@@ -1,0 +1,22 @@
+#ifndef RDS_COPYDIALOG_H
+#define RDS_COPYDIALOG_H
+
+#include <QDialog>
+
+namespace Ui {
+class rdsCopyDialog;
+}
+
+class rdsCopyDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit rdsCopyDialog(QWidget *parent = 0);
+    ~rdsCopyDialog();
+
+private:
+    Ui::rdsCopyDialog *ui;
+};
+
+#endif // RDS_COPYDIALOG_H

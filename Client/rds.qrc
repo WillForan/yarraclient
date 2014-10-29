@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/yarraicon.png</file>
+        <file>images/yarralogo.png</file>
+        <file>images/cai2rlogo.png</file>
+        <file>images/nyulogo.png</file>
+        <file>images/yarralogosqr.png</file>
+    </qresource>
+</RCC>

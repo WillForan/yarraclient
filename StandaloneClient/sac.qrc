@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/saclogo.png</file>
+        <file>images/sacicon_256.png</file>		
+    </qresource>
+</RCC>

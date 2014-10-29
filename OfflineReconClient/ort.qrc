@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/orticon_256.png</file>
+        <file>images/ortlogo.png</file>
+    </qresource>
+</RCC>
