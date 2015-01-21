@@ -5,7 +5,7 @@
 #include "../Client/rds_global.h"
 
 
-#define ORT_VERSION         "0.14"
+#define ORT_VERSION         "0.15"
 
 #define ORT_ICON QIcon(":/images/orticon_256.png")
 
@@ -20,11 +20,10 @@
 
 #define ORT_MINSIZEMB           2.0
 
-#define ORT_SCANSHOW_DEF        20
-#define ORT_SCANSHOW_INC        20
+#define ORT_SCANSHOW_DEF        50
 #define ORT_SCANSHOW_MANMULT    10
 
-#define ORT_RAID_MAXPARSECOUNT  1000
+#define ORT_RAID_MAXPARSECOUNT  3000
 
 #define ORT_CONNECT_TIMEOUT 10000
 

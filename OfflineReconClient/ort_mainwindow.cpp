@@ -208,9 +208,19 @@ void ortMainWindow::updateScanList()
 
     // Estimate how many items should be dispayed
     int itemsToShow=scansToShow;
+
+    // In the manual assignment mode, show 10 times more scans
+    // because of all the adjustment scans
     if (isManualAssignment)
     {
         itemsToShow=scansToShow*ORT_SCANSHOW_MANMULT;
+
+        // Never show more scans than the cap on items to-be-read
+        // from RAID (should not happen anyway)
+        if (itemsToShow>ORT_RAID_MAXPARSECOUNT)
+        {
+            itemsToShow=ORT_RAID_MAXPARSECOUNT;
+        }
     }
 
     bool finished=false;
@@ -242,7 +252,7 @@ void ortMainWindow::updateScanList()
                 itemCount++;
             }
 
-            if (itemCount==itemsToShow)
+            if (itemCount>=itemsToShow)
             {
                 finished=true;
             }
@@ -526,7 +536,7 @@ void ortMainWindow::on_scansWidget_itemSelectionChanged()
 
 void ortMainWindow::on_loadOlderButton_clicked()
 {
-    scansToShow+=ORT_SCANSHOW_INC;
+    scansToShow=ORT_RAID_MAXPARSECOUNT;
     updateScanList();
 }
 
