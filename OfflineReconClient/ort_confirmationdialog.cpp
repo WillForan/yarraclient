@@ -130,9 +130,9 @@ int ortConfirmationDialog::getEnteredParam()
 {
     int enteredValue=paramDefault;
 
-    if (ui->accEdit->text()!="")
+    if (ui->paramEdit->text()!="")
     {
-        ui->accEdit->text().toInt();
+        enteredValue=ui->paramEdit->text().toInt();
     }
 
     if (enteredValue>paramMax)
