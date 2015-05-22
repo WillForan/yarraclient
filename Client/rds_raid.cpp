@@ -38,7 +38,7 @@ rdsRaid::rdsRaid()
         raidToolCmd=QDir::toNativeSeparators( RDS_RAIDTOOL_PATH+QString("/") ) + RDS_RAIDTOOL_NAME;
     }
 
-    // For VD13C and VD13A use local patched versions of the RaidTool that flush stdout
+    // For VD13A, VD13C, and VD13D use local patched versions of the RaidTool that flush stdout
     // before the program shutdown. Otherwise, it will not be possible to read the program output.
     usePatchedRaidTool=false;
     patchedRaidToolMissing=false;
@@ -46,19 +46,19 @@ rdsRaid::rdsRaid()
     if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VD13C)
     {
         usePatchedRaidTool=true;
-        raidToolCmd=QDir::toNativeSeparators( RTI->getAppPath()+QString("/") ) + "RaidTool_VD13C.exe";
+        raidToolCmd=QDir::toNativeSeparators( RTI->getAppPath()+QString("/") ) + "RaidTool_VD13C.dll";
     }
 
     if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VD13D)
     {
         usePatchedRaidTool=true;
-        raidToolCmd=QDir::toNativeSeparators( RTI->getAppPath()+QString("/") ) + "RaidTool_VD13D.exe";
+        raidToolCmd=QDir::toNativeSeparators( RTI->getAppPath()+QString("/") ) + "RaidTool_VD13D.dll";
     }
 
     if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VD13A)
     {
         usePatchedRaidTool=true;
-        raidToolCmd=QDir::toNativeSeparators( RTI->getAppPath()+QString("/") ) + "RaidTool_VD13A.exe";
+        raidToolCmd=QDir::toNativeSeparators( RTI->getAppPath()+QString("/") ) + "RaidTool_VD13A.dll";
     }
 
     if (usePatchedRaidTool)
@@ -264,8 +264,9 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
         }
     }
 
-    // For the VD line and VB20P, add options for anonymization
-    if ((RTI->isSyngoVDLine()) || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB20P)
+    // For the VD/VE line and VB20P, add options for anonymization
+    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine())
+        || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB20P)
         || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB19A))
     {
         if (!anonymize)
@@ -373,9 +374,10 @@ bool rdsRaid::readRaidList()
     QStringList cmd, opt;
     cmd << "-d";
 
-    if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB20P)
+    // Starting with VB20P, also direcoty entries are anonymize (VD13 not yet affected).
+    if ((RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB20P)
+            || (RTI->isSyngoVELine()))
     {
-        // In VD20P, they also anonymize the direcoty entries.
         opt << "-k";
     }
 
@@ -406,7 +408,8 @@ bool rdsRaid::parseOutputDirectory()
 
     QString dirHead=RDS_RAID_DIRHEAD;
 
-    if (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VD13C)
+    if ((RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VD13C)
+        || (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VE))
     {
         dirHead=RDS_RAID_DIRHEAD_VD13C;
     }
@@ -479,7 +482,8 @@ bool rdsRaid::parseOutputDirectory()
             QString origLine=raidLine;
 
             // For the VD13+ format, chop the IDs of the depending scans from the end of the line
-            if (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VD13C)
+            if ((RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VD13C)
+                || (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VE))
             {
                 chopDependingIDs(raidLine);
             }
@@ -681,8 +685,8 @@ bool rdsRaid::createExportList()
 
 bool rdsRaid::anonymizeCurrentFile()
 {
-    // NOTE: On VD11, RaidTool does the job for us
-    if (RTI->isSyngoVDLine())
+    // NOTE: On VD11+, RaidTool does the job for us
+    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()))
     {
         return true;
     }
@@ -705,8 +709,8 @@ bool rdsRaid::anonymizeCurrentFile()
 
 bool rdsRaid::findAdjustmentScans()
 {
-    // NOTE: On VD11, RaidTool does the job for us
-    if (RTI->isSyngoVDLine())
+    // NOTE: On VD11+, RaidTool does the job for us
+    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()))
     {
         return true;
     }

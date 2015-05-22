@@ -197,6 +197,8 @@ void rdsRuntimeInformation::determineSyngoVersion()
     RDS_SYNGODETECT(RDS_VD13A,RDS_SYNGODETECT_VD13A);
     RDS_SYNGODETECT(RDS_VD13C,RDS_SYNGODETECT_VD13C);
     RDS_SYNGODETECT(RDS_VD13D,RDS_SYNGODETECT_VD13D);
+    // VE line
+    RDS_SYNGODETECT(RDS_VE11A,RDS_SYNGODETECT_VE11A);
 
     switch (syngoMRVersion)
     {
@@ -215,6 +217,9 @@ void rdsRuntimeInformation::determineSyngoVersion()
     case RDS_VD13D:
         syngoMRLine=RDS_VD;
         break;
+    case RDS_VE11A:
+        syngoMRLine=RDS_VE;
+        break;
     }
 }
 
@@ -223,7 +228,7 @@ QString rdsRuntimeInformation::getSyngoImagerIP()
     QString result=RDS_IMAGER_IP_3;
 
     if ((syngoMRVersion==RDS_VD13A) || (syngoMRVersion==RDS_VD13C) ||
-        (syngoMRVersion==RDS_VD13D))
+        (syngoMRVersion==RDS_VD13D) || (syngoMRLine==RDS_VE))
     {
         result=RDS_IMAGER_IP_2;
     }

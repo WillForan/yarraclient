@@ -26,7 +26,8 @@ public:
     enum rdsSyngoLines
     {
         RDS_VB = 0,
-        RDS_VD = 1
+        RDS_VD = 1,
+        RDS_VE = 2
     };
 
     enum rdsSyngoVersions
@@ -42,14 +43,16 @@ public:
         RDS_VB18P   =  7,
         RDS_VB19A   =  8,
         RDS_VB20P   =  9,
-        RDS_VD13D   =  10
+        RDS_VD13D   =  10,
+        RDS_VE11A   =  11
     };
 
     enum rdsRaidToolFormat
     {
         RDS_RAIDTOOL_VB    = 0,
         RDS_RAIDTOOL_VD11  = 1,
-        RDS_RAIDTOOL_VD13C = 2
+        RDS_RAIDTOOL_VD13C = 2,
+        RDS_RAIDTOOL_VE    = 3
     };
 
 
@@ -91,8 +94,11 @@ public:
 
     int     getSyngoMRVersion();
     QString getSyngoMRVersionString();
+
     bool    isSyngoVBLine();
     bool    isSyngoVDLine();
+    bool    isSyngoVELine();
+
     QString getSyngoImagerIP();
     int     getRaidToolFormat();
 
@@ -350,6 +356,9 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString()
         versionString="VD13D";
         break;
 
+    case RDS_VE11A:
+        versionString="VE11A";
+        break;
 
     default:
         versionString="Unknown - Use with care!";
@@ -369,6 +378,12 @@ inline bool rdsRuntimeInformation::isSyngoVBLine()
 inline bool rdsRuntimeInformation::isSyngoVDLine()
 {
     return (syngoMRLine==RDS_VD);
+}
+
+
+inline bool rdsRuntimeInformation::isSyngoVELine()
+{
+    return (syngoMRLine==RDS_VE);
 }
 
 
@@ -426,6 +441,9 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     case RDS_VD13C:
     case RDS_VD13D:
         return RDS_RAIDTOOL_VD13C;
+        break;
+    case RDS_VE11A:
+        return RDS_RAIDTOOL_VE;
         break;
     default:
         return RDS_RAIDTOOL_VB;
