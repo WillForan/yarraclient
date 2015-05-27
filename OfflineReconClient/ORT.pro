@@ -48,7 +48,8 @@ HEADERS  += \
     ../Client/rds_exechelper.h \
     ../Client/rds_network.h \
     ort_recontask.h \
-    ort_bootdialog.h
+    ort_bootdialog.h \
+    ort_returnonfocus.h
 
 FORMS    += \
     ort_mainwindow.ui \

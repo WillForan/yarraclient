@@ -35,6 +35,12 @@ ortConfirmationDialog::ortConfirmationDialog(QWidget *parent) :
     ui->paramFrame->setVisible(false);
     ui->paramLine->setVisible(false);
 
+    // Install event hooks from a helper class to enforce that
+    // the cursor is always set to the first character when focusing
+    // line edit controls with input mask.
+    lineEditHelper.installOn(ui->accEdit);
+    lineEditHelper.installOn(ui->paramEdit);
+
     // Adjust the height of the dialog after hiding the ACC section and center it.
     setMaximumHeight(newHeight);
     setMinimumHeight(newHeight);

@@ -1,11 +1,13 @@
 #ifndef ORT_CONFIRMATIONDIALOG_H
 #define ORT_CONFIRMATIONDIALOG_H
 
-#include <QDialog>
+#include <QtWidgets>
+#include "ort_returnonfocus.h"
 
 namespace Ui {
 class ortConfirmationDialog;
 }
+
 
 class ortConfirmationDialog : public QDialog
 {
@@ -53,6 +55,8 @@ private:
     int paramMin;
     int paramMax;
 
+    ortReturnOnFocus lineEditHelper;
+
 };
 
 
@@ -66,6 +70,9 @@ inline bool ortConfirmationDialog::isACCRequired()
 {
     return requiresACC;
 }
+
+
+
 
 
 #endif // ORT_CONFIRMATIONDIALOG_H
