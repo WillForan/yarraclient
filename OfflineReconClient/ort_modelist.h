@@ -11,15 +11,26 @@ public:
     QString readableName;
     QString protocolTag;
     QString mailConfirmation;
-    bool requiresACC;
-    bool requiresAdjScans;
-    double minimumSizeMB;
+    bool    requiresACC;
+    bool    requiresAdjScans;
+    double  minimumSizeMB;
+    QString requiredServerType;
 
+    // User selectable parameter 1
     QString paramLabel;
     QString paramDescription;
-    int     paramDefault;
-    int     paramMin;
-    int     paramMax;
+    double  paramDefault;
+    double  paramMin;
+    double  paramMax;
+    bool    paramIsFloat;
+
+    // User selectable parameter 2
+    QString param2Label;
+    QString param2Description;
+    double  param2Default;
+    double  param2Min;
+    double  param2Max;
+    bool    param2IsFloat;
 };
 
 

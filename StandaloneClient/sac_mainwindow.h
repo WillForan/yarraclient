@@ -6,6 +6,7 @@
 #include "../OfflineReconClient/ort_modelist.h"
 #include "../Client/rds_log.h"
 
+#include "../OfflineReconClient/ort_returnonfocus.h"
 
 namespace Ui {
 class sacMainWindow;
@@ -68,6 +69,9 @@ private slots:
 
 private:
     Ui::sacMainWindow *ui;
+
+    ortReturnOnFocus returnFocusHelper;
+
 };
 
 #endif // SAC_MAINWINDOW_H

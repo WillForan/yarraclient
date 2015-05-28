@@ -31,6 +31,7 @@ HEADERS  += sac_mainwindow.h \
     ../Client/rds_exechelper.h \
     ../Client/rds_network.h \
     ../OfflineReconClient/ort_modelist.h \
+    ../OfflineReconClient/ort_returnonfocus.h \
     sac_global.h \
     sac_bootdialog.h \
     sac_network.h \

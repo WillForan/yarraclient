@@ -104,6 +104,9 @@ sacMainWindow::sacMainWindow(QWidget *parent) :
     ui->priorityCombobox->setCurrentIndex(0);
     checkValues();
 
+    returnFocusHelper.installOn(ui->accEdit);
+    returnFocusHelper.installOn(ui->paramEdit);
+
     //QTimer::singleShot(0, this, SLOT(on_selectFileButton_clicked()));
     ui->selectFileButton->setFocus();
 }
@@ -437,7 +440,7 @@ void sacMainWindow::on_modeCombobox_currentIndexChanged(int index)
     {
         ui->paramEdit->setVisible(true);
         ui->paramLabel->setVisible(true);
-        ui->paramLabel->setText(modeList.modes.at(index)->paramLabel);
+        ui->paramLabel->setText(modeList.modes.at(index)->paramLabel+":");
         ui->paramEdit->setText(QString::number(modeList.modes.at(index)->paramDefault));
         paramVisible=true;
     }

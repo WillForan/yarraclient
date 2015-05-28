@@ -120,15 +120,42 @@ bool ortModeList::readModeList()
             QStringList tempList=modeFileIni.value(modeName+"/ConfirmationMail", "").toStringList();
             modes.at(i)->mailConfirmation=tempList.join(",");
 
-            modes.at(i)->requiresACC     =modeFileIni.value(modeName+"/RequiresACC",      true).toBool();
-            modes.at(i)->requiresAdjScans=modeFileIni.value(modeName+"/RequiresAdjScans", false).toBool();
-            modes.at(i)->minimumSizeMB   =modeFileIni.value(modeName+"/MinimumSizeMB",    ORT_MINSIZEMB).toDouble();
+            modes.at(i)->requiresACC       =modeFileIni.value(modeName+"/RequiresACC",        true).toBool();
+            modes.at(i)->requiresAdjScans  =modeFileIni.value(modeName+"/RequiresAdjScans",   false).toBool();
+            modes.at(i)->minimumSizeMB     =modeFileIni.value(modeName+"/MinimumSizeMB",      ORT_MINSIZEMB).toDouble();
+            modes.at(i)->requiredServerType=modeFileIni.value(modeName+"/RequiredServerType", "").toString();
 
+            // Read first user parameter
             modes.at(i)->paramLabel      =modeFileIni.value(modeName+"/ParamLabel",       "").toString();
             modes.at(i)->paramDescription=modeFileIni.value(modeName+"/ParamDescription", "").toString();
-            modes.at(i)->paramDefault    =modeFileIni.value(modeName+"/ParamDefault",     1).toInt();
-            modes.at(i)->paramMin        =modeFileIni.value(modeName+"/ParamMin",         0).toInt();
-            modes.at(i)->paramMax        =modeFileIni.value(modeName+"/ParamMax",         999999).toInt();
+            modes.at(i)->paramDefault    =modeFileIni.value(modeName+"/ParamDefault",     1).toDouble();
+            modes.at(i)->paramMin        =modeFileIni.value(modeName+"/ParamMin",         0).toDouble();
+            modes.at(i)->paramMax        =modeFileIni.value(modeName+"/ParamMax",         999999).toDouble();
+            modes.at(i)->paramIsFloat    =modeFileIni.value(modeName+"/ParamIsFloat",     false).toBool();
+
+            // If the parameter is an integer parameter, then round all values to integers
+            if (!modes.at(i)->paramIsFloat)
+            {
+                modes.at(i)->paramDefault=int(modes.at(i)->paramDefault);
+                modes.at(i)->paramMin    =int(modes.at(i)->paramMin);
+                modes.at(i)->paramMax    =int(modes.at(i)->paramMax);
+            }
+
+            // Read second user parameter
+            modes.at(i)->param2Label      =modeFileIni.value(modeName+"/Param2Label",       "").toString();
+            modes.at(i)->param2Description=modeFileIni.value(modeName+"/Param2Description", "").toString();
+            modes.at(i)->param2Default    =modeFileIni.value(modeName+"/Param2Default",     1).toDouble();
+            modes.at(i)->param2Min        =modeFileIni.value(modeName+"/Param2Min",         0).toDouble();
+            modes.at(i)->param2Max        =modeFileIni.value(modeName+"/Param2Max",         999999).toDouble();
+            modes.at(i)->param2IsFloat    =modeFileIni.value(modeName+"/Param2IsFloat",     false).toBool();
+
+            // If the parameter is an integer parameter, then round all values to integers
+            if (!modes.at(i)->param2IsFloat)
+            {
+                modes.at(i)->param2Default=int(modes.at(i)->param2Default);
+                modes.at(i)->param2Min    =int(modes.at(i)->param2Min);
+                modes.at(i)->param2Max    =int(modes.at(i)->param2Max);
+            }
         }
     }
 
