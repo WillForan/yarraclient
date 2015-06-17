@@ -414,6 +414,10 @@ bool rdsRaid::parseOutputDirectory()
         dirHead=RDS_RAID_DIRHEAD_VD13C;
     }
 
+    if (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VB15)
+    {
+        dirHead=RDS_RAID_DIRHEAD_VB15;
+    }
 
     for (int i=0; i<raidToolOutput.count(); i++)
     {
@@ -491,6 +495,8 @@ bool rdsRaid::parseOutputDirectory()
             QString temp="";
 
             // NOTE: Format of the raid entries is %7u%11u%32s%32s%9s%13I64u%13I64u%22s%22s
+            // NOTE: On VB13 and VB15, the format is different (no patient name is printed, protocol has 16 chars).
+            //       Format is should be %7u%11u%16s%9s%13I64u%13I64u%22s%22s
 
             // ## FileID
             // Read the FileID from the front and remove from raidLine
@@ -560,55 +566,66 @@ bool rdsRaid::parseOutputDirectory()
             }
             else
             {
-                // ## protName
+                // VB13 and VB15 have a different format (no patient name) and require
+                // a different processing (encapsulated in helper function)
+                if (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VB15)
+                {
+                    parseVB15Line(raidLine, &raidEntry);
+                }
+                else
+                {
+                    // Parse the line for all other software versions
 
-                // The next 32 chars will be definitely the protocol. NOTE: The protocol name
-                // can be longer than 32 characters as well as the patient name. Therefore, it
-                // is not possible to separate both entries for lengths > 32 because both values
-                // can contain space characters.
-                temp=raidLine.left(32);
-                raidLine.remove(0,32);
-                removePrecedingSpace(temp);
-                raidEntry.protName=temp;
+                    // ## protName
 
-                // Now start evaluating the string from the back because we do not know how long
-                // the combination of protName + patName is (these can be longer than 32 characters)
+                    // The next 32 chars will be definitely the protocol. NOTE: The protocol name
+                    // can be longer than 32 characters as well as the patient name. Therefore, it
+                    // is not possible to separate both entries for lengths > 32 because both values
+                    // can contain space characters.
+                    temp=raidLine.left(32);
+                    raidLine.remove(0,32);
+                    removePrecedingSpace(temp);
+                    raidEntry.protName=temp;
 
-                // The Closing Date is not evaluated currently
-                raidLine.chop(22);
+                    // Now start evaluating the string from the back because we do not know how long
+                    // the combination of protName + patName is (these can be longer than 32 characters)
 
-                // ## Creation date
-                temp=raidLine.right(22);
-                raidLine.chop(22);
-                removePrecedingSpace(temp);
-                raidEntry.creationTime=QDateTime::fromString(temp,"dd.MM.yyyy HH:mm:ss");
+                    // The Closing Date is not evaluated currently
+                    raidLine.chop(22);
 
-                // ## Size on disk
-                temp=raidLine.right(13);
-                raidLine.chop(13);
-                removePrecedingSpace(temp);
-                raidEntry.sizeOnDisk=temp.toLongLong();
+                    // ## Creation date
+                    temp=raidLine.right(22);
+                    raidLine.chop(22);
+                    removePrecedingSpace(temp);
+                    raidEntry.creationTime=QDateTime::fromString(temp,"dd.MM.yyyy HH:mm:ss");
 
-                // ## Size
-                temp=raidLine.right(13);
-                raidLine.chop(13);
-                removePrecedingSpace(temp);
-                raidEntry.size=temp.toLongLong();
+                    // ## Size on disk
+                    temp=raidLine.right(13);
+                    raidLine.chop(13);
+                    removePrecedingSpace(temp);
+                    raidEntry.sizeOnDisk=temp.toLongLong();
 
-                // TODO: On VB17, exclude these weird preceding files with small size and identical protocol name
-                //       Check if these files always have the same size, so that they can be identified based on the size.
+                    // ## Size
+                    temp=raidLine.right(13);
+                    raidLine.chop(13);
+                    removePrecedingSpace(temp);
+                    raidEntry.size=temp.toLongLong();
 
-                // The Status information is not evaluated
-                raidLine.chop(9);
+                    // TODO: On VB17, exclude these weird preceding files with small size and identical protocol name
+                    //       Check if these files always have the same size, so that they can be identified based on the size.
 
-                // ## PatName
-                // The remaining part should be the patient name
-                temp=raidLine;
-                removePrecedingSpace(temp);
-                raidEntry.patName=temp;
+                    // The Status information is not evaluated
+                    raidLine.chop(9);
 
-                //TODO: The patient name might still contain the date of birth.
-                //      In this case, the format is patname,YYYYMMDD
+                    // ## PatName
+                    // The remaining part should be the patient name
+                    temp=raidLine;
+                    removePrecedingSpace(temp);
+                    raidEntry.patName=temp;
+
+                    //TODO: The patient name might still contain the date of birth.
+                    //      In this case, the format is patname,YYYYMMDD
+                }
 
                 // Add entry to raid list (will be copied internally)
                 addRaidEntry(&raidEntry);
@@ -629,6 +646,51 @@ bool rdsRaid::parseOutputDirectory()
     }
 
     return isSuccess;
+}
+
+
+
+bool rdsRaid::parseVB15Line(QString line, rdsRaidEntry* entry)
+{
+    // Format is should be %7u%11u%16s%9s%13I64u%13I64u%22s%22s
+
+    // Start evaluating the string from the back because we do not know how long
+    // the protName is (can be longer than 16 characters)
+
+    // The Closing Date is not evaluated currently
+    line.chop(22);
+
+    // ## Creation date
+    QString temp=line.right(22);
+    line.chop(22);
+    removePrecedingSpace(temp);
+    entry->creationTime=QDateTime::fromString(temp,"dd.MM.yyyy HH:mm:ss");
+
+    // ## Size on disk
+    temp=line.right(13);
+    line.chop(13);
+    removePrecedingSpace(temp);
+    entry->sizeOnDisk=temp.toLongLong();
+
+    // ## Size
+    temp=line.right(13);
+    line.chop(13);
+    removePrecedingSpace(temp);
+    entry->size=temp.toLongLong();
+
+    // The Status information is not evaluated
+    line.chop(9);
+
+    // ## ProtName
+    // The remaining part should be the protocol name
+    temp=line;
+    removePrecedingSpace(temp);
+    entry->protName=temp;
+
+    // Patient name is not available from the VB15/13 RaidTool
+    entry->patName="Not available";
+
+    return true;
 }
 
 

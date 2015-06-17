@@ -73,6 +73,8 @@ public:
 
 protected:
 
+    bool parseVB15Line(QString line, rdsRaidEntry* entry);
+
     bool parseOutputDirectory();
 
     bool exportScanFromList();

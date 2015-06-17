@@ -52,7 +52,8 @@ public:
         RDS_RAIDTOOL_VB    = 0,
         RDS_RAIDTOOL_VD11  = 1,
         RDS_RAIDTOOL_VD13C = 2,
-        RDS_RAIDTOOL_VE    = 3
+        RDS_RAIDTOOL_VE    = 3,
+        RDS_RAIDTOOL_VB15  = 4
     };
 
 
@@ -444,6 +445,10 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
         break;
     case RDS_VE11A:
         return RDS_RAIDTOOL_VE;
+        break;
+    case RDS_VB15A:
+    case RDS_VB13A:
+        return RDS_RAIDTOOL_VB15;
         break;
     default:
         return RDS_RAIDTOOL_VB;
