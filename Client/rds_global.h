@@ -6,7 +6,7 @@
 
 
 // Definitions
-#define RDS_VERSION     "0.45"
+#define RDS_VERSION     "0.45b2"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -86,7 +86,8 @@
 #define RDS_RAID_SUCCESS     "Copied measurement data to file"
 #define RDS_RAID_DIRHEAD       " FileID     MeasID                        ProtName                         PatName   Status         Size   SizeOnDisk          CreationTime             CloseTime"
 #define RDS_RAID_DIRHEAD_VD13C " FileID     MeasID                        ProtName                         PatName   Status         Size   SizeOnDisk          CreationTime             CloseTime dependent files (fileID)"
-#define RDS_RAID_DIRHEAD_VB15  " FileID     MeasID        ProtName   Status         Size   SizeOnDisk          CreationTime             CloseTime"
+#define RDS_RAID_DIRHEAD_VB15  " FileID     MeasID                        ProtName   Status         Size   SizeOnDisk          CreationTime             CloseTime"
+#define RDS_RAID_DIRHEAD_VB13  " FileID     MeasID        ProtName   Status         Size   SizeOnDisk          CreationTime             CloseTime"
 
 
 // Note: It can be either "1 dependent file:" or "n dependent files:"

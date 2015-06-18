@@ -408,15 +408,22 @@ bool rdsRaid::parseOutputDirectory()
 
     QString dirHead=RDS_RAID_DIRHEAD;
 
+    // Some of the software versions have a different header format
+
     if ((RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VD13C)
         || (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VE))
     {
         dirHead=RDS_RAID_DIRHEAD_VD13C;
     }
 
-    if (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VB15)
+    if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB15A)
     {
         dirHead=RDS_RAID_DIRHEAD_VB15;
+    }
+
+    if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB13A)
+    {
+        dirHead=RDS_RAID_DIRHEAD_VB13;
     }
 
     for (int i=0; i<raidToolOutput.count(); i++)
