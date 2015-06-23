@@ -49,9 +49,32 @@ bool rdsNetwork::openConnection()
         // Test if network path exists
         if (!networkDrive.exists(RTI_CONFIG->netDriveBasepath))
         {
-            RTI->log("Error: Could not access network drive path: " + RTI_CONFIG->netDriveBasepath);
-            RTI->log("Error: Check if network drive has been mounted. Or check configuration.");
-            return false;
+            // If the network base path should not be created (default), abort with error message
+            if (!RTI_CONFIG->netDriveCreateBasepath)
+            {
+                RTI->log("Error: Could not access network drive path: " + RTI_CONFIG->netDriveBasepath);
+                RTI->log("Error: Check if network drive has been mounted. Or check configuration.");
+                return false;
+            }
+            else
+            {
+                // If the option is enabled, try to create it
+                if (!networkDrive.mkpath(RTI_CONFIG->netDriveBasepath))
+                {
+                    RTI->log("Error: Unable to create network drive path: " + RTI_CONFIG->netDriveBasepath);
+                    RTI->log("Error: Check configuration and network permissions.");
+                    return false;
+                }
+                else
+                {
+                    if (!networkDrive.exists(RTI_CONFIG->netDriveBasepath))
+                    {
+                        RTI->log("Error: Creating the network drive path was not successful: " + RTI_CONFIG->netDriveBasepath);
+                        RTI->log("Error: Check configuration and network permissions.");
+                        return false;
+                    }
+                }
+            }
         }
 
         // Change to network drive

@@ -47,6 +47,7 @@ public:
 
     QString netDriveBasepath;
     QString netDriveReconnectCmd;
+    bool    netDriveCreateBasepath;
 
     QString ortServerPath;
     QString ortConnectCmd;

@@ -43,9 +43,10 @@ void rdsConfiguration::loadConfiguration()
     infoUpdateUseTime2  =settings.value("General/UpdateUseTime2", false).toBool();
     infoUpdateUseTime3  =settings.value("General/UpdateUseTime3", false).toBool();
 
-    netMode             =settings.value("Network/Mode", NETWORKMODE_FTP).toInt();
-    netDriveBasepath    =settings.value("Network/DriveBasepath", "").toString();
-    netDriveReconnectCmd=settings.value("Network/DriveReconnectCmd", "").toString();
+    netMode               =settings.value("Network/Mode", NETWORKMODE_FTP).toInt();
+    netDriveBasepath      =settings.value("Network/DriveBasepath", "").toString();
+    netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd", "").toString();
+    netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath", false).toBool();
 
     netFTPIP            =settings.value("Network/FTPIP", "123.123.123.123").toString();
     netFTPBasepath      =settings.value("Network/FTPBasepath", "/rawdata").toString();
@@ -104,6 +105,7 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("Network/Mode", netMode);
     settings.setValue("Network/DriveBasepath", netDriveBasepath);
     settings.setValue("Network/DriveReconnectCmd", netDriveReconnectCmd);
+    settings.setValue("Network/DriveCreateBasepath", netDriveCreateBasepath);
 
     settings.setValue("Network/FTPIP", netFTPIP);
     settings.setValue("Network/FTPBasepath", netFTPBasepath);

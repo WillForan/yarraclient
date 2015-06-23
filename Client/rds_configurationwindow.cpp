@@ -146,6 +146,7 @@ void rdsConfigurationWindow::readConfiguration()
 
     ui->networkDrivePathEdit->setText(config.netDriveBasepath);
     ui->networkDriveReconnectCmd->setText(config.netDriveReconnectCmd);
+    ui->networkDriveCreatePath->setChecked(config.netDriveCreateBasepath);
 
     ui->ftpIPEdit->setText(config.netFTPIP);
     ui->ftpUserEdit->setText(config.netFTPUser);
@@ -185,6 +186,7 @@ void rdsConfigurationWindow::storeConfiguration()
     config.netMode=ui->networkModeCombobox->currentIndex();
     config.netDriveBasepath=ui->networkDrivePathEdit->text();
     config.netDriveReconnectCmd=ui->networkDriveReconnectCmd->text();
+    config.netDriveCreateBasepath=ui->networkDriveCreatePath->isChecked();
 
     config.netFTPIP=ui->ftpIPEdit->text();
     config.netFTPUser=ui->ftpUserEdit->text();
