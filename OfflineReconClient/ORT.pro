@@ -30,7 +30,8 @@ SOURCES += main.cpp \
     ../Client/rds_exechelper.cpp \
     ../Client/rds_network.cpp \
     ort_recontask.cpp \
-    ort_bootdialog.cpp
+    ort_bootdialog.cpp \
+    ort_serverlist.cpp
 
 HEADERS  += \
     ort_mainwindow.h \
@@ -49,7 +50,8 @@ HEADERS  += \
     ../Client/rds_network.h \
     ort_recontask.h \
     ort_bootdialog.h \
-    ort_returnonfocus.h
+    ort_returnonfocus.h \
+    ort_serverlist.h
 
 FORMS    += \
     ort_mainwindow.ui \

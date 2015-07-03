@@ -3,6 +3,9 @@
 
 #include <QtCore>
 
+#include <ort_serverlist.h>
+
+
 class ortNetwork : public QObject
 {
     Q_OBJECT
@@ -26,6 +29,8 @@ public:
     QDir queueDir;
     QDir serverDir;
     QDir serverTaskDir;
+
+    ortServerList serverList;
 
     QStringList fileList;
 

@@ -195,6 +195,18 @@ bool ortNetwork::openConnection(bool fallback)
         error=true;
     }
 
+    if (!error)
+    {
+        // Try to synchronize local copy of server list (to use it as fallback
+        // solution in the future)
+        if (serverList.syncServerList(serverPath))
+        {
+            // If copying the server list was succesul, read the local
+            // copy of the list into memory.
+            serverList.readLocalServerList();
+        }
+    }
+
     // Files should be stored in the server root share. A subdir is not used anymore.
     serverTaskDir=serverDir;
 

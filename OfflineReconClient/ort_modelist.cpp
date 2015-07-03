@@ -52,6 +52,9 @@ bool ortModeList::readModeList()
     {
         // Opening the file failed -- maybe the file is edited at this moment
         // Wait for a moment, then try again
+
+        // TODO: Better check for lock file.
+
         RTI->log("WARNING: Opening mode file failed. Retrying in 2 sec.");
         Sleep(2000);
 
