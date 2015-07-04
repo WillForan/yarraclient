@@ -18,6 +18,8 @@ public:
     void closeConnection();    
     bool transferQueueFiles();
 
+    bool reconnectToMatchingServer(QString requiredServerType);
+
     QString connectCmd;
     QString serverPath;
     QString disconnectCmd;
@@ -31,6 +33,7 @@ public:
     QDir serverTaskDir;
 
     ortServerList serverList;
+    QString selectedServer;
 
     QStringList fileList;
 

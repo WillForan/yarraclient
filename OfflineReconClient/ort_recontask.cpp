@@ -16,6 +16,8 @@ ortReconTask::ortReconTask()
     scanProtocol="";
     reconName="";
     paramValue=0;
+    requiredServerType="";
+    selectedServer="";
 
     errorMessageUI="";
     reconTaskFailed=false;
@@ -157,11 +159,14 @@ bool ortReconTask::generateTaskFile()
             taskFile.setValue("Task/ScanProtocol", scanProtocol);
             taskFile.setValue("Task/ReconName", reconName);
             taskFile.setValue("Task/ParamValue", paramValue);
+            taskFile.setValue("Task/RequiredServerType", requiredServerType);
 
             taskFile.setValue("Information/SystemName", systemName);
             taskFile.setValue("Information/ScanFileSize", scanFileSize);
             taskFile.setValue("Information/TaskDate", taskCreationTime.date().toString(Qt::ISODate));
             taskFile.setValue("Information/TaskTime", taskCreationTime.time().toString(Qt::ISODate));
+            taskFile.setValue("Information/SelectedServer", selectedServer);
+
 
             // Write the list of adjustment files as strings
             for (int i=0; i<adjustmentFiles.count(); i++)

@@ -246,6 +246,16 @@ void ortNetwork::closeConnection()
 }
 
 
+bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
+{
+    // TODO: Try to connect to one matching server. If not responding, continue
+    //       with the next server in the matching-servers list.
+
+    return true;
+}
+
+
+
 bool ortNetwork::transferQueueFiles()
 {
     // Read files in queue directory

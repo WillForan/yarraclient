@@ -356,6 +356,7 @@ void ortMainWindow::on_sendButton_clicked()
 
         reconTask.reconMode=modeList.modes.at(selectedMode)->idName;
         reconTask.reconName=modeList.modes.at(selectedMode)->readableName;
+        reconTask.requiredServerType=modeList.modes.at(selectedMode)->requiredServerType;
 
         // Initialize with value from the mode definition
         reconTask.emailNotifier=modeList.modes.at(selectedMode)->mailConfirmation;
@@ -371,6 +372,7 @@ void ortMainWindow::on_sendButton_clicked()
         reconTask.systemName=config.infoName;
         reconTask.patientName=selectedPatient;
         reconTask.scanProtocol=selectedProtocol;
+        reconTask.selectedServer=network.selectedServer;
 
         if (confirmationDialog.isACCRequired())
         {

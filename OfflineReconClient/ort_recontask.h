@@ -24,6 +24,8 @@ public:
     QString scanProtocol;
     QString reconName;  
     int paramValue;
+    QString requiredServerType;
+    QString selectedServer;
 
     bool highPriority;
 
