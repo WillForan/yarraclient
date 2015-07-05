@@ -35,6 +35,11 @@ public:
     ortServerList serverList;
     QString selectedServer;
 
+    QString currentServer;
+    QString currentServerType;
+
+    QString errorReason;
+
     QStringList fileList;
 
     QString currentFilename;

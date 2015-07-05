@@ -348,110 +348,103 @@ void ortMainWindow::on_sendButton_clicked()
     confirmationDialog.updateDialogHeight();
     confirmationDialog.exec();
 
-    if (confirmationDialog.isConfirmed())
+    if (!confirmationDialog.isConfirmed())
     {
-        // Go ahead with the action
-        ortReconTask reconTask;
-        reconTask.setInstances(&raid, &network);
+        // User decided to not send
+        return;
+    }
 
-        reconTask.reconMode=modeList.modes.at(selectedMode)->idName;
-        reconTask.reconName=modeList.modes.at(selectedMode)->readableName;
-        reconTask.requiredServerType=modeList.modes.at(selectedMode)->requiredServerType;
+    this->hide();
 
-        // Initialize with value from the mode definition
-        reconTask.emailNotifier=modeList.modes.at(selectedMode)->mailConfirmation;
+    ortWaitDialog waitDialog;
+    waitDialog.show();
+    RTI->processEvents();
 
-        // Attach the entry from the dialog. Add separator character if needed
-        QString mailRecipient=confirmationDialog.getEnteredMail();
-        if ((reconTask.emailNotifier!="") && (mailRecipient!=""))
-        {
-            reconTask.emailNotifier+=",";
-        }        
-        reconTask.emailNotifier+=mailRecipient;
+    // Tell the network module the name and type of the current server
+    network.currentServer=modeList.serverName;
+    network.currentServerType=modeList.serverType;
+    QString requiredServerType=modeList.modes.at(selectedMode)->requiredServerType;
 
-        reconTask.systemName=config.infoName;
-        reconTask.patientName=selectedPatient;
-        reconTask.scanProtocol=selectedProtocol;
-        reconTask.selectedServer=network.selectedServer;
-
-        if (confirmationDialog.isACCRequired())
-        {
-            reconTask.accNumber=confirmationDialog.getEnteredACC();
-        }
-        if (paramRequested)
-        {
-            reconTask.paramValue=confirmationDialog.getEnteredParam();
-        }
-
-        if (ui->priorityButton->isChecked())
-        {
-            reconTask.highPriority=true;
-        }
-
-        this->hide();
-
-        ortWaitDialog waitDialog;
-        waitDialog.show();
-
-        if (!reconTask.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
-        {
-            showTransferError(reconTask.getErrorMessageUI());
-            this->show();
-            return;
-        }
-
+    // Try to connect to a matching server (or switch server for load balancing)
+    if (!network.reconnectToMatchingServer(requiredServerType))
+    {
+        // Error handling
         waitDialog.close();
+        showTransferError(network.errorReason);
+        this->show();
+        return;
+    }
 
-        ortCopyDialog copyDialog;
-        copyDialog.show();
+    // Go ahead with the action
+    ortReconTask reconTask;
+    reconTask.setInstances(&raid, &network);
 
-        if (!reconTask.transferDataFiles())
-        {
-            copyDialog.close();
+    reconTask.reconMode=modeList.modes.at(selectedMode)->idName;
+    reconTask.reconName=modeList.modes.at(selectedMode)->readableName;
+    reconTask.requiredServerType=requiredServerType;
 
-            if (reconTask.fileAlreadyExists)
-            {
-                // Inform user that the file is already existing, i.e. the
-                // task had already been submitted
-                QString infoText="The scan selected for offline reconstruction is already present at the server. Likely, the scan has been submitted before for reconstruction.<br><br>";
-                infoText+="If the a different problem exists with the reconstruction, please ask the administrators to manually remove the file from the server's input folder.<br><br>";
-                infoText+="Filename: " + reconTask.scanFile;
+    // Initialize with value from the mode definition
+    reconTask.emailNotifier=modeList.modes.at(selectedMode)->mailConfirmation;
 
-                QMessageBox msgBox;
-                msgBox.setWindowTitle("Scan already on server");
-                msgBox.setText(infoText);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setWindowIcon(ORT_ICON);
-                msgBox.setIcon(QMessageBox::Information);
-                msgBox.exec();
+    // Attach the entry from the dialog. Add separator character if needed
+    QString mailRecipient=confirmationDialog.getEnteredMail();
+    if ((reconTask.emailNotifier!="") && (mailRecipient!=""))
+    {
+        reconTask.emailNotifier+=",";
+    }
+    reconTask.emailNotifier+=mailRecipient;
 
-                this->close();
-            }
-            else
-            {
-                showTransferError(reconTask.getErrorMessageUI());
-                this->show();
-            }
-            return;
-        }
+    reconTask.systemName=config.infoName;
+    reconTask.patientName=selectedPatient;
+    reconTask.scanProtocol=selectedProtocol;
+    reconTask.selectedServer=network.selectedServer;
 
-        if (!reconTask.generateTaskFile())
-        {
-            copyDialog.close();
-            showTransferError(reconTask.getErrorMessageUI());
-            this->show();
-            return;
-        }
+    if (confirmationDialog.isACCRequired())
+    {
+        reconTask.accNumber=confirmationDialog.getEnteredACC();
+    }
+    if (paramRequested)
+    {
+        reconTask.paramValue=confirmationDialog.getEnteredParam();
+    }
 
+    if (ui->priorityButton->isChecked())
+    {
+        reconTask.highPriority=true;
+    }
+
+    if (!reconTask.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
+    {
+        showTransferError(reconTask.getErrorMessageUI());
+        this->show();
+        return;
+    }
+
+    waitDialog.close();
+
+    ortCopyDialog copyDialog;
+    copyDialog.show();
+
+    if (!reconTask.transferDataFiles())
+    {
         copyDialog.close();
 
-        // Clean local queue directory (in any case)
-        network.cleanLocalQueueDir();
-
-        // If the reconstruction tasked has been submitted successfully, then
-        // shutdown the ORT client.
-        if (reconTask.isSubmissionSuccessful())
+        if (reconTask.fileAlreadyExists)
         {
+            // Inform user that the file is already existing, i.e. the
+            // task had already been submitted
+            QString infoText="The scan selected for offline reconstruction is already present at the server. Likely, the scan has been submitted before for reconstruction.<br><br>";
+            infoText+="If the a different problem exists with the reconstruction, please ask the administrators to manually remove the file from the server's input folder.<br><br>";
+            infoText+="Filename: " + reconTask.scanFile;
+
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Scan already on server");
+            msgBox.setText(infoText);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowIcon(ORT_ICON);
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.exec();
+
             this->close();
         }
         else
@@ -459,6 +452,32 @@ void ortMainWindow::on_sendButton_clicked()
             showTransferError(reconTask.getErrorMessageUI());
             this->show();
         }
+        return;
+    }
+
+    if (!reconTask.generateTaskFile())
+    {
+        copyDialog.close();
+        showTransferError(reconTask.getErrorMessageUI());
+        this->show();
+        return;
+    }
+
+    copyDialog.close();
+
+    // Clean local queue directory (in any case)
+    network.cleanLocalQueueDir();
+
+    // If the reconstruction tasked has been submitted successfully, then
+    // shutdown the ORT client.
+    if (reconTask.isSubmissionSuccessful())
+    {
+        this->close();
+    }
+    else
+    {
+        showTransferError(reconTask.getErrorMessageUI());
+        this->show();
     }
 }
 

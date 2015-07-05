@@ -10,6 +10,7 @@
 
 #include "ort_network.h"
 
+
 ortNetwork::ortNetwork()
 {
     connectCmd="";
@@ -18,6 +19,7 @@ ortNetwork::ortNetwork()
     fallbackConnectCmd="";
 
     appPath="";
+    errorReason="";
 }
 
 
@@ -248,12 +250,104 @@ void ortNetwork::closeConnection()
 
 bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
 {
-    // TODO: Try to connect to one matching server. If not responding, continue
-    //       with the next server in the matching-servers list.
+    int serverCount=serverList.findMatchingServers(requiredServerType);
 
-    return true;
+    // If no servers were found, either server routing is not used or
+    // no server has been configured for the reconstruction type.
+    if (serverCount==0)
+    {
+        if ((requiredServerType.isEmpty()) || (currentServerType==requiredServerType))
+        {
+            // Multi-server mechanism not configured. Continue to use current server.
+            selectedServer=currentServer;
+            return true;
+        }
+        else
+        {
+            errorReason="No matching servers configured.";
+            RTI->log("No servers configured to process the case.");
+            return false;
+        }
+    }
+
+    // Select which of the available servers should be used
+    ortServerEntry* selectedEntry=serverList.getNextMatchingServer();
+    if (selectedEntry==0)
+    {
+        RTI->log("Error: Invalid server entry received.");
+        errorReason="Invalid server entry received";
+        return false;
+    }
+
+    // If already connected to this server, then exit
+    if (selectedEntry->name==currentServer)
+    {
+        selectedServer=currentServer;
+        return true;
+    }
+
+    // Try to connect to a matching server. If not responding, continue
+    // with the next server in the matching-servers list.
+    bool serverConnected=false;
+
+    for (int i=0; i<serverCount; i++)
+    {
+        if (i>0)
+        {
+            selectedEntry=serverList.getNextMatchingServer();
+        }
+        if (selectedEntry==0)
+        {
+            RTI->log("Error: Invalid server entry received.");
+            continue;
+        }
+
+        // First, disconnect from the current server
+        closeConnection();
+
+        selectedServer=selectedEntry->name;
+        connectCmd=selectedEntry->connectCmd;
+
+        rdsExecHelper execHelper;
+        execHelper.setCommand(connectCmd);
+
+        if (!execHelper.callProcessTimout(connectTimeout))
+        {
+            RTI->log("Calling the reconnect command failed: " + connectCmd);
+            RTI->log("Continuing with next entry.");
+            continue;
+        }
+
+        if (!serverTaskDir.exists(serverPath))
+        {
+            RTI->log("ERROR: Could not access server path on new server: " + serverPath);
+            continue;
+        }
+
+        if (!serverTaskDir.cd(serverPath))
+        {
+            RTI->log("ERROR: Could not change to base path of network drive.");
+            continue;
+        }
+
+        if ((!serverTaskDir.exists(ORT_MODEFILE)) || (!serverTaskDir.exists(ORT_SERVERFILE)))
+        {
+            RTI->log("ERROR: Mode or server file not found.");
+            continue;
+        }
+
+        // OK, everything looks good. New server is connected.
+        serverConnected=true;
+        break;
+    }
+
+    if (!serverConnected)
+    {
+        errorReason="Unable to connected to requested server type.";
+    }
+
+    return serverConnected;
 }
-
 
 
 bool ortNetwork::transferQueueFiles()
