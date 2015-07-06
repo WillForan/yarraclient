@@ -33,10 +33,8 @@ public:
     QDir serverTaskDir;
 
     ortServerList serverList;
-    QString selectedServer;
-
-    QString currentServer;
-    QString currentServerType;
+    QString       selectedServer;
+    QString       currentServer;
 
     QString errorReason;
 

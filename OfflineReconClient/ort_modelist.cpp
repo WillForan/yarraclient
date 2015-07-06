@@ -79,7 +79,6 @@ bool ortModeList::readModeList()
                 error=true;
                 errorText="Server file content is not valid.";
             }
-            serverType=serverFileIni.value("YarraServer/Type", "").toString().toLower();
         }
 
         // Now we should be safe, so read the file

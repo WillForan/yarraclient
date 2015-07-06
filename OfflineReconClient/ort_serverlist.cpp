@@ -3,6 +3,7 @@
 
 #include <time.h>
 
+
 ortServerList::ortServerList()
 {
     serverListAvailable=false;
@@ -123,7 +124,7 @@ bool ortServerList::readLocalServerList()
             {
                 ortServerEntry* entry=new ortServerEntry();
                 entry->name      =serverName;
-                entry->type      =serverListIni.value("Type","").toString().toLower();
+                entry->type      =serverListIni.value("Type","").toStringList();
                 entry->connectCmd=serverListIni.value("ConnectCmd","").toString();
 
                 // If a Base64 encoded version is availabe, decode it and overwrite
@@ -147,10 +148,6 @@ bool ortServerList::readLocalServerList()
 
 int ortServerList::findMatchingServers(QString type)
 {
-    // Convert the given type to lower case, so that the comparison
-    // is more reliable
-    type=type.toLower();
-
     matchingServers.clear();
 
     if (type.isEmpty())
@@ -161,7 +158,7 @@ int ortServerList::findMatchingServers(QString type)
     {
         for (int i=0; i<servers.count(); i++)
         {
-            if (servers.at(i)->type==type)
+            if (servers.at(i)->type.contains(type, Qt::CaseInsensitive))
             {
                 matchingServers.append(servers.at(i));
             }
@@ -188,3 +185,5 @@ ortServerEntry* ortServerList::getNextMatchingServer()
 
     return selectedEntry;
 }
+
+

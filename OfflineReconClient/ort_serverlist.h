@@ -6,9 +6,9 @@
 class ortServerEntry
 {
 public:
-    QString name;
-    QString type;
-    QString connectCmd;
+    QString     name;
+    QStringList type;
+    QString     connectCmd;
 };
 
 

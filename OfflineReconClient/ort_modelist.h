@@ -52,7 +52,6 @@ public:
 
     QList<ortModeEntry*> modes;
     QString serverName;
-    QString serverType;
     int count;    
 
 #ifdef YARRA_APP_ORT

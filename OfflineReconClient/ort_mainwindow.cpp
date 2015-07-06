@@ -362,7 +362,6 @@ void ortMainWindow::on_sendButton_clicked()
 
     // Tell the network module the name and type of the current server
     network.currentServer=modeList.serverName;
-    network.currentServerType=modeList.serverType;
     QString requiredServerType=modeList.modes.at(selectedMode)->requiredServerType;
 
     // Try to connect to a matching server (or switch server for load balancing)

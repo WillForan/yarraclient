@@ -256,7 +256,7 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
     // no server has been configured for the reconstruction type.
     if (serverCount==0)
     {
-        if ((requiredServerType.isEmpty()) || (currentServerType==requiredServerType))
+        if (requiredServerType.isEmpty())
         {
             // Multi-server mechanism not configured. Continue to use current server.
             selectedServer=currentServer;
