@@ -9,6 +9,7 @@ public:
     QString     name;
     QStringList type;
     QString     connectCmd;
+    bool        acceptsUndefined;
 };
 
 
@@ -25,6 +26,7 @@ public:
     bool syncServerList(QString remotePath);
     bool readLocalServerList();
     bool isServerListAvailable();
+    ortServerEntry* getServerEntry(QString name);
 
     int findMatchingServers(QString type);
     ortServerEntry* getNextMatchingServer();

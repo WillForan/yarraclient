@@ -16,6 +16,10 @@ public:
 
     QProcess process;
     QString execCmdLine;
+
+public slots:
+    void logOutput();
+
 };
 
 

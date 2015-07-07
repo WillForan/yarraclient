@@ -6,6 +6,7 @@
 #include <QTextEdit>
 #include <QString>
 
+
 class rdsLog
 {
 public:
@@ -71,19 +72,6 @@ inline void rdsLog::flush()
 {
     logfile.flush();
 }
-
-
-inline QString rdsLog::getLogFilename()
-{
-#ifdef YARRA_APP_ORT
-    return "ort.log";
-#else
-    return "rds.log";
-#endif
-}
-
-
-
 
 
 #endif // RDS_LOG_H

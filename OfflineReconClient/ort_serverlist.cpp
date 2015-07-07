@@ -91,7 +91,7 @@ bool ortServerList::syncServerList(QString remotePath)
         }
     }
 
-    if (!QFile::copy(localDir.filePath(ORT_SERVERLISTFILE),remoteDir.filePath(ORT_SERVERLISTFILE)))
+    if (!QFile::copy(remoteDir.filePath(ORT_SERVERLISTFILE),localDir.filePath(ORT_SERVERLISTFILE)))
     {
         RTI->log("Error: Unable to synchronize server list.");
         return false;
@@ -135,6 +135,8 @@ bool ortServerList::readLocalServerList()
                     entry->connectCmd=QString(QByteArray::fromBase64(connectCmdE.toLatin1()));
                 }
 
+                entry->acceptsUndefined=serverListIni.value("AcceptsUndefined",true).toBool();
+
                 servers.append(entry);
             }
             // Check if enabled
@@ -152,7 +154,15 @@ int ortServerList::findMatchingServers(QString type)
 
     if (type.isEmpty())
     {
-        matchingServers=servers;
+        // If no server type has been requested, consider all
+        // servers that accept tasks with undefined type
+        for (int i=0; i<servers.count(); i++)
+        {
+            if (servers.at(i)->acceptsUndefined)
+            {
+                matchingServers.append(servers.at(i));
+            }
+        }
     }
     else
     {
@@ -186,4 +196,17 @@ ortServerEntry* ortServerList::getNextMatchingServer()
     return selectedEntry;
 }
 
+
+ortServerEntry* ortServerList::getServerEntry(QString name)
+{
+    for (int i=0; i<servers.count(); i++)
+    {
+        if (servers.at(i)->name==name)
+        {
+            return servers.at(i);
+        }
+    }
+
+    return 0;
+}
 

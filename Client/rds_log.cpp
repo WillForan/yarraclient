@@ -8,15 +8,9 @@ rdsLog::rdsLog()
 }
 
 
-
 void rdsLog::start()
 {
-    QString logFilename=RTI->getAppPath()+"/"+RDS_DIR_LOG+"/"+getLogFilename();
-
-    // NOTE: For the SAC app, there are no subfolders. So create a log in the app dir
-#ifdef YARRA_APP_SAC
-    logFilename=qApp->applicationDirPath()+"/sac.log";
-#endif
+    QString logFilename=qApp->applicationDirPath()+"/"+getLogFilename();
 
     logfile.setFileName(logFilename);
     logfile.open(QIODevice::Append | QIODevice::Text);
@@ -84,4 +78,21 @@ QString rdsLog::getLocalLogPath()
 {
     return RTI->getAppPath()+"/"+RDS_DIR_LOG+"/";
 }
+
+
+QString rdsLog::getLogFilename()
+{
+#ifdef YARRA_APP_RDS
+    return QString(RDS_DIR_LOG)+"/rds.log";
+#endif
+
+#ifdef YARRA_APP_ORT
+    return QString(RDS_DIR_LOG)+"/ort.log";
+#endif
+
+#ifdef YARRA_APP_SAC
+    return "sac.log";
+#endif
+}
+
 

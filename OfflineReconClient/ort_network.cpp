@@ -258,14 +258,44 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
     {
         if (requiredServerType.isEmpty())
         {
-            // Multi-server mechanism not configured. Continue to use current server.
-            selectedServer=currentServer;
-            return true;
+            // If no server type has been requested, there are two cases: Either
+            // the multi-server mechanism has not been configured or the current
+            // "seed" server explicitly does not accept tasks with undefinied type
+
+            ortServerEntry* currentServerEntry=serverList.getServerEntry(currentServer);
+
+            // Check if we received a null pointer from the server list. If so,
+            // the mechnism has not been configured.
+            if (currentServerEntry==0)
+            {
+                // Multi-server mechanism not configured. Continue to use current server.
+                selectedServer=currentServer;
+                return true;
+            }
+            else
+            {
+                // If an entry for the current server has been found in the server list,
+                // continue or abort depending on the setting if the server accepts
+                // tasks with undefined server request.
+                if (currentServerEntry->acceptsUndefined)
+                {
+                    // Continue using current server.
+                    selectedServer=currentServer;
+                    return true;
+                }
+                else
+                {
+                    errorReason="No servers defined to process task.";
+                    RTI->log("The current server refuses to process tasks with undefined type.");
+                    RTI->log("No other servers found for the task.");
+                    return false;
+                }
+            }
         }
         else
         {
             errorReason="No matching servers configured.";
-            RTI->log("No servers configured to process the case.");
+            RTI->log("No servers configured to process the task (required type "+requiredServerType+")");
             return false;
         }
     }
@@ -295,6 +325,7 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
         if (i>0)
         {
             selectedEntry=serverList.getNextMatchingServer();
+            RTI->log("Reconnect attempt " + QString::number(i+1));
         }
         if (selectedEntry==0)
         {
@@ -304,41 +335,58 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
 
         // First, disconnect from the current server
         closeConnection();
+        // Make sure serverTaskDir points to an exisiting directory
+        serverTaskDir=QDir();
+        RTI->processEvents();
 
         selectedServer=selectedEntry->name;
         connectCmd=selectedEntry->connectCmd;
 
-        rdsExecHelper execHelper;
-        execHelper.setCommand(connectCmd);
+        bool success=false;
+        {
+            // Declared inside explicit scope to enforce prompt destruction
+            rdsExecHelper execHelper;
+            execHelper.setCommand(connectCmd);
+            success=execHelper.callProcessTimout(connectTimeout);
+            RTI->processEvents();
+            RTI->log("##Return");
+        }
 
-        if (!execHelper.callProcessTimout(connectTimeout))
+        if (!success)
         {
             RTI->log("Calling the reconnect command failed: " + connectCmd);
-            RTI->log("Continuing with next entry.");
-            continue;
         }
 
-        if (!serverTaskDir.exists(serverPath))
+        RTI->log("##T1");
+        serverTaskDir.refresh();
+        RTI->log("##T2");
+        if ((success) && (!serverTaskDir.exists(serverPath)))
         {
             RTI->log("ERROR: Could not access server path on new server: " + serverPath);
-            continue;
+            success=false;
         }
+        RTI->log("##T3");
 
-        if (!serverTaskDir.cd(serverPath))
+        if ((success) && (!serverTaskDir.cd(serverPath)))
         {
             RTI->log("ERROR: Could not change to base path of network drive.");
-            continue;
+            success=false;
         }
+        RTI->log("##T4");
 
-        if ((!serverTaskDir.exists(ORT_MODEFILE)) || (!serverTaskDir.exists(ORT_SERVERFILE)))
+        if ((success) &&
+            ((!serverTaskDir.exists(ORT_MODEFILE)) || (!serverTaskDir.exists(ORT_SERVERFILE))))
         {
             RTI->log("ERROR: Mode or server file not found.");
-            continue;
+            success=false;
         }
 
         // OK, everything looks good. New server is connected.
-        serverConnected=true;
-        break;
+        if (success)
+        {
+            serverConnected=true;
+            break;
+        }
     }
 
     if (!serverConnected)

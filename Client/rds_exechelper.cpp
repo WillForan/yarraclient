@@ -15,6 +15,7 @@ rdsExecHelper::rdsExecHelper()
 {
     execCmdLine="";
     process.setReadChannel(QProcess::StandardOutput);
+    process.setProcessChannelMode(QProcess::MergedChannels);
 }
 
 
@@ -27,7 +28,9 @@ bool rdsExecHelper::callProcessTimout(int timeoutMs)
     timeoutTimer.setInterval(timeoutMs);
     QEventLoop q;
     connect(&process, SIGNAL(finished(int , QProcess::ExitStatus)), &q, SLOT(quit()));
+    connect(&process, SIGNAL(error(QProcess::ProcessError)), &q, SLOT(quit()));
     connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
+    connect(&process, SIGNAL(readyReadStandardOutput()), this, SLOT(logOutput()));
 
     // Time measurement to diagnose RaidTool calling problems
     QTime ti;
@@ -83,6 +86,18 @@ bool rdsExecHelper::callProcessTimout(int timeoutMs)
         }
     }
 
+    logOutput();
+
     return success;
 }
 
+
+void rdsExecHelper::logOutput()
+{
+    while (process.canReadLine())
+    {
+        // Read the current line, but restrict the maximum length to 512 chars to
+        // avoid infinite output (if a module starts outputting binary data)
+        RTI->log(process.readLine(512));
+    }
+}

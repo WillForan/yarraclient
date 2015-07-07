@@ -24,8 +24,6 @@ ortReconTask::ortReconTask()
     fileAlreadyExists=false;
 
     highPriority=false;
-
-    RTI->log("Received reconstruction request (ORT client " + QString(ORT_VERSION) + ")");
 }
 
 

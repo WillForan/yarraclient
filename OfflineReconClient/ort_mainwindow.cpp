@@ -10,6 +10,7 @@
 #include "ort_recontask.h"
 #include "ort_bootdialog.h"
 
+
 ortMainWindow::ortMainWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ortMainWindow)
@@ -373,6 +374,9 @@ void ortMainWindow::on_sendButton_clicked()
         this->show();
         return;
     }
+
+    RTI->log("Reconstruction request submitted (ORT client " + QString(ORT_VERSION) + ")");
+    RTI->log("Selected server: "+network.selectedServer);
 
     // Go ahead with the action
     ortReconTask reconTask;
