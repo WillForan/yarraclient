@@ -13,6 +13,8 @@
 #define ORT_MODEFILE             "YarraModes.cfg"
 #define ORT_SERVERLISTFILE       "YarraServerList.cfg"
 
+#define ORT_LBI_NAME             "lbi.ini"
+
 #define ORT_TASK_DIR             "queue"
 #define ORT_TASK_EXTENSION       ".task"
 #define ORT_LOCK_EXTENSION       ".lock"

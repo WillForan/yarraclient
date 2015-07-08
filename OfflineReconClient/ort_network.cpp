@@ -140,6 +140,7 @@ bool ortNetwork::openConnection(bool fallback)
     if (connectCmd!="")
     {
         rdsExecHelper execHelper;
+        execHelper.setMonitorOutput();
 
         // Connect to the main server. In the second try, connect
         // to the fallback server
@@ -238,6 +239,7 @@ void ortNetwork::closeConnection()
     if (disconnectCmd!="")
     {
         rdsExecHelper execHelper;
+        execHelper.setMonitorOutput();
         execHelper.setCommand(disconnectCmd);
 
         if (!execHelper.callProcessTimout(connectTimeout))
@@ -316,6 +318,10 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
         return true;
     }
 
+    // First, disconnect from the current server
+    closeConnection();
+    rdsExecHelper::safeSleep(100);
+
     // Try to connect to a matching server. If not responding, continue
     // with the next server in the matching-servers list.
     bool serverConnected=false;
@@ -333,23 +339,20 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
             continue;
         }
 
-        // First, disconnect from the current server
-        closeConnection();
-        // Make sure serverTaskDir points to an exisiting directory
-        serverTaskDir=QDir();
-        RTI->processEvents();
-
         selectedServer=selectedEntry->name;
         connectCmd=selectedEntry->connectCmd;
 
         bool success=false;
+        bool connectCmdSuccess=false;
+
         {
             // Declared inside explicit scope to enforce prompt destruction
             rdsExecHelper execHelper;
+            execHelper.setMonitorOutput();
             execHelper.setCommand(connectCmd);
-            success=execHelper.callProcessTimout(connectTimeout);
+            connectCmdSuccess=execHelper.callProcessTimout(connectTimeout);
+            success=connectCmdSuccess;
             RTI->processEvents();
-            RTI->log("##Return");
         }
 
         if (!success)
@@ -357,22 +360,18 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
             RTI->log("Calling the reconnect command failed: " + connectCmd);
         }
 
-        RTI->log("##T1");
         serverTaskDir.refresh();
-        RTI->log("##T2");
         if ((success) && (!serverTaskDir.exists(serverPath)))
         {
             RTI->log("ERROR: Could not access server path on new server: " + serverPath);
             success=false;
         }
-        RTI->log("##T3");
 
         if ((success) && (!serverTaskDir.cd(serverPath)))
         {
             RTI->log("ERROR: Could not change to base path of network drive.");
             success=false;
         }
-        RTI->log("##T4");
 
         if ((success) &&
             ((!serverTaskDir.exists(ORT_MODEFILE)) || (!serverTaskDir.exists(ORT_SERVERFILE))))
@@ -386,6 +385,12 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
         {
             serverConnected=true;
             break;
+        }
+        else
+        {
+            rdsExecHelper::safeSleep(100);
+            closeConnection();
+            rdsExecHelper::safeSleep(100);
         }
     }
 

@@ -8,6 +8,7 @@ ortServerList::ortServerList()
 {
     serverListAvailable=false;
     appPath=qApp->applicationDirPath();
+    selectedIndex=0;
 }
 
 
@@ -151,6 +152,7 @@ bool ortServerList::readLocalServerList()
 int ortServerList::findMatchingServers(QString type)
 {
     matchingServers.clear();
+    selectedIndex=0;
 
     if (type.isEmpty())
     {
@@ -175,6 +177,10 @@ int ortServerList::findMatchingServers(QString type)
         }
     }
 
+    // Read the starting index (i.e. the index of the first server that should
+    // be tried). This index is increased each time to achieve load balancing.
+    getLoadBalancingIndex(type);
+
     return matchingServers.count();
 }
 
@@ -187,8 +193,13 @@ ortServerEntry* ortServerList::getNextMatchingServer()
     }
 
     // Poor man's load balancing for now...
-    srand(time(NULL));
-    int selectedIndex=rand() % matchingServers.count();
+    //srand(time(NULL));
+    //int selectedIndex=rand() % matchingServers.count();
+
+    if (selectedIndex>=matchingServers.count())
+    {
+        selectedIndex=0;
+    }
 
     ortServerEntry* selectedEntry=matchingServers.at(selectedIndex);
     matchingServers.removeAt(selectedIndex);
@@ -209,4 +220,27 @@ ortServerEntry* ortServerList::getServerEntry(QString name)
 
     return 0;
 }
+
+
+void ortServerList::getLoadBalancingIndex(QString type)
+{
+    // Use "Undefined" for non-specified type (to comply ini format)
+    if (type.isEmpty())
+    {
+        type="Undefined";
+    }
+
+    // Read the index value from a local ini file
+    QSettings lbiFile(RTI->getAppPath()+"/"+ORT_LBI_NAME, QSettings::IniFormat);
+    selectedIndex=lbiFile.value("LoadBalancingIndex/"+type, 0).toInt();
+
+    // The modulo operation is used because fewer servers could exist now.
+    selectedIndex=selectedIndex % matchingServers.count();
+
+    // Increase and save value again
+    lbiFile.setValue("LoadBalancingIndex/"+type, selectedIndex+1);
+}
+
+
+
 

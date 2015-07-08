@@ -31,10 +31,14 @@ public:
     int findMatchingServers(QString type);
     ortServerEntry* getNextMatchingServer();
 
+    void getLoadBalancingIndex(QString type);
+
 protected:
 
     bool    serverListAvailable;
     QString appPath;
+
+    int selectedIndex;
 
 };
 

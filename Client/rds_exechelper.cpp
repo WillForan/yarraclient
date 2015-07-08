@@ -11,11 +11,16 @@
 
 #include <QtWidgets>
 
+
 rdsExecHelper::rdsExecHelper()
 {
     execCmdLine="";
     process.setReadChannel(QProcess::StandardOutput);
     process.setProcessChannelMode(QProcess::MergedChannels);
+
+    monitorOutput=false;
+    detectedError=false;
+    detectedSuccess=false;
 }
 
 
@@ -26,11 +31,16 @@ bool rdsExecHelper::callProcessTimout(int timeoutMs)
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
     timeoutTimer.setInterval(timeoutMs);
+
     QEventLoop q;
     connect(&process, SIGNAL(finished(int , QProcess::ExitStatus)), &q, SLOT(quit()));
     connect(&process, SIGNAL(error(QProcess::ProcessError)), &q, SLOT(quit()));
     connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
-    connect(&process, SIGNAL(readyReadStandardOutput()), this, SLOT(logOutput()));
+
+    if (monitorOutput)
+    {
+        connect(&process, SIGNAL(readyReadStandardOutput()), this, SLOT(readOutput()));
+    }
 
     // Time measurement to diagnose RaidTool calling problems
     QTime ti;
@@ -86,18 +96,62 @@ bool rdsExecHelper::callProcessTimout(int timeoutMs)
         }
     }
 
-    logOutput();
+    if (monitorOutput)
+    {
+        readOutput();
+
+        if (detectedSuccess)
+        {
+            success=true;
+        }
+        if (detectedError)
+        {
+            success=false;
+        }
+    }
 
     return success;
 }
 
 
-void rdsExecHelper::logOutput()
+void rdsExecHelper::readOutput()
 {
     while (process.canReadLine())
     {
         // Read the current line, but restrict the maximum length to 512 chars to
         // avoid infinite output (if a module starts outputting binary data)
-        RTI->log(process.readLine(512));
+        QString currentLine=process.readLine(512);
+
+        // Mapping or deletion sucessfull
+        if (currentLine.contains("successfully."))
+        {
+            detectedSuccess=true;
+        }
+
+        // Deletion of non-existing mapping --> Treated as success
+        if (currentLine.contains("The network connection could not be found."))
+        {
+            detectedSuccess=true;
+        }
+
+        // Error caused, either by mapping of deletion
+        if (currentLine.contains("System error"))
+        {
+            detectedError=true;
+            RTI->log("Error detected: "+currentLine);
+        }
     }
 }
+
+
+void rdsExecHelper::safeSleep(int ms)
+{
+    QTime ti;
+    ti.start();
+    while (ti.elapsed()<ms)
+    {
+        RTI->processEvents();
+        Sleep(RDS_SLEEP_INTERVAL);
+    }
+}
+
