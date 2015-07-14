@@ -590,7 +590,7 @@ void ortMainWindow::on_priorityButton_clicked(bool checked)
     if (checked)
     {
         QPalette pal=ui->priorityButton->palette();
-        pal.setColor(QPalette::Button, QColor(88,15,139));
+        pal.setColor(QPalette::Button, QColor(255,106,19));
         pal.setColor(QPalette::ButtonText, QColor(255,255,255));
 
         ui->priorityButton->setPalette(pal);

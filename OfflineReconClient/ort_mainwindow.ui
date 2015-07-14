@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>708</width>
-    <height>412</height>
+    <height>414</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,16 +21,16 @@
     <number>8</number>
    </property>
    <property name="leftMargin">
-    <number>16</number>
+    <number>10</number>
    </property>
    <property name="topMargin">
-    <number>20</number>
+    <number>12</number>
    </property>
    <property name="rightMargin">
-    <number>16</number>
+    <number>10</number>
    </property>
    <property name="bottomMargin">
-    <number>12</number>
+    <number>10</number>
    </property>
    <item>
     <widget class="QTableWidget" name="scansWidget">
@@ -310,7 +310,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>12</height>
+       <height>4</height>
       </size>
      </property>
     </spacer>
@@ -319,10 +319,16 @@
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0" rowspan="2">
       <widget class="QLabel" name="logoLabel">
+       <property name="minimumSize">
+        <size>
+         <width>78</width>
+         <height>60</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>245</width>
-         <height>57</height>
+         <width>78</width>
+         <height>60</height>
         </size>
        </property>
        <property name="contextMenuPolicy">
