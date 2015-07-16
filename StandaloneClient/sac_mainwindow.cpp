@@ -443,12 +443,14 @@ void sacMainWindow::on_modeCombobox_currentIndexChanged(int index)
         ui->paramLabel->setText(modeList.modes.at(index)->paramLabel+":");
         ui->paramEdit->setText(QString::number(modeList.modes.at(index)->paramDefault));
         paramVisible=true;
+        updateDialogHeight();
     }
     else
     {
         ui->paramEdit->setVisible(false);
         ui->paramLabel->setVisible(false);
         paramVisible=false;
+        updateDialogHeight();
     }
 
     QFont accFont=ui->accLabel->font();
@@ -636,5 +638,18 @@ void sacMainWindow::analyzeDatFile(QString filename, QString& detectedPatname, Q
 }
 
 
+void sacMainWindow::updateDialogHeight()
+{
+    int newHeight=432;
+
+    if (!paramVisible)
+    {
+        newHeight=402;
+    }
+
+    setMaximumHeight(newHeight);
+    setMinimumHeight(newHeight);
+    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, QSize(size().width(), newHeight), qApp->desktop()->availableGeometry()));
+}
 
 

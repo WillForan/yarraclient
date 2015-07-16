@@ -56,6 +56,8 @@ public:
 
     void analyzeDatFile(QString filename, QString& detectedPatname, QString& detectedProtocol);
 
+    void updateDialogHeight();
+
 private slots:
     void on_selectFileButton_clicked();
     void on_cancelButton_clicked();

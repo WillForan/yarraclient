@@ -228,21 +228,21 @@
      <widget class="QLabel" name="label">
       <property name="geometry">
        <rect>
-        <x>18</x>
-        <y>155</y>
-        <width>202</width>
-        <height>55</height>
+        <x>14</x>
+        <y>151</y>
+        <width>78</width>
+        <height>60</height>
        </rect>
       </property>
       <property name="minimumSize">
        <size>
-        <width>202</width>
-        <height>55</height>
+        <width>78</width>
+        <height>60</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>149</width>
+        <width>78</width>
         <height>60</height>
        </size>
       </property>
@@ -262,8 +262,8 @@
      <widget class="QLabel" name="InfoLabelSystem">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>28</y>
+        <x>14</x>
+        <y>25</y>
         <width>91</width>
         <height>16</height>
        </rect>
@@ -275,8 +275,8 @@
      <widget class="QLabel" name="InfoLabelUpdate">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>46</y>
+        <x>14</x>
+        <y>43</y>
         <width>91</width>
         <height>16</height>
        </rect>
@@ -288,8 +288,8 @@
      <widget class="QLabel" name="InfoValueSystem">
       <property name="geometry">
        <rect>
-        <x>100</x>
-        <y>28</y>
+        <x>95</x>
+        <y>25</y>
         <width>351</width>
         <height>16</height>
        </rect>
@@ -301,8 +301,8 @@
      <widget class="QLabel" name="InfoValueUpdate">
       <property name="geometry">
        <rect>
-        <x>100</x>
-        <y>46</y>
+        <x>95</x>
+        <y>43</y>
         <width>351</width>
         <height>16</height>
        </rect>
@@ -314,8 +314,8 @@
      <widget class="QLabel" name="InfoValueError">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>74</y>
+        <x>14</x>
+        <y>72</y>
         <width>421</width>
         <height>51</height>
        </rect>

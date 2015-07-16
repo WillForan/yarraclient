@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>4</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -1072,7 +1072,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <property name="leftMargin">
-          <number>10</number>
+          <number>0</number>
          </property>
          <property name="rightMargin">
           <number>20</number>
@@ -1141,6 +1141,9 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;http://yarra.rocks&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#000000;&quot;&gt;http://yarra.rocks&lt;br /&gt;&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#000000;&quot;&gt;http://cai2r.net&lt;/span&gt;&lt;/a&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
            <property name="openExternalLinks">
             <bool>true</bool>

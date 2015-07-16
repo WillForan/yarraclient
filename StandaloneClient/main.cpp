@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     // Set color scheme
     qApp->setStyle(QStyleFactory::create("Fusion"));
     QPalette newPalette=QPalette(QColor(240,240,240),QColor(240,240,240));
-    newPalette.setColor(QPalette::Highlight, QColor(88,15,139));
+    newPalette.setColor(QPalette::Highlight, QColor(67,176,42));
     qApp->setPalette(newPalette);
 
     bool restartApp=true;
