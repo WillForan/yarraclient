@@ -164,6 +164,9 @@ bool ortReconTask::generateTaskFile()
             taskFile.setValue("Information/TaskDate", taskCreationTime.date().toString(Qt::ISODate));
             taskFile.setValue("Information/TaskTime", taskCreationTime.time().toString(Qt::ISODate));
             taskFile.setValue("Information/SelectedServer", selectedServer);
+            taskFile.setValue("Information/SystemVendor", "Siemens");
+            taskFile.setValue("Information/SystemVersion", RTI->getSyngoMRVersionString());
+
 
 
             // Write the list of adjustment files as strings

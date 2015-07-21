@@ -383,6 +383,8 @@ bool sacMainWindow::generateTaskFile()
             taskFile.setValue("Information/ScanFileSize", scanFileSize);
             taskFile.setValue("Information/TaskDate", taskCreationTime.date().toString(Qt::ISODate));
             taskFile.setValue("Information/TaskTime", taskCreationTime.time().toString(Qt::ISODate));
+            taskFile.setValue("Information/SystemVendor",  "Siemens");
+            taskFile.setValue("Information/SystemVersion", "Unknown");
 
             // Flush the entries into the file
             taskFile.sync();
