@@ -21,15 +21,8 @@ int main(int argc, char *argv[])
 
     if (a.isRunning())
     {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Yarra ORT already running");
-        msgBox.setText("The ORT client is already running.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setWindowIcon(RDS_ICON);
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.exec();
-
-        // Shutdown this instance
+        // Shutdown this instance. Don't show error message to avoid
+        // disturbing popups when using the client via YarraLink.
         return 0;
     }
 
