@@ -5,7 +5,7 @@
 #include "../Client/rds_global.h"
 
 
-#define ORT_VERSION              "0.19b3"
+#define ORT_VERSION              "0.20b1"
 
 #define ORT_ICON QIcon(":/images/orticon_256.png")
 
@@ -14,6 +14,7 @@
 #define ORT_SERVERLISTFILE       "YarraServerList.cfg"
 
 #define ORT_LBI_NAME             "lbi.ini"
+#define ORT_INI_NAME             "ort.ini"
 
 #define ORT_TASK_DIR             "queue"
 #define ORT_TASK_EXTENSION       ".task"

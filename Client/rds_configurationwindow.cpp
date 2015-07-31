@@ -37,19 +37,6 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
     ui->versionLabel->setText("Version " + QString(RDS_VERSION) + ", Build date " + QString(__DATE__));
 
     readConfiguration();
-
-    ui->ortConnectEdit->setToolTip("Enter the full command-shell command for mapping the share from your Yarra server\n to a local network drive (usually, using 'net use ...').");
-    ui->ortConnectLabel->setToolTip(ui->ortConnectEdit->toolTip());
-
-    ui->ortDisconnectEdit->setToolTip("Enter the command-shell command for disconnecting the network connection to the Yarra server. \nLeave the field empty if you want to keep the Yarra share connected.");
-    ui->ortDisconnectLabel->setToolTip(ui->ortConnectEdit->toolTip());
-
-    ui->ortServerPathEdit->setToolTip("Enter the path to the queuing directory of the Yarra server, including \nthe network drive letter for mapped network shares.");
-    ui->ortServerPathLabel->setToolTip(ui->ortConnectEdit->toolTip());
-
-    ui->ortFallbackEdit->setToolTip("Enter the command-shell command for mapping the queueing share from a fallback YarraServer.");
-    ui->ortFallbackConnectCmdLabel->setToolTip(ui->ortConnectEdit->toolTip());
-
 }
 
 
@@ -164,11 +151,6 @@ void rdsConfigurationWindow::readConfiguration()
         ui->protListWidget->setCurrentRow(0);
     }
     callShowProt();
-
-    ui->ortServerPathEdit->setText(config.ortServerPath);
-    ui->ortConnectEdit->setText(config.ortConnectCmd);
-    ui->ortDisconnectEdit->setText(config.ortDisconnectCmd);
-    ui->ortFallbackEdit->setText(config.ortFallbackConnectCmd);
 }
 
 
@@ -196,11 +178,6 @@ void rdsConfigurationWindow::storeConfiguration()
     config.infoUpdateMode=ui->updateCombobox->currentIndex();
     config.infoUpdatePeriodUnit=ui->updatePeriodCombobox->currentIndex();
     config.infoUpdatePeriod=ui->updatePeriodSpinbox->value();
-
-    config.ortServerPath=ui->ortServerPathEdit->text();
-    config.ortConnectCmd=ui->ortConnectEdit->text();
-    config.ortDisconnectCmd=ui->ortDisconnectEdit->text();
-    config.ortFallbackConnectCmd=ui->ortFallbackEdit->text();
 
     // Write the configuration to the ini file
     config.saveConfiguration();
@@ -358,3 +335,4 @@ void rdsConfigurationWindow::on_protSmallFilesCheckbox_toggled(bool checked)
 {
     callUpdateProt();
 }
+

@@ -31,7 +31,9 @@ SOURCES += main.cpp \
     ../Client/rds_network.cpp \
     ort_recontask.cpp \
     ort_bootdialog.cpp \
-    ort_serverlist.cpp
+    ort_serverlist.cpp \
+    ort_configuration.cpp \
+    ort_configurationdialog.cpp
 
 HEADERS  += \
     ort_mainwindow.h \
@@ -51,14 +53,17 @@ HEADERS  += \
     ort_recontask.h \
     ort_bootdialog.h \
     ort_returnonfocus.h \
-    ort_serverlist.h
+    ort_serverlist.h \
+    ort_configuration.h \
+    ort_configurationdialog.h
 
 FORMS    += \
     ort_mainwindow.ui \
     ort_confirmationdialog.ui \
     ort_waitdialog.ui \
     ort_copydialog.ui \
-    ort_bootdialog.ui
+    ort_bootdialog.ui \
+    ort_configurationdialog.ui
 
 RESOURCES += \
     ort.qrc

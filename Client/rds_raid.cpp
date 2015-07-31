@@ -92,6 +92,11 @@ rdsRaid::rdsRaid()
     // The LPFI will increase speed for parsing the output from the RaidTool
     // because parsing can stop when the LPFI has been found.
     readLPFI();          
+
+    // Initialize the internal variable used for holding the system name
+    // when using the class within ORT (needed to remove the dependency
+    // on the RTI class)
+    ortSystemName="Unknown";
 }
 
 
@@ -1134,7 +1139,7 @@ QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString par
     QString filename="";
 
     filename += modeID + RTI_SEPT_CHAR;
-    filename += "S" + RTI_CONFIG->infoName + RTI_SEPT_CHAR;
+    filename += "S" + ortSystemName + RTI_SEPT_CHAR;
 
     if (refID!=-1)
     {

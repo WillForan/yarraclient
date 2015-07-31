@@ -3,7 +3,7 @@
 #include <QtWidgets>
 
 #include "ort_global.h"
-#include "../Client/rds_configuration.h"
+#include "ort_configuration.h"
 #include "../Client/rds_runtimeinformation.h"
 #include "../Client/rds_exechelper.h"
 #include "../Client/rds_network.h"
@@ -20,17 +20,29 @@ ortNetwork::ortNetwork()
 
     appPath="";
     errorReason="";
+    configInstance=0;
+}
+
+
+void ortNetwork::setConfigInstance(ortConfiguration* instance)
+{
+    configInstance=instance;
 }
 
 
 bool ortNetwork::prepare()
 {
+    if (configInstance==0)
+    {
+        return false;
+    }
+
     // Buffer the settings from the configuration object
-    connectCmd=RTI_CONFIG->ortConnectCmd;
-    serverPath=RTI_CONFIG->ortServerPath;
-    disconnectCmd=RTI_CONFIG->ortDisconnectCmd;
-    fallbackConnectCmd=RTI_CONFIG->ortFallbackConnectCmd;
-    connectTimeout=RTI_CONFIG->ortConnectTimeout;
+    connectCmd=configInstance->ortConnectCmd;
+    serverPath=configInstance->ortServerPath;
+    disconnectCmd=configInstance->ortDisconnectCmd;
+    fallbackConnectCmd=configInstance->ortFallbackConnectCmd;
+    connectTimeout=configInstance->ortConnectTimeout;
 
     if (connectTimeout<1)
     {

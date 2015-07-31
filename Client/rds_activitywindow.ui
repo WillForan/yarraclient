@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>479</width>
-    <height>109</height>
+    <width>474</width>
+    <height>105</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -30,49 +30,36 @@
     <number>6</number>
    </property>
    <property name="leftMargin">
-    <number>12</number>
+    <number>16</number>
    </property>
    <property name="topMargin">
-    <number>12</number>
+    <number>10</number>
    </property>
    <property name="rightMargin">
     <number>16</number>
    </property>
    <property name="bottomMargin">
-    <number>12</number>
+    <number>10</number>
    </property>
-   <item>
-    <spacer name="horizontalSpacer_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>1</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item>
     <widget class="QLabel" name="label_2">
      <property name="minimumSize">
       <size>
-       <width>89</width>
-       <height>80</height>
+       <width>78</width>
+       <height>60</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>89</width>
-       <height>80</height>
+       <width>78</width>
+       <height>60</height>
       </size>
      </property>
      <property name="text">
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="rds.qrc">:/images/yarralogosqr.png</pixmap>
+      <pixmap resource="rds.qrc">:/images/yarralogo.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>

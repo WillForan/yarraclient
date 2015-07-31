@@ -9,6 +9,7 @@
 #include "ort_copydialog.h"
 #include "ort_recontask.h"
 #include "ort_bootdialog.h"
+#include "ort_configurationdialog.h"
 
 
 ortMainWindow::ortMainWindow(QWidget *parent) :
@@ -26,9 +27,9 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 
     log.start();
     RTI->setLogInstance(&log);
-    RTI->setConfigInstance(&config);
+    // Only to make sure no null-pointer calls occur by accident
+    RTI->setConfigInstance(&dummyconfig);
     RTI->setRaidInstance(&raid);
-    //RTI->setNetworkInstance(&network);
 
     // Tell the raid class to not use the LPFI mechanism (which was designed for RDS).
     raid.setIgnoreLPFI();
@@ -41,21 +42,31 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     {
         // Configuration is incomplete, so shut down
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Configuration invalid");
-        msgBox.setText("The Yarra Transfer Client has not been configured correctly. Please configure it first by running the program RDS.exe.");
-        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowTitle("Configuration Invalid");
+        msgBox.setText("The Yarra offline-reconstruction client has not been configured correctly.\n\nDo you want to review the configuration?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setWindowIcon(ORT_ICON);
-        msgBox.exec();
+        msgBox.setIcon(QMessageBox::Critical);
+        if (msgBox.exec()==QMessageBox::Yes)
+        {
+            // TODO: Call configuration dialog
+            ortConfigurationDialog::executeDialog();
+        }
 
+        // Shutdown the client
         QTimer::singleShot(0, qApp, SLOT(quit()));        
         return;
     }
+
+    // Forward system name (necessary to define filename of the exported scans)
+    raid.setORTSystemName(config.ortSystemName);
 
     // Show a splash screen while the network connection is established, so that the user
     // knows that something is going on.
     ortBootDialog bootDialog;
     bootDialog.show();
 
+    network.setConfigInstance(&config);
     if (!network.prepare())
     {
         QTimer::singleShot(0, qApp, SLOT(quit()));
@@ -325,6 +336,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     // Configure configuration dialog
     ortConfirmationDialog confirmationDialog;
+    confirmationDialog.setConfigInstance(&config);
     confirmationDialog.setPatientInformation(selectedPatient+",  "+selectedScantime);
 
     // Retrive the settings of the selected mode
@@ -397,7 +409,7 @@ void ortMainWindow::on_sendButton_clicked()
     }
     reconTask.emailNotifier+=mailRecipient;
 
-    reconTask.systemName=config.infoName;
+    reconTask.systemName=config.ortSystemName;
     reconTask.patientName=selectedPatient;
     reconTask.scanProtocol=selectedProtocol;
     reconTask.selectedServer=network.selectedServer;

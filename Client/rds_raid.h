@@ -70,6 +70,9 @@ public:
                         QString &filename, QStringList& adjustFilenames, QString paramSuffix);
 
     bool ortMissingDiskspace;
+    QString ortSystemName;
+
+    void setORTSystemName(QString name);
 
 protected:
 
@@ -282,6 +285,11 @@ inline void rdsRaid::setIgnoreLPFI()
     ignoreLPFID=true;
 }
 
+
+inline void rdsRaid::setORTSystemName(QString name)
+{
+    ortSystemName=name;
+}
 
 
 

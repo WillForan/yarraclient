@@ -2,6 +2,7 @@
 #include "ui_ort_confirmationdialog.h"
 
 #include "ort_global.h"
+#include "ort_configuration.h"
 #include "../Client/rds_global.h"
 #include <QDesktopWidget>
 #include <QtWidgets>
@@ -45,12 +46,21 @@ ortConfirmationDialog::ortConfirmationDialog(QWidget *parent) :
     setMaximumHeight(newHeight);
     setMinimumHeight(newHeight);
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, QSize(size().width(), newHeight), qApp->desktop()->availableGeometry()));
+
+    configInstance=0;
 }
 
 ortConfirmationDialog::~ortConfirmationDialog()
 {
     delete ui;
 }
+
+
+void ortConfirmationDialog::setConfigInstance(ortConfiguration* instance)
+{
+    configInstance=instance;
+}
+
 
 void ortConfirmationDialog::setACCRequired()
 {
@@ -187,16 +197,21 @@ void ortConfirmationDialog::on_accEdit_textEdited(const QString &arg1)
 
 void ortConfirmationDialog::on_mailEdit_customContextMenuRequested(const QPoint &pos)
 {
+    if (configInstance==0)
+    {
+        return;
+    }
+
     QMenu infoMenu(this);
     infoMenu.addAction("Insert @ symbol", this, SLOT(insertAtChar()));
 
-    if (RTI->getConfigInstance()->ortMailPresets.count()>0)
+    if (configInstance->ortMailPresets.count()>0)
     {
         infoMenu.addSeparator();
 
-        for (int i=0; i<RTI->getConfigInstance()->ortMailPresets.count(); i++)
+        for (int i=0; i<configInstance->ortMailPresets.count(); i++)
         {
-            QString entry=RTI->getConfigInstance()->ortMailPresets.at(i);
+            QString entry=configInstance->ortMailPresets.at(i);
             infoMenu.addAction(entry, this, SLOT(insertMailAddress()))->setProperty("email",entry);
         }
     }

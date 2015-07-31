@@ -14,8 +14,6 @@ rdsConfiguration::~rdsConfiguration()
     {
         delete protocols.takeFirst();
     }
-
-    ortMailPresets.clear();
 }
 
 
@@ -67,21 +65,6 @@ void rdsConfiguration::loadConfiguration()
         bool smallFiles= settings.value("Protocol" + QString::number(i) + "/SmallFiles",  false ).toBool();
 
         addProtocol(name, filter, saveAdjustData, anonymizeData, smallFiles, false);
-    }
-
-    ortServerPath=settings.value("ORT/ServerPath", "").toString();
-    ortConnectCmd=settings.value("ORT/ConnectCmd", "").toString();
-    ortDisconnectCmd=settings.value("ORT/DisconnectCmd", "").toString();
-    ortFallbackConnectCmd=settings.value("ORT/FallbackConnectCmd", "").toString();
-    ortConnectTimeout=settings.value("ORT/ConnectTimeout", 0).toInt();
-
-    // Read the mail presets for the ORT configuration dialog
-    ortMailPresets.clear();
-    int mCount=1;
-    while ((!settings.value("ORT/MailPreset"+QString::number(mCount),"").toString().isEmpty()) && (mCount<100))
-    {
-        ortMailPresets.append(settings.value("ORT/MailPreset"+QString::number(mCount),"").toString());
-        mCount++;
     }
 }
 
@@ -139,18 +122,6 @@ void rdsConfiguration::saveConfiguration()
             settings.setValue("Protocol" + QString::number(i) + "/AnonymizeData",  anonymizeData);
             settings.setValue("Protocol" + QString::number(i) + "/SmallFiles",     smallFiles);
         }
-    }
-
-    settings.setValue("ORT/ServerPath", ortServerPath);
-    settings.setValue("ORT/ConnectCmd", ortConnectCmd);
-    settings.setValue("ORT/DisconnectCmd", ortDisconnectCmd);    
-    settings.setValue("ORT/FallbackConnectCmd", ortFallbackConnectCmd);
-    settings.setValue("ORT/ConnectTimeout", ortConnectTimeout);
-
-    // Read the mail presets for the ORT configuration dialog
-    for (int i=0; i<ortMailPresets.count(); i++)
-    {
-        settings.setValue("ORT/MailPreset"+QString::number(i+1), ortMailPresets.at(i));
     }
 }
 
@@ -233,7 +204,6 @@ void rdsConfiguration::removeRemotelyDefinedProtocols()
                 item=0;
             }
         }
-
     }
 }
 

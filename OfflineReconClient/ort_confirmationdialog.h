@@ -8,6 +8,8 @@ namespace Ui {
 class ortConfirmationDialog;
 }
 
+class ortConfiguration;
+
 
 class ortConfirmationDialog : public QDialog
 {
@@ -16,6 +18,9 @@ class ortConfirmationDialog : public QDialog
 public:
     explicit ortConfirmationDialog(QWidget *parent = 0);
     ~ortConfirmationDialog();
+
+    ortConfiguration* configInstance;
+    void setConfigInstance(ortConfiguration* instance);
 
     void setPatientInformation(QString patientInfo);
     void setACCRequired();

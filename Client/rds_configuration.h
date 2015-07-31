@@ -49,12 +49,6 @@ public:
     QString netDriveReconnectCmd;
     bool    netDriveCreateBasepath;
 
-    QString ortServerPath;
-    QString ortConnectCmd;
-    QString ortDisconnectCmd;
-    QString ortFallbackConnectCmd;
-    int     ortConnectTimeout;
-    QStringList ortMailPresets;
 
 
     QList<rdsConfigurationProtocol*> protocols;

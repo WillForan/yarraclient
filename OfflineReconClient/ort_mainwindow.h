@@ -4,9 +4,9 @@
 #include <QDialog>
 #include <../Client/rds_log.h>
 #include <../Client/rds_raid.h>
-#include <../Client/rds_configuration.h>
-#include <ort_network.h>
-#include <ort_modelist.h>
+#include "ort_configuration.h"
+#include "ort_network.h"
+#include "ort_modelist.h"
 
 
 namespace Ui {
@@ -23,8 +23,12 @@ public:
 
     // Re-used components from RDS
     rdsLog log;
-    rdsConfiguration config;
     rdsRaid raid;
+    // Dummy configuration object, needed for the RTI class
+    rdsConfiguration dummyconfig;
+
+    // Own components for ORT
+    ortConfiguration config;
     ortNetwork network;
     ortModeList modeList;
 

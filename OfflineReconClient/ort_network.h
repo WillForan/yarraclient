@@ -5,12 +5,17 @@
 
 #include <ort_serverlist.h>
 
+class ortConfiguration;
+
 
 class ortNetwork : public QObject
 {
     Q_OBJECT
 public:
     ortNetwork();
+
+    ortConfiguration* configInstance;
+    void setConfigInstance(ortConfiguration* instance);
 
     bool prepare();
 
