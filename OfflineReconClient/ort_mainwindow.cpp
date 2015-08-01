@@ -43,13 +43,13 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         // Configuration is incomplete, so shut down
         QMessageBox msgBox;
         msgBox.setWindowTitle("Configuration Invalid");
-        msgBox.setText("The Yarra offline-reconstruction client has not been configured correctly.\n\nDo you want to review the configuration?");
+        msgBox.setText("The Yarra ORT client has not been configured yet.\n\nDo you want to open the configuration?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setWindowIcon(ORT_ICON);
         msgBox.setIcon(QMessageBox::Critical);
         if (msgBox.exec()==QMessageBox::Yes)
         {
-            // TODO: Call configuration dialog
+            // Call configuration dialog
             ortConfigurationDialog::executeDialog();
         }
 
@@ -524,6 +524,7 @@ void ortMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
     infoMenu.addAction(versionString);
     infoMenu.addAction(serverString);
     infoMenu.addSeparator();
+    infoMenu.addAction("Configuration...", this, SLOT(showConfiguration()));
     infoMenu.addAction("Show log file...", this, SLOT(showLogfile()));
     infoMenu.exec(ui->logoLabel->mapToGlobal(pos));
 }
@@ -538,6 +539,17 @@ void ortMainWindow::showLogfile()
     QStringList args;
     args.append(RTI->getAppPath()+"/"+RDS_DIR_LOG+"/"+RTI->getLogInstance()->getLogFilename());
     QProcess::startDetached(cmdLine, args);
+}
+
+
+void ortMainWindow::showConfiguration()
+{
+    // Call configuration dialog
+    if (ortConfigurationDialog::executeDialog())
+    {
+        // Quit program is configuration has changed
+        close();
+    }
 }
 
 

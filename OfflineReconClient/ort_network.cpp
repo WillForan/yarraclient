@@ -4,6 +4,7 @@
 
 #include "ort_global.h"
 #include "ort_configuration.h"
+#include "ort_configurationdialog.h"
 #include "../Client/rds_runtimeinformation.h"
 #include "../Client/rds_exechelper.h"
 #include "../Client/rds_network.h"
@@ -234,11 +235,16 @@ bool ortNetwork::openConnection(bool fallback)
         {
             QMessageBox msgBox;
             msgBox.setWindowTitle("Error");
-            msgBox.setText(errorMessage);
-            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(errorMessage + "\n\nDo you want to review the configuration?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setWindowIcon(ORT_ICON);
             msgBox.setIcon(QMessageBox::Critical);
-            msgBox.exec();
+
+            if (msgBox.exec()==QMessageBox::Yes)
+            {
+                // Call configuration dialog
+                ortConfigurationDialog::executeDialog();
+            }
         }
     }
 

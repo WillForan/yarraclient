@@ -19,6 +19,15 @@ public:
 
     bool requiresRestart;
 
+    void readSettings();
+    void writeSettings();
+
+    bool checkAccessPassword();
+
+private slots:
+    void on_okButton_clicked();
+    void on_cancelButton_clicked();
+
 private:
     Ui::ortConfigurationDialog *ui;
 };

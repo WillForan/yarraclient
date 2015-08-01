@@ -48,6 +48,7 @@ private slots:
     void on_logoLabel_customContextMenuRequested(const QPoint &pos);
 
     void showLogfile();
+    void showConfiguration();
 
     void on_loadOlderButton_clicked();
     void on_manualAssignButton_clicked();

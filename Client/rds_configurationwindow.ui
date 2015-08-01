@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -865,7 +865,7 @@ p, li { white-space: pre-wrap; }
      </widget>
      <widget class="QWidget" name="infoTab">
       <attribute name="title">
-       <string>About</string>
+       <string>Information</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="spacing">
@@ -881,7 +881,7 @@ p, li { white-space: pre-wrap; }
         <number>12</number>
        </property>
        <property name="bottomMargin">
-        <number>25</number>
+        <number>16</number>
        </property>
        <item>
         <widget class="QLabel" name="label_11">
@@ -937,7 +937,7 @@ p, li { white-space: pre-wrap; }
         <widget class="QLabel" name="label_12">
          <property name="maximumSize">
           <size>
-           <width>520</width>
+           <width>16777215</width>
            <height>16777215</height>
           </size>
          </property>
@@ -946,8 +946,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Developed by Kai Tobias Block&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;WARNING:&lt;/span&gt; This software comes without any warranties. Operation of this software is solely on the &lt;span style=&quot; font-weight:600;&quot;&gt;user's own risk&lt;/span&gt;. The author takes no responsibility for damage or misfunction of any kind caused by this software, including permanent damages to the MR system, temporary unavailability of the MR system, and loss of data. This applies to all software components included in this software package.&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;WARNING:&lt;/span&gt; This software comes without any warranties. Operation of this software is solely on the &lt;span style=&quot; font-weight:600;&quot;&gt;user's own risk&lt;/span&gt;. The authors take no responsibility for damage or misfunction of any kind caused by this software, including permanent damages to the MR system, temporary unavailability of the MR system, and loss of data. This applies to all software components included in the Yarra software packages.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
@@ -974,7 +973,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <property name="leftMargin">
-          <number>0</number>
+          <number>2</number>
          </property>
          <property name="rightMargin">
           <number>20</number>
