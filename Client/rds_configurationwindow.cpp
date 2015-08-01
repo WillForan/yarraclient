@@ -11,6 +11,7 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowIcon(RDS_ICON);
+    setWindowTitle("Yarra - RDS Configuration");
 
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;
@@ -35,6 +36,10 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
     ui->networkStackedWidget->setCurrentIndex(0);
 
     ui->versionLabel->setText("Version " + QString(RDS_VERSION) + ", Build date " + QString(__DATE__));
+
+    // Center the window on the screen
+    setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,size(),
+                                    qApp->desktop()->availableGeometry()));
 
     readConfiguration();
 }

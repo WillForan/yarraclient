@@ -503,11 +503,11 @@ void sacMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
     QString serverString="Server:  " + modeList.serverName;
 
     QMenu infoMenu(this);
-    infoMenu.addAction("Configuration...", this, SLOT(showConfiguration()));
-    infoMenu.addAction("Show log file...", this, SLOT(showLogfile()));
-    infoMenu.addSeparator();
     infoMenu.addAction(versionString);
     infoMenu.addAction(serverString);
+    infoMenu.addSeparator();
+    infoMenu.addAction("Configuration...", this, SLOT(showConfiguration()));
+    infoMenu.addAction("Show log file...", this, SLOT(showLogfile()));
     infoMenu.exec(ui->logoLabel->mapToGlobal(pos));
 }
 

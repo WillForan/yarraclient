@@ -13,7 +13,7 @@ ortConfigurationDialog::ortConfigurationDialog(QWidget *parent) :
     ui->setupUi(this);
 
     setWindowIcon(ORT_ICON);
-    setWindowTitle("Yarra ORT Configuration");
+    setWindowTitle("Yarra - ORT Configuration");
 
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;

@@ -973,10 +973,10 @@ p, li { white-space: pre-wrap; }
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <property name="leftMargin">
-          <number>2</number>
+          <number>0</number>
          </property>
          <property name="rightMargin">
-          <number>20</number>
+          <number>0</number>
          </property>
          <property name="bottomMargin">
           <number>0</number>
@@ -985,14 +985,14 @@ p, li { white-space: pre-wrap; }
           <widget class="QLabel" name="label_15">
            <property name="minimumSize">
             <size>
-             <width>100</width>
-             <height>70</height>
+             <width>78</width>
+             <height>60</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>100</width>
-             <height>70</height>
+             <width>78</width>
+             <height>60</height>
             </size>
            </property>
            <property name="mouseTracking">
@@ -1005,7 +1005,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::AutoText</enum>
            </property>
            <property name="pixmap">
-            <pixmap resource="rds.qrc">:/images/cai2rlogo.png</pixmap>
+            <pixmap resource="rds.qrc">:/images/yarralogo.png</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -1028,7 +1028,7 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>10</width>
+             <width>4</width>
              <height>20</height>
             </size>
            </property>
@@ -1037,11 +1037,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QLabel" name="label_16">
            <property name="text">
-            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;http://yarra.rocks&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#000000;&quot;&gt;http://yarra.rocks&lt;br /&gt;&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#000000;&quot;&gt;http://cai2r.net&lt;/span&gt;&lt;/a&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For updates and documentation, please visit: &lt;a href=&quot;http://yarra.rocks&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#580f8b;&quot;&gt;http://yarra.rocks&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;Made with &lt;span style=&quot; font-family:'arial'; font-size:15px; color:#580f8b;&quot;&gt;♥&lt;/span&gt; in NYC, by the Yarra team at &lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#580f8b;&quot;&gt;CAI&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#580f8b; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#580f8b;&quot;&gt;R&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

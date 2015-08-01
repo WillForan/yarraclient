@@ -2,6 +2,7 @@
 
 #include "sac_configurationdialog.h"
 #include "sac_mainwindow.h"
+#include "sac_global.h"
 
 #include "ui_sac_configurationdialog.h"
 
@@ -11,10 +12,17 @@ sacConfigurationDialog::sacConfigurationDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setWindowTitle("Configuration");
+    setWindowTitle("Yarra - SAC Configuration");
+    ui->versionLabel->setText("Version " + QString(SAC_VERSION) + ", Build date " + QString(__DATE__));
 
     mainWindow=0;
     closeMainWindow=false;
+
+    // Center the window on the screen
+    setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,size(),
+                                    qApp->desktop()->availableGeometry()));
+
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 
