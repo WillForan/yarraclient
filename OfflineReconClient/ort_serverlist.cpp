@@ -9,6 +9,7 @@ ortServerList::ortServerList()
     serverListAvailable=false;
     appPath=qApp->applicationDirPath();
     selectedIndex=0;
+    servers.clear();
 }
 
 
@@ -36,14 +37,25 @@ bool ortServerList::syncServerList(QString remotePath)
     // Remove the old copy of the serverlist file, if it exists
     if (localDir.exists(ORT_SERVERLISTFILE))
     {
+        // Reset the file permissions of the local file, in case it was copied
+        // from the network with read-only permissions
+        {
+            QFile existingFile(localDir.absoluteFilePath(ORT_SERVERLISTFILE));
+            existingFile.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner | QFile::ReadGroup | QFile::ExeGroup | QFile::ReadOther | QFile::ExeOther);
+        }
+
         if (!localDir.remove(ORT_SERVERLISTFILE))
         {
             RTI->log("Error: Cannot remove local chached copy of server list!");
             RTI->log("Error: Check write permission in installation folder.");
+
+            removedServerList=false;
             return false;
         }
-
-        removedServerList=true;
+        else
+        {
+            removedServerList=true;
+        }
     }
 
     QDir remoteDir(remotePath);
@@ -235,7 +247,14 @@ void ortServerList::getLoadBalancingIndex(QString type)
     selectedIndex=lbiFile.value("LoadBalancingIndex/"+type, 0).toInt();
 
     // The modulo operation is used because fewer servers could exist now.
-    selectedIndex=selectedIndex % matchingServers.count();
+    if (matchingServers.count()!=0)
+    {
+        selectedIndex=selectedIndex % matchingServers.count();
+    }
+    else
+    {
+        selectedIndex=0;
+    }
 
     // Increase and save value again
     lbiFile.setValue("LoadBalancingIndex/"+type, selectedIndex+1);
