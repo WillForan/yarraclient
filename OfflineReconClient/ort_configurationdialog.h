@@ -12,7 +12,7 @@ class ortConfigurationDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ortConfigurationDialog(QWidget *parent = 0);
+    explicit ortConfigurationDialog(QWidget *parent=0);
     ~ortConfigurationDialog();
 
     static bool executeDialog();

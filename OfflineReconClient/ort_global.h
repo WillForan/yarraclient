@@ -5,7 +5,7 @@
 #include "../Client/rds_global.h"
 
 
-#define ORT_VERSION              "0.20b3"
+#define ORT_VERSION              "0.20"
 
 #define ORT_ICON QIcon(":/images/orticon_256.png")
 

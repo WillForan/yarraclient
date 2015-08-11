@@ -60,7 +60,7 @@ ortConfigurationDialog::~ortConfigurationDialog()
 
 bool ortConfigurationDialog::executeDialog()
 {
-    ortConfigurationDialog* instance=new ortConfigurationDialog;
+    ortConfigurationDialog* instance=new ortConfigurationDialog();
 
     if (!instance->checkAccessPassword())
     {
