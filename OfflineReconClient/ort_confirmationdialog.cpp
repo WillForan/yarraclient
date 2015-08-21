@@ -20,7 +20,9 @@ ortConfirmationDialog::ortConfirmationDialog(QWidget *parent) :
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;
     flags &= ~Qt::WindowContextHelpButtonHint;
+    flags |= Qt::WindowStaysOnTopHint;
     setWindowFlags(flags);
+
 
     confirmed=false;
     requiresACC=false;

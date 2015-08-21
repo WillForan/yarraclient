@@ -23,6 +23,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;
     flags &= ~Qt::WindowContextHelpButtonHint;
+    flags |= Qt::WindowStaysOnTopHint;
     setWindowFlags(flags);    
 
     log.start();
@@ -544,11 +545,17 @@ void ortMainWindow::showLogfile()
 
 void ortMainWindow::showConfiguration()
 {
+    hide();
+
     // Call configuration dialog
     if (ortConfigurationDialog::executeDialog())
-    {
+    {        
         // Quit program is configuration has changed
         close();
+    }
+    else
+    {
+        show();
     }
 }
 
