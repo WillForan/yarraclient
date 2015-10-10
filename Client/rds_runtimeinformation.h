@@ -44,7 +44,8 @@ public:
         RDS_VB19A   =  8,
         RDS_VB20P   =  9,
         RDS_VD13D   =  10,
-        RDS_VE11A   =  11
+        RDS_VE11A   =  11,
+        RDS_VD13B   =  12
     };
 
     enum rdsRaidToolFormat
@@ -349,6 +350,10 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString()
         versionString="VD13A";
         break;
 
+    case RDS_VD13B:
+        versionString="VD13B";
+        break;
+
     case RDS_VD13C:
         versionString="VD13C";
         break;
@@ -437,6 +442,7 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     case RDS_VD11A:
     case RDS_VD11D:
     case RDS_VD13A:
+    case RDS_VD13B:
         return RDS_RAIDTOOL_VD11;
         break;
     case RDS_VD13C:

@@ -82,7 +82,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
 
     if (raid.isPatchedRaidToolMissing())
     {
-        RTI->log("ERROR: Patched Raid Tool for VD13A/C is missing.");
+        RTI->log("ERROR: Patched Raid Tool for VD13 is missing.");
         RTI->log("ERROR: Shutting down service.");
         QTimer::singleShot(0, this, SLOT(callImmediateShutdown()));
     }

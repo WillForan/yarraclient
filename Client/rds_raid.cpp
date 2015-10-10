@@ -38,7 +38,7 @@ rdsRaid::rdsRaid()
         raidToolCmd=QDir::toNativeSeparators( RDS_RAIDTOOL_PATH+QString("/") ) + RDS_RAIDTOOL_NAME;
     }
 
-    // For VD13A, VD13C, and VD13D use local patched versions of the RaidTool that flush stdout
+    // For VD13 use local patched versions of the RaidTool that flush stdout
     // before the program shutdown. Otherwise, it will not be possible to read the program output.
     usePatchedRaidTool=false;
     patchedRaidToolMissing=false;
@@ -61,6 +61,12 @@ rdsRaid::rdsRaid()
         raidToolCmd=QDir::toNativeSeparators( RTI->getAppPath()+QString("/") ) + "RaidTool_VD13A.dll";
     }
 
+    if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VD13B)
+    {
+        usePatchedRaidTool=true;
+        raidToolCmd=QDir::toNativeSeparators( RTI->getAppPath()+QString("/") ) + "RaidTool_VD13B.dll";
+    }
+
     if (usePatchedRaidTool)
     {
         // Check for existence of patched RaidTool
@@ -69,7 +75,7 @@ rdsRaid::rdsRaid()
         {
             QMessageBox msgBox;
             msgBox.setWindowTitle("Patched Raid Tool not found");
-            msgBox.setText("Systems running VD13A, VD13C, or VD13D software require modified local version of the RaidTool, which was not found. <br><br>"\
+            msgBox.setText("Systems running VD13 software require modified local version of the RaidTool, which was not found. <br><br>"\
                            "Please check the Yarra website to obtain these files.");
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setWindowIcon(RDS_ICON);
