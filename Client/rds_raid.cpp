@@ -387,7 +387,8 @@ bool rdsRaid::readRaidList()
 
     // Starting with VB20P, also direcoty entries are anonymize (VD13 not yet affected).
     if ((RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB20P)
-            || (RTI->isSyngoVELine()))
+        || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB19A)
+        || (RTI->isSyngoVELine()))
     {
         opt << "-k";
     }
