@@ -45,7 +45,8 @@ public:
         RDS_VB20P   =  9,
         RDS_VD13D   =  10,
         RDS_VE11A   =  11,
-        RDS_VD13B   =  12
+        RDS_VD13B   =  12,
+        RDS_VE11B   =  13
     };
 
     enum rdsRaidToolFormat
@@ -366,6 +367,10 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString()
         versionString="VE11A";
         break;
 
+    case RDS_VE11B:
+        versionString="VE11B";
+        break;
+
     default:
         versionString="Unknown - Use with care!";
         break;
@@ -450,6 +455,7 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
         return RDS_RAIDTOOL_VD13C;
         break;
     case RDS_VE11A:
+    case RDS_VE11B:
         return RDS_RAIDTOOL_VE;
         break;
     case RDS_VB15A:
@@ -469,8 +475,4 @@ inline void rdsRuntimeInformation::setPreventStart()
 
 
 #endif // RDS_RUNTIMEINFORMATION_H
-
-
-
-
 

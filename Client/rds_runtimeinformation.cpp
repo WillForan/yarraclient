@@ -200,6 +200,7 @@ void rdsRuntimeInformation::determineSyngoVersion()
     RDS_SYNGODETECT(RDS_VD13D,RDS_SYNGODETECT_VD13D);
     // VE line
     RDS_SYNGODETECT(RDS_VE11A,RDS_SYNGODETECT_VE11A);
+    RDS_SYNGODETECT(RDS_VE11B,RDS_SYNGODETECT_VE11B);
 
     switch (syngoMRVersion)
     {
@@ -220,6 +221,7 @@ void rdsRuntimeInformation::determineSyngoVersion()
         syngoMRLine=RDS_VD;
         break;
     case RDS_VE11A:
+    case RDS_VE11B:
         syngoMRLine=RDS_VE;
         break;
     }
