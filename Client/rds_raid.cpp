@@ -267,7 +267,7 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
     cmd << "-o " + filePath;
 
     // For the VD line, add option for inclusion of adjustment scans
-    if (RTI->isSyngoVDLine())
+    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()))
     {
         if (saveAdjustments)
         {

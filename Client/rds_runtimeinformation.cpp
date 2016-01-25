@@ -101,7 +101,6 @@ void rdsRuntimeInformation::prepare()
 }
 
 
-
 bool rdsRuntimeInformation::prepareEnvironment()
 {
     // If any prior constructors request that start of the
@@ -201,6 +200,8 @@ void rdsRuntimeInformation::determineSyngoVersion()
     // VE line
     RDS_SYNGODETECT(RDS_VE11A,RDS_SYNGODETECT_VE11A);
     RDS_SYNGODETECT(RDS_VE11B,RDS_SYNGODETECT_VE11B);
+    RDS_SYNGODETECT(RDS_VE11C,RDS_SYNGODETECT_VE11C);
+    RDS_SYNGODETECT(RDS_VE11U,RDS_SYNGODETECT_VE11U);
 
     switch (syngoMRVersion)
     {
@@ -222,6 +223,8 @@ void rdsRuntimeInformation::determineSyngoVersion()
         break;
     case RDS_VE11A:
     case RDS_VE11B:
+    case RDS_VE11C:
+    case RDS_VE11U:
         syngoMRLine=RDS_VE;
         break;
     }
@@ -240,9 +243,6 @@ QString rdsRuntimeInformation::getSyngoImagerIP()
 
     return result;
 }
-
-
-
 
 
 qint64 rdsRuntimeInformation::getFreeDiskSpace(QString path)
@@ -268,7 +268,6 @@ qint64 rdsRuntimeInformation::getFreeDiskSpace(QString path)
 
     return static_cast<__int64>(freeSpace.QuadPart);
 }
-
 
 
 void rdsRuntimeInformation::showOperationWindow()
