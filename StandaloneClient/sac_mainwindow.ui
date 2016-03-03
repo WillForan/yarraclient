@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>717</width>
-    <height>404</height>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -167,7 +167,7 @@
           </size>
          </property>
          <property name="inputMask">
-          <string>00000000000000000000</string>
+          <string>&gt;NNNNNNNNNNNNNNNNNNNN</string>
          </property>
         </widget>
        </item>

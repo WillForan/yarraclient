@@ -2,12 +2,13 @@
 
 #include <QtWidgets>
 #include <QtCore>
-#include "sac_mainwindow.h"
 
+#include "sac_mainwindow.h"
 #include "sac_global.h"
 #include "sac_bootdialog.h"
 #include "sac_copydialog.h"
 #include "sac_configurationdialog.h"
+#include "sac_twixheader.h"
 
 
 sacMainWindow::sacMainWindow(QWidget *parent) :
@@ -216,7 +217,7 @@ void sacMainWindow::on_sendButton_clicked()
     }
 
     patientName=ui->patnameEdit->text();
-    accNumber=ui->accEdit->text();
+    accNumber=ui->accEdit->text().toUpper();
     mode=modeList.modes.at(selectedIndex)->idName;
     modeReadable=modeList.modes.at(selectedIndex)->readableName;
 
@@ -572,14 +573,54 @@ int sacMainWindow::detectMode(QString protocol)
 void sacMainWindow::analyzeDatFile(QString filename, QString& detectedPatname, QString& detectedProtocol)
 {
     QString protID="<ParamString.\"tProtocolName\">";
-    QString patID="<ParamString.\"tPatientName\">";
+    QString patID ="<ParamString.\"tPatientName\">";
 
-    detectedPatname="";
+    detectedPatname ="";
     detectedProtocol="";
 
     QFile file;
     file.setFileName(filename);
     file.open(QIODevice::ReadOnly);
+
+    // Determine whether file is VB or VD
+    uint32_t x[2];
+    file.read((char*)x, 2*sizeof(uint32_t));
+
+    bool isVDVE=false;
+
+    if ((x[0]==0) && (x[1]<=64))
+    {
+        isVDVE=true;
+    }
+    file.seek(0);
+
+    // If file version is VD, then jump to the last measurement in the file
+    if (isVDVE)
+    {
+        uint32_t id=0, ndset=0;
+        std::vector<VD::EntryHeader> veh;
+
+        file.read((char*)&id,   sizeof(uint32_t));  // ID
+        file.read((char*)&ndset,sizeof(uint32_t));  // # data sets
+
+        if (ndset>30)
+        {
+            // If there are more than 30 measurements, it's unlikely that the
+            // file is a valid TWIX file
+        }
+        else
+        {
+            veh.resize(ndset);
+
+            for (size_t i=0; i<ndset; ++i)
+            {
+                file.read((char*)&veh[i], VD::ENTRY_HEADER_LEN);
+            }
+
+            // Go to last measurement
+            file.seek(veh.back().MeasOffset);
+        }
+    }
 
     bool patientFound=false;
     bool protocolFound=false;
@@ -653,5 +694,3 @@ void sacMainWindow::updateDialogHeight()
     setMinimumHeight(newHeight);
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, QSize(size().width(), newHeight), qApp->desktop()->availableGeometry()));
 }
-
-

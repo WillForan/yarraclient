@@ -1,6 +1,7 @@
 #include "sac_bootdialog.h"
 #include "ui_sac_bootdialog.h"
 
+
 sacBootDialog::sacBootDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::sacBootDialog)
@@ -12,9 +13,10 @@ sacBootDialog::sacBootDialog(QWidget *parent) :
     setWindowFlags(flags);
 
     QPalette p = palette();
-    p.setColor(QPalette::Highlight, QColor(67,176,42) );
+    p.setColor(QPalette::Highlight, QColor(67,176,42));
     ui->progressBar->setPalette(p);
 }
+
 
 sacBootDialog::~sacBootDialog()
 {

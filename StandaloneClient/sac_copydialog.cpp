@@ -23,7 +23,9 @@ sacCopyDialog::sacCopyDialog(QWidget *parent) :
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignBottom, size(), qApp->desktop()->availableGeometry()));
 }
 
+
 sacCopyDialog::~sacCopyDialog()
 {
     delete ui;
 }
+

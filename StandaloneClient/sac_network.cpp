@@ -5,6 +5,7 @@
 #include "../Client/rds_exechelper.h"
 #include "../Client/rds_network.h"
 
+
 sacNetwork::sacNetwork()
 {
     connectCmd="";
@@ -15,6 +16,7 @@ sacNetwork::sacNetwork()
     copyErrorMsg="";
     showConfigurationAfterError=false;
 }
+
 
 bool sacNetwork::readConfiguration()
 {
@@ -103,7 +105,7 @@ bool sacNetwork::openConnection()
         RTI->log("ERROR: ORT Mode file not found.");
         RTI->setSevereErrors(true);
 
-        errorMessage="Could not find the Yarra configuration files (YarraServer.cfg / YarraModes.cfg).\n\nPlease verify the configuration of the Yarra client and server.";
+        errorMessage="Unable to connect to server.\n\nCould not find Yarra configuration files (YarraServer.cfg/YarraModes.cfg) at expected location.\n\nPlease verify the network configuration of the Yarra client and server.";
         error=true;
     }
 

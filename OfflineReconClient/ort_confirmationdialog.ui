@@ -204,7 +204,7 @@
            </font>
           </property>
           <property name="inputMask">
-           <string>000000000000</string>
+           <string>&gt;NNNNNNNNNNNN</string>
           </property>
          </widget>
         </item>

@@ -6,6 +6,7 @@
 
 #include "ui_sac_configurationdialog.h"
 
+
 sacConfigurationDialog::sacConfigurationDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::sacConfigurationDialog)

@@ -4,6 +4,7 @@
 #include "ort_global.h"
 #include "ort_configuration.h"
 #include "../Client/rds_global.h"
+
 #include <QDesktopWidget>
 #include <QtWidgets>
 
@@ -22,7 +23,6 @@ ortConfirmationDialog::ortConfirmationDialog(QWidget *parent) :
     flags &= ~Qt::WindowContextHelpButtonHint;
     flags |= Qt::WindowStaysOnTopHint;
     setWindowFlags(flags);
-
 
     confirmed=false;
     requiresACC=false;
@@ -51,6 +51,7 @@ ortConfirmationDialog::ortConfirmationDialog(QWidget *parent) :
 
     configInstance=0;
 }
+
 
 ortConfirmationDialog::~ortConfirmationDialog()
 {
@@ -104,13 +105,13 @@ void ortConfirmationDialog::setParamRequired(QString label, QString description,
 void ortConfirmationDialog::updateDialogHeight()
 {
     // Adjust the height of the dialog for the ACC + param section
-
     int newHeight=expandedHeight;
 
     if (!requiresACC)
     {
         newHeight-=accessionHeight;
     }
+
     if (!requiresParam)
     {
         newHeight-=paramHeight;
@@ -130,7 +131,7 @@ void ortConfirmationDialog::setPatientInformation(QString patientInfo)
 
 QString ortConfirmationDialog::getEnteredACC()
 {
-    return ui->accEdit->text();
+    return ui->accEdit->text().toUpper();
 }
 
 
@@ -196,7 +197,6 @@ void ortConfirmationDialog::on_accEdit_textEdited(const QString &arg1)
 }
 
 
-
 void ortConfirmationDialog::on_mailEdit_customContextMenuRequested(const QPoint &pos)
 {
     if (configInstance==0)
@@ -227,9 +227,8 @@ void ortConfirmationDialog::insertAtChar()
     ui->mailEdit->setText(ui->mailEdit->text()+"@");
 }
 
+
 void ortConfirmationDialog::insertMailAddress()
 {
     ui->mailEdit->setText(ui->mailEdit->text()+sender()->property("email").toString());
 }
-
-
