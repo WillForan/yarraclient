@@ -394,7 +394,7 @@ bool rdsNetwork::verifyTransfer()
         // TODO
     }
 
-    RTI->log("File transfer succuessful.");
+    RTI->log("File transfer successful.");
 
     return true;
 }
