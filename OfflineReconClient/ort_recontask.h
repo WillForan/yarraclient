@@ -6,28 +6,30 @@
 #include <ort_network.h>
 #include <ort_modelist.h>
 
+
 class ortReconTask
 {
 public:
     ortReconTask();
     void setInstances(rdsRaid* raidinstance, ortNetwork* networkinstance);
 
-    QString scanFile;
+    QString     scanFile;
     QStringList adjustmentFiles;
-    QString accNumber;
-    QString emailNotifier;
-    QString reconMode;
-    QString systemName;
-    QDateTime taskCreationTime;
-    qint64 scanFileSize;
-    QString patientName;
-    QString scanProtocol;
-    QString reconName;  
-    int paramValue;
-    QString requiredServerType;
-    QString selectedServer;
+    QString     accNumber;
+    QString     emailNotifier;
+    QString     reconMode;
+    QString     systemName;
+    QDateTime   taskCreationTime;
+    QString     raidCreationTime;
+    qint64      scanFileSize;
+    QString     patientName;
+    QString     scanProtocol;
+    QString     reconName;
+    int         paramValue;
+    QString     requiredServerType;
+    QString     selectedServer;
 
-    bool highPriority;
+    bool        highPriority;
 
     bool exportDataFiles(int fileID, ortModeEntry* mode);
     bool transferDataFiles();
@@ -44,7 +46,6 @@ protected:
 
     QString errorMessageUI;
     bool reconTaskFailed;
-
 };
 
 

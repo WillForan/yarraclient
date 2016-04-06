@@ -48,6 +48,7 @@ private:
     QString currentFilename;
     QString currentProt;
     qint64  currentFilesize;
+    QString currentTimeStamp;
 
     //QFtp ftp;
     QDir networkDrive;

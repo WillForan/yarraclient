@@ -8,7 +8,7 @@ ortBootDialog::ortBootDialog(QWidget *parent) :
     ui->setupUi(this);
 
     Qt::WindowFlags flags = windowFlags();
-    flags=Qt::Popup;
+    flags=Qt::Popup; 
     setWindowFlags(flags);
 
     QPalette p = palette();

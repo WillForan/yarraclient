@@ -204,7 +204,8 @@ void rdsOperationWindow::callShowLogfile()
     // Call notepad and show the log file
     QString cmdLine="notepad.exe";
     QStringList args;
-    args.append(RTI->getAppPath()+"/"+RDS_DIR_LOG+"/"+RTI->getLogInstance()->getLogFilename());
+    args.append(RTI->getAppPath()+"/"+RTI->getLogInstance()->getLogFilename());
+
     QProcess::startDetached(cmdLine, args);
 }
 

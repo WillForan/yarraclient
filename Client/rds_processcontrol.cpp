@@ -158,7 +158,6 @@ void rdsProcessControl::performUpdate()
         // of if the files should be exported and transfered one by one.
         if (alternatingUpdate)
         {
-
             // Loop over all scans scheduled for the export
             while ((exportSuccessful) && (!RTI->isPostponementRequested()) && (RTI_RAID->exportsAvailable()))
             {
@@ -214,8 +213,7 @@ void rdsProcessControl::performUpdate()
 
         RTI->log("Update finished.");
 
-        // Copy the local logfile to the network drive
-        // for remote diagnosis
+        // Copy the local logfile to the network drive for remote diagnosis
         RTI_NETWORK->copyLogFile();
 
         // Close connection to FTP server

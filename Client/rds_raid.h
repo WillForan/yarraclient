@@ -9,25 +9,24 @@
 class rdsRaidEntry
 {
 public:
-    int fileID;
-    int measID;
-    QString protName;
-    QString patName;
-    qint64 size;
-    qint64 sizeOnDisk;
+    int       fileID;
+    int       measID;
+    QString   protName;
+    QString   patName;
+    qint64    size;
+    qint64    sizeOnDisk;
     QDateTime creationTime;
-
 };
 
 
 class rdsExportEntry
 {
 public:
-    int raidIndex;
+    int     raidIndex;
     int     protIndex;
     QString protName;
-    bool anonymize;
-    bool adjustmentScans;
+    bool    anonymize;
+    bool    adjustmentScans;
 };
 
 

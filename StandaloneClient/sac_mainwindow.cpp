@@ -37,7 +37,7 @@ sacMainWindow::sacMainWindow(QWidget *parent) :
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;
     flags &= ~Qt::WindowContextHelpButtonHint;
-    setWindowFlags(flags);
+    setWindowFlags(flags);    
 
     setWindowTitle("Yarra - Stand-Alone Client");
     setWindowIcon(SAC_ICON);

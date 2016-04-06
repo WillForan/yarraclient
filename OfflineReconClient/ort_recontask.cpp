@@ -12,6 +12,7 @@ ortReconTask::ortReconTask()
     reconMode="";
     systemName="";
     taskCreationTime=QDateTime::currentDateTime();
+    raidCreationTime=taskCreationTime.toString("dd/MM/yy")+"  "+taskCreationTime.toString("HH:mm:ss");
     patientName="";
     scanProtocol="";
     reconName="";
@@ -159,6 +160,9 @@ bool ortReconTask::generateTaskFile()
             taskFile.setValue("Task/ParamValue", paramValue);
             taskFile.setValue("Task/RequiredServerType", requiredServerType);
 
+            taskFile.setValue("Task/CreationTimeRAID", raidCreationTime);
+            taskFile.setValue("Task/CreationTimeTask", taskCreationTime.toString("dd/MM/yy")+"  "+taskCreationTime.toString("HH:mm:ss"));
+
             taskFile.setValue("Information/SystemName", systemName);
             taskFile.setValue("Information/ScanFileSize", scanFileSize);
             taskFile.setValue("Information/TaskDate", taskCreationTime.date().toString(Qt::ISODate));
@@ -166,7 +170,6 @@ bool ortReconTask::generateTaskFile()
             taskFile.setValue("Information/SelectedServer", selectedServer);
             taskFile.setValue("Information/SystemVendor", "Siemens");
             taskFile.setValue("Information/SystemVersion", RTI->getSyngoMRVersionString());
-
 
 
             // Write the list of adjustment files as strings

@@ -106,11 +106,9 @@ rdsRaid::rdsRaid()
 }
 
 
-
 rdsRaid::~rdsRaid()
 {
 }
-
 
 
 bool rdsRaid::callRaidTool(QStringList command, QStringList options)
@@ -225,7 +223,6 @@ bool rdsRaid::callRaidTool(QStringList command, QStringList options)
 }
 
 
-
 void rdsRaid::readLPFI()
 {
     QSettings lpfiFile(RTI->getAppPath() + RDS_LPFI_NAME, QSettings::IniFormat);
@@ -233,13 +230,11 @@ void rdsRaid::readLPFI()
 }
 
 
-
 void rdsRaid::saveLPFI()
 {
     QSettings lpfiFile(RTI->getAppPath() + RDS_LPFI_NAME, QSettings::IniFormat);
     lpfiFile.setValue("LPFI/FileID", lastProcessedFileID);
 }
-
 
 
 bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, bool anonymize)
@@ -327,7 +322,6 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
 }
 
 
-
 bool rdsRaid::parseOutputFileExport()
 {
     bool isSuccess=false;
@@ -377,7 +371,6 @@ bool rdsRaid::parseOutputFileExport()
 }
 
 
-
 bool rdsRaid::readRaidList()
 {
     // Call raid tool and obtain directory list
@@ -405,7 +398,6 @@ bool rdsRaid::readRaidList()
 
     return true;
 }
-
 
 
 bool rdsRaid::parseOutputDirectory()
@@ -668,7 +660,6 @@ bool rdsRaid::parseOutputDirectory()
 }
 
 
-
 bool rdsRaid::parseVB15Line(QString line, rdsRaidEntry* entry)
 {
     // Format is should be %7u%11u%16s%9s%13I64u%13I64u%22s%22s
@@ -711,7 +702,6 @@ bool rdsRaid::parseVB15Line(QString line, rdsRaidEntry* entry)
 
     return true;
 }
-
 
 
 bool rdsRaid::createExportList()
@@ -824,7 +814,6 @@ bool rdsRaid::findAdjustmentScans()
 }
 
 
-
 bool rdsRaid::processTotalExportList()
 {
     bool result=true;
@@ -845,19 +834,16 @@ bool rdsRaid::processTotalExportList()
 }
 
 
-
 bool rdsRaid::processExportListEntry()
 {
     return exportScanFromList();
 }
 
 
-
 bool rdsRaid::exportsAvailable()
 {
     return (exportList.count()>0);
 }
-
 
 
 bool rdsRaid::exportScanFromList()
@@ -891,6 +877,10 @@ bool rdsRaid::exportScanFromList()
 
     RDS_RETONERR( setCurrentFilename() );
 
+/*
+    // Change in transfer strategy: Files should always be copied, even if
+    // they already exist (because the existing file might be from an incomplete
+    // transfer). If the file already exists, a time stamp will be added to the name.
 
     #ifdef YARRA_APP_ORT
         // If we compile for ORT, the network object is not available.
@@ -906,35 +896,40 @@ bool rdsRaid::exportScanFromList()
         RTI->log("Skipping export of file.");
     }
     else
+*/
+
+#ifdef YARRA_APP_RDS
+    RTI->log("Selected file name "   + currentFilename);
+    RTI->log("Size of scan on RAID " + QString::number(getRaidEntry(currentRaidIndex)->size));
+#endif
+
+    RDS_RETONERR( saveRaidFile(currentFileID, currentFilename, saveAdjustScans, anonymize) );
+
+    // Anonymize the raw data, but only on VB line. In VD, the raid tool
+    // automatically anonymizes the data if desired
+    if ((RTI->isSyngoVBLine()) && (anonymize))
     {
-        RDS_RETONERR( saveRaidFile(currentFileID, currentFilename, saveAdjustScans, anonymize) );
+        RDS_RETONERR( anonymizeCurrentFile() );
+    }
 
-        // Anonymize the raw data, but only on VB line. In VD, the raid tool
-        // automatically anonymizes the data if desired
-        if ((RTI->isSyngoVBLine()) && (anonymize))
+    // Fetch the depending adjustment scans, but only for VB line.
+    // The VD line provides the option to store adjustment data
+    // automatically.
+    if ((RTI->isSyngoVBLine()) && (saveAdjustScans))
+    {
+        RDS_RETONERR( findAdjustmentScans() );
+
+        for (int i=0; i<currentAdjustScans.count(); i++)
         {
-            RDS_RETONERR( anonymizeCurrentFile() );
-        }
+            currentRaidIndex=currentAdjustScans.at(i);
 
-        // Fetch the depending adjustment scans, but only for VB line.
-        // The VD line provides the option to store adjustment data
-        // automatically.
-        if ((RTI->isSyngoVBLine()) && (saveAdjustScans))
-        {
-            RDS_RETONERR( findAdjustmentScans() );
+            RDS_RETONERR( setCurrentFileID() );
+            RDS_RETONERR( setCurrentFilename(scanFileID) );
+            RDS_RETONERR( saveRaidFile(currentFileID, currentFilename, false, anonymize) );
 
-            for (int i=0; i<currentAdjustScans.count(); i++)
+            if (anonymize)
             {
-                currentRaidIndex=currentAdjustScans.at(i);
-
-                RDS_RETONERR( setCurrentFileID() );
-                RDS_RETONERR( setCurrentFilename(scanFileID) );
-                RDS_RETONERR( saveRaidFile(currentFileID, currentFilename, false, anonymize) );
-
-                if (anonymize)
-                {
-                    RDS_RETONERR( anonymizeCurrentFile() );
-                }
+                RDS_RETONERR( anonymizeCurrentFile() );
             }
         }
     }
@@ -948,7 +943,6 @@ bool rdsRaid::exportScanFromList()
 
     return true;
 }
-
 
 
 bool rdsRaid::setCurrentFilename(int refID)
@@ -1003,7 +997,6 @@ bool rdsRaid::setCurrentFilename(int refID)
 }
 
 
-
 bool rdsRaid::setCurrentFileID()
 {
     // Search current RAID entry in list
@@ -1020,7 +1013,6 @@ bool rdsRaid::setCurrentFileID()
 
     return true;
 }
-
 
 
 void rdsRaid::dumpRaidList()

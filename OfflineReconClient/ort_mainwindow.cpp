@@ -24,7 +24,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     flags |= Qt::MSWindowsFixedSizeDialogHint;
     flags &= ~Qt::WindowContextHelpButtonHint;
     flags |= Qt::WindowStaysOnTopHint;
-    setWindowFlags(flags);    
+    setWindowFlags(flags);
 
     log.start();
     RTI->setLogInstance(&log);
@@ -410,10 +410,11 @@ void ortMainWindow::on_sendButton_clicked()
     }
     reconTask.emailNotifier+=mailRecipient;
 
-    reconTask.systemName=config.ortSystemName;
-    reconTask.patientName=selectedPatient;
-    reconTask.scanProtocol=selectedProtocol;
-    reconTask.selectedServer=network.selectedServer;
+    reconTask.systemName      =config.ortSystemName;
+    reconTask.patientName     =selectedPatient;
+    reconTask.scanProtocol    =selectedProtocol;
+    reconTask.raidCreationTime=selectedScantime;
+    reconTask.selectedServer  =network.selectedServer;
 
     if (confirmationDialog.isACCRequired())
     {

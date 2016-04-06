@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>1</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -340,7 +340,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>70</width>
              <height>0</height>
             </size>
            </property>
@@ -351,7 +351,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Add</string>
+            <string>Add New</string>
            </property>
            <property name="autoRaise">
             <bool>false</bool>
@@ -362,7 +362,7 @@
           <widget class="QToolButton" name="protRemoveButton">
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>70</width>
              <height>0</height>
             </size>
            </property>

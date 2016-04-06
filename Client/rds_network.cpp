@@ -21,9 +21,10 @@ rdsNetwork::rdsNetwork()
     queueDir.setCurrent(RTI->getAppPath() + "/" + RDS_DIR_QUEUE);
     queueDir.setFilter(QDir::Files);
 
-    currentFilename="";
-    currentProt    ="";
-    currentFilesize=-1;
+    currentFilename ="";
+    currentProt     ="";
+    currentFilesize =-1;
+    currentTimeStamp="";
 
     connectionActive=false;
 }
@@ -266,12 +267,13 @@ bool rdsNetwork::copyFile()
 
         QString sourceName=queueDir.absoluteFilePath(currentFilename);
         QString destName=networkDrive.absolutePath() + "/" + currentProt + "/" + currentFilename;
+        currentTimeStamp="";
 
         // Check free diskspace on the network drive
         QFileInfo srcinfo(sourceName);
         qint64 diskSpace=RTI->getFreeDiskSpace(networkDrive.absolutePath());
         RTI->debug("Disk space on netdrive = " + QString::number(diskSpace));
-        RTI->debug("File size is = " +  QString::number(srcinfo.size()));
+        RTI->log("Size of source file is " + QString::number(srcinfo.size()));
 
         if (srcinfo.size() > diskSpace)
         {
@@ -286,9 +288,29 @@ bool rdsNetwork::copyFile()
         if (QFile::exists(destName))
         {
             RTI->log("WARNING: File already exists in target folder: " + destName);
-            RTI->log("Skipping transfer.");
-            return true;
+
+            // Create a time stamp for copying the file under a different name
+            currentTimeStamp="_"+QDateTime::currentDateTime().toString("ddMMyyhhmmss");
+
+            // If a file also exists with this name, append ms to the time stamp
+            if (QFile::exists(destName+currentTimeStamp))
+            {
+                 currentTimeStamp="_"+QDateTime::currentDateTime().toString("ddMMyyhhmmsszzz");
+            }
+
+            // If also this file exists, something must be wrong
+            if (QFile::exists(destName+currentTimeStamp))
+            {
+                RTI->log("ERROR: Unable to create unique filename: " + destName);
+                RTI->log("Something must be wrong with the file system.");
+                return false;
+            }
+
+            // Add the time stamp to the file name
+            destName=destName+currentTimeStamp;
+            RTI->log("Appending time stamp to filename: " + destName);
         }
+
 
 #ifdef YARRA_APP_RDS
         // Calculate the MD5 checksum prior to copying to diagnose sporadic file corruptions.
@@ -368,7 +390,8 @@ bool rdsNetwork::verifyTransfer()
 {
     if (RTI_CONFIG->isNetworkModeDrive())
     {
-        QString destName=networkDrive.absolutePath() + "/" + currentProt + "/" + currentFilename;
+        // currentTimeStamp is empty unless a file with the same name already existed in the target folder
+        QString destName=networkDrive.absolutePath() + "/" + currentProt + "/" + currentFilename + currentTimeStamp;
         QFileInfo fileInfo(destName);
 
         if (!fileInfo.exists())
@@ -386,6 +409,10 @@ bool rdsNetwork::verifyTransfer()
             RTI->log("Error: Copy size = " + QString::number(fileInfo.size()));
             RTI->setSevereErrors(true);
             return false;
+        }
+        else
+        {
+            RTI->log("Size of copied file matches with source " + QString::number(fileInfo.size()));
         }
     }
 
@@ -423,6 +450,7 @@ void rdsNetwork::releaseFile()
     currentFilename="";
     currentProt="";
     currentFilesize=-1;
+    currentTimeStamp="";
 }
 
 
@@ -457,22 +485,33 @@ bool rdsNetwork::checkExistance(QString filename)
 void rdsNetwork::copyLogFile()
 {
     // Get the filename and path of the local log files from the log instance
-    QString logName=RTI->getLogInstance()->getLogFilename();
+    QString logName="rds.log";
     QString logPath=RTI->getLogInstance()->getLocalLogPath();
 
     // Delete the existing log file on the network drive inside the system folder
     // No error logging here because copying the log files is of low priority
     if (networkDrive.exists(logName))
     {
-        networkDrive.remove(logName);
+        if (!networkDrive.remove(logName))
+        {
+            RTI->log("ERROR: Can't remove existing log file on network drive.");
+            return;
+        }
     }
 
-    // Stop the log engines (i.e. flush and close the log file)
+    // Stop the log engine (i.e. flush and close the log file)
     RTI->getLogInstance()->pauseLogfile();
+
     // Copy the log file into the network folder
-    QFile::copy(logPath+logName, networkDrive.absoluteFilePath(logName));
+    bool logCopySuccess=QFile::copy(logPath+logName, networkDrive.absoluteFilePath(logName));
+
     // Open the log file again
     RTI->getLogInstance()->resumeLogfile();
+
+    if (!logCopySuccess)
+    {
+        RTI->log("WARNING: Copying the log file did not succeed!");
+    }
 }
 
 

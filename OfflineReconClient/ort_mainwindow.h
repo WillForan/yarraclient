@@ -38,7 +38,6 @@ public:
     void addScanItem(int mid, QString patientName, QString protocolName, QDateTime scanTime, qint64 scanSize, int fid, int mode);
 
     void refreshRaidList();
-
     void showTransferError(QString msg);
 
 
@@ -55,7 +54,6 @@ private slots:
     void on_scansWidget_itemSelectionChanged();
 
     void on_refreshButton_clicked();
-
     void on_priorityButton_clicked(bool checked);
 
 private:
