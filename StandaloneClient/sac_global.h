@@ -4,7 +4,7 @@
 // Include global definitions from the ORT and RDS client
 #include "../OfflineReconClient/ort_global.h"
 
-#define SAC_VERSION         "0.17b1"
+#define SAC_VERSION         "0.17"
 #define SAC_ICON QIcon(":/images/sacicon_256.png")
 
 #define SAC_ANALYZE_MAXLINES  30000
