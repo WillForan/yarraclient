@@ -46,6 +46,7 @@ void rdsConfiguration::loadConfiguration()
     netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd", "").toString();
     netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath", false).toBool();
 
+    netLogServerPath      =settings.value("Network/LogServerPath","").toString();
     netFTPIP            =settings.value("Network/FTPIP", "123.123.123.123").toString();
     netFTPBasepath      =settings.value("Network/FTPBasepath", "/rawdata").toString();
     netFTPUser          =settings.value("Network/FTPUser", "rdsuser").toString();
@@ -89,6 +90,8 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("Network/DriveBasepath", netDriveBasepath);
     settings.setValue("Network/DriveReconnectCmd", netDriveReconnectCmd);
     settings.setValue("Network/DriveCreateBasepath", netDriveCreateBasepath);
+
+    settings.setValue("Network/LogServerPath",netLogServerPath);
 
     settings.setValue("Network/FTPIP", netFTPIP);
     settings.setValue("Network/FTPBasepath", netFTPBasepath);

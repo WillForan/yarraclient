@@ -16,6 +16,8 @@ public:
     qint64    size;
     qint64    sizeOnDisk;
     QDateTime creationTime;
+    QDateTime closingTime;
+    void addToQuery(QUrlQuery& query);
 };
 
 
@@ -241,7 +243,7 @@ inline void rdsRaid::addRaidEntry(rdsRaidEntry* source)
     entry->size=source->size;
     entry->sizeOnDisk=source->sizeOnDisk;
     entry->creationTime=source->creationTime;
-
+    entry->closingTime=source->closingTime;
     raidList.append(entry);
 }
 

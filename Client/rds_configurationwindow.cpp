@@ -149,6 +149,7 @@ void rdsConfigurationWindow::readConfiguration()
     ui->updatePeriodCombobox->setCurrentIndex(config.infoUpdatePeriodUnit);
     ui->updatePeriodSpinbox->setValue(config.infoUpdatePeriod);
 
+    ui->logServerEdit->setText(config.netLogServerPath);
     updateProtocolList();
 
     if (config.getProtocolCount()>0)
@@ -179,6 +180,7 @@ void rdsConfigurationWindow::storeConfiguration()
     config.netFTPUser=ui->ftpUserEdit->text();
     config.netFTPPassword=ui->ftpPwdEdit->text();  // TODO: Scramble passoword!!!
     config.netFTPBasepath=ui->ftpPathEdit->text();    
+    config.netLogServerPath=ui->logServerEdit->text();
 
     config.infoUpdateMode=ui->updateCombobox->currentIndex();
     config.infoUpdatePeriodUnit=ui->updatePeriodCombobox->currentIndex();

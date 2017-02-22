@@ -20,13 +20,13 @@ rdsNetwork::rdsNetwork()
 {
     queueDir.setCurrent(RTI->getAppPath() + "/" + RDS_DIR_QUEUE);
     queueDir.setFilter(QDir::Files);
-
     currentFilename ="";
     currentProt     ="";
     currentFilesize =-1;
     currentTimeStamp="";
 
     connectionActive=false;
+    networkManager = new QNetworkAccessManager();
 }
 
 
@@ -249,6 +249,38 @@ bool rdsNetwork::getFileToProcess(int index)
     return true;
 }
 
+bool rdsNetwork::postLogData(QUrlQuery query, const char* endpt) {
+    QUrl serviceUrl = QUrl(QString(RTI_CONFIG->netLogServerPath) + "/" + endpt);
+    QNetworkRequest req(serviceUrl);
+    QUrl params;
+    params.setQuery(query);
+    QByteArray postData = params.toEncoded(QUrl::RemoveFragment);
+    postData = postData.remove(0,1);
+
+    req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
+    QNetworkReply* reply = networkManager->post(req,postData);
+
+    // Wait until it's finished
+    QEventLoop eventLoop;
+    QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+    eventLoop.exec();
+
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        RTI->log(QString("Error: Scans could not be logged (%1, %2)").arg(QString::number(reply->error()),reply->errorString()));
+        return false;
+    }
+    else
+    {
+        // make sure the HTTP status is 200
+        int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (status != 200) {
+            RTI->log(QString("Error: Scans could not be logged. (HTTP Error %1)").arg(status));
+            return false;
+        }
+    }
+    return true;
+}
 
 bool rdsNetwork::copyFile()
 {

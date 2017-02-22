@@ -17,6 +17,17 @@
     #include <time.h>
 #endif
 
+void rdsRaidEntry::addToQuery(QUrlQuery& query){
+    query.addQueryItem("creationTime",                creationTime.toString());
+    query.addQueryItem("closingTime",                 closingTime.toString());
+    query.addQueryItem("fileID",      QString::number(fileID));
+    query.addQueryItem("measID",      QString::number(measID));
+    query.addQueryItem("protocolName",                protName);
+    query.addQueryItem("patientName",                 patName);
+    query.addQueryItem("size",        QString::number(size));
+    query.addQueryItem("sizeOnDisk",  QString::number(sizeOnDisk));
+    query.addQueryItem("scannerID",     RTI_CONFIG->infoName);
+}
 
 rdsRaid::rdsRaid()
 {
@@ -602,7 +613,10 @@ bool rdsRaid::parseOutputDirectory()
                     // the combination of protName + patName is (these can be longer than 32 characters)
 
                     // The Closing Date is not evaluated currently
+                    temp=raidLine.right(22);
                     raidLine.chop(22);
+                    removePrecedingSpace(temp);
+                    raidEntry.closingTime=QDateTime::fromString(temp,"dd.MM.yyyy HH:mm:ss");
 
                     // ## Creation date
                     temp=raidLine.right(22);
@@ -667,11 +681,14 @@ bool rdsRaid::parseVB15Line(QString line, rdsRaidEntry* entry)
     // Start evaluating the string from the back because we do not know how long
     // the protName is (can be longer than 16 characters)
 
-    // The Closing Date is not evaluated currently
+    // The Closing Date
+    QString temp=line.right(22);
     line.chop(22);
+    removePrecedingSpace(temp);
+    entry->closingTime=QDateTime::fromString(temp,"dd.MM.yyyy HH:mm:ss");
 
     // ## Creation date
-    QString temp=line.right(22);
+    temp=line.right(22);
     line.chop(22);
     removePrecedingSpace(temp);
     entry->creationTime=QDateTime::fromString(temp,"dd.MM.yyyy HH:mm:ss");

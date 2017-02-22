@@ -3,7 +3,9 @@
 #include "rds_activitywindow.h"
 #include "rds_raid.h"
 #include "rds_network.h"
-
+#include <QXmlStreamWriter>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
 
 rdsProcessControl::rdsProcessControl()
 {
@@ -126,8 +128,8 @@ void rdsProcessControl::performUpdate()
 
     RTI->setPostponementRequest(false);
 
-    // Check if the connection to the FTP server of network drive can be established
-    if (RTI_NETWORK->openConnection())
+    // Check if the connection to the FTP server or network drive can be established
+    if (1 || RTI_NETWORK->openConnection())
     {
         explicitUpdate=false;
         connectionFailureCount=0;
@@ -148,6 +150,12 @@ void rdsProcessControl::performUpdate()
         // Read the RAID directory, parse it, and decide which
         // scans have to be saved.
         RTI_RAID->createExportList();
+
+        QUrlQuery query;
+        for (rdsRaidEntry* k: RTI_RAID->raidList){
+            k->addToQuery(query);
+        }
+        RTI_NETWORK->postLogData(query, "RaidRecords");
 
         // Process Windows events to react to the postpone button
         RTI->processEvents();

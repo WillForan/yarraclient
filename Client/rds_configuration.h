@@ -49,7 +49,7 @@ public:
     QString netDriveReconnectCmd;
     bool    netDriveCreateBasepath;
 
-
+    QString netLogServerPath;
 
     QList<rdsConfigurationProtocol*> protocols;
     int getProtocolCount();

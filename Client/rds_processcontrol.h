@@ -2,6 +2,7 @@
 #define RDS_PROCESSCONTROL_H
 
 #include <QtGui>
+
 #include "rds_global.h"
 
 
