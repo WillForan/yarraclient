@@ -3,6 +3,9 @@
 
 #include <QtCore>
 #include <QtNetwork>
+
+#include <../NetLogger/netlogger.h>
+
 //#include <QFtp>
 
 class rdsNetwork : public QObject
@@ -38,7 +41,7 @@ public:
     void copyLogFile();
     void runReconnectCmd();
 
-    bool postLogData(QUrlQuery query, const char* endpt);
+    NetLogger *netLogger;
 private:
 
     QDir queueDir;
@@ -53,7 +56,6 @@ private:
 
     //QFtp ftp;
     QDir networkDrive;
-    QNetworkAccessManager *networkManager;
 
     // TODO: Implement event handler for FTP management
 };

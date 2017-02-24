@@ -65,6 +65,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
         RTI->setLogInstance(&log);
         RTI->setConfigInstance(&config);
         RTI->setNetworkInstance(&network);
+        network.netLogger = new NetLogger(RTI_CONFIG->netLogServerPath, EventInfo::SourceType::RDS,RTI_CONFIG->infoName);
         RTI->setRaidInstance(&raid);
         RTI->setControlInstance(&control);
         RTI->setWindowInstance(this);
@@ -72,6 +73,8 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
         // Notify the process controller about the start of the service
         control.setStartTime();
         updateInfoUI();
+
+        network.netLogger->postEvent(EventInfo::Type::Boot,EventInfo::Detail::Success,EventInfo::Severity::Routine,"startup");
 
         // Start the timer for triggering updates. Checks update condition only every
         // minute to prevent undesired system load

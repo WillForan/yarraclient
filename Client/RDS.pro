@@ -30,7 +30,8 @@ SOURCES += main.cpp \
     rds_debugwindow.cpp \
     rds_anonymizeVB17.cpp \
 	rds_copydialog.cpp \
-    rds_checksum.cpp
+    rds_checksum.cpp \
+    ../NetLogger/netlogger.cpp
 
 
 HEADERS  += rds_configurationwindow.h \
@@ -47,7 +48,9 @@ HEADERS  += rds_configurationwindow.h \
     rds_anonymizeVB17.h \
     rds_copydialog.h \
     main.h \
-    rds_checksum.h
+    rds_checksum.h \
+    ../NetLogger/netlogger.h \
+    ../NetLogger/netlog_events.h
 
 FORMS    += rds_configurationwindow.ui \
     rds_operationwindow.ui \

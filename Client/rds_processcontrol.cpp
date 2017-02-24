@@ -95,6 +95,7 @@ void rdsProcessControl::performUpdate()
     qint64 diskSpace=RTI->getFreeDiskSpace();
     RTI->debug("Disk space on appdir = " + QString::number(diskSpace));
 
+    RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::SomethingElse,EventInfo::Severity::Routine,"Performing an update");
     // Use the alternating update mode when the disk space is below 5 Gb.
     // In the alternating mode, files are fetched from RAID and transferred
     // to the storage individually, which leads to longer dead time of the
@@ -128,8 +129,26 @@ void rdsProcessControl::performUpdate()
 
     RTI->setPostponementRequest(false);
 
+    // Read the RAID directory, parse it, and decide which
+    // scans have to be saved.
+    RTI_RAID->createExportList();
+
+    QUrlQuery data;
+    for (rdsRaidEntry* entry: RTI_RAID->raidList){
+        entry->addToQuery(data);
+    }
+    QNetworkReply::NetworkError error;
+    int http_status = 0;
+    bool success = RTI_NETWORK->netLogger->postData(data, "RaidRecords",error,http_status);
+    if (!success) {
+        if (http_status) {
+            RTI->log(QString("Error: Scans could not be logged. (HTTP Error %1)").arg(http_status));
+        } else {
+            RTI->log(QString("Error: Scans could not be logged (%1, %2)").arg(QString::number(error)));
+        }
+    }
     // Check if the connection to the FTP server or network drive can be established
-    if (1 || RTI_NETWORK->openConnection())
+    if (RTI_NETWORK->openConnection())
     {
         explicitUpdate=false;
         connectionFailureCount=0;
@@ -147,15 +166,7 @@ void rdsProcessControl::performUpdate()
         RTI->updateInfoUI();
         RTI->processEvents();
 
-        // Read the RAID directory, parse it, and decide which
-        // scans have to be saved.
-        RTI_RAID->createExportList();
 
-        QUrlQuery query;
-        for (rdsRaidEntry* k: RTI_RAID->raidList){
-            k->addToQuery(query);
-        }
-        RTI_NETWORK->postLogData(query, "RaidRecords");
 
         // Process Windows events to react to the postpone button
         RTI->processEvents();
@@ -195,6 +206,7 @@ void rdsProcessControl::performUpdate()
             RTI->log("WARNING: Errors occured during export.");
             RTI->log("WARNING: Data transfer has been terminated.");
             RTI->setSevereErrors(true);
+            RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::Failure,EventInfo::Severity::Error, "Error during export");
         }
 
         // Close activity window if visible
@@ -248,7 +260,11 @@ void rdsProcessControl::performUpdate()
             // NOTE: On request of the techs, showing the status window after
             //       failed updates was disabled.
             //RTI->showOperationWindow();
+            RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::Failure,EventInfo::Severity::FatalError, "Opening the connection failed multiple times");
+        } else {
+            RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::Failure,EventInfo::Severity::Error, "Opening the connection failed");
         }
+
     }
 
     lastUpdate=QDateTime::currentDateTime();

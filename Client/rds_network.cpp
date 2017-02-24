@@ -26,7 +26,6 @@ rdsNetwork::rdsNetwork()
     currentTimeStamp="";
 
     connectionActive=false;
-    networkManager = new QNetworkAccessManager();
 }
 
 
@@ -249,13 +248,13 @@ bool rdsNetwork::getFileToProcess(int index)
     return true;
 }
 
-bool rdsNetwork::postLogData(QUrlQuery query, const char* endpt) {
+/*bool rdsNetwork::postLogData(QUrlQuery query, const char* endpt) {
     QUrl serviceUrl = QUrl(QString(RTI_CONFIG->netLogServerPath) + "/" + endpt);
     QNetworkRequest req(serviceUrl);
     QUrl params;
     params.setQuery(query);
     QByteArray postData = params.toEncoded(QUrl::RemoveFragment);
-    postData = postData.remove(0,1);
+    postData = postData.remove(0,1); // pop off extraneous "?"
 
     req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
     QNetworkReply* reply = networkManager->post(req,postData);
@@ -264,6 +263,7 @@ bool rdsNetwork::postLogData(QUrlQuery query, const char* endpt) {
     QEventLoop eventLoop;
     QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
     eventLoop.exec();
+
 
     if (reply->error() != QNetworkReply::NoError)
     {
@@ -280,7 +280,7 @@ bool rdsNetwork::postLogData(QUrlQuery query, const char* endpt) {
         }
     }
     return true;
-}
+}*/
 
 bool rdsNetwork::copyFile()
 {

@@ -76,6 +76,7 @@
 #define RTI_RAID    rdsRuntimeInformation::getInstance()->getRaidInstance()
 #define RTI_NETWORK rdsRuntimeInformation::getInstance()->getNetworkInstance()
 #define RTI_CONTROL rdsRuntimeInformation::getInstance()->getControlInstance()
+#define RTI_NETLOG  RTI_NETWORK->netLogger
 
 
 // Naming convention for queued files: filtername#filename.dat
