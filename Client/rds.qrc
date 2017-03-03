@@ -3,5 +3,6 @@
         <file>images/yarraicon.png</file>
         <file>images/yarralogo.png</file>
         <file>images/cai2rlogo.png</file>
+        <file>certificate/localhost.crt</file>
     </qresource>
 </RCC>

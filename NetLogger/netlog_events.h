@@ -9,9 +9,10 @@ namespace EventInfo {
     };
 
     enum class Detail : int {
+        Generic,
         Success,
         Failure,
-        SomethingElse
+        LowDiskSpace
     };
 
     enum class SourceType : int {

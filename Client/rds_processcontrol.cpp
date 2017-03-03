@@ -95,7 +95,7 @@ void rdsProcessControl::performUpdate()
     qint64 diskSpace=RTI->getFreeDiskSpace();
     RTI->debug("Disk space on appdir = " + QString::number(diskSpace));
 
-    RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::SomethingElse,EventInfo::Severity::Routine,"Performing an update");
+    RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::Generic,EventInfo::Severity::Routine,"Performing an update");
     // Use the alternating update mode when the disk space is below 5 Gb.
     // In the alternating mode, files are fetched from RAID and transferred
     // to the storage individually, which leads to longer dead time of the
@@ -107,6 +107,7 @@ void rdsProcessControl::performUpdate()
     {
         alternatingUpdate=true;
         RTI->log("Using alternating update mode due to low disk space.");
+        RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Warning,"Using alternating update mode");
     }
 
     if (diskSpace < qint64(RDS_DISKLIMIT_WARNING))
@@ -117,6 +118,7 @@ void rdsProcessControl::performUpdate()
         RTI->log("WARNING: Please free disk space.");
         RTI->log("");
         RTI->showOperationWindow();
+        RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Error,"Critically low disk space");
     }
 
     RTI->log("");
@@ -144,7 +146,7 @@ void rdsProcessControl::performUpdate()
         if (http_status) {
             RTI->log(QString("Error: Scans could not be logged. (HTTP Error %1)").arg(http_status));
         } else {
-            RTI->log(QString("Error: Scans could not be logged (%1, %2)").arg(QString::number(error)));
+            RTI->log(QString("Error: Scans could not be logged (%1)").arg(error));
         }
     }
     // Check if the connection to the FTP server or network drive can be established

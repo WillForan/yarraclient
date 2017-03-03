@@ -138,6 +138,7 @@ int main(int argc, char *argv[])
         }
 
     }
+    RTI_NETLOG->postEvent(EventInfo::Type::Shutdown,EventInfo::Detail::Generic,EventInfo::Severity::Routine);
 
     return RTI->getReturnValue();
 }
