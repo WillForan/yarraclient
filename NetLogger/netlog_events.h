@@ -1,31 +1,98 @@
 #ifndef NETLOG_EVENTS_H
 #define NETLOG_EVENTS_H
 namespace EventInfo {
-    enum class Type : int {
-        Generic,
-        Boot,
+    enum class Type : int
+    {
+        Generic=0,
+        Boot,               // for YarraServer, RDS, WebGUI, ArchiveSearch
         Shutdown,
-        Upload
+        Update,             // for RDS
+        Transfer,           // for ORT, RDS, SAC
+        Processing,         // for YarraServer
+        RaidDataSent,       // for RDS
+        ExceptionCaught     // for WebGUI debugging
     };
 
-    enum class Detail : int {
-        Generic,
-        Success,
-        Failure,
+
+    inline std::ostream& operator<< (std::ostream& o, const Type& c)
+    {
+        switch (c)
+        {
+        case Type::Generic :         return o << "Generic";
+        case Type::Boot  :           return o << "Boot";
+        case Type::Shutdown :        return o << "Shutdown";
+        case Type::Update :          return o << "Update";
+        case Type::Transfer :        return o << "Transfer";
+        case Type::Processing :      return o << "Processing";
+        case Type::RaidDataSent :    return o << "RaidDataSent";
+        case Type::ExceptionCaught : return o << "ExceptionCaught";
+        }
+      return o << static_cast<std::uint16_t>(c);
+    }
+    enum class Detail : int
+    {
+        Information=0,
+        Start,
+        End,
         LowDiskSpace
     };
+    inline std::ostream& operator<< (std::ostream& o, const Detail& c)
+    {
+        switch (c)
+        {
+        case Detail::Information :  return o << "Information";
+        case Detail::Start  :       return o << "Start";
+        case Detail::End :          return o << "End";
+        case Detail::LowDiskSpace : return o << "LowDiskSpace";
+        }
+      return o << static_cast<std::uint16_t>(c);
+    }
 
-    enum class SourceType : int {
-        RDS=0,
+    enum class SourceType : int
+    {
+        Generic=0,
+        RDS,
         SAC,
-        YarraServer
+        ORT,
+        Server,
+        WebGUI,
+        ArchiveSearchIndexer,
+        ArchiveSearchGUI
     };
 
-    enum class Severity : int {
-        Routine=0,
+    inline std::ostream& operator<< (std::ostream& o, const SourceType& c)
+    {
+        switch (c)
+        {
+        case SourceType::Generic :          return o << "Generic";
+        case SourceType::RDS  :             return o << "RDS";
+        case SourceType::SAC :              return o << "SAC";
+        case SourceType::ORT :              return o << "ORT";
+        case SourceType::Server  :          return o << "Server";
+        case SourceType::WebGUI :           return o << "WebGUI";
+        case SourceType::ArchiveSearchIndexer  : return o << "ArchiveSearchIndexer";
+        case SourceType::ArchiveSearchGUI : return o << "ArchiveSearchGUI";
+        }
+      return o << static_cast<std::uint16_t>(c);
+    }
+
+    enum class Severity : int
+    {
+        Success=0,
         Warning,
         Error,
         FatalError
     };
+    inline std::ostream& operator<< (std::ostream& o, const Severity& c)
+    {
+        switch (c)
+        {
+        case Severity::Success :     return o << "Success";
+        case Severity::Warning  :    return o << "Warning";
+        case Severity::Error :       return o << "Error";
+        case Severity::FatalError :  return o << "FatalError";
+        }
+      return o << static_cast<std::uint16_t>(c);
+    }
 }
 #endif // NETLOG_EVENTS_H

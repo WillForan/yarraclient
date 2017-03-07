@@ -95,7 +95,7 @@ void rdsProcessControl::performUpdate()
     qint64 diskSpace=RTI->getFreeDiskSpace();
     RTI->debug("Disk space on appdir = " + QString::number(diskSpace));
 
-    RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::Generic,EventInfo::Severity::Routine,"Performing an update");
+    RTI_NETLOG->postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"Performing an update");
     // Use the alternating update mode when the disk space is below 5 Gb.
     // In the alternating mode, files are fetched from RAID and transferred
     // to the storage individually, which leads to longer dead time of the
@@ -107,7 +107,7 @@ void rdsProcessControl::performUpdate()
     {
         alternatingUpdate=true;
         RTI->log("Using alternating update mode due to low disk space.");
-        RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Warning,"Using alternating update mode");
+        RTI_NETLOG->postEvent(EventInfo::Type::Update,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Warning,"Using alternating update mode");
     }
 
     if (diskSpace < qint64(RDS_DISKLIMIT_WARNING))
@@ -118,7 +118,7 @@ void rdsProcessControl::performUpdate()
         RTI->log("WARNING: Please free disk space.");
         RTI->log("");
         RTI->showOperationWindow();
-        RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Error,"Critically low disk space");
+        RTI_NETLOG->postEvent(EventInfo::Type::Update,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Error,"Critically low disk space");
     }
 
     RTI->log("");
@@ -146,7 +146,8 @@ void rdsProcessControl::performUpdate()
         if (http_status) {
             RTI->log(QString("Error: Scans could not be logged. (HTTP Error %1)").arg(http_status));
         } else {
-            RTI->log(QString("Error: Scans could not be logged (%1)").arg(error));
+            QMetaEnum metaEnum = QMetaEnum::fromType<QNetworkReply::NetworkError>();
+            RTI->log(QString("Error: Scans could not be logged (%1)").arg(metaEnum.valueToKey(error)));
         }
     }
     // Check if the connection to the FTP server or network drive can be established
@@ -208,7 +209,7 @@ void rdsProcessControl::performUpdate()
             RTI->log("WARNING: Errors occured during export.");
             RTI->log("WARNING: Data transfer has been terminated.");
             RTI->setSevereErrors(true);
-            RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::Failure,EventInfo::Severity::Error, "Error during export");
+            RTI_NETLOG->postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error, "Error during export");
         }
 
         // Close activity window if visible
@@ -262,9 +263,9 @@ void rdsProcessControl::performUpdate()
             // NOTE: On request of the techs, showing the status window after
             //       failed updates was disabled.
             //RTI->showOperationWindow();
-            RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::Failure,EventInfo::Severity::FatalError, "Opening the connection failed multiple times");
+            RTI_NETLOG->postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Opening the connection failed multiple times");
         } else {
-            RTI_NETLOG->postEvent(EventInfo::Type::Upload,EventInfo::Detail::Failure,EventInfo::Severity::Error, "Opening the connection failed");
+            RTI_NETLOG->postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error, "Opening the connection failed");
         }
 
     }

@@ -74,7 +74,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
         control.setStartTime();
         updateInfoUI();
 
-        network.netLogger->postEvent(EventInfo::Type::Boot,EventInfo::Detail::Success,EventInfo::Severity::Routine,"startup");
+        network.netLogger->postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"startup");
 
         // Start the timer for triggering updates. Checks update condition only every
         // minute to prevent undesired system load

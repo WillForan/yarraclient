@@ -18,15 +18,15 @@
 #endif
 
 void rdsRaidEntry::addToQuery(QUrlQuery& query){
-    query.addQueryItem("creationTime",                creationTime.toString());
-    query.addQueryItem("closingTime",                 closingTime.toString());
-    query.addQueryItem("fileID",      QString::number(fileID));
-    query.addQueryItem("measID",      QString::number(measID));
-    query.addQueryItem("protocolName",                protName);
-    query.addQueryItem("patientName",                 patName);
+    query.addQueryItem("creation_time",                creationTime.toString());
+    query.addQueryItem("closing_time",                 closingTime.toString());
+    query.addQueryItem("file_id",      QString::number(fileID));
+    query.addQueryItem("meas_id",      QString::number(measID));
+    query.addQueryItem("protocol_name",                protName);
+    query.addQueryItem("patient_name",                 patName);
     query.addQueryItem("size",        QString::number(size));
-    query.addQueryItem("sizeOnDisk",  QString::number(sizeOnDisk));
-    query.addQueryItem("scannerID",     RTI_CONFIG->infoName);
+    query.addQueryItem("size_on_disk",  QString::number(sizeOnDisk));
+    query.addQueryItem("scanner_id",     RTI_CONFIG->infoName);
 }
 
 rdsRaid::rdsRaid()
