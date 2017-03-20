@@ -136,12 +136,13 @@ void rdsProcessControl::performUpdate()
     RTI_RAID->createExportList();
 
     QUrlQuery data;
+
     for (rdsRaidEntry* entry: RTI_RAID->raidList){
         entry->addToQuery(data);
     }
     QNetworkReply::NetworkError error;
     int http_status = 0;
-    bool success = RTI_NETWORK->netLogger->postData(data, "RaidRecords",error,http_status);
+    bool success = RTI_LOG->postData(data, "RaidRecords",error,http_status);
     if (!success) {
         if (http_status) {
             RTI->log(QString("Error: Scans could not be logged. (HTTP Error %1)").arg(http_status));

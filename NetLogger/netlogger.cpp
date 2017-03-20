@@ -6,7 +6,7 @@ NetLogger::NetLogger(QString path, EventInfo::SourceType source_type, QString so
       source_type(source_type)
 {
 
-    QFile file(":/certificate/localhost.crt");
+    QFile file(":/certificate/logserver.crt");
     file.open(QIODevice::ReadOnly);
     const QByteArray bytes = file.readAll();
 
@@ -50,6 +50,9 @@ bool NetLogger::postEventSync(EventInfo::Type type, QNetworkReply::NetworkError&
 
 
 QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt) {
+    if (serverPath.length() == 0) {
+        return NULL;
+    }
     QUrl serviceUrl = QUrl(serverPath + "/" + endpt);
     serviceUrl.setScheme("https");
 

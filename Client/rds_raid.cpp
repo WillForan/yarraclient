@@ -24,9 +24,10 @@ void rdsRaidEntry::addToQuery(QUrlQuery& query){
     query.addQueryItem("meas_id",      QString::number(measID));
     query.addQueryItem("protocol_name",                protName);
     query.addQueryItem("patient_name",                 patName);
-    query.addQueryItem("size",        QString::number(size));
-    query.addQueryItem("size_on_disk",  QString::number(sizeOnDisk));
-    query.addQueryItem("scanner_id",     RTI_CONFIG->infoName);
+    query.addQueryItem("size",         QString::number(size));
+    query.addQueryItem("size_on_disk", QString::number(sizeOnDisk));
+    query.addQueryItem("scanner_id",   RTI_CONFIG->infoName);
+    query.addQueryItem("exam_id", QString(""));
 }
 
 rdsRaid::rdsRaid()
