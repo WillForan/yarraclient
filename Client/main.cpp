@@ -13,8 +13,9 @@
 rdsApplication::rdsApplication(int &argc, char **argv, bool GUIenabled)
     : QtSingleApplication(argc, argv, GUIenabled)
 {
-     connect(this, SIGNAL(messageReceived(const QString&)), this, SLOT(respond(const QString&)));
+    connect(this, SIGNAL(messageReceived(const QString&)), this, SLOT(respond(const QString&)));
 }
+
 
 void rdsApplication::respond(const QString &message)
 {
@@ -108,7 +109,6 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-
     rdsConfigurationWindow* cw=0;
     rdsOperationWindow* ow=0;
 
@@ -138,9 +138,8 @@ int main(int argc, char *argv[])
         }
 
     }
-    RTI_NETLOG->postEvent(EventInfo::Type::Shutdown,EventInfo::Detail::Information,EventInfo::Severity::Success);
+
+    RTI_NETLOG.postEvent(EventInfo::Type::Shutdown,EventInfo::Detail::Information,EventInfo::Severity::Success);
 
     return RTI->getReturnValue();
 }
-
-

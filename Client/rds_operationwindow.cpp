@@ -65,16 +65,17 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
         RTI->setLogInstance(&log);
         RTI->setConfigInstance(&config);
         RTI->setNetworkInstance(&network);
-        network.netLogger = new NetLogger(RTI_CONFIG->netLogServerPath, EventInfo::SourceType::RDS,RTI_CONFIG->infoName);
         RTI->setRaidInstance(&raid);
         RTI->setControlInstance(&control);
         RTI->setWindowInstance(this);
+
+        RTI_NETLOG.configure(RTI_CONFIG->logServerPath, EventInfo::SourceType::RDS,RTI_CONFIG->infoName);
 
         // Notify the process controller about the start of the service
         control.setStartTime();
         updateInfoUI();
 
-        network.netLogger->postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"startup");
+        RTI_NETLOG.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"startup");
 
         // Start the timer for triggering updates. Checks update condition only every
         // minute to prevent undesired system load
@@ -92,14 +93,12 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
 }
 
 
-
 rdsOperationWindow::~rdsOperationWindow()
 {
     RTI->setLogInstance(0);
     log.finish();
     delete ui;
 }
-
 
 
 void rdsOperationWindow::closeEvent(QCloseEvent *event)
@@ -133,7 +132,6 @@ void rdsOperationWindow::keyPressEvent(QKeyEvent* event)
 }
 
 
-
 void rdsOperationWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     switch (reason)
@@ -146,7 +144,6 @@ void rdsOperationWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
         break;
     }
 }
-
 
 
 void rdsOperationWindow::callShutDown()
@@ -165,7 +162,6 @@ void rdsOperationWindow::callShutDown()
         RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
         qApp->quit();
     }
-
 }
 
 
@@ -176,7 +172,6 @@ void rdsOperationWindow::callImmediateShutdown()
     RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
     qApp->quit();
 }
-
 
 
 void rdsOperationWindow::callConfiguration()

@@ -8,7 +8,6 @@
     #include "ort_global.h"
 #endif
 
-
 #if defined(Q_OS_WIN)
     #include <QtCore/QLibrary>
     #include <QtCore/qt_windows.h>
@@ -17,18 +16,21 @@
     #include <time.h>
 #endif
 
-void rdsRaidEntry::addToQuery(QUrlQuery& query){
-    query.addQueryItem("creation_time",                creationTime.toString());
-    query.addQueryItem("closing_time",                 closingTime.toString());
-    query.addQueryItem("file_id",      QString::number(fileID));
-    query.addQueryItem("meas_id",      QString::number(measID));
-    query.addQueryItem("protocol_name",                protName);
-    query.addQueryItem("patient_name",                 patName);
-    query.addQueryItem("size",         QString::number(size));
-    query.addQueryItem("size_on_disk", QString::number(sizeOnDisk));
-    query.addQueryItem("scanner_id",   RTI_CONFIG->infoName);
-    query.addQueryItem("exam_id", QString(""));
+
+void rdsRaidEntry::addToUrlQuery(QUrlQuery& query)
+{
+    query.addQueryItem("creation_time", creationTime.toString());
+    query.addQueryItem("closing_time",  closingTime.toString());
+    query.addQueryItem("file_id",       QString::number(fileID));
+    query.addQueryItem("meas_id",       QString::number(measID));
+    query.addQueryItem("protocol_name", protName);
+    query.addQueryItem("patient_name",  patName);
+    query.addQueryItem("size",          QString::number(size));
+    query.addQueryItem("size_on_disk",  QString::number(sizeOnDisk));
+    query.addQueryItem("scanner_id",    RTI_CONFIG->infoName);
+    query.addQueryItem("exam_id",       QString(""));
 }
+
 
 rdsRaid::rdsRaid()
 {
@@ -376,7 +378,6 @@ bool rdsRaid::parseOutputFileExport()
             isSuccess=false;
             break;
         }
-
     }
 
     return isSuccess;
@@ -582,7 +583,6 @@ bool rdsRaid::parseOutputDirectory()
                 return false;
             }
 
-
             if (raidEntry.measID >= 3000000)
             {
                 // Measurement is a retrorecon. These data sets should not be saved.
@@ -613,7 +613,7 @@ bool rdsRaid::parseOutputDirectory()
                     // Now start evaluating the string from the back because we do not know how long
                     // the combination of protName + patName is (these can be longer than 32 characters)
 
-                    // The Closing Date is not evaluated currently
+                    // ## Closing date
                     temp=raidLine.right(22);
                     raidLine.chop(22);
                     removePrecedingSpace(temp);
@@ -682,7 +682,7 @@ bool rdsRaid::parseVB15Line(QString line, rdsRaidEntry* entry)
     // Start evaluating the string from the back because we do not know how long
     // the protName is (can be longer than 16 characters)
 
-    // The Closing Date
+    // ## Closing date
     QString temp=line.right(22);
     line.chop(22);
     removePrecedingSpace(temp);

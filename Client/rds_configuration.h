@@ -30,6 +30,7 @@ public:
     bool    infoValidityTest;
 
     QString infoName;
+    QString infoSerialNumber;
     int     infoUpdateMode;
     int     infoUpdatePeriod;
     int     infoUpdatePeriodUnit;
@@ -49,7 +50,8 @@ public:
     QString netDriveReconnectCmd;
     bool    netDriveCreateBasepath;
 
-    QString netLogServerPath;
+    QString logServerPath;
+    bool    logSendScanInfo;
 
     QList<rdsConfigurationProtocol*> protocols;
     int getProtocolCount();
@@ -62,7 +64,8 @@ public:
 
     bool protocolNeedsAnonymization(int index);
 
-    enum {
+    enum
+    {
         UPDATEMODE_STARTUP          =0,
         UPDATEMODE_FIXEDTIME        =1,
         UPDATEMODE_PERIODIC         =2,
@@ -70,18 +73,22 @@ public:
         UPDATEMODE_STARTUP_FIXEDTIME=4
     };
 
-    enum {
+    enum
+    {
         PERIODICUNIT_MIN  =0,
         PERIODICUNIT_HOUR =1
     };
 
-    enum {
+    enum
+    {
         NETWORKMODE_DRIVE=0,
         NETWORKMODE_FTP  =1
     };
 
     bool isNetworkModeFTP();
     bool isNetworkModeDrive();
+
+    bool isLogServerConfigured();
 
 protected:
 
@@ -119,6 +126,12 @@ inline bool rdsConfiguration::protocolNeedsAnonymization(int index)
     {
         return false;
     }
+}
+
+
+inline bool rdsConfiguration::isLogServerConfigured()
+{
+    return (!logServerPath.isEmpty());
 }
 
 

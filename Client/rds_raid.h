@@ -17,7 +17,8 @@ public:
     qint64    sizeOnDisk;
     QDateTime creationTime;
     QDateTime closingTime;
-    void addToQuery(QUrlQuery& query);
+
+    void addToUrlQuery(QUrlQuery& query);
 };
 
 
@@ -30,7 +31,6 @@ public:
     bool    anonymize;
     bool    adjustmentScans;
 };
-
 
 
 class rdsRaid : public QObject
@@ -128,7 +128,6 @@ protected:
     QString getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, int refID=-1);
 
 };
-
 
 
 inline int rdsRaid::getLPFI()
@@ -244,6 +243,7 @@ inline void rdsRaid::addRaidEntry(rdsRaidEntry* source)
     entry->sizeOnDisk=source->sizeOnDisk;
     entry->creationTime=source->creationTime;
     entry->closingTime=source->closingTime;
+
     raidList.append(entry);
 }
 

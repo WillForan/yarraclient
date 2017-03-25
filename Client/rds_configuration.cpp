@@ -4,6 +4,7 @@
 
 rdsConfiguration::rdsConfiguration()
 {
+    infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER","0");
 }
 
 
@@ -46,11 +47,13 @@ void rdsConfiguration::loadConfiguration()
     netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd", "").toString();
     netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath", false).toBool();
 
-    netLogServerPath      =settings.value("Network/LogServerPath","").toString();
     netFTPIP            =settings.value("Network/FTPIP", "123.123.123.123").toString();
     netFTPBasepath      =settings.value("Network/FTPBasepath", "/rawdata").toString();
     netFTPUser          =settings.value("Network/FTPUser", "rdsuser").toString();
     netFTPPassword      =settings.value("Network/FTPPassword", "rdspwd").toString(); // TODO: Scramble password!
+
+    logServerPath       =settings.value("LogServer/ServerPath","").toString();
+    logSendScanInfo     =settings.value("LogServer/SendScanInfo", true).toBool();
 
     // Used to test if the program has been configured once at all
     infoValidityTest    =settings.value("General/ValidityTest", false).toBool();
@@ -91,7 +94,8 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("Network/DriveReconnectCmd", netDriveReconnectCmd);
     settings.setValue("Network/DriveCreateBasepath", netDriveCreateBasepath);
 
-    settings.setValue("Network/LogServerPath",netLogServerPath);
+    settings.setValue("LogServer/ServerPath",  logServerPath);
+    settings.setValue("LogServer/SendScanInfo",logSendScanInfo);
 
     settings.setValue("Network/FTPIP", netFTPIP);
     settings.setValue("Network/FTPBasepath", netFTPBasepath);
@@ -209,9 +213,3 @@ void rdsConfiguration::removeRemotelyDefinedProtocols()
         }
     }
 }
-
-
-
-
-
-

@@ -31,6 +31,8 @@ public:
     QDateTime getLastUpdateTime();
     bool isWaitingFirstUpdate();
 
+    void sendScanInfoToLogServer();
+
 protected:
 
     int state;

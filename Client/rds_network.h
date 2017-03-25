@@ -3,10 +3,10 @@
 
 #include <QtCore>
 #include <QtNetwork>
+//#include <QFtp>
 
 #include <../NetLogger/netlogger.h>
 
-//#include <QFtp>
 
 class rdsNetwork : public QObject
 {
@@ -18,7 +18,6 @@ public:
     ~rdsNetwork();
 
     // External interface
-
     bool openConnection();
     void closeConnection();
     bool isConnectionActive();
@@ -28,7 +27,6 @@ public:
 
 
     // Internal methods
-
     bool isQueueEmpty();
     int getQueueCount();
 
@@ -41,7 +39,8 @@ public:
     void copyLogFile();
     void runReconnectCmd();
 
-    NetLogger *netLogger;
+    NetLogger netLogger;
+
 private:
 
     QDir queueDir;

@@ -120,6 +120,7 @@ void rdsConfigurationWindow::callUpdateModeChanged(int index)
 void rdsConfigurationWindow::readConfiguration()
 {
     ui->softwareVersionEdit->setText(RTI->getSyngoMRVersionString());
+    ui->serialNumberEdit->setText(config.infoSerialNumber);
 
     config.loadConfiguration();
 
@@ -149,7 +150,9 @@ void rdsConfigurationWindow::readConfiguration()
     ui->updatePeriodCombobox->setCurrentIndex(config.infoUpdatePeriodUnit);
     ui->updatePeriodSpinbox->setValue(config.infoUpdatePeriod);
 
-    ui->logServerEdit->setText(config.netLogServerPath);
+    ui->logServerPathEdit->setText(config.logServerPath);
+    ui->logServerSendScansCheckbox->setChecked(config.logSendScanInfo);
+
     updateProtocolList();
 
     if (config.getProtocolCount()>0)
@@ -180,7 +183,9 @@ void rdsConfigurationWindow::storeConfiguration()
     config.netFTPUser=ui->ftpUserEdit->text();
     config.netFTPPassword=ui->ftpPwdEdit->text();  // TODO: Scramble passoword!!!
     config.netFTPBasepath=ui->ftpPathEdit->text();    
-    config.netLogServerPath=ui->logServerEdit->text();
+
+    config.logServerPath=ui->logServerPathEdit->text();
+    config.logSendScanInfo=ui->logServerSendScansCheckbox->isChecked();
 
     config.infoUpdateMode=ui->updateCombobox->currentIndex();
     config.infoUpdatePeriodUnit=ui->updatePeriodCombobox->currentIndex();
