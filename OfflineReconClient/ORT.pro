@@ -33,7 +33,8 @@ SOURCES += main.cpp \
     ort_bootdialog.cpp \
     ort_serverlist.cpp \
     ort_configuration.cpp \
-    ort_configurationdialog.cpp
+    ort_configurationdialog.cpp \
+    ../NetLogger/netlogger.cpp
 
 HEADERS  += \
     ort_mainwindow.h \
