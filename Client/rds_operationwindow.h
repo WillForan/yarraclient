@@ -11,11 +11,14 @@
 #include "rds_log.h"
 #include "rds_processcontrol.h"
 #include "rds_debugwindow.h"
+#include "rds_iconwindow.h"
 
 
-namespace Ui {
+namespace Ui
+{
     class rdsOperationWindow;
 }
+
 
 class rdsOperationWindow : public QDialog
 {
@@ -65,8 +68,11 @@ private:
 
     QTimer controlTimer;
 
+    rdsIconWindow  iconWindow;
     rdsDebugWindow debugWindow;
 
 };
 
+
 #endif // RDS_OPERATIONWINDOW_H
+

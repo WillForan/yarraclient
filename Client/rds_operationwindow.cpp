@@ -82,6 +82,11 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
         controlTimer.setInterval(RDS_TIMERINTERVAL);
         connect(&controlTimer, SIGNAL(timeout()), this, SLOT(checkForUpdate()));
         controlTimer.start();
+
+        if (RTI_CONFIG->infoShowIcon)
+        {
+            iconWindow.show();
+        }
     }
 
     if (raid.isPatchedRaidToolMissing())

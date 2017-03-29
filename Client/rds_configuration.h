@@ -31,6 +31,8 @@ public:
 
     QString infoName;
     QString infoSerialNumber;
+    bool    infoShowIcon;
+
     int     infoUpdateMode;
     int     infoUpdatePeriod;
     int     infoUpdatePeriodUnit;
@@ -52,6 +54,7 @@ public:
 
     QString logServerPath;
     bool    logSendScanInfo;
+    int     logUpdateFrequency;
 
     QList<rdsConfigurationProtocol*> protocols;
     int getProtocolCount();

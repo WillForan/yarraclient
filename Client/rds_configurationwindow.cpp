@@ -126,6 +126,8 @@ void rdsConfigurationWindow::readConfiguration()
 
     // Transfer configuration to UI controls
     ui->systemNameEdit->setText(config.infoName);
+    ui->indicatorCheckbox->setChecked(config.infoShowIcon);
+
     ui->time1Edit->setTime(config.infoUpdateTime1);
     ui->time2Edit->setTime(config.infoUpdateTime2);
     ui->time3Edit->setTime(config.infoUpdateTime3);
@@ -152,6 +154,7 @@ void rdsConfigurationWindow::readConfiguration()
 
     ui->logServerPathEdit->setText(config.logServerPath);
     ui->logServerSendScansCheckbox->setChecked(config.logSendScanInfo);
+    ui->logServerPushFrequencySpinbox->setValue(config.logUpdateFrequency);
 
     updateProtocolList();
 
@@ -166,6 +169,7 @@ void rdsConfigurationWindow::readConfiguration()
 void rdsConfigurationWindow::storeConfiguration()
 {
     config.infoName=ui->systemNameEdit->text();
+    config.infoShowIcon=ui->indicatorCheckbox->isChecked();
 
     config.infoUpdateTime1=ui->time1Edit->time();
     config.infoUpdateTime2=ui->time2Edit->time();
@@ -186,6 +190,7 @@ void rdsConfigurationWindow::storeConfiguration()
 
     config.logServerPath=ui->logServerPathEdit->text();
     config.logSendScanInfo=ui->logServerSendScansCheckbox->isChecked();
+    config.logUpdateFrequency=ui->logServerPushFrequencySpinbox->value();
 
     config.infoUpdateMode=ui->updateCombobox->currentIndex();
     config.infoUpdatePeriodUnit=ui->updatePeriodCombobox->currentIndex();

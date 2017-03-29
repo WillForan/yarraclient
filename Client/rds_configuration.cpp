@@ -31,6 +31,8 @@ void rdsConfiguration::loadConfiguration()
     // Load the configuration values from the configuration file
     // If the configuration file does not exist, the defailt values will be used.
     infoName            =settings.value("General/Name", "Unnamed").toString();
+    infoShowIcon        =settings.value("General/ShowIcon", true).toBool();
+
     infoUpdateMode      =settings.value("General/UpdateMode", UPDATEMODE_STARTUP_FIXEDTIME).toInt();
     infoUpdatePeriod    =settings.value("General/UpdatePeriod", 6).toInt();
     infoUpdatePeriodUnit=settings.value("General/UpdatePeriodUnit", PERIODICUNIT_HOUR).toInt();
@@ -54,6 +56,7 @@ void rdsConfiguration::loadConfiguration()
 
     logServerPath       =settings.value("LogServer/ServerPath","").toString();
     logSendScanInfo     =settings.value("LogServer/SendScanInfo", true).toBool();
+    logUpdateFrequency  =settings.value("LogServer/UpdateFrequency", 4).toInt();
 
     // Used to test if the program has been configured once at all
     infoValidityTest    =settings.value("General/ValidityTest", false).toBool();
@@ -78,6 +81,8 @@ void rdsConfiguration::saveConfiguration()
     QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
 
     settings.setValue("General/Name", infoName);
+    settings.setValue("General/ShowIcon", infoShowIcon);
+
     settings.setValue("General/UpdateMode", infoUpdateMode);
     settings.setValue("General/UpdatePeriod", infoUpdatePeriod);
     settings.setValue("General/UpdatePeriodUnit", infoUpdatePeriodUnit);
@@ -96,6 +101,7 @@ void rdsConfiguration::saveConfiguration()
 
     settings.setValue("LogServer/ServerPath",  logServerPath);
     settings.setValue("LogServer/SendScanInfo",logSendScanInfo);
+    settings.setValue("LogServer/UpdateFrequency",logUpdateFrequency);
 
     settings.setValue("Network/FTPIP", netFTPIP);
     settings.setValue("Network/FTPBasepath", netFTPBasepath);

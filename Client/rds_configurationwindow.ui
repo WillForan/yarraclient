@@ -42,6 +42,13 @@
        <property name="rightMargin">
         <number>100</number>
        </property>
+       <item row="3" column="2">
+        <widget class="QCheckBox" name="indicatorCheckbox">
+         <property name="text">
+          <string>Show RDS indicator in top-right corner</string>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="2">
         <widget class="QLineEdit" name="systemNameEdit">
          <property name="inputMask">
@@ -49,14 +56,23 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>System Name:</string>
+       <item row="4" column="1">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-        </widget>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
-       <item row="4" column="2">
+       <item row="5" column="2">
         <widget class="QComboBox" name="updateCombobox">
          <property name="frame">
           <bool>true</bool>
@@ -88,6 +104,13 @@
          </item>
         </widget>
        </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>System Name:</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="2">
         <widget class="QLineEdit" name="softwareVersionEdit">
          <property name="readOnly">
@@ -95,37 +118,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <spacer name="verticalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Software Version:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Update Rule:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -141,7 +134,14 @@
          </property>
         </spacer>
        </item>
-       <item row="6" column="2">
+       <item row="1" column="0" colspan="2">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Software Version:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
         <spacer name="verticalSpacer_6">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -154,7 +154,14 @@
          </property>
         </spacer>
        </item>
-       <item row="5" column="2">
+       <item row="5" column="0" colspan="2">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Update Rule:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2">
         <widget class="QStackedWidget" name="updateStackedWidget">
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
@@ -883,7 +890,7 @@ p, li { white-space: pre-wrap; }
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <property name="spacing">
-        <number>10</number>
+        <number>9</number>
        </property>
        <property name="leftMargin">
         <number>12</number>
@@ -892,7 +899,7 @@ p, li { white-space: pre-wrap; }
         <number>16</number>
        </property>
        <property name="rightMargin">
-        <number>100</number>
+        <number>80</number>
        </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -900,7 +907,7 @@ p, li { white-space: pre-wrap; }
           <widget class="QLabel" name="logServerPathLabel">
            <property name="minimumSize">
             <size>
-             <width>80</width>
+             <width>130</width>
              <height>0</height>
             </size>
            </property>
@@ -920,6 +927,56 @@ p, li { white-space: pre-wrap; }
           <string>Send protocol statistics to server</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QLabel" name="logServerPushFrequencyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>130</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Statistics push frequency:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="logServerPushFrequencySpinbox">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>24</number>
+           </property>
+           <property name="value">
+            <number>4</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="logServerPushFrequencyUnitLabel">
+           <property name="text">
+            <string>hours</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer_13">
@@ -953,7 +1010,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <widget class="QLabel" name="logServerStatusLabel">
          <property name="text">
-          <string/>
+          <string>Connection status</string>
          </property>
         </widget>
        </item>
