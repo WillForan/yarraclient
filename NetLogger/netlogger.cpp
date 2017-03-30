@@ -9,7 +9,7 @@ NetLogger::NetLogger()
     source_type=EventInfo::SourceType::Generic;
 
     // TODO: Read certificate from external file
-    QFile certificateFile(":/certificate/logserver.crt");
+    QFile certificateFile("certificate/logserver.crt");
 
     // Read the certificate if possible and then add it
     if (certificateFile.open(QIODevice::ReadOnly))
@@ -37,11 +37,12 @@ NetLogger::~NetLogger()
 }
 
 
-void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId)
+void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId,QString APIKey)
 {
     serverPath=path;
     source_id=sourceId;
     source_type=sourceType;
+    api_key =APIKey;
 
     if (!serverPath.isEmpty())
     {
@@ -102,6 +103,7 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
         return NULL;
     }
 
+    query.addQueryItem("api_key",api_key);
     QUrl serviceUrl = QUrl(serverPath + "/" + endpt);
     serviceUrl.setScheme("https");
 
@@ -139,7 +141,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
     // TODO: Is there a timeout mechanism?
     QEventLoop eventLoop;
     QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-
+    QTimer::singleShot(10000, &eventLoop, SLOT(quit()));
     if (reply->isRunning())
     {
         eventLoop.exec();

@@ -52,6 +52,7 @@ public:
 
     QString logServerPath;
     bool    logSendScanInfo;
+    QString logServerKey;
 
     QList<rdsConfigurationProtocol*> protocols;
     int getProtocolCount();

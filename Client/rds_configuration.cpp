@@ -54,7 +54,7 @@ void rdsConfiguration::loadConfiguration()
 
     logServerPath       =settings.value("LogServer/ServerPath","").toString();
     logSendScanInfo     =settings.value("LogServer/SendScanInfo", true).toBool();
-
+    logServerKey        =settings.value("LogServer/Key","").toString();
     // Used to test if the program has been configured once at all
     infoValidityTest    =settings.value("General/ValidityTest", false).toBool();
 

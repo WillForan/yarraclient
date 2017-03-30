@@ -13,7 +13,7 @@ public:
     NetLogger();
     ~NetLogger();
 
-    void configure(QString path, EventInfo::SourceType sourceType, QString sourceId);
+    void configure(QString path, EventInfo::SourceType sourceType, QString sourceId, QString logServerKey);
     bool isConfigured();
 
     QNetworkReply* postDataAsync(QUrlQuery query, QString endpt);
@@ -26,7 +26,7 @@ public:
 protected:
 
     bool configured;
-
+    QString api_key;
     QString serverPath;
     QString source_id;
     EventInfo::SourceType source_type;
