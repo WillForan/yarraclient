@@ -722,15 +722,22 @@ bool rdsRaid::parseVB15Line(QString line, rdsRaidEntry* entry)
 }
 
 
-bool rdsRaid::createExportList()
+bool rdsRaid::createExportList(bool onlyReadRaid)
 {   
     exportList.clear();
 
     // Trigger reading of raid list
     RDS_RETONERR( readRaidList() );
 
+    // If only the raid should be read but no export list creater (for intermediate
+    // log server updates), return at this point
+    if (onlyReadRaid)
+    {
+        return true;
+    }
+
     int raidCount=raidList.count();
-    int raidIndex=0;
+    int raidIndex=0;  
 
     // Evalute RaidList backwards and filter measurements that have to be saved
     // NOTE: Backward evaluation is needed to ensure that the LPFI mechanism works

@@ -28,6 +28,8 @@ public:
     explicit rdsOperationWindow(QWidget *parent = 0);
     ~rdsOperationWindow();    
 
+    rdsIconWindow  iconWindow;
+
 public slots:
     void callShutDown();
     void callImmediateShutdown();
@@ -68,9 +70,7 @@ private:
 
     QTimer controlTimer;
 
-    rdsIconWindow  iconWindow;
     rdsDebugWindow debugWindow;
-
 };
 
 

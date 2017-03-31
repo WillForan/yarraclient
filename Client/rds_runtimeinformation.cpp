@@ -311,3 +311,12 @@ void rdsRuntimeInformation::updateInfoUI()
     #endif
 }
 
+
+void rdsRuntimeInformation::setIconWindowAnim(bool status)
+{
+    if (configInstance->infoShowIcon)
+    {
+        windowInstance->iconWindow.setAnim(status);
+    }
+}
+

@@ -86,6 +86,11 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
         if (RTI_CONFIG->infoShowIcon)
         {
             iconWindow.show();
+
+            if (RTI_NETLOG.isConfigurationError())
+            {
+                iconWindow.setError();
+            }
         }
     }
 
@@ -289,7 +294,8 @@ void rdsOperationWindow::callPostpone()
 
 void rdsOperationWindow::updateInfoUI()
 {
-    ui->InfoValueSystem->setText(RTI_CONFIG->infoName);
+    QString systemName=RTI_CONFIG->infoName + " / " + RTI_CONFIG->infoSerialNumber;
+    ui->InfoValueSystem->setText(systemName);
 
     if (RTI_CONTROL->getState()==RTI_CONTROL->STATE_IDLE)
     {
@@ -309,6 +315,11 @@ void rdsOperationWindow::updateInfoUI()
         if (RTI->isSevereErrors())
         {
             ui->InfoValueError->setText("<b>Severe errors occured during update approach.</b>");
+
+            if (!this->isVisible())
+            {
+                iconWindow.setError();
+            }
         }
         else
         {

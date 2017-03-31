@@ -4,6 +4,7 @@
         <file>images/yarralogo.png</file>
         <file>images/cai2rlogo.png</file>
         <file>images/topIcon.png</file>
+        <file>images/topIcon_error.png</file>
         <file>images/topIcon_run.gif</file>        
     </qresource>
 </RCC>

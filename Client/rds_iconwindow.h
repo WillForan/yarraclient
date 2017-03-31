@@ -3,6 +3,7 @@
 
 #include <QDialog>
 
+
 namespace Ui
 {
     class rdsIconWindow;
@@ -17,8 +18,19 @@ public:
     explicit rdsIconWindow(QWidget *parent = 0);
     ~rdsIconWindow();
 
+    void setAnim(bool value);
+    void clearError();
+    void setError();
+
 private:
     Ui::rdsIconWindow* ui;
+
+    void mouseDoubleClickEvent(QMouseEvent *event);
+
+    bool    animRunning;
+    bool    error;
+    QMovie* anim;
+
 };
 
 

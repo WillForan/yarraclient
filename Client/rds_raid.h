@@ -41,7 +41,7 @@ public:
     rdsRaid();
     ~rdsRaid();
 
-    bool createExportList();
+    bool createExportList(bool onlyReadRaid=false);
     bool processTotalExportList();
     bool processExportListEntry();
     bool exportsAvailable();

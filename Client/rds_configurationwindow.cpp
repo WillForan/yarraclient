@@ -3,6 +3,9 @@
 
 #include "rds_global.h"
 #include <QtWidgets>
+#include <QHostInfo>
+#include <QNetworkInterface>
+#include <QTcpSocket>
 
 
 rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
@@ -25,9 +28,9 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
 
     connect(ui->protAddButton, SIGNAL(clicked()), this, SLOT(callAddProt()));
     connect(ui->protRemoveButton, SIGNAL(clicked()), this, SLOT(callRemoveProt()));
-
     //connect(ui->protListWidget, SIGNAL(activated()), this, SLOT(callShowProt()));
 
+    connect(ui->logServerTestConnectionButton, SIGNAL(clicked()), this, SLOT(callLogServerTestConnection()));
 
     ui->tabWidget->setCurrentIndex(0);
     callUpdateModeChanged(ui->updateCombobox->currentIndex());
@@ -42,6 +45,8 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
                                     qApp->desktop()->availableGeometry()));
 
     readConfiguration();
+
+    ui->logServerStatusLabel->setText("");
 }
 
 
@@ -135,7 +140,6 @@ void rdsConfigurationWindow::readConfiguration()
     ui->time2Checkbox->setChecked(config.infoUpdateUseTime2);
     ui->time3Checkbox->setChecked(config.infoUpdateUseTime3);
 
-    //ui->networkModeCombobox->setCurrentIndex(config.netMode);
     //NOTE: Currently, the software only supports the network drive mode
     ui->networkModeCombobox->setCurrentIndex(0);
 
@@ -183,9 +187,10 @@ void rdsConfigurationWindow::storeConfiguration()
     config.netDriveReconnectCmd=ui->networkDriveReconnectCmd->text();
     config.netDriveCreateBasepath=ui->networkDriveCreatePath->isChecked();
 
+    // Not used anymore
     config.netFTPIP=ui->ftpIPEdit->text();
     config.netFTPUser=ui->ftpUserEdit->text();
-    config.netFTPPassword=ui->ftpPwdEdit->text();  // TODO: Scramble passoword!!!
+    config.netFTPPassword=ui->ftpPwdEdit->text();
     config.netFTPBasepath=ui->ftpPathEdit->text();    
 
     config.logServerPath=ui->logServerPathEdit->text();
@@ -352,4 +357,109 @@ void rdsConfigurationWindow::on_protSmallFilesCheckbox_toggled(bool checked)
 {
     callUpdateProt();
 }
+
+
+void rdsConfigurationWindow::callLogServerTestConnection()
+{
+    // Clear previous output
+    ui->logServerStatusLabel->setText("");
+    RTI->processEvents();
+
+    const QString errorPrefix="<span style=""color:#990000;""><strong>ERROR:</strong></span>&nbsp;&nbsp;";
+
+    QString output="";
+    bool error=false;
+
+    QString serverPath=ui->logServerPathEdit->text();
+    int serverPort=8080;
+
+    if (serverPath.isEmpty())
+    {
+        output=errorPrefix + "No server address entered.";
+        ui->logServerStatusLabel->setText(output);
+
+        return;
+    }
+
+    // Check if the entered address contains a port specifier
+    int colonPos=serverPath.indexOf(":");
+
+    if (colonPos!=-1)
+    {
+        int cutChars=serverPath.length()-colonPos;
+
+        QString portString=serverPath.right(cutChars-1);
+        serverPath.chop(cutChars);
+
+        // Convert port string into number and validate
+        bool portValid=false;
+
+        int tempPort=portString.toInt(&portValid);
+
+        if (portValid)
+        {
+            serverPort=tempPort;
+        }
+    }
+
+    QString localHostname="";
+
+    // Open socket connection to see if the server is active and to
+    // determine the local IP address used for routing to the server.
+    QTcpSocket socket;
+    socket.connectToHost(serverPath, serverPort);
+
+    if (socket.waitForConnected(500))
+    {
+        localHostname=QHostInfo::fromName( socket.localAddress().toString() ).hostName();
+
+    }
+    else
+    {
+        output += errorPrefix + "Unable to connect to server.";
+        error=true;
+    }
+
+    socket.disconnectFromHost();
+
+    if ((!error) && (localHostname.isEmpty()))
+    {
+        output += errorPrefix + "Unable to resolve local hostname.";
+        error=true;
+    }
+
+    // Now compare if the local system and the server live on the same domain
+    if (!error)
+    {
+        serverPath=QHostInfo::fromName(serverPath).hostName();
+
+        QStringList localHostString =localHostname.toLower().split(".");
+        QStringList serverHostString=serverPath.toLower().split(".");
+
+        if ((localHostString.count()<2) || (serverHostString.count()<2))
+        {
+            output += errorPrefix + "Error resolving hostnames.";
+            error=true;
+        }
+        else
+        {
+            if ((localHostString.at(localHostString.count()-1)!=(serverHostString.at(serverHostString.count()-1)))
+               || (localHostString.at(localHostString.count()-2)!=(serverHostString.at(serverHostString.count()-2))))
+            {
+                output += errorPrefix + "Server not in local domain.<br /><br />";
+                output += "Local host: " + localHostname.toLower() + "<br />";
+                output += "Log server: " + serverPath.toLower() + "<br />";
+                error=true;
+            }
+        }
+    }
+
+    if (!error)
+    {
+        output="<span style=""color:#009900;""><strong>Success.</strong></span>";
+    }
+
+    ui->logServerStatusLabel->setText(output);
+}
+
 

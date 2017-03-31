@@ -15,6 +15,8 @@ public:
 
     void configure(QString path, EventInfo::SourceType sourceType, QString sourceId);
     bool isConfigured();
+    bool isConfigurationError();
+    bool isServerInSameDomain(QString serverPath);
 
     QNetworkReply* postDataAsync(QUrlQuery query, QString endpt);
     QUrlQuery buildEventQuery(EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data);
@@ -23,9 +25,11 @@ public:
     void postEvent(EventInfo::Type type, EventInfo::Detail detail=EventInfo::Detail::Information, EventInfo::Severity severity=EventInfo::Severity::Success, QString info=QString(""), QString data=QString(""));
     bool postEventSync(EventInfo::Type type, QNetworkReply::NetworkError& error, int& status_code, EventInfo::Detail detail =EventInfo::Detail::Information, EventInfo::Severity severity=EventInfo::Severity::Success, QString info=QString(""), QString data=QString(""));
 
+
 protected:
 
     bool configured;
+    bool configurationError;
 
     QString serverPath;
     QString source_id;
@@ -39,6 +43,12 @@ protected:
 inline bool NetLogger::isConfigured()
 {
     return configured;
+}
+
+
+inline bool NetLogger::isConfigurationError()
+{
+    return configurationError;
 }
 
 

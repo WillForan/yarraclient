@@ -1,15 +1,21 @@
 #include "netlogger.h"
 
+#ifdef YARRA_APP_RDS
+    #include "rds_global.h"
+#endif
+
 
 NetLogger::NetLogger()
 {
     configured=false;
+    configurationError=false;
+
     QString serverPath="";
     QString source_id="";
     source_type=EventInfo::SourceType::Generic;
 
-    // TODO: Read certificate from external file
-    QFile certificateFile(":/certificate/logserver.crt");
+    // Read certificate from external file
+    QFile certificateFile(qApp->applicationDirPath() + "/logserver.crt");
 
     // Read the certificate if possible and then add it
     if (certificateFile.open(QIODevice::ReadOnly))
@@ -37,17 +43,132 @@ NetLogger::~NetLogger()
 }
 
 
+bool NetLogger::isServerInSameDomain(QString serverPath)
+{
+    QString errorMessage="";
+    bool error=false;
+
+    int serverPort=8080;
+
+    if (serverPath.isEmpty())
+    {
+        errorMessage="No server address entered.";
+        error=true;
+    }
+
+    QString localHostname="";
+
+    if (!error)
+    {
+        // Check if the entered address contains a port specifier
+        int colonPos=serverPath.indexOf(":");
+
+        if (colonPos!=-1)
+        {
+            int cutChars=serverPath.length()-colonPos;
+
+            QString portString=serverPath.right(cutChars-1);
+            serverPath.chop(cutChars);
+
+            // Convert port string into number and validate
+            bool portValid=false;
+
+            int tempPort=portString.toInt(&portValid);
+
+            if (portValid)
+            {
+                serverPort=tempPort;
+            }
+        }
+
+
+        // Open socket connection to see if the server is active and to
+        // determine the local IP address used for routing to the server.
+        QTcpSocket socket;
+        socket.connectToHost(serverPath, serverPort);
+
+        if (socket.waitForConnected(500))
+        {
+            localHostname=QHostInfo::fromName( socket.localAddress().toString() ).hostName();
+
+        }
+        else
+        {
+            errorMessage="Unable to connect to server.";
+            error=true;
+        }
+
+        socket.disconnectFromHost();
+    }
+
+    if ((!error) && (localHostname.isEmpty()))
+    {
+        errorMessage="Unable to resolve local hostname.";
+        error=true;
+    }
+
+    // Now compare if the local system and the server live on the same domain
+    if (!error)
+    {
+        serverPath=QHostInfo::fromName(serverPath).hostName();
+
+        QStringList localHostString =localHostname.toLower().split(".");
+        QStringList serverHostString=serverPath.toLower().split(".");
+
+        if ((localHostString.count()<2) || (serverHostString.count()<2))
+        {
+            errorMessage="Error resolving hostnames.";
+            error=true;
+        }
+        else
+        {
+            if ((localHostString.at(localHostString.count()-1)!=(serverHostString.at(serverHostString.count()-1)))
+               || (localHostString.at(localHostString.count()-2)!=(serverHostString.at(serverHostString.count()-2))))
+            {
+                errorMessage="Log server not in local domain.";
+                error=true;
+            }
+        }
+    }
+
+    // Report the error, using an error reporting mechanism depending on
+    // what binary target this class is built into
+    if (error)
+    {
+    #ifdef YARRA_APP_RDS
+        RTI->log("ERROR: Configuration of log server failed.");
+        RTI->log("ERROR: " + errorMessage);
+        RTI->log("ERROR: Use configuration dialog to analyze connection.");
+        RTI->log("ERROR: Logging has been disabled.");
+    #endif
+
+        return false;
+    }
+
+#ifdef YARRA_APP_RDS
+    RTI->log("Connection to log server validated.");
+#endif
+
+    return true;
+}
+
+
 void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId)
 {
+    configurationError=false;
     serverPath=path;
     source_id=sourceId;
     source_type=sourceType;
 
     if (!serverPath.isEmpty())
     {
-        // TODO: Check if local host and server path are on the same domain
+        // Check if local host and server path are on the same domain
+        configured=isServerInSameDomain(path);
 
-        configured=true;
+        if (!configured)
+        {
+            configurationError=true;
+        }
     }
 }
 

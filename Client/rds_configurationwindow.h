@@ -32,6 +32,8 @@ public slots:
     void callUpdateProt();
     void callShowProt();
 
+    void callLogServerTestConnection();
+
 protected:
     void closeEvent(QCloseEvent *event);
 

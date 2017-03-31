@@ -53,10 +53,7 @@ private:
     qint64  currentFilesize;
     QString currentTimeStamp;
 
-    //QFtp ftp;
     QDir networkDrive;
-
-    // TODO: Implement event handler for FTP management
 };
 
 
