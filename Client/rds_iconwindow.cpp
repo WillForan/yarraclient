@@ -6,6 +6,8 @@
 #include "rds_global.h"
 
 
+// Note: For the animation to work, qgif.dll from the QT plugin folder has to be put in C:\yarra\imageformats
+
 rdsIconWindow::rdsIconWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::rdsIconWindow)

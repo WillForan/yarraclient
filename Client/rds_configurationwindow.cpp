@@ -403,6 +403,7 @@ void rdsConfigurationWindow::callLogServerTestConnection()
     }
 
     QString localHostname="";
+    QString localIP="";
 
     // Open socket connection to see if the server is active and to
     // determine the local IP address used for routing to the server.
@@ -411,8 +412,8 @@ void rdsConfigurationWindow::callLogServerTestConnection()
 
     if (socket.waitForConnected(500))
     {
-        localHostname=QHostInfo::fromName( socket.localAddress().toString() ).hostName();
-
+        localIP=socket.localAddress().toString();
+        localHostname=QHostInfo::fromName(localIP).hostName();
     }
     else
     {
@@ -424,7 +425,7 @@ void rdsConfigurationWindow::callLogServerTestConnection()
 
     if ((!error) && (localHostname.isEmpty()))
     {
-        output += errorPrefix + "Unable to resolve local hostname.";
+        output += errorPrefix + "Unable to resolve local hostname.<br /><br />IP = " + localIP;
         error=true;
     }
 
@@ -438,7 +439,9 @@ void rdsConfigurationWindow::callLogServerTestConnection()
 
         if ((localHostString.count()<2) || (serverHostString.count()<2))
         {
-            output += errorPrefix + "Error resolving hostnames.";
+            output += errorPrefix + "Error resolving hostnames.<br /><br />";
+            output += "Local host: " + localHostname.toLower() + " ("+localIP+")<br />";
+            output += "Log server: " + serverHostString.join(".");
             error=true;
         }
         else
