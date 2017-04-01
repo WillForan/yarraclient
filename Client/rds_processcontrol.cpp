@@ -169,7 +169,7 @@ void rdsProcessControl::performUpdate()
     }
 
     // If a full update with raw-data transfer should be done
-    if (!logServerOnlyUpdate)
+    if ((!logServerOnlyUpdate) && (!RTI_RAID->isScanActive()))
     {
         // Check if the connection to the network drive can be established
         if (RTI_NETWORK->openConnection())
@@ -285,17 +285,13 @@ void rdsProcessControl::performUpdate()
                 RTI->log("");
                 connectionFailureCount=0;
 
-                // Show the window so that the users get notified about the problem
-                // NOTE: On request of the techs, showing the status window after
-                //       failed updates was disabled.
-                //RTI->showOperationWindow();
-                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Opening connection failed repeatedly");
-
                 // Indicate the error in the top icon
                 if (!RTI->getWindowInstance()->isVisible())
                 {
                     RTI->getWindowInstance()->iconWindow.setError();
                 }
+
+                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Opening connection failed repeatedly");
             }
             else
             {
@@ -304,6 +300,13 @@ void rdsProcessControl::performUpdate()
         }
 
         lastUpdate=QDateTime::currentDateTime();
+    }
+
+    // If the current update run was for raw data transfer and a scan
+    // is currently active, don't update and retry in some time
+    if ((!logServerOnlyUpdate) && (RTI_RAID->isScanActive()))
+    {
+        setExplicitUpdate(RDS_UPDATETIME_RETRY);
     }
 
     lastLogServerOnlyUpdate=QDateTime::currentDateTime();

@@ -19,6 +19,15 @@
 
 void rdsRaidEntry::addToUrlQuery(QUrlQuery& query)
 {
+    // Use the serial number as ID. If the serial number has not been
+    // defined, then fallback to the name selected in the configuration
+    // dialog (which might not be unique)
+    QString scannerID=RTI_CONFIG->infoSerialNumber;
+    if (scannerID=="0")
+    {
+        scannerID=RTI_CONFIG->infoName;
+    }
+
     query.addQueryItem("creation_time", creationTime.toString());
     query.addQueryItem("closing_time",  closingTime.toString());
     query.addQueryItem("file_id",       QString::number(fileID));
@@ -26,8 +35,8 @@ void rdsRaidEntry::addToUrlQuery(QUrlQuery& query)
     query.addQueryItem("protocol_name", protName);
     query.addQueryItem("patient_name",  patName);
     query.addQueryItem("size",          QString::number(size));
-    query.addQueryItem("size_on_disk",  QString::number(sizeOnDisk));
-    query.addQueryItem("scanner_id",    RTI_CONFIG->infoName);
+    query.addQueryItem("size_on_disk",  QString::number(sizeOnDisk));   
+    query.addQueryItem("scanner_id",    scannerID);
     query.addQueryItem("exam_id",       QString(""));
 }
 
@@ -107,6 +116,7 @@ rdsRaid::rdsRaid()
     lastProcessedFileID=-1;
     ignoreLPFID=false;
     ortMissingDiskspace=false;
+    scanActive=false;
 
     // Read the file ID of the last processed file from file.
     // The LPFI will increase speed for parsing the output from the RaidTool
@@ -116,7 +126,7 @@ rdsRaid::rdsRaid()
     // Initialize the internal variable used for holding the system name
     // when using the class within ORT (needed to remove the dependency
     // on the RTI class)
-    ortSystemName="Unknown";
+    ortSystemName="Unknown";    
 }
 
 
@@ -416,6 +426,7 @@ bool rdsRaid::readRaidList()
 bool rdsRaid::parseOutputDirectory()
 {
     clearRaidList();
+    scanActive=false;
 
     bool isSuccess=true;
     bool dirHeadFound=false;
@@ -500,6 +511,7 @@ bool rdsRaid::parseOutputDirectory()
         {
             rdsRaidEntry raidEntry;
             bool res=true;
+            bool skipEntry=false;
 
             // Parse raid line
             QString raidLine=raidToolOutput.at(i);
@@ -641,7 +653,16 @@ bool rdsRaid::parseOutputDirectory()
                     //       Check if these files always have the same size, so that they can be identified based on the size.
 
                     // The Status information is not evaluated
-                    raidLine.chop(9);
+                    temp=raidLine.right(9);
+                    if (!temp.contains("cld"))
+                    {
+                        // Scan is not closed. This can only be the case for the first
+                        // file on raid. This means, scannig is active. Raw data storate
+                        // should be postponed. Scan info transfer can take place.
+                        scanActive=true;
+                        skipEntry=true;
+                    }
+                    raidLine.chop(9);                    
 
                     // ## PatName
                     // The remaining part should be the patient name
@@ -653,8 +674,11 @@ bool rdsRaid::parseOutputDirectory()
                     //      In this case, the format is patname,YYYYMMDD
                 }
 
-                // Add entry to raid list (will be copied internally)
-                addRaidEntry(&raidEntry);
+                if (!skipEntry)
+                {
+                    // Add entry to raid list (will be copied internally)
+                    addRaidEntry(&raidEntry);
+                }
             }
         }
     }

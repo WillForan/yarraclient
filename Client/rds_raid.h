@@ -75,6 +75,8 @@ public:
 
     void setORTSystemName(QString name);
 
+    bool isScanActive();
+
 protected:
 
     bool parseVB15Line(QString line, rdsRaidEntry* entry);
@@ -124,6 +126,7 @@ protected:
     bool patchedRaidToolMissing;
 
     bool ignoreLPFID;
+    bool scanActive;
 
     QString getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, int refID=-1);
 
@@ -292,6 +295,11 @@ inline void rdsRaid::setORTSystemName(QString name)
     ortSystemName=name;
 }
 
+
+inline bool rdsRaid::isScanActive()
+{
+    return scanActive;
+}
 
 
 #endif // RDS_RAID_H
