@@ -57,6 +57,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
     }
 
     QString localHostname="";
+    QString localIP="";
 
     if (!error)
     {
@@ -81,16 +82,14 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
             }
         }
 
-
         // Open socket connection to see if the server is active and to
         // determine the local IP address used for routing to the server.
         QTcpSocket socket;
         socket.connectToHost(serverPath, serverPort);
 
-        if (socket.waitForConnected(500))
+        if (socket.waitForConnected(1000))
         {
-            localHostname=QHostInfo::fromName( socket.localAddress().toString() ).hostName();
-
+            localIP=socket.localAddress().toString();
         }
         else
         {
@@ -101,17 +100,33 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
         socket.disconnectFromHost();
     }
 
-    if ((!error) && (localHostname.isEmpty()))
-    {
-        errorMessage="Unable to resolve local hostname.";
-        error=true;
-    }
-
-    // Now compare if the local system and the server live on the same domain
+    // Lookup the hostname of the local client from the DNS server
     if (!error)
     {
-        serverPath=QHostInfo::fromName(serverPath).hostName();
+        localHostname=NetLogger::dnsLookup(localIP);
 
+        if (localHostname.isEmpty())
+        {
+            errorMessage="Unable to resolve local hostname.";
+            error=true;
+        }
+    }
+
+    // Lookup the hostname of the log server from the DNS server
+    if (!error)
+    {
+        serverPath=NetLogger::dnsLookup(serverPath);
+
+        if (serverPath.isEmpty())
+        {
+            errorMessage="Unable to resolve server name.";
+            error=true;
+        }
+    }
+
+    // Compare if the local system and the server live on the same domain
+    if (!error)
+    {
         QStringList localHostString =localHostname.toLower().split(".");
         QStringList serverHostString=serverPath.toLower().split(".");
 
@@ -138,7 +153,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
     #ifdef YARRA_APP_RDS
         RTI->log("ERROR: Configuration of log server failed.");
         RTI->log("ERROR: " + errorMessage);
-        RTI->log("ERROR: Use configuration dialog to analyze connection.");
+        RTI->log("ERROR: Use configuration dialog to test connection.");
         RTI->log("ERROR: Logging has been disabled.");
     #endif
 
@@ -284,4 +299,113 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
 
     return true;
 }
+
+
+
+QString NetLogger::dnsLookup(QString address)
+{
+    const int nslTimeout=6000;
+    bool success=false;
+    QString nameFound="";
+
+    QStringList args;
+    args << address;
+
+    QProcess *nslProcess = new QProcess(0);
+    nslProcess->setReadChannel(QProcess::StandardOutput);
+
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    timeoutTimer.setInterval(nslTimeout);
+    QEventLoop q;
+    QObject::connect(nslProcess, SIGNAL(finished(int , QProcess::ExitStatus)), &q, SLOT(quit()));
+    QObject::connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
+
+    // Time measurement to diagnose RaidTool calling problems
+    QTime ti;
+    ti.start();
+    timeoutTimer.start();
+    nslProcess->start("nslookup", args);
+    q.exec();
+
+    // Check for problems with the event loop: Sometimes it seems to return to quickly!
+    // In this case, start a second while loop to check when the process is really finished.
+    if ((timeoutTimer.isActive()) && (nslProcess->state()==QProcess::Running))
+    {
+        timeoutTimer.stop();
+        RTI->log("Warning: QEventLoop returned too early. Starting secondary loop.");
+
+        while ((nslProcess->state()==QProcess::Running) && (ti.elapsed()<nslTimeout))
+        {
+            RTI->processEvents();
+            Sleep(10);
+        }
+
+        // If the process did not finish within the timeout duration
+        if (nslProcess->state()==QProcess::Running)
+        {
+            RTI->log("Warning: Process is still active. Killing process.");
+            nslProcess->kill();
+            success=false;
+        }
+        else
+        {
+            success=true;
+        }
+    }
+    else
+    {
+        // Normal timeout-handling if QEventLoop works normally
+        if (timeoutTimer.isActive())
+        {
+            success=true;
+            timeoutTimer.stop();
+        }
+        else
+        {
+            RTI->log("Warning: Process event loop timed out.");
+            RTI->log("Warning: Duration since start "+QString::number(ti.elapsed())+" ms");
+            success=false;
+            if (nslProcess->state()==QProcess::Running)
+            {
+                RTI->log("Warning: Process is still active. Killing process.");
+                nslProcess->kill();
+            }
+        }
+    }
+
+    if (!success)
+    {
+        RTI->log("ERROR: Problems running nslookup.");
+    }
+    else
+    {
+        char buf[1024];
+        qint64 lineLength = -1;
+
+        do
+        {
+            lineLength=nslProcess->readLine(buf, sizeof(buf));
+            if (lineLength != -1)
+            {
+                QString line=QString(buf);
+                if  (line.startsWith("Name:"))
+                {
+                    line.remove(0,5);
+                    line=line.trimmed();
+                    nameFound=line;
+                    break;
+                }
+            }
+        } while (lineLength!=-1);
+    }
+
+    delete nslProcess;
+    nslProcess=0;
+
+    return nameFound;
+}
+
+
+
 

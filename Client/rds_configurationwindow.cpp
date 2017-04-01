@@ -2,6 +2,8 @@
 #include "ui_rds_configurationwindow.h"
 
 #include "rds_global.h"
+#include <../NetLogger/netlogger.h>
+
 #include <QtWidgets>
 #include <QHostInfo>
 #include <QNetworkInterface>
@@ -361,8 +363,8 @@ void rdsConfigurationWindow::on_protSmallFilesCheckbox_toggled(bool checked)
 
 void rdsConfigurationWindow::callLogServerTestConnection()
 {
-    // Clear previous output
-    ui->logServerStatusLabel->setText("");
+    // Reset previous output
+    ui->logServerStatusLabel->setText("Testing connection...");
     RTI->processEvents();
 
     const QString errorPrefix="<span style=""color:#990000;""><strong>ERROR:</strong></span>&nbsp;&nbsp;";
@@ -410,10 +412,9 @@ void rdsConfigurationWindow::callLogServerTestConnection()
     QTcpSocket socket;
     socket.connectToHost(serverPath, serverPort);
 
-    if (socket.waitForConnected(500))
+    if (socket.waitForConnected(1000))
     {
         localIP=socket.localAddress().toString();
-        localHostname=QHostInfo::fromName(localIP).hostName();
     }
     else
     {
@@ -423,17 +424,35 @@ void rdsConfigurationWindow::callLogServerTestConnection()
 
     socket.disconnectFromHost();
 
-    if ((!error) && (localHostname.isEmpty()))
-    {
-        output += errorPrefix + "Unable to resolve local hostname.<br /><br />IP = " + localIP;
-        error=true;
-    }
-
-    // Now compare if the local system and the server live on the same domain
+    // Lookup the hostname of the local client from the DNS server
     if (!error)
     {
-        serverPath=QHostInfo::fromName(serverPath).hostName();
+        localHostname=NetLogger::dnsLookup(localIP);
 
+        if (localHostname.isEmpty())
+        {
+            output += errorPrefix + "Unable to resolve local hostname.<br /><br />IP = " + localIP;
+            output += "<br />Check local DNS server settings.";
+            error=true;
+        }
+    }
+
+    // Lookup the hostname of the log server from the DNS server
+    if (!error)
+    {
+        serverPath=NetLogger::dnsLookup(serverPath);
+
+        if (serverPath.isEmpty())
+        {
+            output += errorPrefix + "Unable to resolve server name.<br /><br />";
+            output += "Check local DNS server settings.";
+            error=true;
+        }
+    }
+
+    // Compare if the local system and the server are on the same domain
+    if (!error)
+    {
         QStringList localHostString =localHostname.toLower().split(".");
         QStringList serverHostString=serverPath.toLower().split(".");
 

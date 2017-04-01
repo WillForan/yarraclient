@@ -3,7 +3,6 @@
 
 #include <QtCore>
 #include <QtNetwork>
-//#include <QFtp>
 
 #include <../NetLogger/netlogger.h>
 
