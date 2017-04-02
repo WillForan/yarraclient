@@ -64,21 +64,21 @@ bool rdsProcessControl::isUpdateNeeded()
     if ((RTI_CONFIG->infoUpdateMode==RTI_CONFIG->UPDATEMODE_FIXEDTIME) ||
         (RTI_CONFIG->infoUpdateMode==RTI_CONFIG->UPDATEMODE_STARTUP_FIXEDTIME) )
     {
-        if ((!updateTime1Done) && (currTime.time() > RTI_CONFIG->infoUpdateTime1))
+        if ((!updateTime1Done) && (currTime.time() > RTI_CONFIG->infoUpdateTime1Jittered))
         {
             updateTime1Done=true;
             updateNeeded=true;
             RTI->debug("Update condition: Fixed Time 1");
         }
 
-        if ((RTI_CONFIG->infoUpdateUseTime2) && (!updateTime2Done) && (currTime.time() > RTI_CONFIG->infoUpdateTime2))
+        if ((RTI_CONFIG->infoUpdateUseTime2) && (!updateTime2Done) && (currTime.time() > RTI_CONFIG->infoUpdateTime2Jittered))
         {
             updateTime2Done=true;
             updateNeeded=true;
             RTI->debug("Update condition: Fixed Time 2");
         }
 
-        if ((RTI_CONFIG->infoUpdateUseTime3) && (!updateTime3Done) && (currTime.time() > RTI_CONFIG->infoUpdateTime3))
+        if ((RTI_CONFIG->infoUpdateUseTime3) && (!updateTime3Done) && (currTime.time() > RTI_CONFIG->infoUpdateTime3Jittered))
         {
             updateTime3Done=true;
             updateNeeded=true;
@@ -373,15 +373,15 @@ void rdsProcessControl::setStartTime()
     updateTime3Done=false;
 
     // Check if update times are in the past
-    if (RTI_CONFIG->infoUpdateTime1<startTime.time())
+    if (RTI_CONFIG->infoUpdateTime1Jittered<startTime.time())
     {
         updateTime1Done=true;
     }
-    if (RTI_CONFIG->infoUpdateTime2<startTime.time())
+    if (RTI_CONFIG->infoUpdateTime2Jittered<startTime.time())
     {
         updateTime2Done=true;
     }
-    if (RTI_CONFIG->infoUpdateTime3<startTime.time())
+    if (RTI_CONFIG->infoUpdateTime3Jittered<startTime.time())
     {
         updateTime3Done=true;
     }

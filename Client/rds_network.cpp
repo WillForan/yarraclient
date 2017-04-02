@@ -104,11 +104,6 @@ bool rdsNetwork::openConnection()
         RTI->debug("Selected storage path is :" + networkDrive.absolutePath());
     }
 
-    if (RTI_CONFIG->isNetworkModeFTP())
-    {
-        return false;
-    }
-
     connectionActive=true;
     return true;
 }

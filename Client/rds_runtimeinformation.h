@@ -118,7 +118,6 @@ public:
     void setPostponementRequest(bool request);
     bool isPostponementRequested();
 
-
     void setSevereErrors(bool value);
     bool isSevereErrors();
 

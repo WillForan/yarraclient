@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     qApp->setPalette(newPalette);
 
     /*
-     // Looks also nice.
+    // Looks also nice.
     QPalette darkPalette;
     darkPalette.setColor(QPalette::Window, QColor(53,53,53));
     darkPalette.setColor(QPalette::WindowText, Qt::white);
@@ -114,7 +114,6 @@ int main(int argc, char *argv[])
 
     while (RTI->getMode()!=rdsRuntimeInformation::RDS_QUIT)
     {
-
         switch (RTI->getMode())
         {
         case rdsRuntimeInformation::RDS_OPERATION:
@@ -130,16 +129,17 @@ int main(int argc, char *argv[])
             cw->show();
             a.exec();
             RDS_FREE(cw);
+            RTI->processEvents();
             break;
 
         case rdsRuntimeInformation::RDS_QUIT:
         default:
             break;
         }
-
     }
 
     RTI_NETLOG.postEvent(EventInfo::Type::Shutdown,EventInfo::Detail::Information,EventInfo::Severity::Success);
 
     return RTI->getReturnValue();
 }
+

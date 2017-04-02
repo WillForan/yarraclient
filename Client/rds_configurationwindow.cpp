@@ -142,17 +142,15 @@ void rdsConfigurationWindow::readConfiguration()
     ui->time2Checkbox->setChecked(config.infoUpdateUseTime2);
     ui->time3Checkbox->setChecked(config.infoUpdateUseTime3);
 
+    ui->jitterTimesCheckbox->setChecked(config.infoJitterTimes);
+    ui->jitterSpinbox->setValue(config.infoJitterWindow);
+
     //NOTE: Currently, the software only supports the network drive mode
     ui->networkModeCombobox->setCurrentIndex(0);
 
     ui->networkDrivePathEdit->setText(config.netDriveBasepath);
     ui->networkDriveReconnectCmd->setText(config.netDriveReconnectCmd);
     ui->networkDriveCreatePath->setChecked(config.netDriveCreateBasepath);
-
-    ui->ftpIPEdit->setText(config.netFTPIP);
-    ui->ftpUserEdit->setText(config.netFTPUser);
-    ui->ftpPwdEdit->setText(config.netFTPPassword);
-    ui->ftpPathEdit->setText(config.netFTPBasepath);
 
     ui->updateCombobox->setCurrentIndex(config.infoUpdateMode);
     ui->updatePeriodCombobox->setCurrentIndex(config.infoUpdatePeriodUnit);
@@ -184,16 +182,13 @@ void rdsConfigurationWindow::storeConfiguration()
     config.infoUpdateUseTime2=ui->time2Checkbox->isChecked();
     config.infoUpdateUseTime3=ui->time3Checkbox->isChecked();
 
+    config.infoJitterTimes=ui->jitterTimesCheckbox->isChecked();
+    config.infoJitterWindow=ui->jitterSpinbox->value();
+
     config.netMode=ui->networkModeCombobox->currentIndex();
     config.netDriveBasepath=ui->networkDrivePathEdit->text();
     config.netDriveReconnectCmd=ui->networkDriveReconnectCmd->text();
     config.netDriveCreateBasepath=ui->networkDriveCreatePath->isChecked();
-
-    // Not used anymore
-    config.netFTPIP=ui->ftpIPEdit->text();
-    config.netFTPUser=ui->ftpUserEdit->text();
-    config.netFTPPassword=ui->ftpPwdEdit->text();
-    config.netFTPBasepath=ui->ftpPathEdit->text();    
 
     config.logServerPath=ui->logServerPathEdit->text();
     config.logSendScanInfo=ui->logServerSendScansCheckbox->isChecked();

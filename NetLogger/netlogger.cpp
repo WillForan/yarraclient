@@ -4,6 +4,10 @@
     #include "rds_global.h"
 #endif
 
+#ifdef YARRA_APP_ORT
+    #include "ort_global.h"
+#endif
+
 
 NetLogger::NetLogger()
 {

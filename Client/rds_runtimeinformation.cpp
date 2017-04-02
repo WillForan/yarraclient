@@ -98,6 +98,9 @@ void rdsRuntimeInformation::prepare()
         syngoMRLine=RDS_VB;
     }
 
+    // Initialize random generator for jittering start times
+    QTime time = QTime::currentTime();
+    qsrand((uint)time.msec());
 }
 
 
@@ -314,9 +317,13 @@ void rdsRuntimeInformation::updateInfoUI()
 
 void rdsRuntimeInformation::setIconWindowAnim(bool status)
 {
+    #ifdef YARRA_APP_RDS
+
     if (configInstance->infoShowIcon)
     {
         windowInstance->iconWindow.setAnim(status);
     }
+
+    #endif
 }
 

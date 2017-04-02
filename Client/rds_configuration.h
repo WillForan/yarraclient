@@ -36,18 +36,22 @@ public:
     int     infoUpdateMode;
     int     infoUpdatePeriod;
     int     infoUpdatePeriodUnit;
+
     QTime   infoUpdateTime1;
     QTime   infoUpdateTime2;
     QTime   infoUpdateTime3;
+
     bool    infoUpdateUseTime2;
     bool    infoUpdateUseTime3;
 
-    int     netMode;
-    QString netFTPIP;
-    QString netFTPUser;
-    QString netFTPPassword;
-    QString netFTPBasepath;
+    bool    infoJitterTimes;
+    int     infoJitterWindow;
 
+    QTime   infoUpdateTime1Jittered;
+    QTime   infoUpdateTime2Jittered;
+    QTime   infoUpdateTime3Jittered;
+
+    int     netMode;
     QString netDriveBasepath;
     QString netDriveReconnectCmd;
     bool    netDriveCreateBasepath;
@@ -84,13 +88,10 @@ public:
 
     enum
     {
-        NETWORKMODE_DRIVE=0,
-        NETWORKMODE_FTP  =1
+        NETWORKMODE_DRIVE=0
     };
 
-    bool isNetworkModeFTP();
     bool isNetworkModeDrive();
-
     bool isLogServerConfigured();
 
 protected:
@@ -102,12 +103,6 @@ protected:
 inline int rdsConfiguration::getProtocolCount()
 {
     return protocols.count();
-}
-
-
-inline bool rdsConfiguration::isNetworkModeFTP()
-{
-    return netMode==NETWORKMODE_FTP;
 }
 
 
