@@ -114,6 +114,7 @@ rdsRaid::rdsRaid()
 
     currentFilename="";
     lastProcessedFileID=-1;
+    lastProcessedFileIDScaninfo=-1;
     ignoreLPFID=false;
     ortMissingDiskspace=false;
     scanActive=false;
@@ -250,14 +251,16 @@ bool rdsRaid::callRaidTool(QStringList command, QStringList options)
 void rdsRaid::readLPFI()
 {
     QSettings lpfiFile(RTI->getAppPath() + RDS_LPFI_NAME, QSettings::IniFormat);
-    lastProcessedFileID=lpfiFile.value("LPFI/FileID", -1).toInt();
+    lastProcessedFileID        =lpfiFile.value("LPFI/FileID",     -1).toInt();
+    lastProcessedFileIDScaninfo=lpfiFile.value("Scaninfo/FileID", -1).toInt();
 }
 
 
 void rdsRaid::saveLPFI()
 {
     QSettings lpfiFile(RTI->getAppPath() + RDS_LPFI_NAME, QSettings::IniFormat);
-    lpfiFile.setValue("LPFI/FileID", lastProcessedFileID);
+    lpfiFile.setValue("LPFI/FileID",     lastProcessedFileID);
+    lpfiFile.setValue("Scaninfo/FileID", lastProcessedFileIDScaninfo);
 }
 
 
@@ -563,6 +566,7 @@ bool rdsRaid::parseOutputDirectory()
                     // only mean that an overlap of the fileID has occured. Therefore,
                     // reset the lastProcessedFileID couner
                     lastProcessedFileID=-1;
+                    lastProcessedFileIDScaninfo=-1;
                 }
 
                 if (raidEntry.fileID<=lastProcessedFileID)
@@ -753,7 +757,7 @@ bool rdsRaid::createExportList(bool onlyReadRaid)
     // Trigger reading of raid list
     RDS_RETONERR( readRaidList() );
 
-    // If only the raid should be read but no export list creater (for intermediate
+    // If only the raid should be read but no export list created (for intermediate
     // log server updates), return at this point
     if (onlyReadRaid)
     {

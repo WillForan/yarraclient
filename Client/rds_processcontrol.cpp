@@ -324,9 +324,24 @@ void rdsProcessControl::sendScanInfoToLogServer()
 {
     QUrlQuery data;
 
-    // TODO: Implement own LPFI mechanism to prevent repeated sending of entries
+    if (!RTI_RAID->raidList.isEmpty())
+    {
+        // If the fileID of the first (i.e. newest) scan is smaller than the LPFI,
+        // then a reset of the RAID must have happened. Reset the LPFI and process
+        // the whole RAID list then.
+        if (RTI_RAID->raidList.at(0)->fileID<RTI_RAID->getLPFIScaninfo())
+        {
+            RTI_RAID->setLPFIScaninfo(-1);
+        }
+    }
+
     for (rdsRaidEntry* entry: RTI_RAID->raidList)
     {
+        // Check if this entry has already been processed during the previous run.
+        if (entry->fileID<=RTI_RAID->getLPFIScaninfo())
+        {
+            break;
+        }
         entry->addToUrlQuery(data);
     }
 
@@ -353,6 +368,14 @@ void rdsProcessControl::sendScanInfoToLogServer()
             RTI->getWindowInstance()->iconWindow.setError();
         }
     }
+    else
+    {
+        // Store the fileID of the newest RAID entry processed, so that
+        // during the next run only new entries are processed
+        RTI_RAID->setLPFIScaninfo(RTI_RAID->raidList.at(0)->fileID);
+    }
+
+    RTI_RAID->saveLPFI();
 }
 
 
