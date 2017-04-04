@@ -52,6 +52,7 @@ void rdsConfiguration::loadConfiguration()
     netDriveBasepath      =settings.value("Network/DriveBasepath",      "").toString();
     netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd",  "").toString();
     netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath",false).toBool();
+    netRemoteConfigFile   =settings.value("Network/RemoteConfigFile",   "").toString();
 
     logServerPath         =settings.value("LogServer/ServerPath",       "").toString();
     logSendScanInfo       =settings.value("LogServer/SendScanInfo",     true).toBool();
@@ -116,6 +117,7 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("Network/DriveBasepath",      netDriveBasepath);
     settings.setValue("Network/DriveReconnectCmd",  netDriveReconnectCmd);
     settings.setValue("Network/DriveCreateBasepath",netDriveCreateBasepath);
+    settings.setValue("Network/RemoteConfigFile",   netRemoteConfigFile);
 
     settings.setValue("LogServer/ServerPath",       logServerPath);
     settings.setValue("LogServer/SendScanInfo",     logSendScanInfo);
@@ -207,6 +209,25 @@ void rdsConfiguration::deleteProtocol(int index)
         protocols.removeAt(index);
     }
 }
+
+
+void rdsConfiguration::loadRemotelyDefinedProtocols()
+{
+    // First, remove the already loaded remote procotols, so that they
+    // are replaced with the newer ones from the remote file
+    removeRemotelyDefinedProtocols();
+
+    // Return if remote protocols have not been defined
+    if (netRemoteConfigFile.isEmpty())
+    {
+        return;
+    }
+
+    // TODO: Continue...
+    // TODO: Check for existence of file, load ini, check for serial numbers, insert protocols into list
+
+}
+
 
 
 void rdsConfiguration::removeRemotelyDefinedProtocols()

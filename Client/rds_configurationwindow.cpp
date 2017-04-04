@@ -151,6 +151,7 @@ void rdsConfigurationWindow::readConfiguration()
     ui->networkDrivePathEdit->setText(config.netDriveBasepath);
     ui->networkDriveReconnectCmd->setText(config.netDriveReconnectCmd);
     ui->networkDriveCreatePath->setChecked(config.netDriveCreateBasepath);
+    ui->networkRemoteConfigLabelEdit->setText(config.netRemoteConfigFile);
 
     ui->updateCombobox->setCurrentIndex(config.infoUpdateMode);
     ui->updatePeriodCombobox->setCurrentIndex(config.infoUpdatePeriodUnit);
@@ -189,6 +190,7 @@ void rdsConfigurationWindow::storeConfiguration()
     config.netDriveBasepath=ui->networkDrivePathEdit->text();
     config.netDriveReconnectCmd=ui->networkDriveReconnectCmd->text();
     config.netDriveCreateBasepath=ui->networkDriveCreatePath->isChecked();
+    config.netRemoteConfigFile=ui->networkRemoteConfigLabelEdit->text();
 
     config.logServerPath=ui->logServerPathEdit->text();
     config.logSendScanInfo=ui->logServerSendScansCheckbox->isChecked();
@@ -346,6 +348,17 @@ void rdsConfigurationWindow::on_networkFilePathButton_clicked()
         msgBox.setText("<b>NOTE:</b> Ensure that the network drive will be <b>reconnected automatically</b> after restart of the system. "\
                        "Otherwise transfering the raw data will not be possible. If this cannot be ensured, use FTP server connection instead.");
         msgBox.exec();
+    }
+}
+
+
+void rdsConfigurationWindow::on_networkRemoteConfigurationButton_clicked()
+{
+    QString newFile=QFileDialog::getOpenFileName(this,"Select Remote Configuration File","","*.ini");
+
+    if (!newFile.isNull())
+    {
+        ui->networkRemoteConfigLabelEdit->setText(newFile);
     }
 }
 

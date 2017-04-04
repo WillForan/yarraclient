@@ -275,10 +275,10 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
         return false;
     }
 
-    // Use eventloop to wait until post event has finished
-    // TODO: Is there a timeout mechanism?
+    // Use eventloop to wait until post event has finished. Event loop will timeout after 10sec
     QEventLoop eventLoop;
     QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+    QTimer::singleShot(10000, &eventLoop, SLOT(quit()));
 
     if (reply->isRunning())
     {

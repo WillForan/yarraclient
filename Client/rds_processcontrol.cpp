@@ -158,9 +158,19 @@ void rdsProcessControl::performUpdate()
 
     RTI->setPostponementRequest(false);
 
-    // Read the RAID directory, parse it, and decide which scans have to be saved.
-    // NOTE: For logserver-only updates, this will only read the raid but not create a list
-    RTI_RAID->createExportList(logServerOnlyUpdate);
+    // The the scan list from the RAID
+    if (!RTI_RAID->readRaidList())
+    {
+        RTI->log("ERROR: Unable to read RAID list.");
+        RTI->log("ERROR: Retrying in " + QString::number(RDS_UPDATETIME_RETRY) + " minutes.");
+        setExplicitUpdate(RDS_UPDATETIME_RETRY);
+
+        // Indicate the error in the top icon
+        if (!RTI->getWindowInstance()->isVisible())
+        {
+            RTI->getWindowInstance()->iconWindow.setError();
+        }
+    }
 
     // Transfer the raid scan table to the log server, if configured and desired
     if ((RTI_CONFIG->logSendScanInfo) && (RTI_NETLOG.isConfigured()))
@@ -170,10 +180,16 @@ void rdsProcessControl::performUpdate()
 
     // If a full update with raw-data transfer should be done
     if ((!logServerOnlyUpdate) && (!RTI_RAID->isScanActive()))
-    {
+    {              
         // Check if the connection to the network drive can be established
         if (RTI_NETWORK->openConnection())
         {
+            // Load the network protocols (if defined)
+            RTI_CONFIG->loadRemotelyDefinedProtocols();
+
+            // Decide which scans should be saved
+            RTI_RAID->createExportList();
+
             explicitUpdate=false;
             connectionFailureCount=0;
             rdsActivityWindow* activityWindow=0;
@@ -306,6 +322,7 @@ void rdsProcessControl::performUpdate()
     // is currently active, don't update and retry in some time
     if ((!logServerOnlyUpdate) && (RTI_RAID->isScanActive()))
     {
+        RTI->log("Scan is active. Retrying in " + QString::number(RDS_UPDATETIME_RETRY) + " minutes.");
         setExplicitUpdate(RDS_UPDATETIME_RETRY);
     }
 
@@ -317,6 +334,7 @@ void rdsProcessControl::performUpdate()
     RTI->updateInfoUI();
 
     RTI->setIconWindowAnim(false);
+    RTI->log("");
 }
 
 
@@ -324,7 +342,12 @@ void rdsProcessControl::sendScanInfoToLogServer()
 {
     QUrlQuery data;
 
-    if (!RTI_RAID->raidList.isEmpty())
+    if (RTI_RAID->raidList.isEmpty())
+    {
+        // RAID list is empty for whatever reason. Nothing needs to be done.
+        return;
+    }
+    else
     {
         // If the fileID of the first (i.e. newest) scan is smaller than the LPFI,
         // then a reset of the RAID must have happened. Reset the LPFI and process

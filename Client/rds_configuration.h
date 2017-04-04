@@ -9,10 +9,10 @@ class rdsConfigurationProtocol
 public:
     QString name;
     QString filter;
-    bool saveAdjustData;
-    bool anonymizeData;
-    bool smallFiles;
-    bool remotelyDefined;
+    bool    saveAdjustData;
+    bool    anonymizeData;
+    bool    smallFiles;
+    bool    remotelyDefined;
 };
 
 
@@ -55,6 +55,7 @@ public:
     QString netDriveBasepath;
     QString netDriveReconnectCmd;
     bool    netDriveCreateBasepath;
+    QString netRemoteConfigFile;
 
     QString logServerPath;
     bool    logSendScanInfo;
@@ -67,6 +68,7 @@ public:
     void readProtocol(int index, QString& name, QString& filter, bool& saveAdjustData, bool& anonymizeData, bool &smallFiles, bool remotelyDefined);
     void deleteProtocol(int index);
 
+    void loadRemotelyDefinedProtocols();
     void removeRemotelyDefinedProtocols();
 
     bool protocolNeedsAnonymization(int index);

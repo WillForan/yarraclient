@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>612</width>
-    <height>393</height>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -584,7 +584,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="bottomMargin">
-          <number>12</number>
+          <number>4</number>
          </property>
          <item>
           <widget class="QLabel" name="label_13">
@@ -644,6 +644,9 @@ p, li { white-space: pre-wrap; }
          <property name="leftMargin">
           <number>0</number>
          </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
          <item>
           <widget class="QStackedWidget" name="networkStackedWidget">
            <property name="currentIndex">
@@ -654,13 +657,22 @@ p, li { white-space: pre-wrap; }
              <property name="leftMargin">
               <number>0</number>
              </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
                 <widget class="QLabel" name="label_14">
                  <property name="minimumSize">
                   <size>
-                   <width>80</width>
+                   <width>120</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -707,7 +719,7 @@ p, li { white-space: pre-wrap; }
                 <number>0</number>
                </property>
                <property name="leftMargin">
-                <number>86</number>
+                <number>128</number>
                </property>
                <item>
                 <widget class="QCheckBox" name="networkDriveCreatePath">
@@ -726,10 +738,56 @@ p, li { white-space: pre-wrap; }
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>30</height>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_9">
+               <item>
+                <widget class="QLabel" name="networkRemoteConfigLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Remote Configuration: </string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="networkRemoteConfigLabelEdit"/>
+               </item>
+               <item>
+                <widget class="QToolButton" name="networkRemoteConfigurationButton">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_19">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
                 </size>
                </property>
               </spacer>
@@ -740,7 +798,7 @@ p, li { white-space: pre-wrap; }
                 <widget class="QLabel" name="label_17">
                  <property name="minimumSize">
                   <size>
-                   <width>80</width>
+                   <width>120</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -776,8 +834,8 @@ p, li { white-space: pre-wrap; }
                 <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Note: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The command line entered above will be executed before each data transfer and can be used to reconnect the network drive before the transfer. Leave the field empty if reestablishment of the network connection is not necessary. &lt;br /&gt;&lt;br /&gt;To learn about the syntax, open a Windows command shell and type &amp;quot;net use / help&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note: &lt;/span&gt;The command line above will be executed before each transfer and can be used to reconnect network drives. To learn about the syntax, type &amp;quot;net use / help&amp;quot; in a Windows command shell.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -901,7 +959,7 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>59</width>
+             <width>10</width>
              <height>20</height>
             </size>
            </property>

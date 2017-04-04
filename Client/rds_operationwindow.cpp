@@ -75,6 +75,8 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
         control.setStartTime();
         updateInfoUI();
 
+        log.log("System "+config.infoName+" / Serial # "+config.infoSerialNumber);
+
         RTI_NETLOG.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"startup");
 
         // Start the timer for triggering updates. Checks update condition only every

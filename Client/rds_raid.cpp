@@ -671,7 +671,13 @@ bool rdsRaid::parseOutputDirectory()
                     // ## PatName
                     // The remaining part should be the patient name
                     temp=raidLine;
+
+                    // For RDS the patient name should not be trimmed as this might confuse the
+                    // exam aggregation mechanism of the log server backend
+                #ifdef YARRA_APP_RDS
                     removePrecedingSpace(temp);
+                #endif
+
                     raidEntry.patName=temp;
 
                     //TODO: The patient name might still contain the date of birth.
@@ -750,19 +756,9 @@ bool rdsRaid::parseVB15Line(QString line, rdsRaidEntry* entry)
 }
 
 
-bool rdsRaid::createExportList(bool onlyReadRaid)
+bool rdsRaid::createExportList()
 {   
     exportList.clear();
-
-    // Trigger reading of raid list
-    RDS_RETONERR( readRaidList() );
-
-    // If only the raid should be read but no export list created (for intermediate
-    // log server updates), return at this point
-    if (onlyReadRaid)
-    {
-        return true;
-    }
 
     int raidCount=raidList.count();
     int raidIndex=0;  
