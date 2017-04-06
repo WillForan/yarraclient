@@ -196,6 +196,12 @@ QUrlQuery NetLogger::buildEventQuery(EventInfo::Type type, EventInfo::Detail det
 {
     QUrlQuery query;
 
+    // Send the API key if it has been entered
+    if (!RTI_CONFIG->logApiKey.isEmpty())
+    {
+        query.addQueryItem("api_key",RTI_CONFIG->logApiKey);
+    }
+
     // ip and time are filled in on the server
     query.addQueryItem("ip",            "0");
     query.addQueryItem("time",          "0");

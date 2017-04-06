@@ -158,8 +158,12 @@ void rdsConfigurationWindow::readConfiguration()
     ui->updatePeriodSpinbox->setValue(config.infoUpdatePeriod);
 
     ui->logServerPathEdit->setText(config.logServerPath);
+    ui->logServerApiKeyEdit->setText(config.logApiKey);
     ui->logServerSendScansCheckbox->setChecked(config.logSendScanInfo);
     ui->logServerPushFrequencySpinbox->setValue(config.logUpdateFrequency);
+
+    ui->startCmdEdit->clear();
+    ui->startCmdEdit->setPlainText(config.startCmds.join('\n'));
 
     updateProtocolList();
 
@@ -193,12 +197,15 @@ void rdsConfigurationWindow::storeConfiguration()
     config.netRemoteConfigFile=ui->networkRemoteConfigLabelEdit->text();
 
     config.logServerPath=ui->logServerPathEdit->text();
+    config.logApiKey=ui->logServerApiKeyEdit->text();
     config.logSendScanInfo=ui->logServerSendScansCheckbox->isChecked();
     config.logUpdateFrequency=ui->logServerPushFrequencySpinbox->value();
 
     config.infoUpdateMode=ui->updateCombobox->currentIndex();
     config.infoUpdatePeriodUnit=ui->updatePeriodCombobox->currentIndex();
     config.infoUpdatePeriod=ui->updatePeriodSpinbox->value();
+
+    config.startCmds=ui->startCmdEdit->toPlainText().split('\n');
 
     // Write the configuration to the ini file
     config.saveConfiguration();
@@ -483,6 +490,8 @@ void rdsConfigurationWindow::callLogServerTestConnection()
             }
         }
     }
+
+    // TODO: Connect to the /test entry point and check if it returns 200
 
     if (!error)
     {

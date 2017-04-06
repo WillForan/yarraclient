@@ -3,6 +3,7 @@
 #include "ui_rds_operationwindow.h"
 
 #include "rds_global.h"
+#include "rds_exechelper.h"
 
 
 rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
@@ -93,6 +94,11 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
             {
                 iconWindow.setError();
             }
+        }
+
+        if (!RTI_CONFIG->startCmds.isEmpty())
+        {
+            QTimer::singleShot(1,this,SLOT(runStartCmds()));
         }
     }
 
@@ -346,4 +352,31 @@ void rdsOperationWindow::updateInfoUI()
             ui->InfoValueError->setText("<span style=""color:#580F8B;""><b>Update running...<br>Don't start new scans at this time!</b></b></span>");
         }
     }
+}
+
+
+void rdsOperationWindow::runStartCmds()
+{
+    RTI->log("Executing start commands...");
+
+    rdsExecHelper exec;
+    QString cmdLine="";
+    bool error=false;
+
+    for (int i=0; i<RTI_CONFIG->startCmds.count(); i++)
+    {
+        cmdLine=RTI_CONFIG->startCmds.at(i);
+
+        if (!cmdLine.isEmpty())
+        {
+            if (!exec.run(cmdLine))
+            {
+                RTI->log("ERROR: Execution of run commmand failed '" + cmdLine + "'");
+            }
+        }
+    }
+
+    // TODO: Error reporting
+
+    RTI->log("Done.");
 }

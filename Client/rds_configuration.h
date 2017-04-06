@@ -58,8 +58,12 @@ public:
     QString netRemoteConfigFile;
 
     QString logServerPath;
+    QString logApiKey;
     bool    logSendScanInfo;
     int     logUpdateFrequency;
+
+    QStringList startCmds;
+
 
     QList<rdsConfigurationProtocol*> protocols;
     int getProtocolCount();

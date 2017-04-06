@@ -55,11 +55,19 @@ void rdsConfiguration::loadConfiguration()
     netRemoteConfigFile   =settings.value("Network/RemoteConfigFile",   "").toString();
 
     logServerPath         =settings.value("LogServer/ServerPath",       "").toString();
+    logApiKey             =settings.value("LogServer/ApiKey",           "").toString();
     logSendScanInfo       =settings.value("LogServer/SendScanInfo",     true).toBool();
     logUpdateFrequency    =settings.value("LogServer/UpdateFrequency",  4).toInt();
 
-    int protocolCount     =settings.value("Protocols/Count",            0).toInt();
+    startCmds.clear();
+    int startCmdsCount    =settings.value("StartCmds/Count",            0).toInt();
+    for (int i=0; i<startCmdsCount; i++)
+    {
+        startCmds.append(settings.value("StartCmds/Cmd"+QString::number(i),"").toString());
+    }
 
+
+    int protocolCount     =settings.value("Protocols/Count",            0).toInt();
     for (int i=0; i<protocolCount; i++)
     {
         QString name       =settings.value("Protocol" + QString::number(i) + "/Name",          "Group"+QString::number(i)).toString();
@@ -120,11 +128,17 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("Network/RemoteConfigFile",   netRemoteConfigFile);
 
     settings.setValue("LogServer/ServerPath",       logServerPath);
+    settings.setValue("LogServer/ApiKey",           logApiKey);
     settings.setValue("LogServer/SendScanInfo",     logSendScanInfo);
     settings.setValue("LogServer/UpdateFrequency",  logUpdateFrequency);
 
-    settings.setValue("Protocols/Count",            getProtocolCount());
+    settings.setValue("StartCmds/Count",            startCmds.count());
+    for (int i=0; i<startCmds.count(); i++)
+    {
+        settings.setValue("StartCmds/Cmd"+QString::number(i), startCmds.at(i));
+    }
 
+    settings.setValue("Protocols/Count",            getProtocolCount());
     for (int i=0; i<getProtocolCount(); i++)
     {
         QString name="";
@@ -147,6 +161,7 @@ void rdsConfiguration::saveConfiguration()
             settings.setValue("Protocol" + QString::number(i) + "/SmallFiles",     smallFiles);
         }
     }
+
 }
 
 

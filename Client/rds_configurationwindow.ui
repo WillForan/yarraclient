@@ -1025,7 +1025,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_10">
          <item>
-          <widget class="QLabel" name="apiKeyLogServerLabel">
+          <widget class="QLabel" name="logServerApiKeyLabel">
            <property name="minimumSize">
             <size>
              <width>130</width>
@@ -1038,7 +1038,7 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="apiKeyLogServerEdit"/>
+          <widget class="QLineEdit" name="logServerApiKeyEdit"/>
          </item>
         </layout>
        </item>
@@ -1197,7 +1197,11 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
-        <widget class="QPlainTextEdit" name="startCmdEdit"/>
+        <widget class="QPlainTextEdit" name="startCmdEdit">
+         <property name="lineWrapMode">
+          <enum>QPlainTextEdit::NoWrap</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

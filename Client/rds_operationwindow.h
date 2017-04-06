@@ -47,6 +47,7 @@ public slots:
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
+    void runStartCmds();
 
 protected:
     void closeEvent(QCloseEvent *event);    

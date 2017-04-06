@@ -358,6 +358,12 @@ void rdsProcessControl::sendScanInfoToLogServer()
         }
     }
 
+    // Send the API key if it has been entered
+    if (!RTI_CONFIG->logApiKey.isEmpty())
+    {
+        data.addQueryItem("api_key",RTI_CONFIG->logApiKey);
+    }
+
     for (rdsRaidEntry* entry: RTI_RAID->raidList)
     {
         // Check if this entry has already been processed during the previous run.
