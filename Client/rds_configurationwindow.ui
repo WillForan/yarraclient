@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>4</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -999,6 +999,9 @@ p, li { white-space: pre-wrap; }
        <property name="rightMargin">
         <number>80</number>
        </property>
+       <property name="bottomMargin">
+        <number>7</number>
+       </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
@@ -1016,6 +1019,26 @@ p, li { white-space: pre-wrap; }
          </item>
          <item>
           <widget class="QLineEdit" name="logServerPathEdit"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <item>
+          <widget class="QLabel" name="apiKeyLogServerLabel">
+           <property name="minimumSize">
+            <size>
+             <width>130</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>API Key:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="apiKeyLogServerEdit"/>
          </item>
         </layout>
        </item>
@@ -1140,6 +1163,41 @@ p, li { white-space: pre-wrap; }
           </size>
          </property>
         </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="startCmdTabs">
+      <attribute name="title">
+       <string>Startup Commands</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <property name="spacing">
+        <number>9</number>
+       </property>
+       <property name="leftMargin">
+        <number>12</number>
+       </property>
+       <property name="topMargin">
+        <number>16</number>
+       </property>
+       <property name="rightMargin">
+        <number>12</number>
+       </property>
+       <property name="bottomMargin">
+        <number>16</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="startCmdLabel">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Starting with software versions VB19A and VE11A, the &amp;quot;MREmbeddedControl&amp;quot; software has been introduced to the Siemens MR scanner software, which prevents execution of any batch scipts. The RDS will client will execute the commands entered below in sequential order during the start-up procedure, which can be used as an alternative mechanism to reconnect network shares:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPlainTextEdit" name="startCmdEdit"/>
        </item>
       </layout>
      </widget>
