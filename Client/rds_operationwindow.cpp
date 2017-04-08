@@ -6,12 +6,12 @@
 #include "rds_exechelper.h"
 
 
-rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
+rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
     QDialog(parent),
     ui(new Ui::rdsOperationWindow)
 {
     ui->setupUi(this);
-    log.setLogWidget(ui->logEdit);
+    log.setLogWidget(ui->logEdit);    
 
     trayIconMenu = new QMenu(this);
     trayItemTransferNow=trayIconMenu->addAction("Transfer data now",this, SLOT(callManualUpdate()));
@@ -96,8 +96,8 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
             }
         }
 
-        if (!RTI_CONFIG->startCmds.isEmpty())
-        {
+        if ((isFirstRun) && (!RTI_CONFIG->startCmds.isEmpty()))
+        {            
             QTimer::singleShot(1,this,SLOT(runStartCmds()));
         }
     }
@@ -372,11 +372,15 @@ void rdsOperationWindow::runStartCmds()
             if (!exec.run(cmdLine))
             {
                 RTI->log("ERROR: Execution of run commmand failed '" + cmdLine + "'");
+
+                // Indicate the error in the top icon
+                if (!RTI->getWindowInstance()->isVisible())
+                {
+                    RTI->getWindowInstance()->iconWindow.setError();
+                }
             }
         }
     }
-
-    // TODO: Error reporting
 
     RTI->log("Done.");
 }

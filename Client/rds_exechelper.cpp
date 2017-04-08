@@ -34,7 +34,17 @@ bool rdsExecHelper::run(QString cmdLine)
     ti.start();
     timeoutTimer.start();
     myProcess->start(cmdLine);
-    q.exec();
+    if (myProcess->state()==QProcess::NotRunning)
+    {
+        delete myProcess;
+        myProcess=0;
+        RTI->log("ERROR: Process did not start - '" + cmdLine + "'");
+        return false;
+    }
+    else
+    {
+        q.exec();
+    }
 
     // Check for problems with the event loop: Sometimes it seems to return to quickly!
     // In this case, start a second while loop to check when the process is really finished.

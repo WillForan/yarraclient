@@ -112,16 +112,20 @@ int main(int argc, char *argv[])
     rdsConfigurationWindow* cw=0;
     rdsOperationWindow* ow=0;
 
+    bool firstRun=true;
+
     while (RTI->getMode()!=rdsRuntimeInformation::RDS_QUIT)
     {
         switch (RTI->getMode())
         {
         case rdsRuntimeInformation::RDS_OPERATION:
-            ow=new rdsOperationWindow();
+            ow=new rdsOperationWindow(0,firstRun);
             a.setActivationWindow(ow, false);
             a.exec();
             a.setActivationWindow(0, false);
             RDS_FREE(ow);
+
+            firstRun=false;
             break;
 
         case rdsRuntimeInformation::RDS_CONFIGURATION:

@@ -63,9 +63,12 @@ void rdsConfiguration::loadConfiguration()
     int startCmdsCount    =settings.value("StartCmds/Count",            0).toInt();
     for (int i=0; i<startCmdsCount; i++)
     {
-        startCmds.append(settings.value("StartCmds/Cmd"+QString::number(i),"").toString());
+        QString entry=settings.value("StartCmds/Cmd"+QString::number(i),"").toString();
+        if (!entry.isEmpty())
+        {
+            startCmds.append(entry);
+        }
     }
-
 
     int protocolCount     =settings.value("Protocols/Count",            0).toInt();
     for (int i=0; i<protocolCount; i++)

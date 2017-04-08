@@ -25,7 +25,7 @@ class rdsOperationWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit rdsOperationWindow(QWidget *parent = 0);
+    explicit rdsOperationWindow(QWidget *parent = 0, bool isFirstRun=false);
     ~rdsOperationWindow();    
 
     rdsIconWindow  iconWindow;
