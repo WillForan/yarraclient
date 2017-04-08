@@ -260,6 +260,8 @@ bool rdsConfiguration::loadRemotelyDefinedProtocols()
 
     QStringList sections=settings.childGroups();
 
+    int addedProtocols=0;
+
     for (int i=0; i<sections.count(); i++)
     {
         if (sections.at(i)!="Yarra")
@@ -272,15 +274,18 @@ bool rdsConfiguration::loadRemotelyDefinedProtocols()
 
             bool addThisProtocol=true;
 
-            // Note: String lists aren't correcly read yet
-            QStringList includeSystem=settings.value(name+"/IncludeSystems","").toStringList();
-            QStringList excludeSystem=settings.value(name+"/ExcludeSystems","").toStringList();
+            const QString invalidStr="#@4#4@";
+            QStringList includeSystem=settings.value(name+"/IncludeSystems",invalidStr).toStringList();
+            QStringList excludeSystem=settings.value(name+"/ExcludeSystems",invalidStr).toStringList();
 
-            RTI->log(name);
-            RTI->log(filter);
-
-            RTI->log(QString::number(includeSystem.count()));
-            RTI->log(includeSystem.join(","));
+            if ((includeSystem.count()==1) && (includeSystem.at(0)==invalidStr))
+            {
+                includeSystem.clear();
+            }
+            if ((excludeSystem.count()==1) && (excludeSystem.at(0)==invalidStr))
+            {
+                excludeSystem.clear();
+            }
 
             // If a list of include systems is provided, check if this sytem is listed
             if (!includeSystem.isEmpty())
@@ -299,11 +304,15 @@ bool rdsConfiguration::loadRemotelyDefinedProtocols()
 
             if (addThisProtocol)
             {
-                RTI->log("Including: "+name);
-
                 addProtocol(name, filter, saveAdjustData, anonymizeData, smallFiles, true);
+                addedProtocols++;
             }
-        }
+        }        
+    }
+
+    if (addedProtocols>0)
+    {
+        RTI->log(QString::number(addedProtocols)+" remote protocols added.");
     }
 
     return true;
