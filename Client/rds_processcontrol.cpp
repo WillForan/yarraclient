@@ -185,7 +185,14 @@ void rdsProcessControl::performUpdate()
         if (RTI_NETWORK->openConnection())
         {
             // Load the network protocols (if defined)
-            RTI_CONFIG->loadRemotelyDefinedProtocols();
+            if (!RTI_CONFIG->loadRemotelyDefinedProtocols())
+            {
+                // Indicate the error in the top icon
+                if (!RTI->getWindowInstance()->isVisible())
+                {
+                    RTI->getWindowInstance()->iconWindow.setError();
+                }
+            }
 
             // Decide which scans should be saved
             RTI_RAID->createExportList();

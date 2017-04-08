@@ -229,7 +229,7 @@ void rdsConfiguration::deleteProtocol(int index)
 }
 
 
-void rdsConfiguration::loadRemotelyDefinedProtocols()
+bool rdsConfiguration::loadRemotelyDefinedProtocols()
 {
     // First, remove the already loaded remote procotols, so that they
     // are replaced with the newer ones from the remote file
@@ -238,12 +238,75 @@ void rdsConfiguration::loadRemotelyDefinedProtocols()
     // Return if remote protocols have not been defined
     if (netRemoteConfigFile.isEmpty())
     {
-        return;
+        return true;
     }
 
-    // TODO: Continue...
-    // TODO: Check for existence of file, load ini, check for serial numbers, insert protocols into list
+    if (!QFile::exists(netRemoteConfigFile))
+    {
+        RTI->log("ERROR: Unable to find remote configuration file.");
+        return false;
+    }
 
+    QSettings settings(netRemoteConfigFile, QSettings::IniFormat);
+
+    // Used to test if the program has been configured once at all
+    bool validityTest=settings.value("Yarra/RemoteConfiguration",false).toBool();
+
+    if (!validityTest)
+    {
+        RTI->log("WARNING: Remote configuration file not valid.");
+        return true;
+    }
+
+    QStringList sections=settings.childGroups();
+
+    for (int i=0; i<sections.count(); i++)
+    {
+        if (sections.at(i)!="Yarra")
+        {
+            QString name=sections.at(i);
+            QString filter     =settings.value(name+"/Filter",       "_RDS").toString();
+            bool saveAdjustData=settings.value(name+"/SaveAdjustData",false).toBool();
+            bool anonymizeData =settings.value(name+"/AnonymizeData", false).toBool();
+            bool smallFiles    =settings.value(name+"/SmallFiles",    false).toBool();
+
+            bool addThisProtocol=true;
+
+            // Note: String lists aren't correcly read yet
+            QStringList includeSystem=settings.value(name+"/IncludeSystems","").toStringList();
+            QStringList excludeSystem=settings.value(name+"/ExcludeSystems","").toStringList();
+
+            RTI->log(name);
+            RTI->log(filter);
+
+            RTI->log(QString::number(includeSystem.count()));
+            RTI->log(includeSystem.join(","));
+
+            // If a list of include systems is provided, check if this sytem is listed
+            if (!includeSystem.isEmpty())
+            {
+                if ((!includeSystem.contains(infoSerialNumber)) && (!includeSystem.contains(infoName)))
+                {
+                    addThisProtocol=false;
+                }
+            }
+
+            // If a list of exclude systems is provided, check if this sytem is on the list
+            if ((excludeSystem.contains(infoSerialNumber)) || (excludeSystem.contains(infoName)))
+            {
+                addThisProtocol=false;
+            }
+
+            if (addThisProtocol)
+            {
+                RTI->log("Including: "+name);
+
+                addProtocol(name, filter, saveAdjustData, anonymizeData, smallFiles, true);
+            }
+        }
+    }
+
+    return true;
 }
 
 

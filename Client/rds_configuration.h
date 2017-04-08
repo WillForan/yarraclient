@@ -72,7 +72,7 @@ public:
     void readProtocol(int index, QString& name, QString& filter, bool& saveAdjustData, bool& anonymizeData, bool &smallFiles, bool remotelyDefined);
     void deleteProtocol(int index);
 
-    void loadRemotelyDefinedProtocols();
+    bool loadRemotelyDefinedProtocols();
     void removeRemotelyDefinedProtocols();
 
     bool protocolNeedsAnonymization(int index);
