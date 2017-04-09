@@ -225,7 +225,7 @@ void NetLogger::postEvent(EventInfo::Type type, EventInfo::Detail detail, EventI
     }
 
     QUrlQuery query=buildEventQuery(type,detail,severity,info,data);
-    postDataAsync(query,"Events");
+    postDataAsync(query,NETLOG_ENDPT_EVENT);
 }
 
 
@@ -248,8 +248,9 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
         return NULL;
     }
 
-    QUrl serviceUrl = QUrl(serverPath + "/" + endpt);
+    QUrl serviceUrl = QUrl("https://" + serverPath + "/" + endpt);
     serviceUrl.setScheme("https");
+    //RTI->log(serviceUrl.toString());
 
     QNetworkRequest req(serviceUrl);
     req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");

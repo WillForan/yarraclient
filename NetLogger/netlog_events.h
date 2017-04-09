@@ -1,9 +1,13 @@
 #ifndef NETLOG_EVENTS_H
 #define NETLOG_EVENTS_H
 
+#define NETLOG_ENDPT_TEST    "test"
+#define NETLOG_ENDPT_EVENT   "Events"
+#define NETLOG_ENDPT_RAIDLOG "RaidRecords"
+
+
 namespace EventInfo
 {
-
     enum class Type : int
     {
         Generic=0,

@@ -384,7 +384,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
     QNetworkReply::NetworkError error;
     int http_status=0;
 
-    bool success=RTI_NETWORK->netLogger.postData(data,"RaidRecords",error,http_status);
+    bool success=RTI_NETWORK->netLogger.postData(data,NETLOG_ENDPT_RAIDLOG,error,http_status);
 
     if (!success)
     {

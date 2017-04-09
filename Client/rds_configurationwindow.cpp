@@ -1,13 +1,14 @@
 #include "rds_configurationwindow.h"
 #include "ui_rds_configurationwindow.h"
 
-#include "rds_global.h"
-#include <../NetLogger/netlogger.h>
-
 #include <QtWidgets>
 #include <QHostInfo>
 #include <QNetworkInterface>
 #include <QTcpSocket>
+
+#include "rds_global.h"
+#include <../NetLogger/netlogger.h>
+#include "rds_network.h"
 
 
 rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
@@ -491,7 +492,28 @@ void rdsConfigurationWindow::callLogServerTestConnection()
         }
     }
 
-    // TODO: Connect to the /test entry point and check if it returns 200
+    // Check if the server responds to the test entry point
+    if (!error)
+    {
+        QUrlQuery data;
+        QNetworkReply::NetworkError net_error;
+        int http_status=0;
+        bool success=RTI_NETWORK->netLogger.postData(data,NETLOG_ENDPT_TEST,net_error,http_status);
+
+        if (!success)
+        {
+            output += errorPrefix + "No connection to Entry point.<br /><br />Is server running?";
+            error=true;
+        }
+        else
+        {
+            if (http_status!=200)
+            {
+                output += errorPrefix + "Server rejected request.<br /><br />Is API key corrent?";
+                error=true;
+            }
+        }
+    }
 
     if (!error)
     {
