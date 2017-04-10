@@ -2,8 +2,8 @@
 #define NETLOG_EVENTS_H
 
 #define NETLOG_ENDPT_TEST    "test"
-#define NETLOG_ENDPT_EVENT   "Events"
-#define NETLOG_ENDPT_RAIDLOG "RaidRecords"
+#define NETLOG_ENDPT_EVENT   "events"
+#define NETLOG_ENDPT_RAIDLOG "scans"
 
 
 namespace EventInfo
