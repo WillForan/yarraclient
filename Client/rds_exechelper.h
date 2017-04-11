@@ -1,51 +1,30 @@
-#ifndef RDS_EXECHELPER_H
-#define RDS_EXECHELPER_H
+#ifndef RDSEXECHELPER_H
+#define RDSEXECHELPER_H
 
-#include <QtCore>
+#include <QStringList>
 
 
-class rdsExecHelper : public QObject
+class rdsExecHelper
 {
-    Q_OBJECT
-
 public:
     rdsExecHelper();
 
-    void setCommand(QString& cmdLine);
-    bool callProcessTimout(int timeoutMs);
+    void setTimeout(int ms);
+    bool run(QString cmdLine);
 
-    void setMonitorOutput(bool state=true);
-
-    QProcess process;
-    QString execCmdLine;
-
-    static void safeSleep(int ms);
+    QStringList output;
 
 private:
-    bool monitorOutput;
 
-    bool detectedError;
-    bool detectedSuccess;
-
-public slots:
-    void readOutput();
+    int timeoutMs;
 
 };
 
 
-
-inline void rdsExecHelper::setCommand(QString& cmdLine)
+inline void rdsExecHelper::setTimeout(int ms)
 {
-    execCmdLine=cmdLine;
+    timeoutMs=ms;
 }
 
 
-inline void rdsExecHelper::setMonitorOutput(bool state)
-{
-    monitorOutput=state;
-}
-
-
-
-#endif // RDS_EXECHELPER_H
-
+#endif // RDSEXECHELPER_H

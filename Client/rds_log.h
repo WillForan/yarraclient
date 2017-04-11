@@ -47,6 +47,7 @@ inline void rdsLog::log(QString text)
     QString line=QDateTime::currentDateTime().toString("dd.MM.yy hh:mm:ss") + "  --  " + text + "\n";
     logfile.write(line.toLatin1());
     logfile.flush();
+    qInfo() << line;
 
     if (logWidget!=0)
     {

@@ -6,7 +6,7 @@
 
 
 // Definitions
-#define RDS_VERSION     "0.51"
+#define RDS_VERSION     "0.52b1"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -76,6 +76,7 @@
 #define RTI_RAID    rdsRuntimeInformation::getInstance()->getRaidInstance()
 #define RTI_NETWORK rdsRuntimeInformation::getInstance()->getNetworkInstance()
 #define RTI_CONTROL rdsRuntimeInformation::getInstance()->getControlInstance()
+#define RTI_NETLOG  RTI_NETWORK->netLogger
 
 
 // Naming convention for queued files: filtername#filename.dat

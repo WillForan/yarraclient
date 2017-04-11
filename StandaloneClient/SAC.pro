@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
+QT       += core widgets gui network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = SAC
@@ -23,7 +22,8 @@ SOURCES += main.cpp\
     sac_bootdialog.cpp \
     sac_network.cpp \
     sac_copydialog.cpp \
-    sac_configurationdialog.cpp
+    sac_configurationdialog.cpp \
+    ../NetLogger/netlogger.cpp
 
 HEADERS  += sac_mainwindow.h \
     ../Client/rds_runtimeinformation.h \

@@ -11,19 +11,24 @@
 #include "rds_log.h"
 #include "rds_processcontrol.h"
 #include "rds_debugwindow.h"
+#include "rds_iconwindow.h"
 
 
-namespace Ui {
+namespace Ui
+{
     class rdsOperationWindow;
 }
+
 
 class rdsOperationWindow : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit rdsOperationWindow(QWidget *parent = 0);
+    explicit rdsOperationWindow(QWidget *parent = 0, bool isFirstRun=false);
     ~rdsOperationWindow();    
+
+    rdsIconWindow  iconWindow;
 
 public slots:
     void callShutDown();
@@ -42,6 +47,7 @@ public slots:
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
+    void runStartCmds();
 
 protected:
     void closeEvent(QCloseEvent *event);    
@@ -66,7 +72,8 @@ private:
     QTimer controlTimer;
 
     rdsDebugWindow debugWindow;
-
 };
 
+
 #endif // RDS_OPERATIONWINDOW_H
+

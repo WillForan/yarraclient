@@ -2,7 +2,9 @@
 #define RDS_NETWORK_H
 
 #include <QtCore>
-//#include <QFtp>
+#include <QtNetwork>
+
+#include <../NetLogger/netlogger.h>
 
 
 class rdsNetwork : public QObject
@@ -15,7 +17,6 @@ public:
     ~rdsNetwork();
 
     // External interface
-
     bool openConnection();
     void closeConnection();
     bool isConnectionActive();
@@ -25,7 +26,6 @@ public:
 
 
     // Internal methods
-
     bool isQueueEmpty();
     int getQueueCount();
 
@@ -37,6 +37,8 @@ public:
 
     void copyLogFile();
     void runReconnectCmd();
+
+    NetLogger netLogger;
 
 private:
 
@@ -50,11 +52,7 @@ private:
     qint64  currentFilesize;
     QString currentTimeStamp;
 
-    //QFtp ftp;
     QDir networkDrive;
-
-    // TODO: Implement event handler for FTP management
-
 };
 
 

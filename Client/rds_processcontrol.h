@@ -2,6 +2,7 @@
 #define RDS_PROCESSCONTROL_H
 
 #include <QtGui>
+
 #include "rds_global.h"
 
 
@@ -30,6 +31,8 @@ public:
     QDateTime getLastUpdateTime();
     bool isWaitingFirstUpdate();
 
+    void sendScanInfoToLogServer();
+
 protected:
 
     int state;
@@ -45,6 +48,10 @@ protected:
     QDateTime lastUpdate;
     QDateTime nextPeriodicUpdate;
     QDateTime lastCheckTime;
+
+    bool      logServerOnlyUpdate;
+    QDateTime lastLogServerOnlyUpdate;
+    QDateTime nextLogServerOnlyUpdate;
 
     int connectionFailureCount;
 

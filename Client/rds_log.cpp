@@ -33,7 +33,7 @@ void rdsLog::start()
     }
 
     #ifdef YARRA_APP_RDS
-        log("Service started  (V "+QString(RDS_VERSION)+")");
+        log("Service started  (V "+QString(RDS_VERSION)+")");        
     #endif
 
     if (RTI->isSimulation())

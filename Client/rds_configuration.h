@@ -9,10 +9,10 @@ class rdsConfigurationProtocol
 public:
     QString name;
     QString filter;
-    bool saveAdjustData;
-    bool anonymizeData;
-    bool smallFiles;
-    bool remotelyDefined;
+    bool    saveAdjustData;
+    bool    anonymizeData;
+    bool    smallFiles;
+    bool    remotelyDefined;
 };
 
 
@@ -30,25 +30,39 @@ public:
     bool    infoValidityTest;
 
     QString infoName;
+    QString infoSerialNumber;
+    bool    infoShowIcon;
+
     int     infoUpdateMode;
     int     infoUpdatePeriod;
     int     infoUpdatePeriodUnit;
+
     QTime   infoUpdateTime1;
     QTime   infoUpdateTime2;
     QTime   infoUpdateTime3;
+
     bool    infoUpdateUseTime2;
     bool    infoUpdateUseTime3;
 
-    int     netMode;
-    QString netFTPIP;
-    QString netFTPUser;
-    QString netFTPPassword;
-    QString netFTPBasepath;
+    bool    infoJitterTimes;
+    int     infoJitterWindow;
 
+    QTime   infoUpdateTime1Jittered;
+    QTime   infoUpdateTime2Jittered;
+    QTime   infoUpdateTime3Jittered;
+
+    int     netMode;
     QString netDriveBasepath;
     QString netDriveReconnectCmd;
     bool    netDriveCreateBasepath;
+    QString netRemoteConfigFile;
 
+    QString logServerPath;
+    QString logApiKey;
+    bool    logSendScanInfo;
+    int     logUpdateFrequency;
+
+    QStringList startCmds;
 
 
     QList<rdsConfigurationProtocol*> protocols;
@@ -58,11 +72,13 @@ public:
     void readProtocol(int index, QString& name, QString& filter, bool& saveAdjustData, bool& anonymizeData, bool &smallFiles, bool remotelyDefined);
     void deleteProtocol(int index);
 
+    bool loadRemotelyDefinedProtocols();
     void removeRemotelyDefinedProtocols();
 
     bool protocolNeedsAnonymization(int index);
 
-    enum {
+    enum
+    {
         UPDATEMODE_STARTUP          =0,
         UPDATEMODE_FIXEDTIME        =1,
         UPDATEMODE_PERIODIC         =2,
@@ -70,18 +86,19 @@ public:
         UPDATEMODE_STARTUP_FIXEDTIME=4
     };
 
-    enum {
+    enum
+    {
         PERIODICUNIT_MIN  =0,
         PERIODICUNIT_HOUR =1
     };
 
-    enum {
-        NETWORKMODE_DRIVE=0,
-        NETWORKMODE_FTP  =1
+    enum
+    {
+        NETWORKMODE_DRIVE=0
     };
 
-    bool isNetworkModeFTP();
     bool isNetworkModeDrive();
+    bool isLogServerConfigured();
 
 protected:
 
@@ -92,12 +109,6 @@ protected:
 inline int rdsConfiguration::getProtocolCount()
 {
     return protocols.count();
-}
-
-
-inline bool rdsConfiguration::isNetworkModeFTP()
-{
-    return netMode==NETWORKMODE_FTP;
 }
 
 
@@ -119,6 +130,12 @@ inline bool rdsConfiguration::protocolNeedsAnonymization(int index)
     {
         return false;
     }
+}
+
+
+inline bool rdsConfiguration::isLogServerConfigured()
+{
+    return (!logServerPath.isEmpty());
 }
 
 

@@ -1,8 +1,14 @@
 #include "rds_configurationwindow.h"
 #include "ui_rds_configurationwindow.h"
 
-#include "rds_global.h"
 #include <QtWidgets>
+#include <QHostInfo>
+#include <QNetworkInterface>
+#include <QTcpSocket>
+
+#include "rds_global.h"
+#include <../NetLogger/netlogger.h>
+#include "rds_network.h"
 
 
 rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
@@ -25,9 +31,9 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
 
     connect(ui->protAddButton, SIGNAL(clicked()), this, SLOT(callAddProt()));
     connect(ui->protRemoveButton, SIGNAL(clicked()), this, SLOT(callRemoveProt()));
-
     //connect(ui->protListWidget, SIGNAL(activated()), this, SLOT(callShowProt()));
 
+    connect(ui->logServerTestConnectionButton, SIGNAL(clicked()), this, SLOT(callLogServerTestConnection()));
 
     ui->tabWidget->setCurrentIndex(0);
     callUpdateModeChanged(ui->updateCombobox->currentIndex());
@@ -42,6 +48,8 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
                                     qApp->desktop()->availableGeometry()));
 
     readConfiguration();
+
+    ui->logServerStatusLabel->setText("");
 }
 
 
@@ -120,11 +128,14 @@ void rdsConfigurationWindow::callUpdateModeChanged(int index)
 void rdsConfigurationWindow::readConfiguration()
 {
     ui->softwareVersionEdit->setText(RTI->getSyngoMRVersionString());
+    ui->serialNumberEdit->setText(config.infoSerialNumber);
 
     config.loadConfiguration();
 
     // Transfer configuration to UI controls
     ui->systemNameEdit->setText(config.infoName);
+    ui->indicatorCheckbox->setChecked(config.infoShowIcon);
+
     ui->time1Edit->setTime(config.infoUpdateTime1);
     ui->time2Edit->setTime(config.infoUpdateTime2);
     ui->time3Edit->setTime(config.infoUpdateTime3);
@@ -132,22 +143,28 @@ void rdsConfigurationWindow::readConfiguration()
     ui->time2Checkbox->setChecked(config.infoUpdateUseTime2);
     ui->time3Checkbox->setChecked(config.infoUpdateUseTime3);
 
-    //ui->networkModeCombobox->setCurrentIndex(config.netMode);
+    ui->jitterTimesCheckbox->setChecked(config.infoJitterTimes);
+    ui->jitterSpinbox->setValue(config.infoJitterWindow);
+
     //NOTE: Currently, the software only supports the network drive mode
     ui->networkModeCombobox->setCurrentIndex(0);
 
     ui->networkDrivePathEdit->setText(config.netDriveBasepath);
     ui->networkDriveReconnectCmd->setText(config.netDriveReconnectCmd);
     ui->networkDriveCreatePath->setChecked(config.netDriveCreateBasepath);
-
-    ui->ftpIPEdit->setText(config.netFTPIP);
-    ui->ftpUserEdit->setText(config.netFTPUser);
-    ui->ftpPwdEdit->setText(config.netFTPPassword);
-    ui->ftpPathEdit->setText(config.netFTPBasepath);
+    ui->networkRemoteConfigLabelEdit->setText(config.netRemoteConfigFile);
 
     ui->updateCombobox->setCurrentIndex(config.infoUpdateMode);
     ui->updatePeriodCombobox->setCurrentIndex(config.infoUpdatePeriodUnit);
     ui->updatePeriodSpinbox->setValue(config.infoUpdatePeriod);
+
+    ui->logServerPathEdit->setText(config.logServerPath);
+    ui->logServerApiKeyEdit->setText(config.logApiKey);
+    ui->logServerSendScansCheckbox->setChecked(config.logSendScanInfo);
+    ui->logServerPushFrequencySpinbox->setValue(config.logUpdateFrequency);
+
+    ui->startCmdEdit->clear();
+    ui->startCmdEdit->setPlainText(config.startCmds.join('\n'));
 
     updateProtocolList();
 
@@ -162,6 +179,7 @@ void rdsConfigurationWindow::readConfiguration()
 void rdsConfigurationWindow::storeConfiguration()
 {
     config.infoName=ui->systemNameEdit->text();
+    config.infoShowIcon=ui->indicatorCheckbox->isChecked();
 
     config.infoUpdateTime1=ui->time1Edit->time();
     config.infoUpdateTime2=ui->time2Edit->time();
@@ -170,19 +188,25 @@ void rdsConfigurationWindow::storeConfiguration()
     config.infoUpdateUseTime2=ui->time2Checkbox->isChecked();
     config.infoUpdateUseTime3=ui->time3Checkbox->isChecked();
 
+    config.infoJitterTimes=ui->jitterTimesCheckbox->isChecked();
+    config.infoJitterWindow=ui->jitterSpinbox->value();
+
     config.netMode=ui->networkModeCombobox->currentIndex();
     config.netDriveBasepath=ui->networkDrivePathEdit->text();
     config.netDriveReconnectCmd=ui->networkDriveReconnectCmd->text();
     config.netDriveCreateBasepath=ui->networkDriveCreatePath->isChecked();
+    config.netRemoteConfigFile=ui->networkRemoteConfigLabelEdit->text();
 
-    config.netFTPIP=ui->ftpIPEdit->text();
-    config.netFTPUser=ui->ftpUserEdit->text();
-    config.netFTPPassword=ui->ftpPwdEdit->text();  // TODO: Scramble passoword!!!
-    config.netFTPBasepath=ui->ftpPathEdit->text();    
+    config.logServerPath=ui->logServerPathEdit->text();
+    config.logApiKey=ui->logServerApiKeyEdit->text();
+    config.logSendScanInfo=ui->logServerSendScansCheckbox->isChecked();
+    config.logUpdateFrequency=ui->logServerPushFrequencySpinbox->value();
 
     config.infoUpdateMode=ui->updateCombobox->currentIndex();
     config.infoUpdatePeriodUnit=ui->updatePeriodCombobox->currentIndex();
     config.infoUpdatePeriod=ui->updatePeriodSpinbox->value();
+
+    config.startCmds=ui->startCmdEdit->toPlainText().split('\n');
 
     // Write the configuration to the ini file
     config.saveConfiguration();
@@ -336,8 +360,167 @@ void rdsConfigurationWindow::on_networkFilePathButton_clicked()
 }
 
 
+void rdsConfigurationWindow::on_networkRemoteConfigurationButton_clicked()
+{
+    QString newFile=QFileDialog::getOpenFileName(this,"Select Remote Configuration File","","*.ini");
+
+    if (!newFile.isNull())
+    {
+        ui->networkRemoteConfigLabelEdit->setText(newFile);
+    }
+}
+
+
 void rdsConfigurationWindow::on_protSmallFilesCheckbox_toggled(bool checked)
 {
     callUpdateProt();
 }
+
+
+void rdsConfigurationWindow::callLogServerTestConnection()
+{
+    // Reset previous output
+    ui->logServerStatusLabel->setText("Testing connection...");
+    RTI->processEvents();
+
+    const QString errorPrefix="<span style=""color:#990000;""><strong>ERROR:</strong></span>&nbsp;&nbsp;";
+
+    QString output="";
+    bool error=false;
+
+    QString serverPath=ui->logServerPathEdit->text();
+    int serverPort=8080;
+
+    if (serverPath.isEmpty())
+    {
+        output=errorPrefix + "No server address entered.";
+        ui->logServerStatusLabel->setText(output);
+
+        return;
+    }
+
+    // Check if the entered address contains a port specifier
+    int colonPos=serverPath.indexOf(":");
+
+    if (colonPos!=-1)
+    {
+        int cutChars=serverPath.length()-colonPos;
+
+        QString portString=serverPath.right(cutChars-1);
+        serverPath.chop(cutChars);
+
+        // Convert port string into number and validate
+        bool portValid=false;
+
+        int tempPort=portString.toInt(&portValid);
+
+        if (portValid)
+        {
+            serverPort=tempPort;
+        }
+    }
+
+    QString localHostname="";
+    QString localIP="";
+
+    // Open socket connection to see if the server is active and to
+    // determine the local IP address used for routing to the server.
+    QTcpSocket socket;
+    socket.connectToHost(serverPath, serverPort);
+
+    if (socket.waitForConnected(1000))
+    {
+        localIP=socket.localAddress().toString();
+    }
+    else
+    {
+        output += errorPrefix + "Unable to connect to server.";
+        error=true;
+    }
+
+    socket.disconnectFromHost();
+
+    // Lookup the hostname of the local client from the DNS server
+    if (!error)
+    {
+        localHostname=NetLogger::dnsLookup(localIP);
+
+        if (localHostname.isEmpty())
+        {
+            output += errorPrefix + "Unable to resolve local hostname.<br /><br />IP = " + localIP;
+            output += "<br />Check local DNS server settings.";
+            error=true;
+        }
+    }
+
+    // Lookup the hostname of the log server from the DNS server
+    if (!error)
+    {
+        serverPath=NetLogger::dnsLookup(serverPath);
+
+        if (serverPath.isEmpty())
+        {
+            output += errorPrefix + "Unable to resolve server name.<br /><br />";
+            output += "Check local DNS server settings.";
+            error=true;
+        }
+    }
+
+    // Compare if the local system and the server are on the same domain
+    if (!error)
+    {
+        QStringList localHostString =localHostname.toLower().split(".");
+        QStringList serverHostString=serverPath.toLower().split(".");
+
+        if ((localHostString.count()<2) || (serverHostString.count()<2))
+        {
+            output += errorPrefix + "Error resolving hostnames.<br /><br />";
+            output += "Local host: " + localHostname.toLower() + " ("+localIP+")<br />";
+            output += "Log server: " + serverHostString.join(".");
+            error=true;
+        }
+        else
+        {
+            if ((localHostString.at(localHostString.count()-1)!=(serverHostString.at(serverHostString.count()-1)))
+               || (localHostString.at(localHostString.count()-2)!=(serverHostString.at(serverHostString.count()-2))))
+            {
+                output += errorPrefix + "Server not in local domain.<br /><br />";
+                output += "Local host: " + localHostname.toLower() + "<br />";
+                output += "Log server: " + serverPath.toLower() + "<br />";
+                error=true;
+            }
+        }
+    }
+
+    // Check if the server responds to the test entry point
+    if (!error)
+    {
+        QUrlQuery data;
+        QNetworkReply::NetworkError net_error;
+        int http_status=0;
+        bool success=RTI_NETWORK->netLogger.postData(data,NETLOG_ENDPT_TEST,net_error,http_status);
+
+        if (!success)
+        {
+            output += errorPrefix + "No connection to Entry point.<br /><br />Is server running?";
+            error=true;
+        }
+        else
+        {
+            if (http_status!=200)
+            {
+                output += errorPrefix + "Server rejected request.<br /><br />Is API key corrent?";
+                error=true;
+            }
+        }
+    }
+
+    if (!error)
+    {
+        output="<span style=""color:#009900;""><strong>Success.</strong></span>";
+    }
+
+    ui->logServerStatusLabel->setText(output);
+}
+
 

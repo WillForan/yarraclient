@@ -3,14 +3,15 @@
 #include "ui_rds_operationwindow.h"
 
 #include "rds_global.h"
+#include "rds_exechelper.h"
 
 
-rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
+rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
     QDialog(parent),
     ui(new Ui::rdsOperationWindow)
 {
     ui->setupUi(this);
-    log.setLogWidget(ui->logEdit);
+    log.setLogWidget(ui->logEdit);    
 
     trayIconMenu = new QMenu(this);
     trayItemTransferNow=trayIconMenu->addAction("Transfer data now",this, SLOT(callManualUpdate()));
@@ -69,15 +70,36 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
         RTI->setControlInstance(&control);
         RTI->setWindowInstance(this);
 
+        RTI_NETLOG.configure(RTI_CONFIG->logServerPath, EventInfo::SourceType::RDS,RTI_CONFIG->infoName);
+
         // Notify the process controller about the start of the service
         control.setStartTime();
         updateInfoUI();
+
+        log.log("System "+config.infoName+" / Serial # "+config.infoSerialNumber);
+
+        RTI_NETLOG.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"startup");
 
         // Start the timer for triggering updates. Checks update condition only every
         // minute to prevent undesired system load
         controlTimer.setInterval(RDS_TIMERINTERVAL);
         connect(&controlTimer, SIGNAL(timeout()), this, SLOT(checkForUpdate()));
         controlTimer.start();
+
+        if (RTI_CONFIG->infoShowIcon)
+        {
+            iconWindow.show();
+
+            if (RTI_NETLOG.isConfigurationError())
+            {
+                iconWindow.setError();
+            }
+        }
+
+        if ((isFirstRun) && (!RTI_CONFIG->startCmds.isEmpty()))
+        {            
+            QTimer::singleShot(1,this,SLOT(runStartCmds()));
+        }
     }
 
     if (raid.isPatchedRaidToolMissing())
@@ -89,14 +111,12 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent) :
 }
 
 
-
 rdsOperationWindow::~rdsOperationWindow()
 {
     RTI->setLogInstance(0);
     log.finish();
     delete ui;
 }
-
 
 
 void rdsOperationWindow::closeEvent(QCloseEvent *event)
@@ -130,7 +150,6 @@ void rdsOperationWindow::keyPressEvent(QKeyEvent* event)
 }
 
 
-
 void rdsOperationWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     switch (reason)
@@ -143,7 +162,6 @@ void rdsOperationWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
         break;
     }
 }
-
 
 
 void rdsOperationWindow::callShutDown()
@@ -162,7 +180,6 @@ void rdsOperationWindow::callShutDown()
         RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
         qApp->quit();
     }
-
 }
 
 
@@ -173,7 +190,6 @@ void rdsOperationWindow::callImmediateShutdown()
     RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
     qApp->quit();
 }
-
 
 
 void rdsOperationWindow::callConfiguration()
@@ -286,7 +302,8 @@ void rdsOperationWindow::callPostpone()
 
 void rdsOperationWindow::updateInfoUI()
 {
-    ui->InfoValueSystem->setText(RTI_CONFIG->infoName);
+    QString systemName=RTI_CONFIG->infoName + " / " + RTI_CONFIG->infoSerialNumber;
+    ui->InfoValueSystem->setText(systemName);
 
     if (RTI_CONTROL->getState()==RTI_CONTROL->STATE_IDLE)
     {
@@ -306,6 +323,11 @@ void rdsOperationWindow::updateInfoUI()
         if (RTI->isSevereErrors())
         {
             ui->InfoValueError->setText("<b>Severe errors occured during update approach.</b>");
+
+            if (!this->isVisible())
+            {
+                iconWindow.setError();
+            }
         }
         else
         {
@@ -330,4 +352,35 @@ void rdsOperationWindow::updateInfoUI()
             ui->InfoValueError->setText("<span style=""color:#580F8B;""><b>Update running...<br>Don't start new scans at this time!</b></b></span>");
         }
     }
+}
+
+
+void rdsOperationWindow::runStartCmds()
+{
+    RTI->log("Executing start commands...");
+
+    rdsExecHelper exec;
+    QString cmdLine="";
+    bool error=false;
+
+    for (int i=0; i<RTI_CONFIG->startCmds.count(); i++)
+    {
+        cmdLine=RTI_CONFIG->startCmds.at(i);
+
+        if (!cmdLine.isEmpty())
+        {
+            if (!exec.run(cmdLine))
+            {
+                RTI->log("ERROR: Execution of run commmand failed '" + cmdLine + "'");
+
+                // Indicate the error in the top icon
+                if (!RTI->getWindowInstance()->isVisible())
+                {
+                    RTI->getWindowInstance()->iconWindow.setError();
+                }
+            }
+        }
+    }
+
+    RTI->log("Done.");
 }
