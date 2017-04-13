@@ -3,7 +3,6 @@
 
 #include <QtCore>
 #include <QtNetwork>
-//#include <QFtp>
 
 #include <../NetLogger/netlogger.h>
 
@@ -53,10 +52,7 @@ private:
     qint64  currentFilesize;
     QString currentTimeStamp;
 
-    //QFtp ftp;
     QDir networkDrive;
-
-    // TODO: Implement event handler for FTP management
 };
 
 

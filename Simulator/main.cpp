@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         printf("\n\n");
 
         strcpy(patName, "Mustermann^Hans");
-        strcpy(status, "CLD");
+        strcpy(status, "cld");
 
         time_t rawtime;
         struct tm * timeinfo;

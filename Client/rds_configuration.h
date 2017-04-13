@@ -9,10 +9,10 @@ class rdsConfigurationProtocol
 public:
     QString name;
     QString filter;
-    bool saveAdjustData;
-    bool anonymizeData;
-    bool smallFiles;
-    bool remotelyDefined;
+    bool    saveAdjustData;
+    bool    anonymizeData;
+    bool    smallFiles;
+    bool    remotelyDefined;
 };
 
 
@@ -31,28 +31,40 @@ public:
 
     QString infoName;
     QString infoSerialNumber;
+    bool    infoShowIcon;
+
     int     infoUpdateMode;
     int     infoUpdatePeriod;
     int     infoUpdatePeriodUnit;
+
     QTime   infoUpdateTime1;
     QTime   infoUpdateTime2;
     QTime   infoUpdateTime3;
+
     bool    infoUpdateUseTime2;
     bool    infoUpdateUseTime3;
 
-    int     netMode;
-    QString netFTPIP;
-    QString netFTPUser;
-    QString netFTPPassword;
-    QString netFTPBasepath;
+    bool    infoJitterTimes;
+    int     infoJitterWindow;
 
+    QTime   infoUpdateTime1Jittered;
+    QTime   infoUpdateTime2Jittered;
+    QTime   infoUpdateTime3Jittered;
+
+    int     netMode;
     QString netDriveBasepath;
     QString netDriveReconnectCmd;
     bool    netDriveCreateBasepath;
+    QString netRemoteConfigFile;
 
     QString logServerPath;
+    QString logApiKey;
     bool    logSendScanInfo;
     QString logServerKey;
+    int     logUpdateFrequency;
+
+    QStringList startCmds;
+
 
     QList<rdsConfigurationProtocol*> protocols;
     int getProtocolCount();
@@ -61,6 +73,7 @@ public:
     void readProtocol(int index, QString& name, QString& filter, bool& saveAdjustData, bool& anonymizeData, bool &smallFiles, bool remotelyDefined);
     void deleteProtocol(int index);
 
+    bool loadRemotelyDefinedProtocols();
     void removeRemotelyDefinedProtocols();
 
     bool protocolNeedsAnonymization(int index);
@@ -82,13 +95,10 @@ public:
 
     enum
     {
-        NETWORKMODE_DRIVE=0,
-        NETWORKMODE_FTP  =1
+        NETWORKMODE_DRIVE=0
     };
 
-    bool isNetworkModeFTP();
     bool isNetworkModeDrive();
-
     bool isLogServerConfigured();
 
 protected:
@@ -100,12 +110,6 @@ protected:
 inline int rdsConfiguration::getProtocolCount()
 {
     return protocols.count();
-}
-
-
-inline bool rdsConfiguration::isNetworkModeFTP()
-{
-    return netMode==NETWORKMODE_FTP;
 }
 
 

@@ -49,6 +49,10 @@ protected:
     QDateTime nextPeriodicUpdate;
     QDateTime lastCheckTime;
 
+    bool      logServerOnlyUpdate;
+    QDateTime lastLogServerOnlyUpdate;
+    QDateTime nextLogServerOnlyUpdate;
+
     int connectionFailureCount;
 
     bool showActivityWindow;

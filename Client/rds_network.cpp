@@ -104,16 +104,6 @@ bool rdsNetwork::openConnection()
         RTI->debug("Selected storage path is :" + networkDrive.absolutePath());
     }
 
-    if (RTI_CONFIG->isNetworkModeFTP())
-    {
-        // TODO
-        //ftp.connectToHost(RTI_CONFIG->netFTPIP);
-        //ftp.login(RTI_CONFIG->netFTPUser, RTI_CONFIG->netFTPPassword);
-        //ftp.cd(RTI_CONFIG->netFTPBasepath);
-
-        return false;
-    }
-
     connectionActive=true;
     return true;
 }
@@ -121,12 +111,7 @@ bool rdsNetwork::openConnection()
 
 void rdsNetwork::closeConnection()
 {  
-    // NOTE: Nothing to be done for the network mode.
-
-    if (RTI_CONFIG->isNetworkModeFTP())
-    {
-        //ftp.close();
-    }
+    // NOTE: Nothing to be done for the network-drive mode.
 
     connectionActive=false;
 }
@@ -186,7 +171,6 @@ bool rdsNetwork::transferFiles()
         RTI->processEvents();
 
         //RTI->log("DBG: Processed events");
-
     }
 
     //RTI->log("DBG: Left loop");
@@ -374,11 +358,6 @@ bool rdsNetwork::copyFile()
         }
     }
 
-    if (RTI_CONFIG->isNetworkModeFTP())
-    {
-        // TODO
-    }
-
     return true;
 }
 
@@ -411,11 +390,6 @@ bool rdsNetwork::verifyTransfer()
         {
             RTI->log("Size of copied file matches with source " + QString::number(fileInfo.size()));
         }
-    }
-
-    if (RTI_CONFIG->isNetworkModeFTP())
-    {
-        // TODO
     }
 
     RTI->log("File transfer successful.");
@@ -468,11 +442,6 @@ bool rdsNetwork::checkExistance(QString filename)
     {
         QString fullFilename=RTI_CONFIG->netDriveBasepath + "/" + RTI_CONFIG->infoName + "/" + fileProt + "/" + filename;
         return QFile::exists(fullFilename);
-    }
-
-    if (RTI_CONFIG->isNetworkModeFTP())
-    {
-        // TODO
     }
 
     return false;

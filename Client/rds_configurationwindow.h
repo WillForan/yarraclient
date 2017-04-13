@@ -32,6 +32,8 @@ public slots:
     void callUpdateProt();
     void callShowProt();
 
+    void callLogServerTestConnection();
+
 protected:
     void closeEvent(QCloseEvent *event);
 
@@ -50,6 +52,7 @@ private slots:
     void on_networkModeCombobox_currentIndexChanged(int index);
 
     void on_networkFilePathButton_clicked();
+    void on_networkRemoteConfigurationButton_clicked();
 
     void on_protSmallFilesCheckbox_toggled(bool checked);
 

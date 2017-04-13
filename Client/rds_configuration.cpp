@@ -28,48 +28,75 @@ void rdsConfiguration::loadConfiguration()
 {
     QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
 
-    // Load the configuration values from the configuration file
-    // If the configuration file does not exist, the defailt values will be used.
-    infoName            =settings.value("General/Name", "Unnamed").toString();
-    infoUpdateMode      =settings.value("General/UpdateMode", UPDATEMODE_STARTUP_FIXEDTIME).toInt();
-    infoUpdatePeriod    =settings.value("General/UpdatePeriod", 6).toInt();
-    infoUpdatePeriodUnit=settings.value("General/UpdatePeriodUnit", PERIODICUNIT_HOUR).toInt();
-
-    infoUpdateTime1     =settings.value("General/UpdateTime1", QTime::fromString("03:00:00")).toTime();
-    infoUpdateTime2     =settings.value("General/UpdateTime2", QTime::fromString("06:00:00")).toTime();
-    infoUpdateTime3     =settings.value("General/UpdateTime3", QTime::fromString("12:00:00")).toTime();
-
-    infoUpdateUseTime2  =settings.value("General/UpdateUseTime2", false).toBool();
-    infoUpdateUseTime3  =settings.value("General/UpdateUseTime3", false).toBool();
-
-    netMode               =settings.value("Network/Mode", NETWORKMODE_FTP).toInt();
-    netDriveBasepath      =settings.value("Network/DriveBasepath", "").toString();
-    netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd", "").toString();
-    netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath", false).toBool();
-
-    netFTPIP            =settings.value("Network/FTPIP", "123.123.123.123").toString();
-    netFTPBasepath      =settings.value("Network/FTPBasepath", "/rawdata").toString();
-    netFTPUser          =settings.value("Network/FTPUser", "rdsuser").toString();
-    netFTPPassword      =settings.value("Network/FTPPassword", "rdspwd").toString(); // TODO: Scramble password!
-
-    logServerPath       =settings.value("LogServer/ServerPath","").toString();
-    logSendScanInfo     =settings.value("LogServer/SendScanInfo", true).toBool();
-    logServerKey        =settings.value("LogServer/Key","").toString();
     // Used to test if the program has been configured once at all
-    infoValidityTest    =settings.value("General/ValidityTest", false).toBool();
+    infoValidityTest    =settings.value("General/ValidityTest",         false).toBool();
 
-    int protocolCount   =settings.value("Protocols/Count", 0).toInt();
+    infoName              =settings.value("General/Name",               "Unnamed").toString();
+    infoShowIcon          =settings.value("General/ShowIcon",           true).toBool();
 
+    infoUpdateMode        =settings.value("General/UpdateMode",         UPDATEMODE_STARTUP_FIXEDTIME).toInt();
+    infoUpdatePeriod      =settings.value("General/UpdatePeriod",       6).toInt();
+    infoUpdatePeriodUnit  =settings.value("General/UpdatePeriodUnit",   PERIODICUNIT_HOUR).toInt();
+
+    infoUpdateTime1       =settings.value("General/UpdateTime1",        QTime::fromString("03:00:00")).toTime();
+    infoUpdateTime2       =settings.value("General/UpdateTime2",        QTime::fromString("06:00:00")).toTime();
+    infoUpdateTime3       =settings.value("General/UpdateTime3",        QTime::fromString("12:00:00")).toTime();
+
+    infoUpdateUseTime2    =settings.value("General/UpdateUseTime2",     false).toBool();
+    infoUpdateUseTime3    =settings.value("General/UpdateUseTime3",     false).toBool();
+
+    infoJitterTimes       =settings.value("General/JitterTimes",        false).toBool();
+    infoJitterWindow      =settings.value("General/JitterWindow",       1).toInt();
+
+    netMode               =settings.value("Network/Mode",               NETWORKMODE_DRIVE).toInt();
+    netDriveBasepath      =settings.value("Network/DriveBasepath",      "").toString();
+    netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd",  "").toString();
+    netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath",false).toBool();
+    netRemoteConfigFile   =settings.value("Network/RemoteConfigFile",   "").toString();
+
+    logServerPath         =settings.value("LogServer/ServerPath",       "").toString();
+    logApiKey             =settings.value("LogServer/ApiKey",           "").toString();
+    logSendScanInfo       =settings.value("LogServer/SendScanInfo",     true).toBool();
+    logUpdateFrequency    =settings.value("LogServer/UpdateFrequency",  4).toInt();
+
+
+    startCmds.clear();
+    int startCmdsCount    =settings.value("StartCmds/Count",            0).toInt();
+    for (int i=0; i<startCmdsCount; i++)
+    {
+        QString entry=settings.value("StartCmds/Cmd"+QString::number(i),"").toString();
+        if (!entry.isEmpty())
+        {
+            startCmds.append(entry);
+        }
+    }
+
+    int protocolCount     =settings.value("Protocols/Count",            0).toInt();
     for (int i=0; i<protocolCount; i++)
     {
-        QString name=  settings.value("Protocol" + QString::number(i) + "/Name",   "Group"+QString::number(i) ).toString();
-        QString filter=settings.value("Protocol" + QString::number(i) + "/Filter", "_RDS" ).toString();
-        bool saveAdjustData=settings.value("Protocol" + QString::number(i) + "/SaveAdjustData", false ).toBool();
-        bool anonymizeData= settings.value("Protocol" + QString::number(i) + "/AnonymizeData",  false ).toBool();
-        bool smallFiles= settings.value("Protocol" + QString::number(i) + "/SmallFiles",  false ).toBool();
+        QString name       =settings.value("Protocol" + QString::number(i) + "/Name",          "Group"+QString::number(i)).toString();
+        QString filter     =settings.value("Protocol" + QString::number(i) + "/Filter",        "_RDS").toString();
+        bool saveAdjustData=settings.value("Protocol" + QString::number(i) + "/SaveAdjustData",false).toBool();
+        bool anonymizeData =settings.value("Protocol" + QString::number(i) + "/AnonymizeData", false).toBool();
+        bool smallFiles    =settings.value("Protocol" + QString::number(i) + "/SmallFiles",    false).toBool();
 
         addProtocol(name, filter, saveAdjustData, anonymizeData, smallFiles, false);
     }
+
+    infoUpdateTime1Jittered=infoUpdateTime1;
+    infoUpdateTime2Jittered=infoUpdateTime2;
+    infoUpdateTime3Jittered=infoUpdateTime3;
+
+    // Jitter the update times to avoid that all MRI machines are pushing the
+    // raw data at the same time.
+    if (infoJitterTimes)
+    {
+        int jitterSecs=qrand() % (3600 * infoJitterWindow);
+        infoUpdateTime1Jittered=infoUpdateTime1Jittered.addSecs(jitterSecs);
+        infoUpdateTime2Jittered=infoUpdateTime2Jittered.addSecs(jitterSecs);
+        infoUpdateTime3Jittered=infoUpdateTime3Jittered.addSecs(jitterSecs);
+    }
+
 }
 
 
@@ -77,37 +104,45 @@ void rdsConfiguration::saveConfiguration()
 {
     QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
 
-    settings.setValue("General/Name", infoName);
-    settings.setValue("General/UpdateMode", infoUpdateMode);
-    settings.setValue("General/UpdatePeriod", infoUpdatePeriod);
-    settings.setValue("General/UpdatePeriodUnit", infoUpdatePeriodUnit);
+    // Set the configuration validity flag to true to indicate that
+    // the configuration has been changed once at least
+    settings.setValue("General/ValidityTest",       true);
 
-    settings.setValue("General/UpdateTime1", infoUpdateTime1);
-    settings.setValue("General/UpdateTime2", infoUpdateTime2);
-    settings.setValue("General/UpdateTime3", infoUpdateTime3);
+    settings.setValue("General/Name",               infoName);
+    settings.setValue("General/ShowIcon",           infoShowIcon);
 
-    settings.setValue("General/UpdateUseTime2", infoUpdateUseTime2);
-    settings.setValue("General/UpdateUseTime3", infoUpdateUseTime3);
+    settings.setValue("General/UpdateMode",         infoUpdateMode);
+    settings.setValue("General/UpdatePeriod",       infoUpdatePeriod);
+    settings.setValue("General/UpdatePeriodUnit",   infoUpdatePeriodUnit);
 
-    settings.setValue("Network/Mode", netMode);
-    settings.setValue("Network/DriveBasepath", netDriveBasepath);
-    settings.setValue("Network/DriveReconnectCmd", netDriveReconnectCmd);
-    settings.setValue("Network/DriveCreateBasepath", netDriveCreateBasepath);
+    settings.setValue("General/UpdateTime1",        infoUpdateTime1);
+    settings.setValue("General/UpdateTime2",        infoUpdateTime2);
+    settings.setValue("General/UpdateTime3",        infoUpdateTime3);
 
-    settings.setValue("LogServer/ServerPath",  logServerPath);
-    settings.setValue("LogServer/SendScanInfo",logSendScanInfo);
+    settings.setValue("General/UpdateUseTime2",     infoUpdateUseTime2);
+    settings.setValue("General/UpdateUseTime3",     infoUpdateUseTime3);
 
-    settings.setValue("Network/FTPIP", netFTPIP);
-    settings.setValue("Network/FTPBasepath", netFTPBasepath);
-    settings.setValue("Network/FTPUser", netFTPUser);
-    settings.setValue("Network/FTPPassword", netFTPPassword);  // TODO: Scramble password!
+    settings.setValue("General/JitterTimes",        infoJitterTimes);
+    settings.setValue("General/JitterWindow",       infoJitterWindow);
 
-    // Set the configuration validity flag to true to indicate that the configuration
-    // has been changed once at least
-    settings.setValue("General/ValidityTest", true);
+    settings.setValue("Network/Mode",               netMode);
+    settings.setValue("Network/DriveBasepath",      netDriveBasepath);
+    settings.setValue("Network/DriveReconnectCmd",  netDriveReconnectCmd);
+    settings.setValue("Network/DriveCreateBasepath",netDriveCreateBasepath);
+    settings.setValue("Network/RemoteConfigFile",   netRemoteConfigFile);
 
-    settings.setValue("Protocols/Count", getProtocolCount());
+    settings.setValue("LogServer/ServerPath",       logServerPath);
+    settings.setValue("LogServer/ApiKey",           logApiKey);
+    settings.setValue("LogServer/SendScanInfo",     logSendScanInfo);
+    settings.setValue("LogServer/UpdateFrequency",  logUpdateFrequency);
 
+    settings.setValue("StartCmds/Count",            startCmds.count());
+    for (int i=0; i<startCmds.count(); i++)
+    {
+        settings.setValue("StartCmds/Cmd"+QString::number(i), startCmds.at(i));
+    }
+
+    settings.setValue("Protocols/Count",            getProtocolCount());
     for (int i=0; i<getProtocolCount(); i++)
     {
         QString name="";
@@ -130,6 +165,7 @@ void rdsConfiguration::saveConfiguration()
             settings.setValue("Protocol" + QString::number(i) + "/SmallFiles",     smallFiles);
         }
     }
+
 }
 
 
@@ -192,6 +228,97 @@ void rdsConfiguration::deleteProtocol(int index)
         protocols.removeAt(index);
     }
 }
+
+
+bool rdsConfiguration::loadRemotelyDefinedProtocols()
+{
+    // First, remove the already loaded remote procotols, so that they
+    // are replaced with the newer ones from the remote file
+    removeRemotelyDefinedProtocols();
+
+    // Return if remote protocols have not been defined
+    if (netRemoteConfigFile.isEmpty())
+    {
+        return true;
+    }
+
+    if (!QFile::exists(netRemoteConfigFile))
+    {
+        RTI->log("ERROR: Unable to find remote configuration file.");
+        return false;
+    }
+
+    QSettings settings(netRemoteConfigFile, QSettings::IniFormat);
+
+    // Used to test if the program has been configured once at all
+    bool validityTest=settings.value("Yarra/RemoteConfiguration",false).toBool();
+
+    if (!validityTest)
+    {
+        RTI->log("WARNING: Remote configuration file not valid.");
+        return true;
+    }
+
+    QStringList sections=settings.childGroups();
+
+    int addedProtocols=0;
+
+    for (int i=0; i<sections.count(); i++)
+    {
+        if (sections.at(i)!="Yarra")
+        {
+            QString name=sections.at(i);
+            QString filter     =settings.value(name+"/Filter",       "_RDS").toString();
+            bool saveAdjustData=settings.value(name+"/SaveAdjustData",false).toBool();
+            bool anonymizeData =settings.value(name+"/AnonymizeData", false).toBool();
+            bool smallFiles    =settings.value(name+"/SmallFiles",    false).toBool();
+
+            bool addThisProtocol=true;
+
+            const QString invalidStr="#@4#4@";
+            QStringList includeSystem=settings.value(name+"/IncludeSystems",invalidStr).toStringList();
+            QStringList excludeSystem=settings.value(name+"/ExcludeSystems",invalidStr).toStringList();
+
+            if ((includeSystem.count()==1) && (includeSystem.at(0)==invalidStr))
+            {
+                includeSystem.clear();
+            }
+            if ((excludeSystem.count()==1) && (excludeSystem.at(0)==invalidStr))
+            {
+                excludeSystem.clear();
+            }
+
+            // If a list of include systems is provided, check if this sytem is listed
+            if (!includeSystem.isEmpty())
+            {
+                if ((!includeSystem.contains(infoSerialNumber)) && (!includeSystem.contains(infoName)))
+                {
+                    addThisProtocol=false;
+                }
+            }
+
+            // If a list of exclude systems is provided, check if this sytem is on the list
+            if ((excludeSystem.contains(infoSerialNumber)) || (excludeSystem.contains(infoName)))
+            {
+                addThisProtocol=false;
+            }
+
+            if (addThisProtocol)
+            {
+                addProtocol(name, filter, saveAdjustData, anonymizeData, smallFiles, true);
+                addedProtocols++;
+            }
+        }        
+    }
+
+    if (addedProtocols>0)
+    {
+        RTI->log(QString::number(addedProtocols)+" remote protocols added.");
+    }
+
+    return true;
+}
+
 
 
 void rdsConfiguration::removeRemotelyDefinedProtocols()

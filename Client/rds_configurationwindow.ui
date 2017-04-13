@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>612</width>
-    <height>393</height>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -42,125 +42,13 @@
        <property name="rightMargin">
         <number>100</number>
        </property>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="systemNameEdit">
-         <property name="inputMask">
-          <string>NNNNNNNNNNNNNNNNNNNN</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>System Name:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QComboBox" name="updateCombobox">
-         <property name="frame">
-          <bool>true</bool>
-         </property>
-         <item>
-          <property name="text">
-           <string>On Startup (during system warmup)</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>At Fixed Time</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Periodically</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Manual Only</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>On Startup and at Fixed Time</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="softwareVersionEdit">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <spacer name="verticalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Software Version:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Update Rule:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>60</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
        <item row="6" column="2">
-        <spacer name="verticalSpacer_6">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>43</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="5" column="2">
         <widget class="QStackedWidget" name="updateStackedWidget">
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="pageStartup"/>
          <widget class="QWidget" name="pageFixed">
@@ -168,37 +56,10 @@
            <property name="leftMargin">
             <number>0</number>
            </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_9">
+           <item row="4" column="2">
+            <widget class="QLabel" name="jitterLabel">
              <property name="text">
-              <string>Time</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QTimeEdit" name="time1Edit">
-             <property name="calendarPopup">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>211</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="time2Checkbox">
-             <property name="text">
-              <string>Time 2</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;hours&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -214,6 +75,73 @@
            </item>
            <item row="2" column="1">
             <widget class="QTimeEdit" name="time3Edit"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="time2Checkbox">
+             <property name="text">
+              <string>Time 2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Time</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QTimeEdit" name="time1Edit">
+             <property name="calendarPopup">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>211</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="jitterSpinbox">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>24</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QCheckBox" name="jitterTimesCheckbox">
+             <property name="text">
+              <string>Jitter by</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <spacer name="verticalSpacer_18">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>8</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -277,6 +205,68 @@
          <widget class="QWidget" name="pageManually"/>
         </widget>
        </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="serialNumberLabel">
+         <property name="text">
+          <string>Serial Number:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QComboBox" name="updateCombobox">
+         <property name="frame">
+          <bool>true</bool>
+         </property>
+         <item>
+          <property name="text">
+           <string>On Startup (during system warmup)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>At Fixed Time</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Periodically</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Manual Only</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>On Startup and at Fixed Time</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>System Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>18</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item row="2" column="2">
         <widget class="QLineEdit" name="serialNumberEdit">
          <property name="readOnly">
@@ -284,10 +274,67 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="serialNumberLabel">
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="systemNameEdit">
+         <property name="inputMask">
+          <string>NNNNNNNNNNNNNNNNNNNN</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLineEdit" name="softwareVersionEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>Serial Number:</string>
+          <string>Update Rule:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Software Version:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
+        <spacer name="verticalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>43</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="0">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>60</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="2">
+        <widget class="QCheckBox" name="indicatorCheckbox">
+         <property name="text">
+          <string>Show RDS indicator in top-right corner</string>
          </property>
         </widget>
        </item>
@@ -537,7 +584,7 @@ p, li { white-space: pre-wrap; }
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="bottomMargin">
-          <number>12</number>
+          <number>4</number>
          </property>
          <item>
           <widget class="QLabel" name="label_13">
@@ -597,6 +644,9 @@ p, li { white-space: pre-wrap; }
          <property name="leftMargin">
           <number>0</number>
          </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
          <item>
           <widget class="QStackedWidget" name="networkStackedWidget">
            <property name="currentIndex">
@@ -607,13 +657,22 @@ p, li { white-space: pre-wrap; }
              <property name="leftMargin">
               <number>0</number>
              </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
                 <widget class="QLabel" name="label_14">
                  <property name="minimumSize">
                   <size>
-                   <width>80</width>
+                   <width>120</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -660,7 +719,7 @@ p, li { white-space: pre-wrap; }
                 <number>0</number>
                </property>
                <property name="leftMargin">
-                <number>86</number>
+                <number>128</number>
                </property>
                <item>
                 <widget class="QCheckBox" name="networkDriveCreatePath">
@@ -679,10 +738,56 @@ p, li { white-space: pre-wrap; }
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>30</height>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_9">
+               <item>
+                <widget class="QLabel" name="networkRemoteConfigLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Remote Configuration: </string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="networkRemoteConfigLabelEdit"/>
+               </item>
+               <item>
+                <widget class="QToolButton" name="networkRemoteConfigurationButton">
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_19">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
                 </size>
                </property>
               </spacer>
@@ -693,7 +798,7 @@ p, li { white-space: pre-wrap; }
                 <widget class="QLabel" name="label_17">
                  <property name="minimumSize">
                   <size>
-                   <width>80</width>
+                   <width>120</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -729,8 +834,8 @@ p, li { white-space: pre-wrap; }
                 <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Note: &lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The command line entered above will be executed before each data transfer and can be used to reconnect the network drive before the transfer. Leave the field empty if reestablishment of the network connection is not necessary. &lt;br /&gt;&lt;br /&gt;To learn about the syntax, open a Windows command shell and type &amp;quot;net use / help&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note: &lt;/span&gt;The command line above will be executed before each transfer and can be used to reconnect network drives. To learn about the syntax, type &amp;quot;net use / help&amp;quot; in a Windows command shell.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -854,7 +959,7 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>59</width>
+             <width>10</width>
              <height>20</height>
             </size>
            </property>
@@ -883,7 +988,7 @@ p, li { white-space: pre-wrap; }
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <property name="spacing">
-        <number>10</number>
+        <number>9</number>
        </property>
        <property name="leftMargin">
         <number>12</number>
@@ -892,7 +997,10 @@ p, li { white-space: pre-wrap; }
         <number>16</number>
        </property>
        <property name="rightMargin">
-        <number>100</number>
+        <number>80</number>
+       </property>
+       <property name="bottomMargin">
+        <number>7</number>
        </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -900,12 +1008,12 @@ p, li { white-space: pre-wrap; }
           <widget class="QLabel" name="logServerPathLabel">
            <property name="minimumSize">
             <size>
-             <width>80</width>
+             <width>130</width>
              <height>0</height>
             </size>
            </property>
            <property name="text">
-            <string>Server Path: </string>
+            <string>Server Address: </string>
            </property>
           </widget>
          </item>
@@ -915,11 +1023,81 @@ p, li { white-space: pre-wrap; }
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <item>
+          <widget class="QLabel" name="logServerApiKeyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>130</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>API Key:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="logServerApiKeyEdit"/>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QCheckBox" name="logServerSendScansCheckbox">
          <property name="text">
           <string>Send protocol statistics to server</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QLabel" name="logServerPushFrequencyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>130</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Statistics push frequency:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="logServerPushFrequencySpinbox">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>24</number>
+           </property>
+           <property name="value">
+            <number>4</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="logServerPushFrequencyUnitLabel">
+           <property name="text">
+            <string>hours</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer_13">
@@ -951,9 +1129,25 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
+        <spacer name="verticalSpacer_17">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>2</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QLabel" name="logServerStatusLabel">
          <property name="text">
-          <string/>
+          <string>Connection status</string>
          </property>
         </widget>
        </item>
@@ -969,6 +1163,45 @@ p, li { white-space: pre-wrap; }
           </size>
          </property>
         </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="startCmdTabs">
+      <attribute name="title">
+       <string>Startup Commands</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <property name="spacing">
+        <number>9</number>
+       </property>
+       <property name="leftMargin">
+        <number>12</number>
+       </property>
+       <property name="topMargin">
+        <number>16</number>
+       </property>
+       <property name="rightMargin">
+        <number>12</number>
+       </property>
+       <property name="bottomMargin">
+        <number>16</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="startCmdLabel">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Starting with software versions VB19A and VE11A, the &amp;quot;MREmbeddedControl&amp;quot; software has been introduced to the Siemens MR scanner software, which prevents execution of any batch scipts. The RDS will client will execute the commands entered below in sequential order during the start-up procedure, which can be used as an alternative mechanism to reconnect network shares:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPlainTextEdit" name="startCmdEdit">
+         <property name="lineWrapMode">
+          <enum>QPlainTextEdit::NoWrap</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

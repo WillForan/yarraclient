@@ -75,6 +75,14 @@ public:
 
     void setORTSystemName(QString name);
 
+    bool isScanActive();
+
+    void readLPFI();
+    void saveLPFI();
+
+    int  getLPFIScaninfo();
+    void setLPFIScaninfo(int value);
+
 protected:
 
     bool parseVB15Line(QString line, rdsRaidEntry* entry);
@@ -92,8 +100,6 @@ protected:
 
     int  getLPFI();
     void setLPFI(int value);
-    void readLPFI();
-    void saveLPFI();
 
     bool callRaidTool(QStringList command, QStringList options);
 
@@ -106,6 +112,7 @@ protected:
     QList<rdsExportEntry*> exportList;
 
     int lastProcessedFileID;
+    int lastProcessedFileIDScaninfo;
 
     void clearRaidList();
     void clearExportList();
@@ -124,6 +131,7 @@ protected:
     bool patchedRaidToolMissing;
 
     bool ignoreLPFID;
+    bool scanActive;
 
     QString getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, int refID=-1);
 
@@ -140,6 +148,18 @@ inline void rdsRaid::setLPFI(int value)
 {
     RTI->debug("Setting LPFI to " + QString::number(value));
     lastProcessedFileID=value;
+}
+
+
+inline int rdsRaid::getLPFIScaninfo()
+{
+    return lastProcessedFileIDScaninfo;
+}
+
+
+inline void rdsRaid::setLPFIScaninfo(int value)
+{
+    lastProcessedFileIDScaninfo=value;
 }
 
 
@@ -292,6 +312,11 @@ inline void rdsRaid::setORTSystemName(QString name)
     ortSystemName=name;
 }
 
+
+inline bool rdsRaid::isScanActive()
+{
+    return scanActive;
+}
 
 
 #endif // RDS_RAID_H

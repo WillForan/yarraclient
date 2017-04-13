@@ -96,6 +96,7 @@ public:
     rdsProcessControl* getControlInstance();
 
     void setWindowInstance(rdsOperationWindow* instance);
+    rdsOperationWindow* getWindowInstance();
 
     int     getSyngoMRVersion();
     QString getSyngoMRVersionString();
@@ -117,7 +118,6 @@ public:
     void setPostponementRequest(bool request);
     bool isPostponementRequested();
 
-
     void setSevereErrors(bool value);
     bool isSevereErrors();
 
@@ -127,6 +127,7 @@ public:
     void clearLogWidget();
     void updateInfoUI();
 
+    void setIconWindowAnim(bool status);
 
 private:    
 
@@ -308,6 +309,12 @@ inline rdsProcessControl* rdsRuntimeInformation::getControlInstance()
 inline void rdsRuntimeInformation::setWindowInstance(rdsOperationWindow* instance)
 {
     windowInstance=instance;
+}
+
+
+inline rdsOperationWindow* rdsRuntimeInformation::getWindowInstance()
+{
+    return windowInstance;
 }
 
 
