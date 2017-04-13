@@ -80,7 +80,7 @@ void NetLogger::postEvent(EventInfo::Type type, EventInfo::Detail detail, EventI
     }
 
     QUrlQuery query=buildEventQuery(type,detail,severity,info,data);
-    postDataAsync(query,"Events");
+    postDataAsync(query,"events");
 }
 
 
@@ -92,7 +92,7 @@ bool NetLogger::postEventSync(EventInfo::Type type, QNetworkReply::NetworkError&
     }
 
     QUrlQuery query=buildEventQuery(type,detail,severity,info,data);
-    return postData(query,"Events",error,status_code);
+    return postData(query,"events",error,status_code);
 }
 
 

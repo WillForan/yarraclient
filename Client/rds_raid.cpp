@@ -646,7 +646,7 @@ bool rdsRaid::parseOutputDirectory()
                     // ## PatName
                     // The remaining part should be the patient name
                     temp=raidLine;
-                    removePrecedingSpace(temp);
+//                    removePrecedingSpace(temp);
                     raidEntry.patName=temp;
 
                     //TODO: The patient name might still contain the date of birth.

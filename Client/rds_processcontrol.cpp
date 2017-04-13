@@ -286,10 +286,12 @@ void rdsProcessControl::sendScanInfoToLogServer()
         entry->addToUrlQuery(data);
     }
 
+//    RTI->log(data.toString());
+//    RTI->log(data.toString());
     QNetworkReply::NetworkError error;
     int http_status=0;
 
-    bool success=RTI_NETWORK->netLogger.postData(data,"RaidRecords",error,http_status);
+    bool success=RTI_NETWORK->netLogger.postData(data,"scans",error,http_status);
 
     if (!success)
     {
