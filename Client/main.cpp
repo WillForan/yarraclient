@@ -50,12 +50,23 @@ int main(int argc, char *argv[])
     {
         QString msg="";
 
-        // If the program is called with an argument, perform an update automatically
-        // If not called with an argument, show the operations window
         if (argc>1)
         {
-            msg="update";
+            if (!qstrcmp(argv[1], "-update"))
+            {
+                // If the program is called with the argument "-update", send an update
+                // message so that the running instance performs the update now
+                msg="update";
+            }
+            else
+            {
+                // For any other argument, don't do anything and terminate silently.
+                return 0;
+            }
         }
+
+        // If not called with an argument, show the operations window
+        // by sending an empty message
 
         a.sendMessage(msg);
 
