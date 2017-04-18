@@ -20,8 +20,10 @@ public:
     QString     ortConnectCmd;
     QString     ortDisconnectCmd;
     QString     ortFallbackConnectCmd;
-    int         ortConnectTimeout;
+    int         ortConnectTimeout;    
     QStringList ortMailPresets;
+
+    QString     infoSerialNumber;
 
 };
 

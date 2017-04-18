@@ -6,6 +6,8 @@
 ortConfiguration::ortConfiguration()
 {
     ortSystemName=ORT_INVALID;
+
+    infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER","0");
 }
 
 

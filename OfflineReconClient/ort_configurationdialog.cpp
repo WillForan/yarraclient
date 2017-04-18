@@ -141,6 +141,8 @@ void ortConfigurationDialog::readSettings()
     ui->disconnectCmdEdit->setText(settings.value("ORT/DisconnectCmd", "").toString());
     ui->fallbackConnectCmdEdit->setText(settings.value("ORT/FallbackConnectCmd", "").toString());
 
+    ui->serialNumberEdit->setText(RTI->getConfigInstance()->infoSerialNumber);
+
     // Read the mail presets for the ORT configuration dialog
     ui->emailPresetsEdit->clear();
     int mCount=1;

@@ -153,7 +153,7 @@ bool ortNetwork::openConnection(bool fallback)
     if (connectCmd!="")
     {
         rdsExecHelper execHelper;
-        execHelper.setMonitorOutput();
+        execHelper.setMonitorNetUseOutput();
 
         // Connect to the main server. In the second try, connect
         // to the fallback server
@@ -166,7 +166,7 @@ bool ortNetwork::openConnection(bool fallback)
             execHelper.setCommand(connectCmd);
         }
 
-        if (!execHelper.callProcessTimout(connectTimeout))
+        if (!execHelper.callNetUseTimout(connectTimeout))
         {
             RTI->log("Calling the connect command failed: " + connectCmd);
         }
@@ -257,10 +257,10 @@ void ortNetwork::closeConnection()
     if (disconnectCmd!="")
     {
         rdsExecHelper execHelper;
-        execHelper.setMonitorOutput();
+        execHelper.setMonitorNetUseOutput();
         execHelper.setCommand(disconnectCmd);
 
-        if (!execHelper.callProcessTimout(connectTimeout))
+        if (!execHelper.callNetUseTimout(connectTimeout))
         {
             RTI->log("Calling the disconnect command failed: " + disconnectCmd);
         }
@@ -366,9 +366,9 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
         {
             // Declared inside explicit scope to enforce prompt destruction
             rdsExecHelper execHelper;
-            execHelper.setMonitorOutput();
+            execHelper.setMonitorNetUseOutput();
             execHelper.setCommand(connectCmd);
-            connectCmdSuccess=execHelper.callProcessTimout(connectTimeout);
+            connectCmdSuccess=execHelper.callNetUseTimout(connectTimeout);
             success=connectCmdSuccess;
             RTI->processEvents();
         }
