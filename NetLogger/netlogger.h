@@ -13,7 +13,7 @@ public:
     NetLogger();
     ~NetLogger();
 
-    void configure(QString path, EventInfo::SourceType sourceType, QString sourceId);
+    void configure(QString path, EventInfo::SourceType sourceType, QString sourceId, QString key);
     bool isConfigured();
     bool isConfigurationError();
     bool isServerInSameDomain(QString serverPath);
@@ -33,6 +33,7 @@ protected:
     bool configurationError;
 
     QString serverPath;
+    QString apiKey;
     QString source_id;
     EventInfo::SourceType source_type;
 

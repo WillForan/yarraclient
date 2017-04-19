@@ -142,6 +142,11 @@ ortMainWindow::~ortMainWindow()
 {
     network.closeConnection();
 
+    if (config.ortStartRDSOnShutdown)
+    {
+        QProcess::startDetached(qApp->applicationDirPath() + "/RDS.exe -silent");
+    }
+
     RTI->setLogInstance(0);
     log.finish();
 

@@ -200,6 +200,93 @@ Write each address in a separate row.</string>
       <attribute name="title">
        <string>Log Server</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="logServerAddressLabel">
+         <property name="minimumSize">
+          <size>
+           <width>120</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Server Address:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="logServerAPIKeyLabel">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;API Key:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="logServerAPIKeyEdit"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="logServerTestButton">
+         <property name="text">
+          <string>Test Connection</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>144</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="logServerAddressEdit"/>
+       </item>
+       <item row="2" column="0">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="0">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>4</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QLabel" name="logServerTestLabel">
+         <property name="text">
+          <string>Connection Result</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
@@ -373,16 +460,21 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <tabstops>
-  <tabstop>systemNameEdit</tabstop>
-  <tabstop>softwareVersionEdit</tabstop>
-  <tabstop>serverPathEdit</tabstop>
   <tabstop>connectCmdEdit</tabstop>
-  <tabstop>disconnectCmdEdit</tabstop>
+  <tabstop>serverPathEdit</tabstop>
+  <tabstop>logServerAddressEdit</tabstop>
+  <tabstop>logServerAPIKeyEdit</tabstop>
+  <tabstop>logServerTestButton</tabstop>
   <tabstop>fallbackConnectCmdEdit</tabstop>
   <tabstop>okButton</tabstop>
   <tabstop>cancelButton</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>emailPresetsEdit</tabstop>
+  <tabstop>autoLaunchRDSCheckbox</tabstop>
+  <tabstop>serialNumberEdit</tabstop>
+  <tabstop>systemNameEdit</tabstop>
+  <tabstop>disconnectCmdEdit</tabstop>
+  <tabstop>softwareVersionEdit</tabstop>
  </tabstops>
  <resources>
   <include location="ort.qrc"/>

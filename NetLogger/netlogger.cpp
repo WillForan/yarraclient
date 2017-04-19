@@ -14,8 +14,9 @@ NetLogger::NetLogger()
     configured=false;
     configurationError=false;
 
-    QString serverPath="";
-    QString source_id="";
+    serverPath="";
+    apiKey="";
+    source_id="";
     source_type=EventInfo::SourceType::Generic;
 
     // Read certificate from external file
@@ -172,12 +173,13 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
 }
 
 
-void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId)
+void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId, QString key)
 {
     configurationError=false;
     serverPath=path;
     source_id=sourceId;
     source_type=sourceType;
+    apiKey=key;
 
     if (!serverPath.isEmpty())
     {
@@ -197,9 +199,9 @@ QUrlQuery NetLogger::buildEventQuery(EventInfo::Type type, EventInfo::Detail det
     QUrlQuery query;
 
     // Send the API key if it has been entered
-    if (!RTI_CONFIG->logApiKey.isEmpty())
+    if (!apiKey.isEmpty())
     {
-        query.addQueryItem("api_key",RTI_CONFIG->logApiKey);
+        query.addQueryItem("api_key",apiKey);
     }
 
     // ip and time are filled in on the server
