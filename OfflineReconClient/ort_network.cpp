@@ -38,6 +38,8 @@ bool ortNetwork::prepare()
         return false;
     }
 
+    netLogger.configure(configInstance->logServerAddress, EventInfo::SourceType::ORT, configInstance->infoSerialNumber, configInstance->logServerAPIKey);
+
     // Buffer the settings from the configuration object
     connectCmd=configInstance->ortConnectCmd;
     serverPath=configInstance->ortServerPath;

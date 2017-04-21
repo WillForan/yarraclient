@@ -155,19 +155,15 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
     // what binary target this class is built into
     if (error)
     {
-    #ifdef YARRA_APP_RDS
         RTI->log("ERROR: Configuration of log server failed.");
         RTI->log("ERROR: " + errorMessage);
         RTI->log("ERROR: Use configuration dialog to test connection.");
         RTI->log("ERROR: Logging has been disabled.");
-    #endif
 
         return false;
     }
 
-#ifdef YARRA_APP_RDS
     RTI->log("Connection to log server validated.");
-#endif
 
     return true;
 }

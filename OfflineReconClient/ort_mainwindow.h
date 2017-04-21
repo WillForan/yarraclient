@@ -13,6 +13,9 @@ namespace Ui {
 class ortMainWindow;
 }
 
+
+class ortReconTask;
+
 class ortMainWindow : public QDialog
 {
     Q_OBJECT
@@ -40,7 +43,6 @@ public:
     void refreshRaidList();
     void showTransferError(QString msg);
 
-
 private slots:
     void on_cancelButton_clicked();
     void on_sendButton_clicked();
@@ -61,6 +63,8 @@ private:
 
     bool isManualAssignment;
     bool isRaidListAvaible;
+
+    QString getTaskInfo(ortReconTask& task);
 
 };
 

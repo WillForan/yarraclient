@@ -158,7 +158,10 @@ bool rdsExecHelper::callNetUseTimout(int timeoutMs)
 
     // Start the process. Note: The commandline and arguments need to be defined before.
     process.start(cmdLine);
-    q.exec();
+    if (process.state()==QProcess::Running)
+    {
+        q.exec();
+    }
 
     // Check for problems with the event loop: Sometimes it seems to return to quickly!
     // In this case, start a second while loop to check when the process is really finished.
