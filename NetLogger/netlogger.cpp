@@ -239,7 +239,7 @@ bool NetLogger::postEventSync(EventInfo::Type type, QNetworkReply::NetworkError&
     }
 
     QUrlQuery query=buildEventQuery(type,detail,severity,info,data);
-    return postData(query,"Events",error,status_code);
+    return postData(query,NETLOG_ENDPT_EVENT,error,status_code);
 }
 
 
