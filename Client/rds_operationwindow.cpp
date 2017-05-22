@@ -70,7 +70,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         RTI->setControlInstance(&control);
         RTI->setWindowInstance(this);
 
-        RTI_NETLOG.configure(RTI_CONFIG->logServerPath, EventInfo::SourceType::RDS,RTI_CONFIG->infoName,RTI_CONFIG->logServerKey);
+        RTI_NETLOG.configure(RTI_CONFIG->logServerPath, EventInfo::SourceType::RDS,RTI_CONFIG->infoName, RTI_CONFIG->logApiKey);
 
         // Notify the process controller about the start of the service
         control.setStartTime();

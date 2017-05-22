@@ -20,8 +20,14 @@ public:
     QString     ortConnectCmd;
     QString     ortDisconnectCmd;
     QString     ortFallbackConnectCmd;
-    int         ortConnectTimeout;
+    int         ortConnectTimeout;    
     QStringList ortMailPresets;
+    bool        ortStartRDSOnShutdown;
+
+    QString     logServerAddress;
+    QString     logServerAPIKey;
+
+    QString     infoSerialNumber;
 
 };
 

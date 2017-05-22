@@ -2,21 +2,44 @@
 #define RDSEXECHELPER_H
 
 #include <QStringList>
+#include <QProcess>
 
 
-class rdsExecHelper
+class rdsExecHelper : public QObject
 {
+    Q_OBJECT
+
 public:
     rdsExecHelper();
 
+    // These are generic functions to execute commands
     void setTimeout(int ms);
-    bool run(QString cmdLine);
+    void setCommand(QString& cmdLineToRun);
 
+    bool run();
+    bool run(QString cmdLine);
     QStringList output;
 
-private:
+    static void safeSleep(int ms);
 
-    int timeoutMs;
+
+    // These two functions are only used for calling the "net use" command from ORT
+    bool callNetUseTimout(int timeoutMs);
+    void setMonitorNetUseOutput(bool state=true);
+
+
+private:
+    QProcess process;
+
+    int      timeoutMs;
+    QString  cmdLine;
+
+    bool monitorNetUseOutput;
+    bool detectedNetUseError;
+    bool detectedNetUseSuccess;
+
+public slots:
+    void readNetUseOutput();
 
 };
 
@@ -24,6 +47,18 @@ private:
 inline void rdsExecHelper::setTimeout(int ms)
 {
     timeoutMs=ms;
+}
+
+
+inline void rdsExecHelper::setCommand(QString& cmdLineToRun)
+{
+    cmdLine=cmdLineToRun;
+}
+
+
+inline void rdsExecHelper::setMonitorNetUseOutput(bool state)
+{
+    monitorNetUseOutput=state;
 }
 
 

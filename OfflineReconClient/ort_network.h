@@ -4,6 +4,8 @@
 #include <QtCore>
 
 #include <ort_serverlist.h>
+#include <../NetLogger/netlogger.h>
+
 
 class ortConfiguration;
 
@@ -56,6 +58,8 @@ public:
 
     void cleanLocalQueueDir();
 
+    NetLogger netLogger;
 };
+
 
 #endif // ORT_NETWORK_H

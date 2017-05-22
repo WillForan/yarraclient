@@ -49,6 +49,8 @@ ortConfigurationDialog::ortConfigurationDialog(QWidget *parent) :
                                     qApp->desktop()->availableGeometry()));
 
     readSettings();
+
+    ui->logServerTestLabel->setText("");
 }
 
 
@@ -140,6 +142,9 @@ void ortConfigurationDialog::readSettings()
     ui->connectCmdEdit->setText(settings.value("ORT/ConnectCmd", "").toString());
     ui->disconnectCmdEdit->setText(settings.value("ORT/DisconnectCmd", "").toString());
     ui->fallbackConnectCmdEdit->setText(settings.value("ORT/FallbackConnectCmd", "").toString());
+    ui->autoLaunchRDSCheckbox->setChecked(settings.value("ORT/StartRDSOnShutdown", false).toBool());
+
+    ui->serialNumberEdit->setText(RTI->getConfigInstance()->infoSerialNumber);
 
     // Read the mail presets for the ORT configuration dialog
     ui->emailPresetsEdit->clear();
@@ -149,6 +154,9 @@ void ortConfigurationDialog::readSettings()
         ui->emailPresetsEdit->appendPlainText(settings.value("ORT/MailPreset"+QString::number(mCount),"").toString());
         mCount++;
     }
+
+    ui->logServerAddressEdit->setText(settings.value("LogServer/ServerAddress", "").toString());
+    ui->logServerAPIKeyEdit->setText(settings.value("LogServer/APIKey", "").toString());
 }
 
 
@@ -161,6 +169,7 @@ void ortConfigurationDialog::writeSettings()
     settings.setValue("ORT/ConnectCmd", ui->connectCmdEdit->text());
     settings.setValue("ORT/DisconnectCmd", ui->disconnectCmdEdit->text());
     settings.setValue("ORT/FallbackConnectCmd", ui->fallbackConnectCmdEdit->text());
+    settings.setValue("ORT/StartRDSOnShutdown", ui->autoLaunchRDSCheckbox->isChecked());
 
     QStringList emailList=ui->emailPresetsEdit->toPlainText().split("\n",QString::SkipEmptyParts);
 
@@ -170,6 +179,9 @@ void ortConfigurationDialog::writeSettings()
     }
     // Set next entry to "" in ini file to indicate end of list
     settings.setValue("ORT/MailPreset"+QString::number(emailList.count()+1), "");
+
+    settings.setValue("LogServer/ServerAddress",ui->logServerAddressEdit->text());
+    settings.setValue("LogServer/APIKey",       ui->logServerAPIKeyEdit->text());
 }
 
 
@@ -200,3 +212,8 @@ bool ortConfigurationDialog::checkAccessPassword()
 }
 
 
+
+void ortConfigurationDialog::on_logServerTestButton_clicked()
+{
+    ui->logServerTestLabel->setText("TODO");
+}

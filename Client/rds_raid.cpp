@@ -674,7 +674,7 @@ bool rdsRaid::parseOutputDirectory()
 
                     // For RDS the patient name should not be trimmed as this might confuse the
                     // exam aggregation mechanism of the log server backend
-                #ifdef YARRA_APP_RDS
+                #ifndef YARRA_APP_RDS
                     removePrecedingSpace(temp);
                 #endif
 

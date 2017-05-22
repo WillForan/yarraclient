@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>611</width>
-    <height>299</height>
+    <height>356</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,10 +30,20 @@
        <string>General</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="6" column="1">
+       <item row="3" column="0">
+        <widget class="QLabel" name="serialNumberLabel">
+         <property name="text">
+          <string>Serial Number:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
         <widget class="QLineEdit" name="connectCmdEdit"/>
        </item>
-       <item row="9" column="0">
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="serverPathEdit"/>
+       </item>
+       <item row="13" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -46,17 +56,7 @@
          </property>
         </spacer>
        </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="serverPathEdit"/>
-       </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="connectCmdLabel">
-         <property name="text">
-          <string>Connect Cmd:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="2">
+       <item row="5" column="0" colspan="2">
         <widget class="Line" name="line">
          <property name="minimumSize">
           <size>
@@ -69,7 +69,21 @@
          </property>
         </widget>
        </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="serverPathLabel">
+         <property name="text">
+          <string>Server Path:</string>
+         </property>
+        </widget>
+       </item>
        <item row="8" column="0">
+        <widget class="QLabel" name="connectCmdLabel">
+         <property name="text">
+          <string>Connect Cmd:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
         <widget class="QLabel" name="fallbackConnectCmdLabel">
          <property name="minimumSize">
           <size>
@@ -82,15 +96,8 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="1">
+       <item row="10" column="1">
         <widget class="QLineEdit" name="fallbackConnectCmdEdit"/>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="serverPathLabel">
-         <property name="text">
-          <string>Server Path:</string>
-         </property>
-        </widget>
        </item>
        <item row="1" column="1">
         <widget class="QLineEdit" name="systemNameEdit"/>
@@ -102,10 +109,7 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
-        <widget class="QLineEdit" name="disconnectCmdEdit"/>
-       </item>
-       <item row="7" column="0">
+       <item row="9" column="0">
         <widget class="QLabel" name="disconnectCmdLabel">
          <property name="text">
           <string>Disconnect Cmd:</string>
@@ -119,8 +123,41 @@
          </property>
         </widget>
        </item>
+       <item row="9" column="1">
+        <widget class="QLineEdit" name="disconnectCmdEdit"/>
+       </item>
        <item row="2" column="1">
         <widget class="QLineEdit" name="softwareVersionEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="0" colspan="2">
+        <widget class="Line" name="line_2">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>10</height>
+          </size>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="0" colspan="2">
+        <widget class="QCheckBox" name="autoLaunchRDSCheckbox">
+         <property name="text">
+          <string>Automatically start RDS client (if not running)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="serialNumberEdit">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -154,6 +191,98 @@ Write each address in a separate row.</string>
         <widget class="QPlainTextEdit" name="emailPresetsEdit">
          <property name="lineWrapMode">
           <enum>QPlainTextEdit::NoWrap</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="logServerTab">
+      <attribute name="title">
+       <string>Log Server</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="logServerAddressLabel">
+         <property name="minimumSize">
+          <size>
+           <width>120</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Server Address:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="logServerAPIKeyLabel">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;API Key:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="logServerAPIKeyEdit"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="logServerTestButton">
+         <property name="text">
+          <string>Test Connection</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>144</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="logServerAddressEdit"/>
+       </item>
+       <item row="2" column="0">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="0">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>4</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QLabel" name="logServerTestLabel">
+         <property name="text">
+          <string>Connection Result</string>
          </property>
         </widget>
        </item>
@@ -331,16 +460,21 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <tabstops>
-  <tabstop>systemNameEdit</tabstop>
-  <tabstop>softwareVersionEdit</tabstop>
-  <tabstop>serverPathEdit</tabstop>
   <tabstop>connectCmdEdit</tabstop>
-  <tabstop>disconnectCmdEdit</tabstop>
+  <tabstop>serverPathEdit</tabstop>
+  <tabstop>logServerAddressEdit</tabstop>
+  <tabstop>logServerAPIKeyEdit</tabstop>
+  <tabstop>logServerTestButton</tabstop>
   <tabstop>fallbackConnectCmdEdit</tabstop>
   <tabstop>okButton</tabstop>
   <tabstop>cancelButton</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>emailPresetsEdit</tabstop>
+  <tabstop>autoLaunchRDSCheckbox</tabstop>
+  <tabstop>serialNumberEdit</tabstop>
+  <tabstop>systemNameEdit</tabstop>
+  <tabstop>disconnectCmdEdit</tabstop>
+  <tabstop>softwareVersionEdit</tabstop>
  </tabstops>
  <resources>
   <include location="ort.qrc"/>

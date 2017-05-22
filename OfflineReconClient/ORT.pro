@@ -56,8 +56,11 @@ HEADERS  += \
     ort_returnonfocus.h \
     ort_serverlist.h \
     ort_configuration.h \
-    ort_configurationdialog.h
+    ort_configurationdialog.h \
+    ../NetLogger/netlogger.h \
+    ../NetLogger/netlog_events.h
 
+    
 FORMS    += \
     ort_mainwindow.ui \
     ort_confirmationdialog.ui \

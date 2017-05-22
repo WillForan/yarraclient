@@ -8,14 +8,19 @@
     #include "ort_global.h"
 #endif
 
+#ifdef YARRA_APP_SAC
+    #include "sac_global.h"
+#endif
+
 
 NetLogger::NetLogger()
 {
     configured=false;
     configurationError=false;
 
-    QString serverPath="";
-    QString source_id="";
+    serverPath="";
+    apiKey="";
+    source_id="";
     source_type=EventInfo::SourceType::Generic;
 
     // Read certificate from external file
@@ -154,31 +159,27 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
     // what binary target this class is built into
     if (error)
     {
-    #ifdef YARRA_APP_RDS
         RTI->log("ERROR: Configuration of log server failed.");
         RTI->log("ERROR: " + errorMessage);
         RTI->log("ERROR: Use configuration dialog to test connection.");
         RTI->log("ERROR: Logging has been disabled.");
-    #endif
 
         return false;
     }
 
-#ifdef YARRA_APP_RDS
     RTI->log("Connection to log server validated.");
-#endif
 
     return true;
 }
 
 
-void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId)
+void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId, QString key)
 {
     configurationError=false;
     serverPath=path;
     source_id=sourceId;
     source_type=sourceType;
-    api_key =APIKey;
+    apiKey=key;
 
     if (!serverPath.isEmpty())
     {
@@ -198,9 +199,9 @@ QUrlQuery NetLogger::buildEventQuery(EventInfo::Type type, EventInfo::Detail det
     QUrlQuery query;
 
     // Send the API key if it has been entered
-    if (!RTI_CONFIG->logApiKey.isEmpty())
+    if (!apiKey.isEmpty())
     {
-        query.addQueryItem("api_key",RTI_CONFIG->logApiKey);
+        query.addQueryItem("api_key",apiKey);
     }
 
     // ip and time are filled in on the server
@@ -238,7 +239,7 @@ bool NetLogger::postEventSync(EventInfo::Type type, QNetworkReply::NetworkError&
     }
 
     QUrlQuery query=buildEventQuery(type,detail,severity,info,data);
-    return postData(query,"events",error,status_code);
+    return postData(query,"Events",error,status_code);
 }
 
 
@@ -287,6 +288,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
     QEventLoop eventLoop;
     QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
     QTimer::singleShot(10000, &eventLoop, SLOT(quit()));
+
     if (reply->isRunning())
     {
         eventLoop.exec();

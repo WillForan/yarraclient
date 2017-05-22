@@ -93,7 +93,8 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         }
 
         if (connectError)
-        {
+        {            
+            // TODO: Send netlogger event
             QTimer::singleShot(0, qApp, SLOT(quit()));
             return;
         }
@@ -141,6 +142,11 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 ortMainWindow::~ortMainWindow()
 {
     network.closeConnection();
+
+    if (config.ortStartRDSOnShutdown)
+    {
+        QProcess::startDetached(qApp->applicationDirPath() + "/RDS.exe -silent");
+    }
 
     RTI->setLogInstance(0);
     log.finish();
@@ -330,6 +336,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     if (selectedFID==-1)
     {
+        // TODO: Send netlogger event
         RTI->log("ERROR: Invalid FID after pressing Send button");
         showTransferError("Invalid FID has been selected.");
         return;
@@ -343,6 +350,7 @@ void ortMainWindow::on_sendButton_clicked()
     // Retrive the settings of the selected mode
     if ((selectedMode<0) or (selectedMode>=modeList.modes.count()))
     {
+        // TODO: Send netlogger event
         RTI->log("ERROR: Invalid mode has been selected.");
         showTransferError("Invalid reconstruction mode has been selected.");
         return;
@@ -383,6 +391,7 @@ void ortMainWindow::on_sendButton_clicked()
     {
         // Error handling
         waitDialog.close();
+        // TODO: Send netlogger event
         showTransferError(network.errorReason);
         this->show();
         return;
@@ -432,6 +441,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     if (!reconTask.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
     {
+        // TODO: Send netlogger event
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
         return;
@@ -466,6 +476,7 @@ void ortMainWindow::on_sendButton_clicked()
         }
         else
         {
+            // TODO: Send netlogger event
             showTransferError(reconTask.getErrorMessageUI());
             this->show();
         }
@@ -474,6 +485,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     if (!reconTask.generateTaskFile())
     {
+        // TODO: Send netlogger event
         copyDialog.close();
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
@@ -489,13 +501,23 @@ void ortMainWindow::on_sendButton_clicked()
     // shutdown the ORT client.
     if (reconTask.isSubmissionSuccessful())
     {
+        // TODO: Finish netlogger event
+        //RTI->log(getTaskInfo(reconTask));
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,getTaskInfo(reconTask));
         this->close();
     }
     else
     {
+        // TODO: Send netlogger event
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
     }
+}
+
+
+QString ortMainWindow::getTaskInfo(ortReconTask& task)
+{
+    return "MOD=" + task.reconMode + " SRV=" + task.selectedServer + " PAT='" + task.patientName + "' ACC=" + task.accNumber + " PRO='" + task.scanProtocol + "'";
 }
 
 
@@ -528,18 +550,36 @@ void ortMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
     infoMenu.addSeparator();
     infoMenu.addAction("Configuration...", this, SLOT(showConfiguration()));
     infoMenu.addAction("Show log file...", this, SLOT(showLogfile()));
+
+    if (network.netLogger.isConfigured())
+    {
+        infoMenu.addSeparator();
+        infoMenu.addAction("<Log Server Connected>");
+    }
+    else
+    {
+        if (network.netLogger.isConfigurationError())
+        {
+            infoMenu.addSeparator();
+            infoMenu.addAction("<Error Connecting to Log Server>", this, SLOT(showLogfile()));
+        }
+    }
+
     infoMenu.exec(ui->logoLabel->mapToGlobal(pos));
 }
 
 
 void ortMainWindow::showLogfile()
 {
+    QString logPath=QDir::toNativeSeparators(RTI->getAppPath()+"/"+RTI->getLogInstance()->getLogFilename());
+    RTI->log(logPath);
+
     RTI->flushLog();
 
     // Call notepad and show the log file
     QString cmdLine="notepad.exe";
     QStringList args;
-    args.append(RTI->getAppPath()+"/"+RDS_DIR_LOG+"/"+RTI->getLogInstance()->getLogFilename());
+    args.append(logPath);
     QProcess::startDetached(cmdLine, args);
 }
 
