@@ -10,6 +10,39 @@
 #include "sac_configurationdialog.h"
 #include "sac_twixheader.h"
 
+bool sacMainWindow::handleBatchFile(QString file){
+    QSettings config(file, QSettings::IniFormat);
+
+    int i=0;
+    int j=0;
+    while (1)
+    {
+        QString folder = QString("Scans/Folder") + QString::number(i);
+        QString file = QString("Scans/File") + QString::number(i);
+
+        if (!config.contains(folder) || !config.contains(file))
+            break;
+
+        folder=config.value(folder,"" ).toString();
+        file=config.value(file,"").toString();
+        i++;
+        j=0;
+        while(1)
+        {
+            QString mode = QString("Modes/ReconMode") + QString::number(j);
+            if (!config.contains(mode)){
+             break;
+            }
+            mode = config.value(mode,"").toString();
+            qInfo() << folder << file << mode;
+            batchSubmit(folder,file,mode);
+            j++;
+        }
+    }
+    return true;
+}
+
+
 bool sacMainWindow::batchSubmit(QString file_path, QString file_name, QString mode ){
     Task the_task;
     QString the_file = QDir(file_path).filePath(file_name);
@@ -132,41 +165,6 @@ sacMainWindow::sacMainWindow(QWidget *parent) :
     bootDialog.close();
 
 
-    auto appPath=qApp->applicationDirPath();
-
-    {
-        QSettings config(appPath+"/test.ini", QSettings::IniFormat);
-
-        int i=0;
-        int j=0;
-        while (1)
-        {
-            QString folder = QString("Scans/Folder") + QString::number(i);
-            QString file = QString("Scans/File") + QString::number(i);
-
-            if (!config.contains(folder) || !config.contains(file))
-                break;
-
-            folder=config.value(folder,"" ).toString();
-            file=config.value(file,"").toString();
-            i++;
-            j=0;
-            while(1)
-            {
-                QString mode = QString("Modes/ReconMode") + QString::number(j);
-                if (!config.contains(mode)){
-                 break;
-                }
-                mode = config.value(mode,"").toString();
-                qInfo() << folder << file << mode;
-                batchSubmit(folder,file,mode);
-                j++;
-            }
-        }
-    }
-
-
-
     if (modeList.modes.count()==0)
     {
         ui->sendButton->setEnabled(false);
@@ -208,7 +206,8 @@ sacMainWindow::~sacMainWindow()
 
 void sacMainWindow::on_selectFileButton_clicked()
 {
-    QString newFilename=QFileDialog::getOpenFileName(this, "Select Measurement File...", QString(), "TWIX rawdata (*.dat)");
+    QString newFilename=QFileDialog::getOpenFileName(this, "Select Measurement File...", QString(), "TWIX rawdata (*.dat);;Batch files (*.sac)");
+    QFileInfo fileInfo = QFileInfo(newFilename);
 
     if (newFilename.length()==0)
     {
@@ -218,6 +217,13 @@ void sacMainWindow::on_selectFileButton_clicked()
             close();
         }
         */
+    } else if (fileInfo.completeSuffix() == "sac" )
+    {
+        auto reply = QMessageBox::question(this, "Test", "Submit this batch of raw files?",
+                                        QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            handleBatchFile(fileInfo.absoluteFilePath());
+        }
     }
     else
     {

@@ -58,6 +58,7 @@ public:
 
     void analyzeDatFile(QString filename, QString& detectedPatname, QString& detectedProtocol);
     bool batchSubmit(QString file_path, QString file_name, QString mode);
+    bool handleBatchFile(QString file);
     void updateDialogHeight();
 
 private slots:
