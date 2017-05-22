@@ -381,8 +381,6 @@ void rdsProcessControl::sendScanInfoToLogServer()
         entry->addToUrlQuery(data);
     }
 
-//    RTI->log(data.toString());
-//    RTI->log(data.toString());
     QNetworkReply::NetworkError error;
     int http_status=0;
 

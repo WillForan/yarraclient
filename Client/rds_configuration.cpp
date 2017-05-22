@@ -59,7 +59,6 @@ void rdsConfiguration::loadConfiguration()
     logSendScanInfo       =settings.value("LogServer/SendScanInfo",     true).toBool();
     logUpdateFrequency    =settings.value("LogServer/UpdateFrequency",  4).toInt();
 
-
     startCmds.clear();
     int startCmdsCount    =settings.value("StartCmds/Count",            0).toInt();
     for (int i=0; i<startCmdsCount; i++)

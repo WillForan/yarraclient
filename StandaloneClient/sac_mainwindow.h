@@ -11,21 +11,6 @@
 namespace Ui {
 class sacMainWindow;
 }
-struct Task {
-    QString taskID;
-    QString scanFilename;
-    int paramValue;
-    QString patientName;
-    QString accNumber;
-    QString mode;
-    QString modeReadable;
-    QString notification;
-    QString taskFilename;
-    QString lockFilename;
-    QString protocolName;
-    QDateTime taskCreationTime;
-    qint64 scanFileSize;
-};
 
 class sacMainWindow : public QMainWindow
 {
@@ -53,11 +38,24 @@ public:
 
     int detectMode(QString protocol);
 
-    Task task;
-    bool generateTaskFile(Task& a_task);
+    QString taskID;
+    QString scanFilename;
+    int paramValue;
+    QString patientName;
+    QString accNumber;
+    QString mode;
+    QString modeReadable;
+    QString notification;
+    QString taskFilename;
+    QString lockFilename;
+    QString protocolName;
+    QDateTime taskCreationTime;
+    qint64 scanFileSize;
+
+    bool generateTaskFile();
 
     void analyzeDatFile(QString filename, QString& detectedPatname, QString& detectedProtocol);
-    bool batchSubmit(QString file_path, QString file_name, QString mode);
+
     void updateDialogHeight();
 
 private slots:

@@ -10,52 +10,6 @@
 #include "sac_configurationdialog.h"
 #include "sac_twixheader.h"
 
-bool sacMainWindow::batchSubmit(QString file_path, QString file_name, QString mode ){
-    Task the_task;
-    QString the_file = QDir(file_path).filePath(file_name);
-    analyzeDatFile(the_file, the_task.patientName, the_task.protocolName);
-    the_task.mode = mode;
-    bool foundMode;
-    for (auto &modeInfo: modeList.modes) {
-        if (modeInfo->idName == mode ) {
-            the_task.modeReadable = modeInfo->readableName;
-            foundMode = true;
-            break;
-        }
-    }
-
-    if (!foundMode)
-    { // Something's wrong- the mode id doesn't exist.
-        qInfo() << mode << " is not available, or doesn't exist, on this server";
-        return false;
-    }
-
-    the_task.accNumber="0";
-    the_task.notification = network.defaultNotification;
-
-    QFileInfo fileinfo(the_file);
-    the_task.scanFilename = file_name;
-    the_task.scanFileSize = fileinfo.size();
-    the_task.taskCreationTime=QDateTime::currentDateTime();
-    the_task.taskFilename=the_task.scanFilename+ORT_TASK_EXTENSION;
-    QString newtaskID=fileinfo.fileName();
-    newtaskID.truncate(newtaskID.indexOf("."+fileinfo.completeSuffix()));
-
-    the_task.taskID=newtaskID;
-    the_task.lockFilename=task.scanFilename+ORT_LOCK_EXTENSION;
-
-    if (!network.copyMeasurementFile(the_file,the_task.scanFilename)){
-        return false;
-    }
-
-    if (!generateTaskFile(the_task))
-    {
-        // Task-file creation failed, so remove scan file
-        QFile::remove(network.serverDir.absoluteFilePath(the_task.scanFilename));
-        return false;
-    }
-    return true;
-}
 
 sacMainWindow::sacMainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -66,16 +20,16 @@ sacMainWindow::sacMainWindow(QWidget *parent) :
     filename="";
     firstFileDialog=true;
     defaultMode=-1;
-    task.scanFilename="";
-    task.taskFilename="";
-    task.lockFilename="";
-    task.protocolName="";
-    task.mode="";
-    task.modeReadable="";
-    task.notification="";
-    task.scanFileSize=0;
-    task.taskCreationTime=QDateTime::currentDateTime();
-    task.paramValue=0;
+    scanFilename="";
+    taskFilename="";
+    lockFilename="";
+    protocolName="";
+    mode="";
+    modeReadable="";
+    notification="";
+    scanFileSize=0;
+    taskCreationTime=QDateTime::currentDateTime();
+    paramValue=0;
     paramVisible=false;
 
     ui->setupUi(this);
@@ -130,42 +84,6 @@ sacMainWindow::sacMainWindow(QWidget *parent) :
     }
 
     bootDialog.close();
-
-
-    auto appPath=qApp->applicationDirPath();
-
-    {
-        QSettings config(appPath+"/test.ini", QSettings::IniFormat);
-
-        int i=0;
-        int j=0;
-        while (1)
-        {
-            QString folder = QString("Scans/Folder") + QString::number(i);
-            QString file = QString("Scans/File") + QString::number(i);
-
-            if (!config.contains(folder) || !config.contains(file))
-                break;
-
-            folder=config.value(folder,"" ).toString();
-            file=config.value(file,"").toString();
-            i++;
-            j=0;
-            while(1)
-            {
-                QString mode = QString("Modes/ReconMode") + QString::number(j);
-                if (!config.contains(mode)){
-                 break;
-                }
-                mode = config.value(mode,"").toString();
-                qInfo() << folder << file << mode;
-                batchSubmit(folder,file,mode);
-                j++;
-            }
-        }
-    }
-
-
 
     if (modeList.modes.count()==0)
     {
@@ -223,10 +141,10 @@ void sacMainWindow::on_selectFileButton_clicked()
     {
         filename=newFilename;
 
-        analyzeDatFile(filename, task.patientName, task.protocolName);
-        if (task.patientName.length()>0)
+        analyzeDatFile(filename, patientName, protocolName);
+        if (patientName.length()>0)
         {
-            ui->patnameEdit->setText(task.patientName);
+            ui->patnameEdit->setText(patientName);
         }
 
         int initMode=-1;
@@ -240,9 +158,9 @@ void sacMainWindow::on_selectFileButton_clicked()
         {
             // Check if a protocol has been detected. If so, check if there is a
             // matching reconstruction mode. If so, preselect it.
-            if (task.protocolName.length()>0)
+            if (protocolName.length()>0)
             {
-                initMode=detectMode(task.protocolName);
+                initMode=detectMode(protocolName);
             }
         }
         // If neither a default mode has been defined, nor a mode has been detected,
@@ -298,22 +216,22 @@ void sacMainWindow::on_sendButton_clicked()
         return;
     }
 
-    task.patientName=ui->patnameEdit->text();
-    task.accNumber=ui->accEdit->text().toUpper();
-    task.mode=modeList.modes.at(selectedIndex)->idName;
-    task.modeReadable=modeList.modes.at(selectedIndex)->readableName;
+    patientName=ui->patnameEdit->text();
+    accNumber=ui->accEdit->text().toUpper();
+    mode=modeList.modes.at(selectedIndex)->idName;
+    modeReadable=modeList.modes.at(selectedIndex)->readableName;
 
     QString confirmText="Are you sure to submit the following reconstruction task?   \n\n";
-    confirmText+="Patient: " + task.patientName + "\nACC#: ";
-    if (task.accNumber.length()>0)
+    confirmText+="Patient: " + patientName + "\nACC#: ";
+    if (accNumber.length()>0)
     {
-        confirmText+=task.accNumber;
+        confirmText+=accNumber;
     }
     else
     {
         confirmText+="NONE";
     }
-    confirmText+="\nMode: " + task.modeReadable + "\n";
+    confirmText+="\nMode: " + modeReadable + "\n";
 
     if (QMessageBox::question(this, "Confirm Submission", confirmText, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)!=QMessageBox::Yes)
     {
@@ -326,65 +244,65 @@ void sacMainWindow::on_sendButton_clicked()
     sacCopyDialog copyDialog;
     copyDialog.show();
 
-    task.taskID=ui->taskIDEdit->text();
+    taskID=ui->taskIDEdit->text();
 
     // Remove space and other characters that might cause problems
-    task.taskID.remove(QChar('.'),  Qt::CaseInsensitive);
-    task.taskID.remove(QChar('/'),  Qt::CaseInsensitive);
-    task.taskID.remove(QChar('\\'), Qt::CaseInsensitive);
-    task.taskID.remove(QChar(':'),  Qt::CaseInsensitive);
-    task.taskID.remove(QChar(' '),  Qt::CaseInsensitive);
+    taskID.remove(QChar('.'),  Qt::CaseInsensitive);
+    taskID.remove(QChar('/'),  Qt::CaseInsensitive);
+    taskID.remove(QChar('\\'), Qt::CaseInsensitive);
+    taskID.remove(QChar(':'),  Qt::CaseInsensitive);
+    taskID.remove(QChar(' '),  Qt::CaseInsensitive);
 
-    task.scanFilename=task.taskID;
+    scanFilename=taskID;
 
     // Read the parameter value if the protocol uses one
     if (paramVisible)
     {
-        task.paramValue=ui->paramEdit->text().toInt();
+        paramValue=ui->paramEdit->text().toInt();
 
-        if (task.paramValue>modeList.modes.at(selectedIndex)->paramMax)
+        if (paramValue>modeList.modes.at(selectedIndex)->paramMax)
         {
-            task.paramValue=modeList.modes.at(selectedIndex)->paramMax;
+            paramValue=modeList.modes.at(selectedIndex)->paramMax;
         }
-        if (task.paramValue<modeList.modes.at(selectedIndex)->paramMin)
+        if (paramValue<modeList.modes.at(selectedIndex)->paramMin)
         {
-            task.paramValue=modeList.modes.at(selectedIndex)->paramMin;
+            paramValue=modeList.modes.at(selectedIndex)->paramMin;
         }
 
-        task.scanFilename+=QString(RTI_SEPT_CHAR)+"P"+QString::number(task.paramValue);
+        scanFilename+=QString(RTI_SEPT_CHAR)+"P"+QString::number(paramValue);
     }
     else
     {
-        task.paramValue=0;
+        paramValue=0;
     }
 
-    task.taskFilename=task.scanFilename+ORT_TASK_EXTENSION;
+    taskFilename=scanFilename+ORT_TASK_EXTENSION;
 
     if (ui->priorityCombobox->currentIndex()==1)
     {
-        task.taskFilename+=ORT_TASK_EXTENSION_NIGHT;
+        taskFilename+=ORT_TASK_EXTENSION_NIGHT;
     }
     if (ui->priorityCombobox->currentIndex()==2)
     {
-        task.taskFilename+=ORT_TASK_EXTENSION_PRIO;
+        taskFilename+=ORT_TASK_EXTENSION_PRIO;
     }
 
-    task.lockFilename=task.scanFilename+ORT_LOCK_EXTENSION;
-    task.scanFilename+=".dat";
+    lockFilename=scanFilename+ORT_LOCK_EXTENSION;
+    scanFilename+=".dat";
 
     // First, get the notification addresses defined for the selected mode
-    task.notification=modeList.modes.at(selectedIndex)->mailConfirmation;
+    notification=modeList.modes.at(selectedIndex)->mailConfirmation;
 
     // Attach the entry from the dialog. Add separator character if needed
     QString mailRecipient=ui->notificationEdit->text();
-    if ((task.notification!="") && (mailRecipient!=""))
+    if ((notification!="") && (mailRecipient!=""))
     {
-        task.notification+=",";
+        notification+=",";
     }
-    task.notification+=mailRecipient;
+    notification+=mailRecipient;
 
-    task.scanFileSize=QFileInfo(filename).size();
-    if (!network.copyMeasurementFile(filename,task.scanFilename))
+    scanFileSize=QFileInfo(filename).size();
+    if (!network.copyMeasurementFile(filename,scanFilename))
     {
         copyDialog.close();
         this->show();
@@ -400,10 +318,10 @@ void sacMainWindow::on_sendButton_clicked()
     }
     else
     {
-        if (!generateTaskFile(task))
+        if (!generateTaskFile())
         {
             // Task-file creation failed, so remove scan file
-            QFile::remove(network.serverDir.absoluteFilePath(task.scanFilename));
+            QFile::remove(network.serverDir.absoluteFilePath(scanFilename));
 
             copyDialog.close();
             this->show();
@@ -434,11 +352,11 @@ void sacMainWindow::on_sendButton_clicked()
 }
 
 
-bool sacMainWindow::generateTaskFile(Task &a_task)
+bool sacMainWindow::generateTaskFile()
 {
-    a_task.taskCreationTime=QDateTime::currentDateTime();
+    taskCreationTime=QDateTime::currentDateTime();
 
-    QLockFile lockFile(network.serverDir.filePath(a_task.lockFilename));
+    QLockFile lockFile(network.serverDir.filePath(lockFilename));
 
     if (!lockFile.isLocked())
     {
@@ -449,23 +367,23 @@ bool sacMainWindow::generateTaskFile(Task &a_task)
         // Scoping for the lock file
         {
             // Create the task file
-            QSettings taskFile(network.serverDir.filePath(a_task.taskFilename), QSettings::IniFormat);
+            QSettings taskFile(network.serverDir.filePath(taskFilename), QSettings::IniFormat);
 
             // Write the entries
-            taskFile.setValue("Task/ReconMode", a_task.mode);
-            taskFile.setValue("Task/ACC", a_task.accNumber);
-            taskFile.setValue("Task/EMailNotification", a_task.notification);
-            taskFile.setValue("Task/ScanFile", a_task.scanFilename);
+            taskFile.setValue("Task/ReconMode", mode);
+            taskFile.setValue("Task/ACC", accNumber);
+            taskFile.setValue("Task/EMailNotification", notification);
+            taskFile.setValue("Task/ScanFile", scanFilename);
             taskFile.setValue("Task/AdjustmentFilesCount", 0);
-            taskFile.setValue("Task/PatientName", a_task.patientName);
-            taskFile.setValue("Task/ScanProtocol", a_task.protocolName);
-            taskFile.setValue("Task/ReconName", a_task.modeReadable);
-            taskFile.setValue("Task/ParamValue", a_task.paramValue);
+            taskFile.setValue("Task/PatientName", patientName);
+            taskFile.setValue("Task/ScanProtocol", protocolName);
+            taskFile.setValue("Task/ReconName", modeReadable);
+            taskFile.setValue("Task/ParamValue", paramValue);
 
             taskFile.setValue("Information/SystemName", network.systemName);
-            taskFile.setValue("Information/ScanFileSize", a_task.scanFileSize);
-            taskFile.setValue("Information/TaskDate", a_task.taskCreationTime.date().toString(Qt::ISODate));
-            taskFile.setValue("Information/TaskTime", a_task.taskCreationTime.time().toString(Qt::ISODate));
+            taskFile.setValue("Information/ScanFileSize", scanFileSize);
+            taskFile.setValue("Information/TaskDate", taskCreationTime.date().toString(Qt::ISODate));
+            taskFile.setValue("Information/TaskTime", taskCreationTime.time().toString(Qt::ISODate));
             taskFile.setValue("Information/SystemVendor",  "Siemens");
             taskFile.setValue("Information/SystemVersion", "Unknown");
 
