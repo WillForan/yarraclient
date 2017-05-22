@@ -8,6 +8,10 @@
     #include "ort_global.h"
 #endif
 
+#ifdef YARRA_APP_SAC
+    #include "sac_global.h"
+#endif
+
 
 NetLogger::NetLogger()
 {

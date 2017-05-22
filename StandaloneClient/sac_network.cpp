@@ -64,7 +64,7 @@ bool sacNetwork::openConnection()
         rdsExecHelper execHelper;
         execHelper.setCommand(connectCmd);
 
-        if (!execHelper.callProcessTimout(ORT_CONNECT_TIMEOUT))
+        if (!execHelper.callNetUseTimout(ORT_CONNECT_TIMEOUT))
         {
             RTI->log("Calling the connect command failed: " + connectCmd);
         }
@@ -135,7 +135,7 @@ void sacNetwork::closeConnection()
         rdsExecHelper execHelper;
         execHelper.setCommand(disconnectCmd);
 
-        if (!execHelper.callProcessTimout(ORT_CONNECT_TIMEOUT))
+        if (!execHelper.callNetUseTimout(ORT_CONNECT_TIMEOUT))
         {
             RTI->log("Calling the disconnect command failed: " + disconnectCmd);
         }
