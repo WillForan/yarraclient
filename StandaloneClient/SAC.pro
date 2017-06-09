@@ -20,6 +20,7 @@ SOURCES += main.cpp\
     ../Client/rds_network.cpp \
     ../OfflineReconClient/ort_modelist.cpp \
     sac_bootdialog.cpp \
+    sac_batchdialog.cpp \
     sac_network.cpp \
     sac_copydialog.cpp \
     sac_configurationdialog.cpp \
@@ -34,6 +35,7 @@ HEADERS  += sac_mainwindow.h \
     ../OfflineReconClient/ort_returnonfocus.h \
     sac_global.h \
     sac_bootdialog.h \
+    sac_batchdialog.h \
     sac_network.h \
     sac_copydialog.h \
     sac_configurationdialog.h \
@@ -42,7 +44,8 @@ HEADERS  += sac_mainwindow.h \
 FORMS    += sac_mainwindow.ui \
     sac_bootdialog.ui \
     sac_copydialog.ui \
-    sac_configurationdialog.ui
+    sac_configurationdialog.ui \
+    sac_batchdialog.ui
 
 RESOURCES += \
     sac.qrc

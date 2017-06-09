@@ -27,6 +27,12 @@ struct Task {
     qint64 scanFileSize;
 };
 
+enum TaskPriority {
+    Normal=0,
+    Night,
+    HighPriority
+};
+
 class sacMainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -57,7 +63,7 @@ public:
     bool generateTaskFile(Task& a_task);
 
     void analyzeDatFile(QString filename, QString& detectedPatname, QString& detectedProtocol);
-    bool batchSubmit(QString file_path, QString file_name, QString mode);
+    bool batchSubmit(QString file_path, QString file_name, QString mode, QString notification, TaskPriority priority);
     bool handleBatchFile(QString file);
     void updateDialogHeight();
 
@@ -70,6 +76,7 @@ private slots:
     void on_logoLabel_customContextMenuRequested(const QPoint &pos);
     void showLogfile();
     void showConfiguration();
+    void showBatchDialog();
     void showFirstConfiguration();
 
 private:
