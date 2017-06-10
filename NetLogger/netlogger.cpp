@@ -91,6 +91,11 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
             }
         }
 
+        if (serverPath == "localhost") {
+            RTI->log("Skipping log server validation on localhost.");
+            return true;
+        }
+
         // Open socket connection to see if the server is active and to
         // determine the local IP address used for routing to the server.
         QTcpSocket socket;
@@ -102,13 +107,12 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
         }
         else
         {
-            errorMessage="Unable to connect to server.";
+            errorMessage="Unable to connect to server (SocketError).";
             error=true;
         }
 
         socket.disconnectFromHost();
     }
-
     // Lookup the hostname of the local client from the DNS server
     if (!error)
     {
