@@ -78,7 +78,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
 
         log.log("System "+config.infoName+" / Serial # "+config.infoSerialNumber);
 
-        RTI_NETLOG.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"startup");
+        RTI_NETLOG.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"startup","<data><version>"+QString(RDS_VERSION)+"</version></data>");
 
         // Start the timer for triggering updates. Checks update condition only every
         // minute to prevent undesired system load
