@@ -8,10 +8,14 @@
 
 #include "../OfflineReconClient/ort_returnonfocus.h"
 
+
 namespace Ui {
 class sacMainWindow;
 }
-struct Task {
+
+
+struct Task
+{
     QString taskID;
     QString scanFilename;
     int paramValue;
@@ -27,11 +31,13 @@ struct Task {
     qint64 scanFileSize;
 };
 
+
 enum TaskPriority {
     Normal=0,
     Night,
     HighPriority
 };
+
 
 class sacMainWindow : public QMainWindow
 {
@@ -61,10 +67,10 @@ public:
 
     Task task;
     bool generateTaskFile(Task& a_task);
-
     void analyzeDatFile(QString filename, QString& detectedPatname, QString& detectedProtocol);
     bool batchSubmit(QString file_path, QString file_name, QString mode, QString notification, TaskPriority priority);
     bool handleBatchFile(QString file);
+
     void updateDialogHeight();
 
 private slots:
@@ -83,7 +89,7 @@ private:
     Ui::sacMainWindow *ui;
 
     ortReturnOnFocus returnFocusHelper;
-
 };
+
 
 #endif // SAC_MAINWINDOW_H

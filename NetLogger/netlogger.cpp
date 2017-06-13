@@ -36,6 +36,8 @@ NetLogger::NetLogger()
 
         // Add this certificate to all SSL connections
         QSslSocket::addDefaultCaCertificate(certificate);
+
+        qInfo() << "Loaded logserver certificate from file.";
     }
 
     networkManager = new QNetworkAccessManager();
@@ -91,8 +93,9 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
             }
         }
 
-        if (serverPath == "localhost") {
-            RTI->log("Skipping log server validation on localhost.");
+        if (serverPath=="localhost")
+        {
+            RTI->log("Skipping domain validation on localhost.");
             return true;
         }
 
@@ -101,7 +104,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
         QTcpSocket socket;
         socket.connectToHost(serverPath, serverPort);
 
-        if (socket.waitForConnected(1000))
+        if (socket.waitForConnected(10000))
         {
             localIP=socket.localAddress().toString();
         }
@@ -113,6 +116,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
 
         socket.disconnectFromHost();
     }
+
     // Lookup the hostname of the local client from the DNS server
     if (!error)
     {
@@ -177,7 +181,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
 }
 
 
-void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId, QString key)
+void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId, QString key, bool skipDomainValidation)
 {
     configurationError=false;
     serverPath=path;
@@ -185,14 +189,22 @@ void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QStrin
     source_type=sourceType;
     apiKey=key;
 
-    if (!serverPath.isEmpty())
+    if (skipDomainValidation)
     {
-        // Check if local host and server path are on the same domain
-        configured=isServerInSameDomain(path);
-
-        if (!configured)
+        // If the netlogger instance is used for testing the connection
+        configured=true;
+    }
+    else
+    {
+        if (!serverPath.isEmpty())
         {
-            configurationError=true;
+            // Check if local host and server path are on the same domain
+            configured=isServerInSameDomain(path);
+
+            if (!configured)
+            {
+                configurationError=true;
+            }
         }
     }
 }
@@ -243,7 +255,9 @@ bool NetLogger::postEventSync(EventInfo::Type type, QNetworkReply::NetworkError&
     }
 
     QUrlQuery query=buildEventQuery(type,detail,severity,info,data);
-    return postData(query,NETLOG_ENDPT_EVENT,error,status_code);
+
+    QString errorString="";
+    return postData(query,NETLOG_ENDPT_EVENT,error,status_code,errorString);
 }
 
 
@@ -251,7 +265,7 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
 {
     if (serverPath.isEmpty())
     {
-        return NULL;
+        return 0;
     }
 
     QUrl serviceUrl = QUrl("https://" + serverPath + "/" + endpt);
@@ -274,17 +288,22 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
 // It returns true if and only if it recieves an HTTP 200 OK response. Otherwise, there's either a network error
 // or, if the network succeeded but the server failed, an HTTP status code.
 
-bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkError& error, int &http_status)
+bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkError& error, int &http_status, QString &errorString)
 {
     if (!configured)
     {
+        errorString="NetLogger not configured";
         return false;
     }
+
+    http_status=0;
+    errorString="Unknown";
 
     QNetworkReply* reply=postDataAsync(query,endpt);
 
     if (!reply)
     {
+        errorString="No QNetworkReply pointer received";
         return false;
     }
 
@@ -301,15 +320,16 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
     if (reply->error() != QNetworkReply::NoError)
     {
         error = reply->error();
+        errorString=reply->errorString();
         return false;
     }
     else
     {
         // Make sure the HTTP status is 200
         http_status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
         if (http_status != 200)
         {
+            errorString="Incorrect response";
             return false;
         }
     }

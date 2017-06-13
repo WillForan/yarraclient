@@ -428,7 +428,7 @@ void rdsConfigurationWindow::callLogServerTestConnection()
     QTcpSocket socket;
     socket.connectToHost(serverPath, serverPort);
 
-    if (socket.waitForConnected(1000))
+    if (socket.waitForConnected(10000))
     {
         localIP=socket.localAddress().toString();
     }
@@ -494,24 +494,50 @@ void rdsConfigurationWindow::callLogServerTestConnection()
 
     // Check if the server responds to the test entry point
     if (!error)
-    {
+    {        
         QUrlQuery data;
         QNetworkReply::NetworkError net_error;
-        int http_status=0;
-        bool success=RTI_NETWORK->netLogger.postData(data,NETLOG_ENDPT_TEST,net_error,http_status);
+        int http_status=0;        
+
+        // Create temporary instance for testing the logserver connection
+        NetLogger testLogger;
+
+        // Read the full server path entered into the UI control again. The path returned from the DNS
+        // might differ if an DNS alias is used. In this case, the certificate will be incorrect.
+        serverPath         =ui->logServerPathEdit->text();
+        QString apiKey     =ui->logServerApiKeyEdit->text();
+        QString name       ="ConnectionTest";
+        QString errorString="n/a";
+
+        testLogger.configure(serverPath, EventInfo::SourceType::RDS, name, apiKey, true);
+        data.addQueryItem("api_key",apiKey);
+        bool success=testLogger.postData(data, NETLOG_ENDPT_TEST, net_error, http_status, errorString);
 
         if (!success)
         {
-            output += errorPrefix + "No connection to Entry point.<br /><br />Is server running?";
-            error=true;
-        }
-        else
-        {
-            if (http_status!=200)
+            if (http_status==0)
             {
-                output += errorPrefix + "Server rejected request.<br /><br />Is API key corrent?";
-                error=true;
+                output += errorPrefix + "No response from server (Error: "+errorString+").<br /><br />";
+
+                switch (net_error)
+                {
+                case QNetworkReply::NetworkError::SslHandshakeFailedError:
+                    output += "Is SSL certificate installed / valid?";
+                    break;
+                case QNetworkReply::NetworkError::AuthenticationRequiredError:
+                    output += "Is API key correct?";
+                    break;
+                default:
+                    output += "Is server running? Is port correct?";
+                    break;
+                }
             }
+            else
+            {
+                output += errorPrefix + "Server rejected request (Status: "+QString::number(http_status)+").<br /><br />Is API key corrent?";
+            }
+
+            error=true;
         }
     }
 

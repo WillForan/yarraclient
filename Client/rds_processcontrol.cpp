@@ -384,7 +384,8 @@ void rdsProcessControl::sendScanInfoToLogServer()
     QNetworkReply::NetworkError error;
     int http_status=0;
 
-    bool success=RTI_NETWORK->netLogger.postData(data,NETLOG_ENDPT_RAIDLOG,error,http_status);
+    QString errorString="";
+    bool success=RTI_NETWORK->netLogger.postData(data, NETLOG_ENDPT_RAIDLOG, error, http_status, errorString);
 
     if (!success)
     {
@@ -394,8 +395,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
         }
         else
         {
-            QMetaEnum metaEnum = QMetaEnum::fromType<QNetworkReply::NetworkError>();
-            RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(metaEnum.valueToKey(error)));
+            RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
         }
 
         // Indicate the error in the top icon

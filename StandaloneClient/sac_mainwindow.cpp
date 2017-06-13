@@ -12,97 +12,6 @@
 #include "sac_twixheader.h"
 #include "ui_sac_batchdialog.h"
 
-bool sacMainWindow::handleBatchFile(QString file){
-    QSettings config(file, QSettings::IniFormat);
-
-    int i=0;
-    int j=0;
-    while (1)
-    {
-        QString folder = QString("Scans/Folder") + QString::number(i);
-        QString file = QString("Scans/File") + QString::number(i);
-
-        if (!config.contains(folder) || !config.contains(file))
-            break;
-
-        folder=config.value(folder,"" ).toString();
-        file=config.value(file,"").toString();
-        i++;
-        j=0;
-        while(1)
-        {
-            QString mode = QString("Modes/ReconMode") + QString::number(j);
-            if (!config.contains(mode)){
-             break;
-            }
-            mode = config.value(mode,"").toString();
-            qInfo() << folder << file << mode;
-            batchSubmit(folder,file,mode,QString{}, TaskPriority::Normal);
-            j++;
-        }
-    }
-    return true;
-}
-
-
-bool sacMainWindow::batchSubmit(QString file_path, QString file_name, QString mode, QString notification, TaskPriority priority){
-    Task the_task;
-    QString the_file = QDir(file_path).filePath(file_name);
-    analyzeDatFile(the_file, the_task.patientName, the_task.protocolName);
-    the_task.mode = mode;
-    bool foundMode;
-    for (auto &modeInfo: modeList.modes) {
-        if (modeInfo->idName == mode ) {
-            the_task.modeReadable = modeInfo->readableName;
-            foundMode = true;
-            break;
-        }
-    }
-
-    if (!foundMode)
-    { // Something's wrong- the mode id doesn't exist.
-        qInfo() << mode << " is not available, or doesn't exist, on this server";
-        return false;
-    }
-
-    the_task.accNumber="0";
-    the_task.notification = notification;
-    QFileInfo fileinfo(the_file);
-    the_task.scanFilename = file_name;
-    the_task.scanFileSize = fileinfo.size();
-    the_task.taskCreationTime=QDateTime::currentDateTime();
-    the_task.taskFilename=the_task.scanFilename+ORT_TASK_EXTENSION;
-
-    if (priority == TaskPriority::Night)
-    {
-        task.taskFilename+=ORT_TASK_EXTENSION_NIGHT;
-    } else if (priority == TaskPriority::HighPriority)
-    {
-        task.taskFilename+=ORT_TASK_EXTENSION_PRIO;
-    }
-
-
-    QString newtaskID=fileinfo.fileName();
-    newtaskID.truncate(newtaskID.indexOf("."+fileinfo.completeSuffix()));
-
-    the_task.taskID=newtaskID;
-    the_task.lockFilename=task.scanFilename+ORT_LOCK_EXTENSION;
-
-    sacCopyDialog copyDialog;
-    copyDialog.show();
-    if (!network.copyMeasurementFile(the_file,the_task.scanFilename)){
-        copyDialog.hide();
-        return false;
-    }
-    copyDialog.hide();
-    if (!generateTaskFile(the_task))
-    {
-        // Task-file creation failed, so remove scan file
-        QFile::remove(network.serverDir.absoluteFilePath(the_task.scanFilename));
-        return false;
-    }
-    return true;
-}
 
 sacMainWindow::sacMainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -610,7 +519,7 @@ void sacMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
     infoMenu.addAction(serverString);
     infoMenu.addSeparator();
     infoMenu.addAction("Configuration...", this, SLOT(showConfiguration()));
-    infoMenu.addAction("Batch...", this, SLOT(showBatchDialog()));
+    infoMenu.addAction("Batch Processing...", this, SLOT(showBatchDialog()));
 
     infoMenu.addAction("Show log file...", this, SLOT(showLogfile()));
     infoMenu.exec(ui->logoLabel->mapToGlobal(pos));
@@ -641,76 +550,6 @@ void sacMainWindow::showConfiguration()
         close();
     }
 }
-
-void sacMainWindow::showBatchDialog()
-{
-    sacBatchDialog batchDialog;
-
-    batchDialog.prepare(modeList.modes, ui->notificationEdit->text());
-
-    while(true) {
-        int result = batchDialog.exec();
-        bool exit = true;
-        if (result == QDialog::Rejected) {
-            break;
-        }
-        if (batchDialog.modes->rowCount() == 0 || batchDialog.files->rowCount() == 0) {
-            QMessageBox::information(this, "Error", "You must submit both files and modes.", QMessageBox::Ok);
-            continue;
-        }
-        for (QString mode: batchDialog.modes->stringList()) {
-            bool foundMode = false;
-            for (auto &modeInfo: modeList.modes) {
-                if (modeInfo->idName == mode ) {
-                    foundMode = true;
-                    break;
-                }
-            }
-            if (!foundMode) {
-                auto reply = QMessageBox::question(this, "Warning", "Mode " + mode + " does not exist on this server. This reconstruction will fail. Continue?",
-                                                QMessageBox::Yes|QMessageBox::No);
-                if (reply == QMessageBox::No) {
-                    exit = false;
-                }
-                break;
-            }
-        }
-        if (!exit) {
-            continue;
-        }
-
-        TaskPriority priority = TaskPriority::Normal;
-
-        if (ui->priorityCombobox->currentIndex()==1)
-        {
-            priority = TaskPriority::Night;
-        }
-        if (ui->priorityCombobox->currentIndex()==2)
-        {
-            priority = TaskPriority::HighPriority;
-        }
-
-        for (QString file: batchDialog.files->stringList()) {
-            QFileInfo fi(file);
-            for (QString mode: batchDialog.modes->stringList()) {
-                while(!batchSubmit(fi.absolutePath(),fi.fileName(),mode,batchDialog.ui->notificationEdit->text(), priority)) {
-                    auto reply = QMessageBox::question(this, "Transfer Error", "Submitting " + file + " < " + mode + " > failed. Retry?",
-                                                    QMessageBox::Yes|QMessageBox::Ignore|QMessageBox::Abort);
-                    if(reply == QMessageBox::Abort) {
-                        return;
-                    } else if (reply == QMessageBox::Ignore) {
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
-            }
-        }
-        QMessageBox::information(this, "Batch finished", "Submitted batch.", QMessageBox::Ok);
-        break;
-    }
-}
-
 
 
 void sacMainWindow::showFirstConfiguration()
@@ -868,3 +707,215 @@ void sacMainWindow::updateDialogHeight()
     setMinimumHeight(newHeight);
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, QSize(size().width(), newHeight), qApp->desktop()->availableGeometry()));
 }
+
+
+bool sacMainWindow::handleBatchFile(QString file)
+{
+    QSettings config(file, QSettings::IniFormat);
+
+    int i=0;
+    int j=0;
+
+    while (1)
+    {
+        QString folder = QString("Scans/Folder") + QString::number(i);
+        QString file = QString("Scans/File") + QString::number(i);
+
+        if (!config.contains(folder) || !config.contains(file))
+        {
+            break;
+        }
+
+        folder=config.value(folder,"" ).toString();
+        file=config.value(file,"").toString();
+
+        i++;
+        j=0;
+
+        while(1)
+        {
+            QString mode = QString("Modes/ReconMode") + QString::number(j);
+            if (!config.contains(mode))
+            {
+             break;
+            }
+            mode = config.value(mode,"").toString();
+            qInfo() << folder << file << mode;
+            batchSubmit(folder, file, mode, QString(), TaskPriority::Normal);
+            j++;
+        }
+    }
+
+    return true;
+}
+
+
+bool sacMainWindow::batchSubmit(QString file_path, QString file_name, QString mode, QString notification, TaskPriority priority)
+{
+    Task the_task;
+    QString the_file = QDir(file_path).filePath(file_name);
+
+    analyzeDatFile(the_file, the_task.patientName, the_task.protocolName);
+
+    the_task.mode = mode;
+
+    bool foundMode;
+    for (auto &modeInfo: modeList.modes)
+    {
+        if (modeInfo->idName == mode )
+        {
+            the_task.modeReadable = modeInfo->readableName;
+            foundMode = true;
+            break;
+        }
+    }
+
+    if (!foundMode)
+    {
+        // Something's wrong- the mode id doesn't exist.
+        qInfo() << mode << " is not available, or doesn't exist, on this server";
+        return false;
+    }
+
+    the_task.accNumber="0";
+    the_task.notification = notification;
+    QFileInfo fileinfo(the_file);
+    the_task.scanFilename = file_name;
+    the_task.scanFileSize = fileinfo.size();
+    the_task.taskCreationTime=QDateTime::currentDateTime();
+    the_task.taskFilename=the_task.scanFilename+ORT_TASK_EXTENSION;
+
+    if (priority == TaskPriority::Night)
+    {
+        task.taskFilename+=ORT_TASK_EXTENSION_NIGHT;
+    }
+    else
+        if (priority == TaskPriority::HighPriority)
+        {
+            task.taskFilename+=ORT_TASK_EXTENSION_PRIO;
+        }
+
+    QString newtaskID=fileinfo.fileName();
+    newtaskID.truncate(newtaskID.indexOf("."+fileinfo.completeSuffix()));
+
+    the_task.taskID=newtaskID;
+    the_task.lockFilename=task.scanFilename+ORT_LOCK_EXTENSION;
+
+    sacCopyDialog copyDialog;
+    copyDialog.show();
+
+    if (!network.copyMeasurementFile(the_file,the_task.scanFilename))
+    {
+        copyDialog.hide();
+        return false;
+    }
+
+    copyDialog.hide();
+
+    if (!generateTaskFile(the_task))
+    {
+        // Task-file creation failed, so remove scan file
+        QFile::remove(network.serverDir.absoluteFilePath(the_task.scanFilename));
+        return false;
+    }
+
+    return true;
+}
+
+
+void sacMainWindow::showBatchDialog()
+{
+    sacBatchDialog batchDialog;
+    batchDialog.prepare(modeList.modes, ui->notificationEdit->text());
+
+    while(true)
+    {
+        bool exit   = true;
+        int  result = batchDialog.exec();
+
+        if (result == QDialog::Rejected)
+        {
+            break;
+        }
+
+        if (batchDialog.modes->rowCount() == 0 || batchDialog.files->rowCount() == 0)
+        {
+            QMessageBox::information(this, "Error", "You must select both files and modes.", QMessageBox::Ok);
+            continue;
+        }
+
+        for (QString mode: batchDialog.modes->stringList())
+        {
+            bool foundMode = false;
+
+            for (auto &modeInfo: modeList.modes)
+            {
+                if (modeInfo->idName == mode )
+                {
+                    foundMode = true;
+                    break;
+                }
+            }
+
+            if (!foundMode)
+            {
+                auto reply = QMessageBox::question(this, "Warning", "Mode " + mode + " does not exist on this server. This reconstruction will fail. Continue?",
+                                                QMessageBox::Yes|QMessageBox::No);
+                if (reply == QMessageBox::No)
+                {
+                    exit=false;
+                }
+                break;
+            }
+        }
+
+        if (!exit)
+        {
+            continue;
+        }
+
+        TaskPriority priority = TaskPriority::Normal;
+
+        if (ui->priorityCombobox->currentIndex()==1)
+        {
+            priority = TaskPriority::Night;
+        }
+        if (ui->priorityCombobox->currentIndex()==2)
+        {
+            priority = TaskPriority::HighPriority;
+        }
+
+        for (QString file: batchDialog.files->stringList())
+        {
+            QFileInfo fi(file);
+
+            for (QString mode: batchDialog.modes->stringList())
+            {
+                while (!batchSubmit(fi.absolutePath(), fi.fileName(), mode, batchDialog.ui->notificationEdit->text(), priority))
+                {
+                    auto reply = QMessageBox::question(this, "Transfer Error", "Submitting " + file + " < " + mode + " > failed. Retry?",
+                                                    QMessageBox::Yes|QMessageBox::Ignore|QMessageBox::Abort);
+                    if(reply == QMessageBox::Abort)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        if (reply == QMessageBox::Ignore)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        QMessageBox::information(this, "Batch finished", "Submitted batch to server.", QMessageBox::Ok);
+        break;
+    }
+}
+
