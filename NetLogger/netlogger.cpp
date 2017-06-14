@@ -40,7 +40,7 @@ NetLogger::NetLogger()
         qInfo() << "Loaded logserver certificate from file.";
     }
 
-    networkManager = new QNetworkAccessManager();
+    networkManager=new QNetworkAccessManager();
 }
 
 
@@ -317,6 +317,8 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
         eventLoop.exec();
     }
 
+    reply->disconnect(&eventLoop);
+
     if (reply->error() != QNetworkReply::NoError)
     {
         error = reply->error();
@@ -327,6 +329,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
     {
         // Make sure the HTTP status is 200
         http_status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
         if (http_status != 200)
         {
             errorString="Incorrect response";
@@ -336,7 +339,6 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
 
     return true;
 }
-
 
 
 QString NetLogger::dnsLookup(QString address)
@@ -442,7 +444,4 @@ QString NetLogger::dnsLookup(QString address)
 
     return nameFound;
 }
-
-
-
 

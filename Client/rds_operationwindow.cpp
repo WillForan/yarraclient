@@ -177,6 +177,7 @@ void rdsOperationWindow::callShutDown()
     if (ret==QMessageBox::Yes)
     {
         log.log("Shut down.");
+        RTI_NETLOG.postEvent(EventInfo::Type::Shutdown,EventInfo::Detail::Information,EventInfo::Severity::Success);
         RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
         qApp->quit();
     }
