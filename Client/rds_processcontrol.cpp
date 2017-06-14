@@ -371,6 +371,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
         data.addQueryItem("api_key",RTI_CONFIG->logApiKey);
     }
 
+    int entryCount=0;
     for (rdsRaidEntry* entry: RTI_RAID->raidList)
     {
         // Check if this entry has already been processed during the previous run.
@@ -379,6 +380,13 @@ void rdsProcessControl::sendScanInfoToLogServer()
             break;
         }
         entry->addToUrlQuery(data);
+        entryCount++;
+    }
+
+    if (entryCount==0)
+    {
+        // No new entries to transfer, so just return
+        return;
     }
 
     QNetworkReply::NetworkError error;
