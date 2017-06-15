@@ -38,6 +38,12 @@ bool ortNetwork::prepare()
         return false;
     }
 
+    // Use serial number as ID. If not set, fall back to system name
+    QString scannerID=configInstance->infoSerialNumber;
+    if (scannerID=="0")
+    {
+        scannerID=configInstance->ortSystemName;
+    }
     netLogger.configure(configInstance->logServerAddress, EventInfo::SourceType::ORT, configInstance->infoSerialNumber, configInstance->logServerAPIKey);
 
     // Buffer the settings from the configuration object

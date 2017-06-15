@@ -70,7 +70,13 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         RTI->setControlInstance(&control);
         RTI->setWindowInstance(this);
 
-        RTI_NETLOG.configure(RTI_CONFIG->logServerPath, EventInfo::SourceType::RDS,RTI_CONFIG->infoName, RTI_CONFIG->logApiKey);
+        // Send the serial number as source ID. If not available, fall back to the given name.
+        QString scannerID=RTI_CONFIG->infoSerialNumber;
+        if (scannerID=="0")
+        {
+            scannerID=RTI_CONFIG->infoName;
+        }
+        RTI_NETLOG.configure(RTI_CONFIG->logServerPath, EventInfo::SourceType::RDS, scannerID, RTI_CONFIG->logApiKey);
 
         // Notify the process controller about the start of the service
         control.setStartTime();

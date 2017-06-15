@@ -183,6 +183,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
 
 void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QString sourceId, QString key, bool skipDomainValidation)
 {
+    configured=false;
     configurationError=false;
     serverPath=path;
     source_id=sourceId;
