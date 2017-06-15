@@ -28,7 +28,8 @@ public:
     QString     logServerAPIKey;
 
     QString     infoSerialNumber;
-
+    QString     infoScannerType;
+    QString     infoSoftwareVersion;
 };
 
 #endif // ORT_CONFIGURATION_H

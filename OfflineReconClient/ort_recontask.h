@@ -7,11 +7,13 @@
 #include <ort_modelist.h>
 
 
+class ortConfiguration;
+
 class ortReconTask
 {
 public:
     ortReconTask();
-    void setInstances(rdsRaid* raidinstance, ortNetwork* networkinstance);
+    void setInstances(rdsRaid* raidinstance, ortNetwork* networkinstance, ortConfiguration* configinstance);
 
     QString     scanFile;
     QStringList adjustmentFiles;
@@ -43,6 +45,7 @@ public:
 protected:
     rdsRaid* raid;
     ortNetwork* network;
+    ortConfiguration* config;
 
     QString errorMessageUI;
     bool reconTaskFailed;

@@ -18,6 +18,7 @@ ortWaitDialog::ortWaitDialog(QWidget *parent) :
     ui->progressBar->setPalette(p);
 }
 
+
 ortWaitDialog::~ortWaitDialog()
 {
     delete ui;

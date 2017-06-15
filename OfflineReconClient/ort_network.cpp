@@ -58,7 +58,6 @@ bool ortNetwork::prepare()
         connectTimeout=ORT_CONNECT_TIMEOUT;
     }
 
-
     // Prepare all needed local directories
     bool error=false;
 

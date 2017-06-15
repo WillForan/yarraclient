@@ -4,14 +4,12 @@
 #include "ort_global.h"
 
 
-
 #ifdef YARRA_APP_ORT
     #include "ort_network.h"
 #endif
 #ifdef YARRA_APP_SAC
     #include "sac_network.h"
 #endif
-
 
 
 ortModeList::ortModeList()
@@ -29,7 +27,6 @@ ortModeList::~ortModeList()
         delete modes.takeFirst();
     }
 }
-
 
 
 bool ortModeList::readModeList()

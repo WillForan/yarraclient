@@ -1,9 +1,13 @@
 #include "ort_recontask.h"
 #include "ort_global.h"
+#include "ort_configuration.h"
+
 
 ortReconTask::ortReconTask()
 {
     raid=0;
+    config=0;
+    network=0;
 
     scanFile="";
     adjustmentFiles.clear();
@@ -28,16 +32,17 @@ ortReconTask::ortReconTask()
 }
 
 
-void ortReconTask::setInstances(rdsRaid* raidinstance, ortNetwork* networkinstance)
+void ortReconTask::setInstances(rdsRaid* raidinstance, ortNetwork* networkinstance, ortConfiguration* configinstance)
 {
     raid=raidinstance;
     network=networkinstance;
+    config=configinstance;
 }
 
 
 bool ortReconTask::exportDataFiles(int fileID, ortModeEntry* mode)
 {
-    if ((raid==0) || (network==0))
+    if ((raid==0) || (network==0) || (config==0))
     {
         return false;
     }
@@ -72,7 +77,7 @@ bool ortReconTask::exportDataFiles(int fileID, ortModeEntry* mode)
 
 bool ortReconTask::transferDataFiles()
 {
-    if ((raid==0) || (network==0))
+    if ((raid==0) || (network==0) || (config==0))
     {
         return false;
     }
@@ -118,7 +123,7 @@ bool ortReconTask::transferDataFiles()
 
 bool ortReconTask::generateTaskFile()
 {
-    if ((raid==0) || (network==0))
+    if ((raid==0) || (network==0) || (config==0))
     {
         return false;
     }
@@ -163,14 +168,16 @@ bool ortReconTask::generateTaskFile()
             taskFile.setValue("Task/CreationTimeRAID", raidCreationTime);
             taskFile.setValue("Task/CreationTimeTask", taskCreationTime.toString("dd/MM/yy")+"  "+taskCreationTime.toString("HH:mm:ss"));
 
-            taskFile.setValue("Information/SystemName", systemName);
-            taskFile.setValue("Information/ScanFileSize", scanFileSize);
-            taskFile.setValue("Information/TaskDate", taskCreationTime.date().toString(Qt::ISODate));
-            taskFile.setValue("Information/TaskTime", taskCreationTime.time().toString(Qt::ISODate));
-            taskFile.setValue("Information/SelectedServer", selectedServer);
-            taskFile.setValue("Information/SystemVendor", "Siemens");
-            taskFile.setValue("Information/SystemVersion", RTI->getSyngoMRVersionString());
-
+            taskFile.setValue("Information/ScanFileSize",    scanFileSize);
+            taskFile.setValue("Information/TaskDate",        taskCreationTime.date().toString(Qt::ISODate));
+            taskFile.setValue("Information/TaskTime",        taskCreationTime.time().toString(Qt::ISODate));
+            taskFile.setValue("Information/SelectedServer",  selectedServer);
+            taskFile.setValue("Information/SerialNumber",    config->infoSerialNumber);
+            taskFile.setValue("Information/SystemName",      systemName);
+            taskFile.setValue("Information/SystemVendor",    "Siemens");
+            taskFile.setValue("Information/SystemType",      config->infoScannerType);
+            taskFile.setValue("Information/SoftwareVersion", config->infoSoftwareVersion);
+            taskFile.setValue("Information/SystemVersion",   RTI->getSyngoMRVersionString());
 
             // Write the list of adjustment files as strings
             for (int i=0; i<adjustmentFiles.count(); i++)

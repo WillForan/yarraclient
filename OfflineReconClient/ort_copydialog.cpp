@@ -3,6 +3,7 @@
 
 #include <QDesktopWidget>
 
+
 ortCopyDialog::ortCopyDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ortCopyDialog)
@@ -22,6 +23,7 @@ ortCopyDialog::ortCopyDialog(QWidget *parent) :
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignBottom, size(), qApp->desktop()->availableGeometry()));
 
 }
+
 
 ortCopyDialog::~ortCopyDialog()
 {

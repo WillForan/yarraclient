@@ -66,6 +66,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     // knows that something is going on.
     ortBootDialog bootDialog;
     bootDialog.show();
+    RTI->processEvents();
 
     network.setConfigInstance(&config);
     if (!network.prepare())
@@ -94,7 +95,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 
         if (connectError)
         {            
-            // TODO: Send netlogger event
+            network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"No connection to server");
             QTimer::singleShot(0, qApp, SLOT(quit()));
             return;
         }
@@ -109,6 +110,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 
     if (!modeList.readModeList())
     {
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read mode list");
         QTimer::singleShot(0, qApp, SLOT(quit()));
         return;
     }
@@ -336,8 +338,8 @@ void ortMainWindow::on_sendButton_clicked()
 
     if (selectedFID==-1)
     {
-        // TODO: Send netlogger event
         RTI->log("ERROR: Invalid FID after pressing Send button");
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid FID after pressing Send button");
         showTransferError("Invalid FID has been selected.");
         return;
     }
@@ -350,8 +352,8 @@ void ortMainWindow::on_sendButton_clicked()
     // Retrive the settings of the selected mode
     if ((selectedMode<0) or (selectedMode>=modeList.modes.count()))
     {
-        // TODO: Send netlogger event
         RTI->log("ERROR: Invalid mode has been selected.");
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid mode has been selected");
         showTransferError("Invalid reconstruction mode has been selected.");
         return;
     }
@@ -391,7 +393,7 @@ void ortMainWindow::on_sendButton_clicked()
     {
         // Error handling
         waitDialog.close();
-        // TODO: Send netlogger event
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to connect to required server");
         showTransferError(network.errorReason);
         this->show();
         return;
@@ -402,7 +404,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     // Go ahead with the action
     ortReconTask reconTask;
-    reconTask.setInstances(&raid, &network);
+    reconTask.setInstances(&raid, &network, &config);
 
     reconTask.reconMode=modeList.modes.at(selectedMode)->idName;
     reconTask.reconName=modeList.modes.at(selectedMode)->readableName;
@@ -441,7 +443,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     if (!reconTask.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
     {
-        // TODO: Send netlogger event
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
         return;
@@ -476,7 +478,7 @@ void ortMainWindow::on_sendButton_clicked()
         }
         else
         {
-            // TODO: Send netlogger event
+            network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error transfering file: "+reconTask.getErrorMessageUI());
             showTransferError(reconTask.getErrorMessageUI());
             this->show();
         }
@@ -485,8 +487,8 @@ void ortMainWindow::on_sendButton_clicked()
 
     if (!reconTask.generateTaskFile())
     {
-        // TODO: Send netlogger event
         copyDialog.close();
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error generating task: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
         return;
@@ -501,14 +503,13 @@ void ortMainWindow::on_sendButton_clicked()
     // shutdown the ORT client.
     if (reconTask.isSubmissionSuccessful())
     {
-        // TODO: Finish netlogger event
         //RTI->log(getTaskInfo(reconTask));
         network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,getTaskInfo(reconTask));
         this->close();
     }
     else
     {
-        // TODO: Send netlogger event
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error with task submission: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
     }
@@ -625,7 +626,6 @@ void ortMainWindow::on_scansWidget_itemSelectionChanged()
                 ui->modeComboBox->setCurrentIndex(matchingMode);
             }
         }
-
     }
 }
 
@@ -651,6 +651,7 @@ void ortMainWindow::refreshRaidList()
     if (!raid.readRaidList())
     {
         RTI->log("Error reading the RAID list.");
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error reading RAID list");
     }
     isRaidListAvaible=true;
 }
