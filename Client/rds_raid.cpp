@@ -657,9 +657,9 @@ bool rdsRaid::parseOutputDirectory()
                     // TODO: On VB17, exclude these weird preceding files with small size and identical protocol name
                     //       Check if these files always have the same size, so that they can be identified based on the size.
 
-                    // The Status information is not evaluated
+                    // Check the status information for active scans
                     temp=raidLine.right(9);
-                    if (!temp.contains("cld"))
+                    if (temp.contains("wip"))
                     {
                         // Scan is not closed. This can only be the case for the first
                         // file on raid. This means, scannig is active. Raw data storate
