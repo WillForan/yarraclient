@@ -142,14 +142,13 @@ void rdsProcessControl::performUpdate()
     if (logServerOnlyUpdate)
     {
         RTI->log("Starting log update...");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"Log data update");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"Scan data");
     }
     else
     {
         RTI->log("Starting update...");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"Raw data update");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"Raw data");
     }
-
 
     if (state!=STATE_IDLE)
     {
@@ -163,6 +162,7 @@ void rdsProcessControl::performUpdate()
     {
         RTI->log("ERROR: Unable to read RAID list.");
         RTI->log("ERROR: Retrying in " + QString::number(RDS_UPDATETIME_RETRY) + " minutes.");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read RAID list");
         setExplicitUpdate(RDS_UPDATETIME_RETRY);
 
         // Indicate the error in the top icon
@@ -170,6 +170,14 @@ void rdsProcessControl::performUpdate()
         {
             RTI->getWindowInstance()->iconWindow.setError();
         }
+
+        RTI->flushLog();
+        setState(STATE_IDLE);
+        RTI->updateInfoUI();
+
+        RTI->setIconWindowAnim(false);
+        RTI->log("");
+        return;
     }
 
     // Transfer the raid scan table to the log server, if configured and desired
@@ -290,6 +298,8 @@ void rdsProcessControl::performUpdate()
 
             // Close connection to FTP server
             RTI_NETWORK->closeConnection();
+
+            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Success,"Raw data sent");
         }
         else
         {
@@ -342,6 +352,8 @@ void rdsProcessControl::performUpdate()
 
     RTI->setIconWindowAnim(false);
     RTI->log("");
+
+    RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::End,EventInfo::Severity::Success,"");
 }
 
 
@@ -399,11 +411,15 @@ void rdsProcessControl::sendScanInfoToLogServer()
     {
         if (http_status)
         {
-            RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
+            RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));           
+
+            QString httpError="HTTP Error "+QString::number(http_status);
+            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+httpError);
         }
         else
         {
             RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
+            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+errorString);
         }
 
         // Indicate the error in the top icon
@@ -417,6 +433,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
         // Store the fileID of the newest RAID entry processed, so that
         // during the next run only new entries are processed
         RTI_RAID->setLPFIScaninfo(RTI_RAID->raidList.at(0)->fileID);
+        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Success,"Scan data sent");
     }
 
     RTI_RAID->saveLPFI();

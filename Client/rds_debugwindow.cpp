@@ -31,15 +31,21 @@ void rdsDebugWindow::on_pushButton_2_clicked()
 
 void rdsDebugWindow::on_pushButton_clicked()
 {
-    RTI->debug("Reading RAID directory...");
+    ui->textEdit->append("Reading RAID and parsing directory...");
+    RTI_RAID->readRaidList();
     RTI_RAID->createExportList();
     RTI_RAID->dumpRaidList();
+    ui->textEdit->append("Done.");
+    ui->textEdit->append("Output path: " + RTI->getAppPath() + "/debug.txt");
 }
 
 void rdsDebugWindow::on_pushButton_3_clicked()
 {
-    RTI->debug("Showing output form RAID Tool...");
+    ui->textEdit->append("Reading RAID directory...");
+    RTI_RAID->readRaidList();
     RTI_RAID->dumpRaidToolOutput();
+    ui->textEdit->append("Done");
+    ui->textEdit->append("Output path: " + RTI->getAppPath() + "/debug.txt");
 }
 
 void rdsDebugWindow::on_pushButton_4_clicked()

@@ -418,6 +418,7 @@ bool rdsRaid::readRaidList()
     if (!parseOutputDirectory())
     {
         RTI->log("Reading the RAID directory failed.  Retrying in 2 minutes.");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Parser error");
         RTI_CONTROL->setExplicitUpdate(RDS_UPDATETIME_RAIDRETRY);
         return false;
     }
@@ -1066,37 +1067,56 @@ bool rdsRaid::setCurrentFileID()
 
 void rdsRaid::dumpRaidList()
 {
-    if (RTI->isDebugMode())
+    QFile dumpFile;
+    dumpFile.setFileName(RTI->getAppPath()+"/debug.txt");
+    if (dumpFile.exists())
     {
-        RTI->debug("Raid entriues = " + QString::number(raidList.count()));
-        RTI->debug("");
-
-        for (int i=0; i < raidList.count(); i++)
-        {
-            rdsRaidEntry* entry=raidList.at(i);
-            RTI->debug("FID=" + QString::number(entry->fileID) + " MID=" + QString::number(entry->measID) + " PROT=" + entry->protName);
-        }
-
-        RTI->debug("");
+        dumpFile.remove();
     }
+    dumpFile.open(QIODevice::ReadWrite | QIODevice::Text);
+
+    QString line="## Raid entriues = " + QString::number(raidList.count());
+    dumpFile.write(line.toLatin1());
+    line="\n";
+    dumpFile.write(line.toLatin1());
+
+    for (int i=0; i < raidList.count(); i++)
+    {
+        rdsRaidEntry* entry=raidList.at(i);
+        line="FID=" + QString::number(entry->fileID) + " MID=" + QString::number(entry->measID) + " PROT='" + entry->protName + "' PAT='" + entry->patName + "'\n";
+        dumpFile.write(line.toLatin1());
+    }
+
+    line="## End\n";
+    dumpFile.write(line.toLatin1());
+    dumpFile.close();
 }
 
 
 void rdsRaid::dumpRaidToolOutput()
 {
-    if (RTI->isDebugMode())
+    QFile dumpFile;
+    dumpFile.setFileName(RTI->getAppPath()+"/debug.txt");
+    if (dumpFile.exists())
     {
-        RTI->debug("Output lines from RaidTool = " + QString::number(raidToolOutput.count()));
-        RTI->debug("");
-
-        for (int i=0; i < raidToolOutput.count(); i++)
-        {
-            RTI->debug(raidToolOutput.at(i));
-            //RTI->debug("Length = " + QString::number(raidToolOutput.at(i).length()));
-        }
-
-        RTI->debug("");
+        dumpFile.remove();
     }
+    dumpFile.open(QIODevice::ReadWrite | QIODevice::Text);
+
+    QString line="## Output lines from RaidTool = " + QString::number(raidToolOutput.count());
+    dumpFile.write(line.toLatin1());
+    line="\n";
+    dumpFile.write(line.toLatin1());
+
+    for (int i=0; i < raidToolOutput.count(); i++)
+    {
+        line=raidToolOutput.at(i);
+        dumpFile.write(line.toLatin1());
+    }
+
+    line="## End\n";
+    dumpFile.write(line.toLatin1());
+    dumpFile.close();
 }
 
 
