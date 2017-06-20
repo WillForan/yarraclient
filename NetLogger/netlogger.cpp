@@ -200,7 +200,7 @@ void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QStrin
         if (!serverPath.isEmpty())
         {
             // Check if local host and server path are on the same domain
-            configured=isServerInSameDomain(path);
+            configured=isServerInSameDomain(serverPath);
 
             if (!configured)
             {
@@ -208,6 +208,26 @@ void NetLogger::configure(QString path, EventInfo::SourceType sourceType, QStrin
             }
         }
     }
+}
+
+
+bool NetLogger::retryDomainValidation()
+{
+    configured=false;
+    configurationError=false;
+
+    if (!serverPath.isEmpty())
+    {
+        // Check if local host and server path are on the same domain
+        configured=isServerInSameDomain(serverPath);
+
+        if (!configured)
+        {
+            configurationError=true;
+        }
+    }
+
+    return !configurationError;
 }
 
 
@@ -344,7 +364,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
 
 QString NetLogger::dnsLookup(QString address)
 {
-    const int nslTimeout=6000;
+    const int nslTimeout=10000;
     bool success=false;
     QString nameFound="";
 

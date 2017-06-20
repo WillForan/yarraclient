@@ -17,6 +17,7 @@ public:
     bool isConfigured();
     bool isConfigurationError();
     bool isServerInSameDomain(QString serverPath);
+    bool retryDomainValidation();
 
     QNetworkReply* postDataAsync(QUrlQuery query, QString endpt);
     QUrlQuery buildEventQuery(EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data);

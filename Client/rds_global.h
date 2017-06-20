@@ -6,17 +6,17 @@
 
 
 // Definitions
-#define RDS_VERSION     "0.52b8"
+#define RDS_VERSION     "0.52b9"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
-#define RDS_PROC_TIMEOUT    600000
-#define RDS_COPY_TIMEOUT    3600000
-#define RDS_TIMERINTERVAL   60000
-#define RDS_SLEEP_INTERVAL  10
-#define RDS_CONNECT_TIMEOUT 1200000
-
-#define RDS_MAXLOGSIZE 1000000
+#define RDS_PROC_TIMEOUT         600000
+#define RDS_COPY_TIMEOUT         3600000
+#define RDS_TIMERINTERVAL        60000
+#define RDS_SLEEP_INTERVAL       10
+#define RDS_CONNECT_TIMEOUT      1200000
+#define RDS_NETLOG_RETRYINTERVAL 1800000
+#define RDS_MAXLOGSIZE           1000000
 
 #define RDS_DIR_LOG   "log"
 #define RDS_DIR_QUEUE "queue"

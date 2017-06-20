@@ -78,6 +78,12 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         }
         RTI_NETLOG.configure(RTI_CONFIG->logServerPath, EventInfo::SourceType::RDS, scannerID, RTI_CONFIG->logApiKey);
 
+        // If the DNS lookup failed, set timer to retry at later time
+        if ((RTI_NETLOG.isConfigurationError()) && (!RTI_CONFIG->logServerPath.isEmpty()))
+        {
+            QTimer::singleShot(RDS_NETLOG_RETRYINTERVAL, this, SLOT(retryNetlogConfiguration()));
+        }
+
         // Notify the process controller about the start of the service
         control.setStartTime();
         updateInfoUI();
@@ -395,4 +401,41 @@ void rdsOperationWindow::runStartCmds()
     }
 
     RTI->log("Done.");
+}
+
+
+void rdsOperationWindow::retryNetlogConfiguration()
+{
+    RTI->log("Retrying domain validation for logserver");
+
+    bool retryAgain=false;
+
+    if (control.getState()==rdsProcessControl::STATE_IDLE)
+    {
+        if (RTI_NETLOG.retryDomainValidation())
+        {
+            RTI->log("Domain validation succesful.");
+
+            // Clear error in the top icon
+            if (!RTI->getWindowInstance()->isVisible())
+            {
+                RTI->getWindowInstance()->iconWindow.clearError();
+            }
+        }
+        else
+        {
+            RTI->log("Domain validation not succesful.");
+            retryAgain=true;
+        }
+    }
+    else
+    {
+        RTI->log("Update ongoing. Trying again later.");
+        retryAgain=true;
+    }
+
+    if (retryAgain)
+    {
+        QTimer::singleShot(RDS_NETLOG_RETRYINTERVAL, this, SLOT(retryNetlogConfiguration()));
+    }
 }

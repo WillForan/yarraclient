@@ -49,6 +49,8 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void runStartCmds();
 
+    void retryNetlogConfiguration();
+
 protected:
     void closeEvent(QCloseEvent *event);    
     void keyPressEvent(QKeyEvent* event);

@@ -157,6 +157,8 @@ void rdsProcessControl::performUpdate()
 
     RTI->setPostponementRequest(false);
 
+    setState(STATE_RAIDPARSING);
+
     // The the scan list from the RAID
     if (!RTI_RAID->readRaidList())
     {
@@ -179,6 +181,8 @@ void rdsProcessControl::performUpdate()
         RTI->log("");
         return;
     }
+
+    setState(STATE_SCANTRANSFER);
 
     // Transfer the raid scan table to the log server, if configured and desired
     if ((RTI_CONFIG->logSendScanInfo) && (RTI_NETLOG.isConfigured()))
@@ -217,9 +221,7 @@ void rdsProcessControl::performUpdate()
             }
 
             setState(STATE_RAIDTRANSFER);
-
             RTI->updateInfoUI();
-            RTI->processEvents();
 
             // Process Windows events to react to the postpone button
             RTI->processEvents();

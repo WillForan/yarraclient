@@ -10,10 +10,12 @@ class rdsProcessControl
 {
 public:
     enum {
-        STATE_IDLE           =0,
-        STATE_RAIDTRANSFER   =1,
-        STATE_NETWORKTRANSFER=2,
-        STATE_NETWORKTRANSFER_ALTERNATING=3
+        STATE_IDLE                       =0,
+        STATE_RAIDTRANSFER               =1,
+        STATE_NETWORKTRANSFER            =2,
+        STATE_NETWORKTRANSFER_ALTERNATING=3,
+        STATE_SCANTRANSFER               =4,
+        STATE_RAIDPARSING                =5
     };
 
     rdsProcessControl();

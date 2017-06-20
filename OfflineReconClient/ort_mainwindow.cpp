@@ -518,7 +518,7 @@ void ortMainWindow::on_sendButton_clicked()
 
 QString ortMainWindow::getTaskInfo(ortReconTask& task)
 {
-    return "MOD=" + task.reconMode + " SRV=" + task.selectedServer + " PAT='" + task.patientName + "' ACC=" + task.accNumber + " PRO='" + task.scanProtocol + "'";
+    return " ACC=" + task.accNumber + " MOD=" + task.reconMode + " SRV=" + task.selectedServer + " PRO='" + task.scanProtocol + "' FIL=" + task.scanFile;
 }
 
 
