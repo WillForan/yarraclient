@@ -205,6 +205,7 @@ void rdsRuntimeInformation::determineSyngoVersion()
     RDS_SYNGODETECT(RDS_VE11B,RDS_SYNGODETECT_VE11B);
     RDS_SYNGODETECT(RDS_VE11C,RDS_SYNGODETECT_VE11C);
     RDS_SYNGODETECT(RDS_VE11U,RDS_SYNGODETECT_VE11U);
+    RDS_SYNGODETECT(RDS_VE11P,RDS_SYNGODETECT_VE11P);
 
     switch (syngoMRVersion)
     {
@@ -228,10 +229,12 @@ void rdsRuntimeInformation::determineSyngoVersion()
     case RDS_VE11B:
     case RDS_VE11C:
     case RDS_VE11U:
+    case RDS_VE11P:
         syngoMRLine=RDS_VE;
         break;
     }
 }
+
 
 QString rdsRuntimeInformation::getSyngoImagerIP()
 {
