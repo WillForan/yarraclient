@@ -385,15 +385,73 @@ void rdsProcessControl::sendScanInfoToLogServer()
         data.addQueryItem("api_key",RTI_CONFIG->logApiKey);
     }
 
-    int entryCount=0;
+    int     entryCount=0;
+    bool    isShimScan=false;
+    QString originalProtocolName="";
+    bool    actualScanFound=false;
+
     for (rdsRaidEntry* entry: RTI_RAID->raidList)
     {
         // Check if this entry has already been processed during the previous run.
-        if (entry->fileID<=RTI_RAID->getLPFIScaninfo())
+        if (entry->fileID <= RTI_RAID->getLPFIScaninfo())
         {
             break;
         }
+
+        // Rename shim scans to "AdjShim (protocol)". Shim scans should be below 1 MB.
+        isShimScan=false;
+        if (entry->size < RDS_SHIMSIZE_FILTER)
+        {
+            // Make sure the scan is not a different adjustment or tagging scan
+            if ((!entry->protName.startsWith("Adj")) && (!entry->protName.startsWith("$")))
+            {
+                // If this is the very latest scan, assume it is a shim scan
+                if (entryCount==0)
+                {
+                    isShimScan=true;
+                    actualScanFound=true;
+                }
+                else
+                {
+                    // If it is not the latest scan, additionally check if there is a later
+                    // scan with the same protocol name
+                    if (RTI_RAID->raidList.at(entryCount-1)->protName==entry->protName)
+                    {
+                        // Check if the previous scan is larger. Remember that setting, so that
+                        // it propagates down (shim scans might run multiple times)
+                        if (RTI_RAID->raidList.at(entryCount-1)->size > RDS_SHIMSIZE_FILTER)
+                        {
+                            actualScanFound=true;
+                        }
+
+                        if (actualScanFound)
+                        {
+                            isShimScan=true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (isShimScan)
+        {
+            // Modify the protocol name to indicate the shim scan
+            originalProtocolName=entry->protName;
+            entry->protName="AdjShim - " + entry->protName;
+        }
+        else
+        {
+            actualScanFound=false;
+        }
+
         entry->addToUrlQuery(data);
+
+        if (isShimScan)
+        {
+            // Revert the protocol name of the entry to the original string
+            entry->protName=originalProtocolName;
+        }
+
         entryCount++;
     }
 

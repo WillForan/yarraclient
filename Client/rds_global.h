@@ -62,7 +62,7 @@
 
 #define RDS_LOG_CHECKSUM false
 #define RDS_FILESIZE_FILTER 1000000
-
+#define RDS_SHIMSIZE_FILTER 1400000
 
 // Convenience macros
 #define RDS_FREE(x) if (x!=0) { delete x; x=0; }
