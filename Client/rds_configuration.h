@@ -32,6 +32,8 @@ public:
     QString infoName;
     QString infoSerialNumber;
     bool    infoShowIcon;
+    QString infoScannerType;
+    QString infoSoftwareVersion;
 
     int     infoUpdateMode;
     int     infoUpdatePeriod;
