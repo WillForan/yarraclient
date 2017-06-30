@@ -28,16 +28,16 @@ void rdsRaidEntry::addToUrlQuery(QUrlQuery& query)
         scannerID=RTI_CONFIG->infoName;
     }
 
-    query.addQueryItem("creation_time", creationTime.toString());
-    query.addQueryItem("closing_time",  closingTime.toString());
-    query.addQueryItem("file_id",       QString::number(fileID));
-    query.addQueryItem("meas_id",       QString::number(measID));
-    query.addQueryItem("protocol_name", protName);
-    query.addQueryItem("patient_name",  patName);
-    query.addQueryItem("size",          QString::number(size));
-    query.addQueryItem("size_on_disk",  QString::number(sizeOnDisk));   
-    query.addQueryItem("scanner_id",    scannerID);
-    query.addQueryItem("exam_id",       QString(""));
+    query.addQueryItem("creation_time",  creationTime.toString());
+    query.addQueryItem("closing_time",   closingTime.toString());
+    query.addQueryItem("file_id",        QString::number(fileID));
+    query.addQueryItem("meas_id",        QString::number(measID));
+    query.addQueryItem("protocol_name",  protName);
+    query.addQueryItem("patient_name",   patName);
+    query.addQueryItem("size",           QString::number(size));
+    query.addQueryItem("size_on_disk",   QString::number(sizeOnDisk));
+    query.addQueryItem("scanner_serial", scannerID);
+    query.addQueryItem("exam_id",        QString(""));
 }
 
 
