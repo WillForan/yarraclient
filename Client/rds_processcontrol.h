@@ -62,6 +62,9 @@ protected:
     void setState(int newState);
     void setNextPeriodicUpdate();
 
+    void storeScanInfoOnDisk(QUrlQuery& data);
+    void resendScanInfoFromDisk();
+
 };
 
 

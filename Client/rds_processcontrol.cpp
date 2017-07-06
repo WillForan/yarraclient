@@ -500,6 +500,182 @@ void rdsProcessControl::sendScanInfoToLogServer()
 }
 
 
+void rdsProcessControl::storeScanInfoOnDisk(QUrlQuery& data)
+{
+    QString timeStamp=QDateTime::currentDateTime().toString("MMddyy_HHmmss_zzz");
+    QString fileName=RTI->getAppPath()+"/"+timeStamp+RDS_SCANINFO_EXT;
+
+    // Check if file exists. If so, add random number until non-existent filename is reached.
+    int tries=0;
+    while (QFile::exists(fileName))
+    {
+        fileName=RTI->getAppPath()+"/"+timeStamp+"_"+QString::number(qrand() % 1000)+RDS_SCANINFO_EXT;
+
+        // Abort after some tries (very very unlikely, so something else must be wrong)
+        tries++;
+        if (tries>20)
+        {
+            // TODO: Post error message
+            return;
+        }
+    }
+
+    QFile bufferFile(fileName);
+
+    if (!bufferFile.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+        // TODO: Error handling, probably missing write permissions
+        return;
+    }
+
+    QTextStream stream(&bufferFile);
+
+    stream << RDS_SCANINFO_HEADER << endl;
+    stream << data.queryItems().count() << endl;
+
+    // Write data information
+    for (int i=0; i<data.queryItems().count(); i++)
+    {
+        stream << data.queryItems().at(i).first  << endl;
+        stream << data.queryItems().at(i).second << endl;
+    }
+
+    bufferFile.flush();
+    bufferFile.close();
+}
+
+
+void rdsProcessControl::resendScanInfoFromDisk()
+{
+    QDir folder(RTI->getAppPath());
+    folder.refresh();
+    QStringList bufferFiles=folder.entryList(QStringList(QString("*")+RDS_SCANINFO_EXT));
+
+    if (bufferFiles.isEmpty())
+    {
+        // No files found, nothing to do.
+        return;
+    }
+
+    for (int i=0; i<bufferFiles.count(); i++)
+    {
+        QString fileName=RTI->getAppPath()+"/"+bufferFiles.at(i);
+        QFile   bufferFile(fileName);
+
+        // Open file, check is successful
+        if (!bufferFile.open(QIODevice::ReadWrite | QIODevice::Text))
+        {
+            // TODO: Error logging
+            continue;
+        }
+
+        // Read contents
+        QString buffer="";
+        QTextStream stream(&bufferFile);
+
+        // Read the header and check if it is correct
+        if (!stream.readLineInto(&buffer))
+        {
+            // TODO: Error, files seems empty
+            bufferFile.close();
+            continue;
+        }
+
+        if (buffer != QString(RDS_SCANINFO_HEADER))
+        {
+            // TODO: Error, incorrect header
+            bufferFile.close();
+            continue;
+        }
+
+        // Read the entry count and check if the second line contains a number
+        if (!stream.readLineInto(&buffer))
+        {
+            // TODO: Error, files seems corrupted
+            bufferFile.close();
+            continue;
+        }
+
+        int expectedEntries=0;
+        expectedEntries=buffer.toInt();
+
+        if (expectedEntries <= 0)
+        {
+            // TODO: Error, files seems corrupted
+            bufferFile.close();
+            continue;
+        }
+
+        QUrlQuery query;
+        QString   key  ="";
+        QString   value="";
+
+        int foundEntries=0;
+        int lineCounter =0;
+
+        // Read the whole file
+        while (stream.readLineInto(&buffer))
+        {
+            if (!lineCounter %2)
+            {
+                key=buffer;
+            }
+            else
+            {
+                value=buffer;
+                query.addQueryItem(key,value);
+                foundEntries++;
+            }
+
+            lineCounter++;
+        }
+
+        // Check if number of entries is consistent
+        if (expectedEntries!=foundEntries)
+        {
+            // TODO: Error handling
+            bufferFile.close();
+            continue;
+        }
+
+        // Close file
+        bufferFile.close();
+
+        // Send data to server
+        QNetworkReply::NetworkError error;
+        int http_status=0;
+        QString errorString="";
+
+        bool success=RTI_NETWORK->netLogger.postData(query, NETLOG_ENDPT_RAIDLOG, error, http_status, errorString);
+
+        if (!success)
+        {
+            if (http_status)
+            {
+                RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
+                QString httpError="HTTP Error "+QString::number(http_status);
+                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error re-sending scan data: "+httpError);
+            }
+            else
+            {
+                RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
+                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error re-sending scan data: "+errorString);
+            }
+
+            // Server transfer seems still to have problems. So stop here and continue during the next update
+            break;
+        }
+        else
+        {
+            // Transfer sucessful, delete file
+            bufferFile.remove();
+            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Success,"Scan data re-sent");
+        }
+    }
+}
+
+
+
 void rdsProcessControl::setStartTime()
 {
     connectionFailureCount=0;

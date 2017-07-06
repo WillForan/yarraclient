@@ -24,8 +24,11 @@
 #define RDS_INI_NAME  "/rds.ini"
 #define RDS_LPFI_NAME "/lpfi.ini"
 
-#define RDS_RAIDTOOL_PATH "C:/MedCom/bin"
-#define RDS_RAIDTOOL_NAME "RaidTool.exe"
+#define RDS_SCANINFO_EXT    ".ylb"
+#define RDS_SCANINFO_HEADER "## Yarra RDS ScanInfo ##"
+
+#define RDS_RAIDTOOL_PATH      "C:/MedCom/bin"
+#define RDS_RAIDTOOL_NAME      "RaidTool.exe"
 #define RDS_RAIDSIMULATOR_NAME "RaidSimulator.exe"
 
 #define RDS_SYNGODETECT_VB13A "C:/MedCom/MriProduct/inst/build_VB13A_label.txt"
