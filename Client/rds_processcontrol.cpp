@@ -26,7 +26,7 @@ bool rdsProcessControl::isUpdateNeeded()
 {
     if (state!=STATE_IDLE)
     {
-        RTI->log("Warning: Received update request in non-idle state");
+        RTI->log("WARNING: Received update request in non-idle state");
         return false;
     }
 
@@ -117,7 +117,7 @@ void rdsProcessControl::performUpdate()
     // In the alternating mode, files are fetched from RAID and transferred
     // to the storage individually, which leads to longer dead time of the
     // scanner
-    // TODO: Resolve warning!
+    // TODO: Resolve compiler warning
 
     if (diskSpace < qint64(RDS_DISKLIMIT_ALTERNATING))
     {
@@ -152,7 +152,7 @@ void rdsProcessControl::performUpdate()
 
     if (state!=STATE_IDLE)
     {
-        RTI->log("Warning: Received update request in non-idle state");
+        RTI->log("WARNING: Received update request in non-idle state");
     }
 
     RTI->setPostponementRequest(false);
@@ -185,8 +185,13 @@ void rdsProcessControl::performUpdate()
     setState(STATE_SCANTRANSFER);
 
     // Transfer the raid scan table to the log server, if configured and desired
-    if ((RTI_CONFIG->logSendScanInfo) && (RTI_NETLOG.isConfigured()))
+    if ((RTI_CONFIG->logSendScanInfo) && (!RTI_CONFIG->logServerPath.isEmpty()))
     {
+        if (!RTI_NETLOG.isConfigurationError())
+        {
+            resendScanInfoFromDisk();
+        }
+
         sendScanInfoToLogServer();
     }
 
@@ -461,51 +466,75 @@ void rdsProcessControl::sendScanInfoToLogServer()
         return;
     }
 
-    QNetworkReply::NetworkError error;
-    int http_status=0;
+    bool storeScanInfo=false;
 
-    QString errorString="";
-    bool success=RTI_NETWORK->netLogger.postData(data, NETLOG_ENDPT_RAIDLOG, error, http_status, errorString);
-
-    if (!success)
+    // Only send the scan info if the connection to the server has been DNS validated
+    if (!RTI_NETWORK->netLogger.isConfigurationError())
     {
-        if (http_status)
-        {
-            RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));           
+        QNetworkReply::NetworkError error;
+        int http_status=0;
 
-            QString httpError="HTTP Error "+QString::number(http_status);
-            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+httpError);
+        QString errorString="";
+        bool success=RTI_NETWORK->netLogger.postData(data, NETLOG_ENDPT_RAIDLOG, error, http_status, errorString);
+
+        if (!success)
+        {
+            if (http_status)
+            {
+                RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
+
+                QString httpError="HTTP Error "+QString::number(http_status);
+                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+httpError);
+            }
+            else
+            {
+                RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
+                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+errorString);
+            }
+
+            // Indicate the error in the top icon
+            if (!RTI->getWindowInstance()->isVisible())
+            {
+                RTI->getWindowInstance()->iconWindow.setError();
+            }
+
+            storeScanInfo=true;
         }
         else
         {
-            RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
-            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+errorString);
-        }
-
-        // Indicate the error in the top icon
-        if (!RTI->getWindowInstance()->isVisible())
-        {
-            RTI->getWindowInstance()->iconWindow.setError();
+            // Store the fileID of the newest RAID entry processed, so that
+            // during the next run only new entries are processed
+            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Success,"Scan data sent");
         }
     }
     else
     {
-        // Store the fileID of the newest RAID entry processed, so that
-        // during the next run only new entries are processed
-        RTI_RAID->setLPFIScaninfo(RTI_RAID->raidList.at(0)->fileID);
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Success,"Scan data sent");
+        // If the server connection could not be validated, store the scan info
+        // on the local drive. It is assumed that the logserver or DNS server is
+        // temporarily down.
+        storeScanInfo=true;
     }
 
+    // If the transfer was not successful or the connection could not be validated,
+    // store the scan info locally in a temporary file and resend later
+    if (storeScanInfo)
+    {
+        RTI->log("WARNING: Storing scan info locally.");
+        storeScanInfoOnDisk(data);
+    }
+
+    RTI_RAID->setLPFIScaninfo(RTI_RAID->raidList.at(0)->fileID);
     RTI_RAID->saveLPFI();
 }
 
 
 void rdsProcessControl::storeScanInfoOnDisk(QUrlQuery& data)
 {
+    // Generate a unique file name for temporarily storing the scan info
     QString timeStamp=QDateTime::currentDateTime().toString("MMddyy_HHmmss_zzz");
     QString fileName=RTI->getAppPath()+"/"+timeStamp+RDS_SCANINFO_EXT;
 
-    // Check if file exists. If so, add random number until non-existent filename is reached.
+    // Check if filename exists. If so, add random number until non-existent filename is reached.
     int tries=0;
     while (QFile::exists(fileName))
     {
@@ -515,7 +544,7 @@ void rdsProcessControl::storeScanInfoOnDisk(QUrlQuery& data)
         tries++;
         if (tries>20)
         {
-            // TODO: Post error message
+            RTI->log(QString("ERROR: Unable to generate unique filename for storing scan info (%1).").arg(fileName));
             return;
         }
     }
@@ -524,7 +553,7 @@ void rdsProcessControl::storeScanInfoOnDisk(QUrlQuery& data)
 
     if (!bufferFile.open(QIODevice::ReadWrite | QIODevice::Text))
     {
-        // TODO: Error handling, probably missing write permissions
+        RTI->log(QString("ERROR: Unable to create file for storing scan info (%1).").arg(fileName));
         return;
     }
 
@@ -547,9 +576,17 @@ void rdsProcessControl::storeScanInfoOnDisk(QUrlQuery& data)
 
 void rdsProcessControl::resendScanInfoFromDisk()
 {
+    // Make sure that the configuration to the log server has been validated
+    if (RTI_NETLOG.isConfigurationError())
+    {
+        return;
+    }
+
+    // Search for all files with extension .ylb in the application folder. Sort the list
+    // by date so that the oldest scans are getting pushed first
     QDir folder(RTI->getAppPath());
-    folder.refresh();
-    QStringList bufferFiles=folder.entryList(QStringList(QString("*")+RDS_SCANINFO_EXT));
+    folder.refresh();    
+    QStringList bufferFiles=folder.entryList(QStringList(QString("*")+RDS_SCANINFO_EXT),QDir::NoFilter,QDir::Time|QDir::Reversed);
 
     if (bufferFiles.isEmpty())
     {
@@ -557,33 +594,36 @@ void rdsProcessControl::resendScanInfoFromDisk()
         return;
     }
 
+    RTI->log("WARNING: Scan info from previous update found.");
+    RTI->log("Resending stored data to server.");
+
     for (int i=0; i<bufferFiles.count(); i++)
-    {
+    {        
         QString fileName=RTI->getAppPath()+"/"+bufferFiles.at(i);
         QFile   bufferFile(fileName);
 
         // Open file, check is successful
         if (!bufferFile.open(QIODevice::ReadWrite | QIODevice::Text))
         {
-            // TODO: Error logging
+            RTI->log(QString("ERROR: Unable to open scan-info file (%1).").arg(fileName));
             continue;
         }
 
-        // Read contents
+        // Read file contents
         QString buffer="";
         QTextStream stream(&bufferFile);
 
         // Read the header and check if it is correct
         if (!stream.readLineInto(&buffer))
         {
-            // TODO: Error, files seems empty
+            RTI->log(QString("ERROR: Scan-info file is empty (%1).").arg(fileName));
             bufferFile.close();
             continue;
         }
 
         if (buffer != QString(RDS_SCANINFO_HEADER))
         {
-            // TODO: Error, incorrect header
+            RTI->log(QString("ERROR: Scan-info file is invalid (%1).").arg(fileName));
             bufferFile.close();
             continue;
         }
@@ -591,7 +631,7 @@ void rdsProcessControl::resendScanInfoFromDisk()
         // Read the entry count and check if the second line contains a number
         if (!stream.readLineInto(&buffer))
         {
-            // TODO: Error, files seems corrupted
+            RTI->log(QString("ERROR: Scan-info file is invalid (%1).").arg(fileName));
             bufferFile.close();
             continue;
         }
@@ -601,7 +641,7 @@ void rdsProcessControl::resendScanInfoFromDisk()
 
         if (expectedEntries <= 0)
         {
-            // TODO: Error, files seems corrupted
+            RTI->log(QString("ERROR: Scan-info file is invalid (%1).").arg(fileName));
             bufferFile.close();
             continue;
         }
@@ -616,7 +656,7 @@ void rdsProcessControl::resendScanInfoFromDisk()
         // Read the whole file
         while (stream.readLineInto(&buffer))
         {
-            if (!lineCounter %2)
+            if ((lineCounter % 2)==0)
             {
                 key=buffer;
             }
@@ -633,7 +673,8 @@ void rdsProcessControl::resendScanInfoFromDisk()
         // Check if number of entries is consistent
         if (expectedEntries!=foundEntries)
         {
-            // TODO: Error handling
+            RTI->log(QString("ERROR: Scan-info file is inconsistent (%1).").arg(fileName));
+            RTI->log(QString("ERROR: Entries expected=%1 Entries found=%2.").arg(expectedEntries).arg(foundEntries));
             bufferFile.close();
             continue;
         }
@@ -673,7 +714,6 @@ void rdsProcessControl::resendScanInfoFromDisk()
         }
     }
 }
-
 
 
 void rdsProcessControl::setStartTime()

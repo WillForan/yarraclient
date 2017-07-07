@@ -170,7 +170,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
         RTI->log("ERROR: Configuration of log server failed.");
         RTI->log("ERROR: " + errorMessage);
         RTI->log("ERROR: Use configuration dialog to test connection.");
-        RTI->log("ERROR: Logging has been disabled.");
+        RTI->log("ERROR: Logging has been suspended.");
 
         return false;
     }
@@ -310,7 +310,7 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
 // or, if the network succeeded but the server failed, an HTTP status code.
 
 bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkError& error, int &http_status, QString &errorString)
-{
+{    
     if (!configured)
     {
         errorString="NetLogger not configured";
