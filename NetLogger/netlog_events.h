@@ -15,10 +15,12 @@ namespace EventInfo
         Boot,               // for YarraServer, RDS, WebGUI, ArchiveSearch
         Shutdown,
         Update,             // for RDS
+        RawDataStorage,
+        ScanInfo,
         Transfer,           // for ORT, RDS, SAC
         Processing,         // for YarraServer
-        RaidDataSent,       // for RDS
-        ExceptionCaught     // for WebGUI debugging
+        ExceptionCaught,    // for WebGUI debugging
+        Heartbeat           // for peripherals
     };
 
     inline std::ostream& operator<< (std::ostream& o, const Type& c)
@@ -29,10 +31,12 @@ namespace EventInfo
         case Type::Boot:             return o << "Boot";
         case Type::Shutdown:         return o << "Shutdown";
         case Type::Update:           return o << "Update";
+        case Type::RawDataStorage:   return o << "RawDataStorage";
+        case Type::ScanInfo:         return o << "ScanInfo";
         case Type::Transfer:         return o << "Transfer";
         case Type::Processing:       return o << "Processing";
-        case Type::RaidDataSent:     return o << "RaidDataSent";
         case Type::ExceptionCaught:  return o << "ExceptionCaught";
+        case Type::Heartbeat:        return o << "Heartbeat";
         }
         return o << static_cast<std::uint16_t>(c);
     }
@@ -43,7 +47,9 @@ namespace EventInfo
         Information=0,
         Start,
         End,
-        LowDiskSpace
+        LowDiskSpace,
+        Diagnostics,
+        Inventory
     };
 
     inline std::ostream& operator<< (std::ostream& o, const Detail& c)
@@ -54,6 +60,8 @@ namespace EventInfo
         case Detail::Start:         return o << "Start";
         case Detail::End:           return o << "End";
         case Detail::LowDiskSpace:  return o << "LowDiskSpace";
+        case Detail::Diagnostics:   return o << "Diagnostics";
+        case Detail::Inventory:     return o << "Inventory";
         }
         return o << static_cast<std::uint16_t>(c);
     }
@@ -68,7 +76,8 @@ namespace EventInfo
         Server,
         WebGUI,
         ArchiveSearchIndexer,
-        ArchiveSearchGUI
+        ArchiveSearchGUI,
+        Peripheral
     };
 
     inline std::ostream& operator<< (std::ostream& o, const SourceType& c)
@@ -83,6 +92,7 @@ namespace EventInfo
         case SourceType::WebGUI:                return o << "WebGUI";
         case SourceType::ArchiveSearchIndexer:  return o << "ArchiveSearchIndexer";
         case SourceType::ArchiveSearchGUI:      return o << "ArchiveSearchGUI";
+        case SourceType::Peripheral:            return o << "Peripheral";
         }
         return o << static_cast<std::uint16_t>(c);
     }

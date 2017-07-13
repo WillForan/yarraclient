@@ -105,9 +105,9 @@ bool rdsProcessControl::isUpdateNeeded()
 
 void rdsProcessControl::performUpdate()
 {
-    RTI->setIconWindowAnim(true);
-
+    RTI->setIconWindowAnim(true);   
     RTI->setSevereErrors(false);
+
     explicitUpdate=false;
     bool alternatingUpdate=false;
     qint64 diskSpace=RTI->getFreeDiskSpace();
@@ -142,12 +142,12 @@ void rdsProcessControl::performUpdate()
     if (logServerOnlyUpdate)
     {
         RTI->log("Starting log update...");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"Scan data");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"ScanInfo only");
     }
     else
     {
         RTI->log("Starting update...");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"Raw data");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"");
     }
 
     if (state!=STATE_IDLE)
@@ -187,17 +187,23 @@ void rdsProcessControl::performUpdate()
     // Transfer the raid scan table to the log server, if configured and desired
     if ((RTI_CONFIG->logSendScanInfo) && (!RTI_CONFIG->logServerPath.isEmpty()))
     {
+        RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Start,EventInfo::Severity::Success,"");
+
         if (!RTI_NETLOG.isConfigurationError())
         {
             resendScanInfoFromDisk();
         }
 
         sendScanInfoToLogServer();
+
+        RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::End,EventInfo::Severity::Success,"");
     }
 
     // If a full update with raw-data transfer should be done
     if ((!logServerOnlyUpdate) && (!RTI_RAID->isScanActive()))
-    {              
+    {
+        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Start,EventInfo::Severity::Success,"");
+
         // Check if the connection to the network drive can be established
         if (RTI_NETWORK->openConnection())
         {
@@ -273,7 +279,7 @@ void rdsProcessControl::performUpdate()
                     RTI->getWindowInstance()->iconWindow.setError();
                 }
 
-                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error, "Error during export");
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Error, "Error during export");
             }
 
             // Close activity window if visible
@@ -306,7 +312,7 @@ void rdsProcessControl::performUpdate()
             // Close connection to FTP server
             RTI_NETWORK->closeConnection();
 
-            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Success,"Raw data sent");
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Success,"Raw data sent");
         }
         else
         {
@@ -331,15 +337,17 @@ void rdsProcessControl::performUpdate()
                     RTI->getWindowInstance()->iconWindow.setError();
                 }
 
-                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Opening connection failed repeatedly");
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Opening connection failed repeatedly");
             }
             else
             {
-                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error, "Opening connection failed");
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Error, "Opening connection failed");
             }
         }
 
         lastUpdate=QDateTime::currentDateTime();
+
+        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::End,EventInfo::Severity::Success,"");
     }
 
     // If the current update run was for raw data transfer and a scan
@@ -484,12 +492,12 @@ void rdsProcessControl::sendScanInfoToLogServer()
                 RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
 
                 QString httpError="HTTP Error "+QString::number(http_status);
-                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+httpError);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+httpError);
             }
             else
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
-                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+errorString);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+errorString);
             }
 
             // Indicate the error in the top icon
@@ -504,7 +512,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
         {
             // Store the fileID of the newest RAID entry processed, so that
             // during the next run only new entries are processed
-            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Success,"Scan data sent");
+            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Success,"Scan data sent");
         }
     }
     else
@@ -695,12 +703,12 @@ void rdsProcessControl::resendScanInfoFromDisk()
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
                 QString httpError="HTTP Error "+QString::number(http_status);
-                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error re-sending scan data: "+httpError);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error re-sending scan data: "+httpError);
             }
             else
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
-                RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error re-sending scan data: "+errorString);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error re-sending scan data: "+errorString);
             }
 
             // Server transfer seems still to have problems. So stop here and continue during the next update
@@ -710,7 +718,7 @@ void rdsProcessControl::resendScanInfoFromDisk()
         {
             // Transfer sucessful, delete file
             bufferFile.remove();
-            RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Success,"Scan data re-sent");
+            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Success,"Previous scan data re-sent");
         }
     }
 }
