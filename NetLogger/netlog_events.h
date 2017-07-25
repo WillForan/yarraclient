@@ -77,6 +77,7 @@ namespace EventInfo
         WebGUI,
         ArchiveSearchIndexer,
         ArchiveSearchGUI,
+        LogServer,
         Peripheral
     };
 
@@ -92,6 +93,7 @@ namespace EventInfo
         case SourceType::WebGUI:                return o << "WebGUI";
         case SourceType::ArchiveSearchIndexer:  return o << "ArchiveSearchIndexer";
         case SourceType::ArchiveSearchGUI:      return o << "ArchiveSearchGUI";
+        case SourceType::LogServer:             return o << "LogServer";
         case SourceType::Peripheral:            return o << "Peripheral";
         }
         return o << static_cast<std::uint16_t>(c);
