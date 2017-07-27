@@ -386,7 +386,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
         // If the fileID of the first (i.e. newest) scan is smaller than the LPFI,
         // then a reset of the RAID must have happened. Reset the LPFI and process
         // the whole RAID list then.
-        if (RTI_RAID->raidList.at(0)->fileID<RTI_RAID->getLPFIScaninfo())
+        if (RTI_RAID->raidList.at(0)->fileID < RTI_RAID->getLPFIScaninfo())
         {
             RTI_RAID->setLPFIScaninfo(-1);
         }
@@ -478,7 +478,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
 
     // Only send the scan info if the connection to the server has been DNS validated
     if (!RTI_NETWORK->netLogger.isConfigurationError())
-    {
+    {        
         QNetworkReply::NetworkError error;
         int http_status=0;
 
@@ -492,12 +492,12 @@ void rdsProcessControl::sendScanInfoToLogServer()
                 RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
 
                 QString httpError="HTTP Error "+QString::number(http_status);
-                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+httpError);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error: "+httpError);
             }
             else
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
-                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error sending scan data: "+errorString);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error: "+errorString);
             }
 
             // Indicate the error in the top icon
@@ -510,9 +510,8 @@ void rdsProcessControl::sendScanInfoToLogServer()
         }
         else
         {
-            // Store the fileID of the newest RAID entry processed, so that
-            // during the next run only new entries are processed
-            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Success,"Scan data sent");
+            RTI->log("Scaninfo sent.");
+            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Success,"");
         }
     }
     else
@@ -531,6 +530,8 @@ void rdsProcessControl::sendScanInfoToLogServer()
         storeScanInfoOnDisk(data);
     }
 
+    // Store the fileID of the newest RAID entry processed, so that
+    // during the next run only new entries are processed
     RTI_RAID->setLPFIScaninfo(RTI_RAID->raidList.at(0)->fileID);
     RTI_RAID->saveLPFI();
 }
@@ -671,6 +672,13 @@ void rdsProcessControl::resendScanInfoFromDisk()
             else
             {
                 value=buffer;
+
+                // Update the api key (in case it has been changed)
+                if (key=="api_key")
+                {
+                    value=RTI_CONFIG->logApiKey;
+                }
+
                 query.addQueryItem(key,value);
                 foundEntries++;
             }
@@ -703,12 +711,12 @@ void rdsProcessControl::resendScanInfoFromDisk()
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
                 QString httpError="HTTP Error "+QString::number(http_status);
-                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error re-sending scan data: "+httpError);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Resend error: "+httpError);
             }
             else
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
-                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error re-sending scan data: "+errorString);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Resend error: "+errorString);
             }
 
             // Server transfer seems still to have problems. So stop here and continue during the next update
@@ -718,7 +726,7 @@ void rdsProcessControl::resendScanInfoFromDisk()
         {
             // Transfer sucessful, delete file
             bufferFile.remove();
-            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Success,"Previous scan data re-sent");
+            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Success,"Resend successful");
         }
     }
 }
