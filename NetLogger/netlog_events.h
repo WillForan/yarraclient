@@ -49,7 +49,8 @@ namespace EventInfo
         End,
         LowDiskSpace,
         Diagnostics,
-        Inventory
+        Inventory,
+        Push
     };
 
     inline std::ostream& operator<< (std::ostream& o, const Detail& c)
