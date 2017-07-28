@@ -492,12 +492,12 @@ void rdsProcessControl::sendScanInfoToLogServer()
                 RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
 
                 QString httpError="HTTP Error "+QString::number(http_status);
-                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error: "+httpError);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Push,EventInfo::Severity::Error,"Error: "+httpError);
             }
             else
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
-                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error: "+errorString);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Push,EventInfo::Severity::Error,"Error: "+errorString);
             }
 
             // Indicate the error in the top icon
@@ -511,7 +511,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
         else
         {
             RTI->log("Scaninfo sent.");
-            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Success,"");
+            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Push,EventInfo::Severity::Success,"");
         }
     }
     else
@@ -605,6 +605,7 @@ void rdsProcessControl::resendScanInfoFromDisk()
 
     RTI->log("WARNING: Scan info from previous update found.");
     RTI->log("Resending stored data to server.");
+    RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Warning,"Resend data found");
 
     for (int i=0; i<bufferFiles.count(); i++)
     {        
@@ -711,12 +712,12 @@ void rdsProcessControl::resendScanInfoFromDisk()
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (HTTP Error %1).").arg(http_status));
                 QString httpError="HTTP Error "+QString::number(http_status);
-                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Resend error: "+httpError);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Push,EventInfo::Severity::Error,"Resend error: "+httpError);
             }
             else
             {
                 RTI->log(QString("ERROR: Transfer to log server failed (%1).").arg(errorString));
-                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Error,"Resend error: "+errorString);
+                RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Push,EventInfo::Severity::Error,"Resend error: "+errorString);
             }
 
             // Server transfer seems still to have problems. So stop here and continue during the next update
@@ -726,7 +727,7 @@ void rdsProcessControl::resendScanInfoFromDisk()
         {
             // Transfer sucessful, delete file
             bufferFile.remove();
-            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Information,EventInfo::Severity::Success,"Resend successful");
+            RTI_NETLOG.postEvent(EventInfo::Type::ScanInfo,EventInfo::Detail::Push,EventInfo::Severity::Success,"Resend successful");
         }
     }
 }
