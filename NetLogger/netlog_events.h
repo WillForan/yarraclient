@@ -63,6 +63,7 @@ namespace EventInfo
         case Detail::LowDiskSpace:  return o << "LowDiskSpace";
         case Detail::Diagnostics:   return o << "Diagnostics";
         case Detail::Inventory:     return o << "Inventory";
+        case Detail::Push:          return o << "Push";
         }
         return o << static_cast<std::uint16_t>(c);
     }

@@ -399,7 +399,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
     }
 
     int     entryCount=0;
-    bool    isShimScan=false;
+    bool    isDummyScan=false;
     QString originalProtocolName="";
     bool    actualScanFound=false;
 
@@ -411,8 +411,9 @@ void rdsProcessControl::sendScanInfoToLogServer()
             break;
         }
 
-        // Rename shim scans to "AdjShim (protocol)". Shim scans should be below 1 MB.
-        isShimScan=false;
+        // Rename aborted scans due to stimulation warnings to "AdjDummy (protocol)".
+        // Aborted "dummy" scans should be smaller than 1 MB.
+        isDummyScan=false;
         if (entry->size < RDS_SHIMSIZE_FILTER)
         {
             // Make sure the scan is not a different adjustment or tagging scan
@@ -421,7 +422,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
                 // If this is the very latest scan, assume it is a shim scan
                 if (entryCount==0)
                 {
-                    isShimScan=true;
+                    isDummyScan=true;
                     actualScanFound=true;
                 }
                 else
@@ -439,18 +440,18 @@ void rdsProcessControl::sendScanInfoToLogServer()
 
                         if (actualScanFound)
                         {
-                            isShimScan=true;
+                            isDummyScan=true;
                         }
                     }
                 }
             }
         }
 
-        if (isShimScan)
+        if (isDummyScan)
         {
-            // Modify the protocol name to indicate the shim scan
+            // Modify the protocol name to indicate the dummy scan
             originalProtocolName=entry->protName;
-            entry->protName="AdjShim - " + entry->protName;
+            entry->protName="AdjDummy - " + entry->protName;
         }
         else
         {
@@ -459,7 +460,7 @@ void rdsProcessControl::sendScanInfoToLogServer()
 
         entry->addToUrlQuery(data);
 
-        if (isShimScan)
+        if (isDummyScan)
         {
             // Revert the protocol name of the entry to the original string
             entry->protName=originalProtocolName;
