@@ -6,6 +6,10 @@
 #define NETLOG_ENDPT_EVENT   "events"
 #define NETLOG_ENDPT_RAIDLOG "scans"
 
+#define NETLOG_POST_TIMEOUT     20000
+#define NETLOG_NSLOOKUP_TIMEOUT 10000
+
+
 // Event definitions
 namespace EventInfo
 {

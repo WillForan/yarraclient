@@ -328,10 +328,10 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
         return false;
     }
 
-    // Use eventloop to wait until post event has finished. Event loop will timeout after 10sec
+    // Use eventloop to wait until post event has finished. Event loop will timeout after 20sec
     QEventLoop eventLoop;
     QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-    QTimer::singleShot(10000, &eventLoop, SLOT(quit()));
+    QTimer::singleShot(NETLOG_POST_TIMEOUT, &eventLoop, SLOT(quit()));
 
     if (reply->isRunning())
     {
@@ -353,7 +353,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
 
         if (http_status != 200)
         {
-            errorString="Incorrect response";
+            errorString="Incorrect response " + QString::number(http_status);
             return false;
         }
     }
@@ -364,7 +364,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
 
 QString NetLogger::dnsLookup(QString address)
 {
-    const int nslTimeout=10000;
+    const int nslTimeout=NETLOG_NSLOOKUP_TIMEOUT;
     bool success=false;
     QString nameFound="";
 
