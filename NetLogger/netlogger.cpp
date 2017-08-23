@@ -319,6 +319,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
 
     http_status=0;
     errorString="Unknown";
+    bool timeout=false;
 
     QNetworkReply* reply=postDataAsync(query,endpt);
 
@@ -338,6 +339,11 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
         eventLoop.exec();
     }
 
+    if (reply->isRunning())
+    {
+        timeout=true;
+    }
+
     reply->disconnect(&eventLoop);
 
     if (reply->error() != QNetworkReply::NoError)
@@ -347,13 +353,19 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
         return false;
     }
     else
-    {
-        // Make sure the HTTP status is 200
+    {      
+        // Make sure the HTTP status is 200       
         http_status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
         if (http_status != 200)
-        {
+        {                     
             errorString="Incorrect response " + QString::number(http_status);
+
+            if (timeout)
+            {
+                errorString="Response timeout";
+            }
+
             return false;
         }
     }
