@@ -6,7 +6,7 @@
 
 
 // Definitions
-#define RDS_VERSION     "0.52b16"
+#define RDS_VERSION     "0.52b17"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 

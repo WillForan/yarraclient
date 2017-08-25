@@ -66,6 +66,19 @@ rdsRaid::rdsRaid()
     usePatchedRaidTool=false;
     patchedRaidToolMissing=false;
 
+    // Dermines whether the verbose mode is used for directory readout
+    if ( (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB13A) ||
+         (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB15A)
+       )
+    {
+        useVerboseMode=false;
+    }
+    else
+    {
+        useVerboseMode=true;
+    }
+
+
     if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VD13C)
     {
         usePatchedRaidTool=true;
@@ -412,6 +425,11 @@ bool rdsRaid::readRaidList()
         opt << "-k";
     }
 
+    if (useVerboseMode)
+    {
+        opt << "-v";
+    }
+
     RDS_RETONERR_LOG( callRaidTool(cmd, opt), "Reading RAID directory failed. Canceling." );
 
     // Parse the raid output
@@ -514,6 +532,8 @@ bool rdsRaid::parseOutputDirectory()
         if ((!lineProcessed) && (dirHeadFound) && (raidToolOutput.at(i).length() > 2))
         {
             rdsRaidEntry raidEntry;
+            raidEntry.attribute=RDS_SCANATTRIBUTE_OK;
+
             bool res=true;
             bool skipEntry=false;
 
@@ -525,11 +545,18 @@ bool rdsRaid::parseOutputDirectory()
 
             QString origLine=raidLine;
 
-            // For the VD13+ format, chop the IDs of the depending scans from the end of the line
-            if ((RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VD13C)
-                || (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VE))
+            if (useVerboseMode)
             {
-                chopDependingIDs(raidLine);
+                chopDependingIDsVerbose(raidLine, raidEntry.attribute);
+            }
+            else
+            {
+                // For the VD13+ format, chop the IDs of the depending scans from the end of the line
+                if ((RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VD13C)
+                    || (RTI->getRaidToolFormat()==rdsRuntimeInformation::RDS_RAIDTOOL_VE))
+                {
+                    chopDependingIDs(raidLine);
+                }
             }
 
             QString temp="";
@@ -787,6 +814,8 @@ bool rdsRaid::createExportList()
             // Check if protocol name from raid contains filter tag
             if (currentEntry->protName.contains(filter))
             {
+                // TODO: If in verbose mode, don't export files that have the error attribute
+
                 // Check the size. Only export measurements that are larger than 1Mb. Measurements
                 // smaller than 1Mb are most likely adjustment scans (shims etc), which should
                 // not be transferred, unless explicitly enables for the project.

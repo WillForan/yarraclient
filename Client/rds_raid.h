@@ -6,6 +6,11 @@
 #include "rds_global.h"
 
 
+#define RDS_SCANATTRIBUTE_ERROR      0
+#define RDS_SCANATTRIBUTE_OK         1
+#define RDS_SCANATTRIBUTE_USERCANCEL 3
+
+
 class rdsRaidEntry
 {
 public:
@@ -17,6 +22,7 @@ public:
     qint64    sizeOnDisk;
     QDateTime creationTime;
     QDateTime closingTime;
+    int       attribute;
 
     void addToUrlQuery(QUrlQuery& query);
 };
@@ -50,6 +56,8 @@ public:
     void dumpRaidToolOutput();
 
     void chopDependingIDs(QString& text);
+    void chopDependingIDsVerbose(QString& text, int& scanAttribute);
+
     bool isPatchedRaidToolMissing();
 
     bool readRaidList();
@@ -86,15 +94,12 @@ public:
 protected:
 
     bool parseVB15Line(QString line, rdsRaidEntry* entry);
-
     bool parseOutputDirectory();
-
+    bool parseOutputFileExport();
     bool exportScanFromList();
 
     bool setCurrentFileID();
     bool setCurrentFilename(int refID=-1);
-
-    bool parseOutputFileExport();
 
     bool anonymizeCurrentFile();
 
@@ -122,7 +127,7 @@ protected:
     rdsRaidEntry*   getRaidEntry(int index);
 
     void addExportEntry(int raidIndex, int protIndex, QString protName, bool anonymize, bool adjustmentScans);
-    void addRaidEntry(int fileID, int measID, QString protName, QString patName, qint64 size, qint64 sizeOnDisk, QDateTime creationTime);
+    void addRaidEntry(int fileID, int measID, QString protName, QString patName, qint64 size, qint64 sizeOnDisk, QDateTime creationTime, int attribute=RDS_SCANATTRIBUTE_OK);
     void addRaidEntry(rdsRaidEntry* source);
 
     void removePrecedingSpace(QString& text);
@@ -132,6 +137,8 @@ protected:
 
     bool ignoreLPFID;
     bool scanActive;
+
+    bool useVerboseMode;
 
     QString getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, int refID=-1);
 
@@ -235,7 +242,7 @@ inline void rdsRaid::addExportEntry(int raidIndex, int protIndex, QString protNa
 }
 
 
-inline void rdsRaid::addRaidEntry(int fileID, int measID, QString protName, QString patName, qint64 size, qint64 sizeOnDisk, QDateTime creationTime)
+inline void rdsRaid::addRaidEntry(int fileID, int measID, QString protName, QString patName, qint64 size, qint64 sizeOnDisk, QDateTime creationTime, int attribute)
 {
     rdsRaidEntry* entry=new rdsRaidEntry;
 
@@ -246,6 +253,7 @@ inline void rdsRaid::addRaidEntry(int fileID, int measID, QString protName, QStr
     entry->size=size;
     entry->sizeOnDisk=sizeOnDisk;
     entry->creationTime=creationTime;
+    entry->attribute=attribute;
 
     raidList.append(entry);
 }
@@ -263,6 +271,7 @@ inline void rdsRaid::addRaidEntry(rdsRaidEntry* source)
     entry->sizeOnDisk=source->sizeOnDisk;
     entry->creationTime=source->creationTime;
     entry->closingTime=source->closingTime;
+    entry->attribute=source->attribute;
 
     raidList.append(entry);
 }
@@ -284,13 +293,52 @@ inline void rdsRaid::chopDependingIDs(QString& text)
     if (length==0)
     {
         return;
-    }
+    }    
 
     int colon=text.lastIndexOf(":");
 
     if (colon != length-3)
     {
         text.chop(length-(colon+3));
+    }
+}
+
+
+inline void rdsRaid::chopDependingIDsVerbose(QString& text, int& scanAttribute)
+{
+    scanAttribute=RDS_SCANATTRIBUTE_OK;
+
+    int length=text.length();
+    int colonPos =text.lastIndexOf(":");
+    int attribPos=colonPos+20;
+
+    if ((length==0) || (colonPos==-1))
+    {
+        return;
+    }
+
+    if (text.length()>attribPos)
+    {
+        // TODO: Check for position of white space to be on the safe side
+
+        // Evaluate the attribute relative to the position of the detected colon
+        if (text.at(attribPos)=='0')
+        {
+            scanAttribute=RDS_SCANATTRIBUTE_ERROR;
+        }
+        else
+        {
+            if (text.at(attribPos)=='3')
+            {
+                scanAttribute=RDS_SCANATTRIBUTE_USERCANCEL;
+            }
+        }       
+    }
+
+    // Chop of the tail of the entry 3 chars after the last ":" of the closing date
+    if (colonPos != length-3)
+    {
+        text.chop(length-(colonPos+3));
     }
 }
 
@@ -320,6 +368,3 @@ inline bool rdsRaid::isScanActive()
 
 
 #endif // RDS_RAID_H
-
-
-

@@ -411,62 +411,13 @@ void rdsProcessControl::sendScanInfoToLogServer()
             break;
         }
 
-        // Rename aborted scans due to stimulation warnings to "AdjDummy (protocol)".
-        // Aborted "dummy" scans should be smaller than 1 MB.
-        isDummyScan=false;
-        if (entry->size < RDS_SHIMSIZE_FILTER)
+        // Send the entry, except if it has the error attribute. If it's a tagging scan, then send
+        // it in any case, even with error tag
+        if ((entry->attribute!=RDS_SCANATTRIBUTE_ERROR) || (entry->protName.startsWith("$")))
         {
-            // Make sure the scan is not a different adjustment or tagging scan
-            if ((!entry->protName.startsWith("Adj")) && (!entry->protName.startsWith("$")))
-            {
-                // If this is the very latest scan, assume it is a shim scan
-                if (entryCount==0)
-                {
-                    isDummyScan=true;
-                    actualScanFound=true;
-                }
-                else
-                {
-                    // If it is not the latest scan, additionally check if there is a later
-                    // scan with the same protocol name
-                    if (RTI_RAID->raidList.at(entryCount-1)->protName==entry->protName)
-                    {
-                        // Check if the previous scan is larger. Remember that setting, so that
-                        // it propagates down (shim scans might run multiple times)
-                        if (RTI_RAID->raidList.at(entryCount-1)->size > RDS_SHIMSIZE_FILTER)
-                        {
-                            actualScanFound=true;
-                        }
-
-                        if (actualScanFound)
-                        {
-                            isDummyScan=true;
-                        }
-                    }
-                }
-            }
+            entry->addToUrlQuery(data);
+            entryCount++;
         }
-
-        if (isDummyScan)
-        {
-            // Modify the protocol name to indicate the dummy scan
-            originalProtocolName=entry->protName;
-            entry->protName="AdjDummy - " + entry->protName;
-        }
-        else
-        {
-            actualScanFound=false;
-        }
-
-        entry->addToUrlQuery(data);
-
-        if (isDummyScan)
-        {
-            // Revert the protocol name of the entry to the original string
-            entry->protName=originalProtocolName;
-        }
-
-        entryCount++;
     }
 
     if (entryCount==0)
