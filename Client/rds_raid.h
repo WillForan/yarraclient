@@ -6,9 +6,13 @@
 #include "rds_global.h"
 
 
-#define RDS_SCANATTRIBUTE_ERROR      0
-#define RDS_SCANATTRIBUTE_OK         1
-#define RDS_SCANATTRIBUTE_USERCANCEL 3
+#define RDS_SCANATTRIBUTE_ERROR         0
+#define RDS_SCANATTRIBUTE_OK            1
+#define RDS_SCANATTRIBUTE_USERCANCEL    3
+
+#define RDS_VERBOSEATTRIBUTE_ERROR      "0000000000000000"
+#define RDS_VERBOSEATTRIBUTE_OK         "0000000000000001"
+#define RDS_VERBOSEATTRIBUTE_USERCANCEL "0000000000000003"
 
 
 class rdsRaidEntry
@@ -91,6 +95,8 @@ public:
     int  getLPFIScaninfo();
     void setLPFIScaninfo(int value);
 
+    bool debugReadTestFile(QString filename);
+
 protected:
 
     bool parseVB15Line(QString line, rdsRaidEntry* entry);
@@ -139,6 +145,7 @@ protected:
     bool scanActive;
 
     bool useVerboseMode;
+    bool missingVerboseData;
 
     QString getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, int refID=-1);
 
@@ -317,22 +324,39 @@ inline void rdsRaid::chopDependingIDsVerbose(QString& text, int& scanAttribute)
         return;
     }
 
+    // Check if the line has the verbose format
     if (text.length()>attribPos)
     {
-        // TODO: Check for position of white space to be on the safe side
+        QString attrSubString=text.mid(colonPos+5,16);
 
-        // Evaluate the attribute relative to the position of the detected colon
-        if (text.at(attribPos)=='0')
+        // Check for OK first. This will apply to most entry and avoids
+        // running two compares.
+        if (attrSubString==RDS_VERBOSEATTRIBUTE_OK)
         {
-            scanAttribute=RDS_SCANATTRIBUTE_ERROR;
+            scanAttribute=RDS_SCANATTRIBUTE_OK;
         }
         else
         {
-            if (text.at(attribPos)=='3')
+            if (attrSubString==RDS_VERBOSEATTRIBUTE_ERROR)
             {
-                scanAttribute=RDS_SCANATTRIBUTE_USERCANCEL;
+                scanAttribute=RDS_SCANATTRIBUTE_ERROR;
             }
-        }       
+            else
+            {
+                if (attrSubString==RDS_VERBOSEATTRIBUTE_USERCANCEL)
+                {
+                    scanAttribute=RDS_SCANATTRIBUTE_USERCANCEL;
+                }
+                else
+                {
+                    missingVerboseData=true;
+                }
+            }
+        }
+    }
+    else
+    {
+        missingVerboseData=true;
     }
 
     // Chop of the tail of the entry 3 chars after the last ":" of the closing date

@@ -66,18 +66,8 @@ rdsRaid::rdsRaid()
     usePatchedRaidTool=false;
     patchedRaidToolMissing=false;
 
-    // Dermines whether the verbose mode is used for directory readout
-    if ( (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB13A) ||
-         (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB15A)
-       )
-    {
-        useVerboseMode=false;
-    }
-    else
-    {
-        useVerboseMode=true;
-    }
-
+    useVerboseMode=true;
+    missingVerboseData=false;
 
     if (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VD13C)
     {
@@ -412,6 +402,18 @@ bool rdsRaid::parseOutputFileExport()
 
 bool rdsRaid::readRaidList()
 {
+    // Dermines whether the verbose mode is used for directory readout
+    if ( (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB13A) ||
+         (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB15A)
+       )
+    {
+        useVerboseMode=false;
+    }
+    else
+    {
+        useVerboseMode=true;
+    }
+
     // Call raid tool and obtain directory list
     // Parse text output and sort entries into raidlist structure
     QStringList cmd, opt;
@@ -453,6 +455,7 @@ bool rdsRaid::parseOutputDirectory()
     bool isSuccess=true;
     bool dirHeadFound=false;
     bool lineProcessed=false;
+    missingVerboseData=false;
 
     RTI->debug("Received " + QString::number(raidToolOutput.count()) + " lines from the RAID tool.");
 
@@ -731,6 +734,11 @@ bool rdsRaid::parseOutputDirectory()
             RTI->log("Simulation mode --> Overwriting error.");
             isSuccess=true;
         }
+    }
+
+    if (useVerboseMode && missingVerboseData)
+    {
+        RTI->log("WARNING: Missing verbose information!");
     }
 
     return isSuccess;
@@ -1112,7 +1120,8 @@ void rdsRaid::dumpRaidList()
     for (int i=0; i < raidList.count(); i++)
     {
         rdsRaidEntry* entry=raidList.at(i);
-        line="FID=" + QString::number(entry->fileID) + " MID=" + QString::number(entry->measID) + " PROT='" + entry->protName + "' PAT='" + entry->patName + "'\n";
+        line="FID=" + QString::number(entry->fileID) + " MID=" + QString::number(entry->measID) + " PROT='" + entry->protName + "' PAT='" + entry->patName + "' ";
+        line+= (entry->attribute==RDS_SCANATTRIBUTE_ERROR ? QString("ERROR") : QString("OK"))+"\n";
         dumpFile.write(line.toLatin1());
     }
 
@@ -1273,4 +1282,59 @@ QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString par
     filename += ".dat";
 
     return filename;
+}
+
+
+
+bool rdsRaid::debugReadTestFile(QString filename)
+{
+    bool result=false;
+
+    QFile testFile(filename);
+    if (!testFile.exists())
+    {
+        RTI->debug("Can't find test file.");
+        return false;
+    }
+
+    if (!testFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        RTI->debug("Can't open test file.");
+        return false;
+    }
+
+    raidToolOutput.clear();
+    QTextStream in(&testFile);
+
+    int i=0;
+    while (!in.atEnd())
+    {
+        raidToolOutput.append(in.readLine());
+        i++;
+    }
+    RTI->debug("Lines read from test file: "+QString::number(i));
+    RTI->debug("Calling parser now.");
+
+    ignoreLPFID=true;
+
+    QTime t;
+    t.start();
+
+    result=parseOutputDirectory();
+
+    RTI->debug(QString("Parsing duration: %1 ms").arg(t.elapsed()));
+
+    // Parse the raid output
+    if (!result)
+    {
+        RTI->debug("Parsing file was not succesful.");
+    }
+    else
+    {
+        RTI->debug("File parsed without problems.");
+    }
+
+    ignoreLPFID=false;
+
+    return result;
 }

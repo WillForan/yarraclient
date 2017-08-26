@@ -23,12 +23,7 @@ public:
         RDS_OPERATION
     };
 
-    enum rdsSyngoLines
-    {
-        RDS_VB = 0,
-        RDS_VD = 1,
-        RDS_VE = 2
-    };
+    #define RDS_SYNGOVERSIONS_COUNT 17
 
     enum rdsSyngoVersions
     {
@@ -50,6 +45,13 @@ public:
         RDS_VE11C   =  14,
         RDS_VE11U   =  15,
         RDS_VE11P   =  16
+    };
+
+    enum rdsSyngoLines
+    {
+        RDS_VB = 0,
+        RDS_VD = 1,
+        RDS_VE = 2
     };
 
     enum rdsRaidToolFormat
@@ -100,7 +102,8 @@ public:
     rdsOperationWindow* getWindowInstance();
 
     int     getSyngoMRVersion();
-    QString getSyngoMRVersionString();
+    QString getSyngoMRVersionString(int syngoVersionEnum=RDS_INVALID);
+    int     getSyngoMRLine();
 
     bool    isSyngoVBLine();
     bool    isSyngoVDLine();
@@ -129,6 +132,8 @@ public:
     void updateInfoUI();
 
     void setIconWindowAnim(bool status);
+
+    void debugPatchSyngoVersion(int newVersion);
 
 private:    
 
@@ -319,11 +324,18 @@ inline rdsOperationWindow* rdsRuntimeInformation::getWindowInstance()
 }
 
 
-inline QString rdsRuntimeInformation::getSyngoMRVersionString()
+inline QString rdsRuntimeInformation::getSyngoMRVersionString(int syngoVersionEnum)
 {
     QString versionString="";
 
-    switch (syngoMRVersion)
+    // If the function is called without parameter, return the syngo version
+    // detected by the RTI
+    if (syngoVersionEnum==RDS_INVALID)
+    {
+        syngoVersionEnum=syngoMRVersion;
+    }
+
+    switch (syngoVersionEnum)
     {
     case RDS_VB13A:
         versionString="VB13A";
@@ -490,6 +502,38 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     default:
         return RDS_RAIDTOOL_VB;
     };
+}
+
+
+inline int rdsRuntimeInformation::getSyngoMRLine()
+{
+    switch (syngoMRVersion)
+    {
+    case RDS_VB13A:
+    case RDS_VB15A:
+    case RDS_VB17A:
+    case RDS_VB19A:
+    case RDS_VB18P:
+    case RDS_VB20P:
+    default:
+        return RDS_VB;
+        break;
+    case RDS_VD11A:
+    case RDS_VD11D:
+    case RDS_VD13A:
+    case RDS_VD13B:
+    case RDS_VD13C:
+    case RDS_VD13D:
+        return RDS_VD;
+        break;
+    case RDS_VE11A:
+    case RDS_VE11B:
+    case RDS_VE11C:
+    case RDS_VE11U:
+    case RDS_VE11P:
+        return RDS_VE;
+        break;
+    }
 }
 
 

@@ -113,7 +113,6 @@ bool rdsRuntimeInformation::prepareEnvironment()
         return false;
     }
 
-
     bool error=false;
 
     // Prepare all directories etc
@@ -159,7 +158,6 @@ bool rdsRuntimeInformation::prepareEnvironment()
         error=true;
     }
 
-
     // Show error message because the log is not running yet
     if (error)
     {
@@ -177,7 +175,6 @@ bool rdsRuntimeInformation::prepareEnvironment()
 
 
 #define RDS_SYNGODETECT(ID,IDFILE) if (myDir.exists(IDFILE)) { syngoMRVersion=ID; }
-
 
 void rdsRuntimeInformation::determineSyngoVersion()
 {
@@ -207,32 +204,7 @@ void rdsRuntimeInformation::determineSyngoVersion()
     RDS_SYNGODETECT(RDS_VE11U,RDS_SYNGODETECT_VE11U);
     RDS_SYNGODETECT(RDS_VE11P,RDS_SYNGODETECT_VE11P);
 
-    switch (syngoMRVersion)
-    {
-    case RDS_VB13A:
-    case RDS_VB15A:
-    case RDS_VB17A:        
-    case RDS_VB19A:
-    case RDS_VB18P:
-    case RDS_VB20P:
-        syngoMRLine=RDS_VB;
-        break;
-    case RDS_VD11A:
-    case RDS_VD11D:
-    case RDS_VD13A:
-    case RDS_VD13B:
-    case RDS_VD13C:
-    case RDS_VD13D:
-        syngoMRLine=RDS_VD;
-        break;
-    case RDS_VE11A:
-    case RDS_VE11B:
-    case RDS_VE11C:
-    case RDS_VE11U:
-    case RDS_VE11P:
-        syngoMRLine=RDS_VE;
-        break;
-    }
+    syngoMRLine=getSyngoMRLine();
 }
 
 
@@ -330,3 +302,11 @@ void rdsRuntimeInformation::setIconWindowAnim(bool status)
     #endif
 }
 
+
+void rdsRuntimeInformation::debugPatchSyngoVersion(int newVersion)
+{
+    // Overwrite the detected SyngoMR version. This is intended only for
+    // testing the parser with different dump files
+    syngoMRVersion=newVersion;
+    syngoMRLine=getSyngoMRLine();
+}

@@ -25,6 +25,10 @@ private slots:
 
     void on_pushButton_4_clicked();
 
+    void on_testFileButton_clicked();
+
+    void on_parserTestButton_clicked();
+
 private:
     Ui::rdsDebugWindow *ui;
 };
