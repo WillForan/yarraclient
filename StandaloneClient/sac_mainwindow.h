@@ -44,10 +44,11 @@ class sacMainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit sacMainWindow(QWidget *parent = 0);
+    explicit sacMainWindow(QWidget *parent, bool isConsole);
     ~sacMainWindow();
 
     bool restartApp;
+    bool isConsole;
 
     sacNetwork network;
     ortModeList modeList;
@@ -65,14 +66,16 @@ public:
 
     int detectMode(QString protocol);
 
+    bool didStart;
+
     Task task;
     bool generateTaskFile(Task& a_task);
     void analyzeDatFile(QString filename, QString& detectedPatname, QString& detectedProtocol);
-    bool batchSubmit(QString file_path, QString file_name, QString mode, QString notification, TaskPriority priority);
+    bool submitFileOfBatch(QString file_path, QString file_name, QString mode, QString notification, TaskPriority priority);
     bool handleBatchFile(QString file);
-
+    bool submitBatch(QStringList files, QStringList modes, QString notify, TaskPriority priority);
     void updateDialogHeight();
-
+    bool readBatchFile(QString fileName, QStringList& files, QStringList& modes, QString& notify, TaskPriority& priority);
 private slots:
     void on_selectFileButton_clicked();
     void on_cancelButton_clicked();

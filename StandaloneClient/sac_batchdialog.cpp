@@ -7,6 +7,7 @@ sacBatchDialog::sacBatchDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::sacBatchDialog)
 {
+    mainWindow = (sacMainWindow*) parent;
     ui->setupUi(this);
 
     Qt::WindowFlags flags = windowFlags();
@@ -95,46 +96,20 @@ void sacBatchDialog::on_importBatchFileButton_clicked()
 
     if (newFilename.length())
     {
-        QFileInfo fileInfo = QFileInfo(newFilename);
-        QSettings config(fileInfo.absoluteFilePath(), QSettings::IniFormat);
-        files->setStringList( QStringList{} );
-        modes->setStringList( QStringList{} );
-
-        int i=0;
-        while (1)
-        {
-            QString scan = QString("Scans/Scan") + QString::number(i);
-
-            if (!config.contains(scan))
-            {
-                break;
-            }
-
-            scan=config.value(scan,"" ).toString();
-
-            int row = files->rowCount();
-            files->insertRows(row,1);
-            files->setData(files->index(row),scan);
-            i++;
+        QStringList files_l; QStringList modes_l;
+        QString notify;
+        TaskPriority priority;
+        mainWindow->readBatchFile(newFilename,files_l, modes_l, notify, priority);
+        ui->notificationEdit->setText(notify);
+        if ( priority == TaskPriority::Normal ) {
+            ui->priorityCombobox->setCurrentIndex(0);
+        } else if ( priority == TaskPriority::Night ) {
+            ui->priorityCombobox->setCurrentIndex(1);
+        } else if ( priority == TaskPriority::HighPriority ) {
+            ui->priorityCombobox->setCurrentIndex(2);
         }
-
-        i=0;
-        while (1)
-        {
-            QString mode = QString("ReconModes/Mode") + QString::number(i);
-
-            if (!config.contains(mode))
-            {
-                break;
-            }
-
-            mode=config.value(mode,"" ).toString();
-
-            int row = modes->rowCount();
-            modes->insertRows(row,1);
-            modes->setData(modes->index(row),mode);
-            i++;
-        }
+        files->setStringList( files_l );
+        modes->setStringList( modes_l );
     }
 }
 

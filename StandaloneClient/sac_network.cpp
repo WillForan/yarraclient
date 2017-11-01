@@ -25,12 +25,12 @@ bool sacNetwork::readConfiguration()
     {
         QSettings config(appPath+"/sac.ini", QSettings::IniFormat);
 
-        serverPath=config.value("Configuration/ServerPath","").toString();
-        connectCmd=config.value("Configuration/ConnectCmd","").toString();
-        disconnectCmd=config.value("Configuration/DisconnectCmd","").toString();
-        systemName=config.value("Configuration/Name","Unknown").toString();
-        defaultNotification=config.value("Configuration/DefaultNotification","").toString();
-        preferredMode=config.value("Configuration/PreferredMode","").toString();
+        serverPath =    config.value("Configuration/ServerPath","").toString();
+        connectCmd =    config.value("Configuration/ConnectCmd","").toString();
+        disconnectCmd = config.value("Configuration/DisconnectCmd","").toString();
+        systemName =    config.value("Configuration/Name","Unknown").toString();
+        defaultNotification = config.value("Configuration/DefaultNotification","").toString();
+        preferredMode = config.value("Configuration/PreferredMode","").toString();
 
         if (serverPath.length()==0)
         {
@@ -57,7 +57,7 @@ void sacNetwork::writeConfiguration()
 }
 
 
-bool sacNetwork::openConnection()
+bool sacNetwork::openConnection(bool isConsole)
 {
     if (connectCmd!="")
     {
@@ -81,7 +81,7 @@ bool sacNetwork::openConnection()
         error=true;
     }
 
-    if ((!error) && (!serverDir.exists(serverPath)))
+    if (!error && !serverDir.exists(serverPath))
     {
         RTI->log("ERROR: Could not access Yarra server path: " + serverPath);
         RTI->log("ERROR: Check if network drive has been mounted correctly. Or check configuration.");
@@ -90,7 +90,7 @@ bool sacNetwork::openConnection()
         error=true;
     }
 
-    if ((!error) && (!serverDir.cd(serverPath)))
+    if (!error && !serverDir.cd(serverPath))
     {
         RTI->log("ERROR: Could not change to base path of network drive.");
         RTI->setSevereErrors(true);
@@ -100,7 +100,7 @@ bool sacNetwork::openConnection()
         error=true;
     }
 
-    if ((!error) && ((!serverDir.exists(ORT_MODEFILE)) || (!serverDir.exists(ORT_SERVERFILE))))
+    if (!error && (!serverDir.exists(ORT_MODEFILE) || !serverDir.exists(ORT_SERVERFILE)))
     {
         RTI->log("ERROR: ORT Mode file not found.");
         RTI->setSevereErrors(true);
@@ -110,7 +110,7 @@ bool sacNetwork::openConnection()
     }
 
     // Show error message and terminate the client
-    if (error)
+    if (error && !isConsole)
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error");
@@ -123,8 +123,7 @@ bool sacNetwork::openConnection()
             showConfigurationAfterError=true;
         }
     }
-
-    return (!error);
+    return !error;
 }
 
 
