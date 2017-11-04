@@ -29,7 +29,7 @@ public:
     bool readConfiguration();
     void writeConfiguration();
 
-    bool openConnection();
+    bool openConnection(bool isConsole);
     void closeConnection();
 
     bool copyMeasurementFile(QString sourceFile, QString targetFile);

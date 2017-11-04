@@ -5,6 +5,7 @@
 #include <QStringListModel>
 #include <QFileDialog>
 #include "../OfflineReconClient/ort_modelist.h"
+#include "sac_mainwindow.h"
 
 
 namespace Ui {
@@ -22,6 +23,7 @@ public:
     QStringListModel *files;
     QStringListModel *modes;
 
+    sacMainWindow* mainWindow;
     void prepare(QList<ortModeEntry*> modes,QString notification);
 
     QList<ortModeEntry*> modesInfo;
