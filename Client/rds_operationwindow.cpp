@@ -109,6 +109,11 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
 
         if (RTI_CONFIG->infoShowIcon)
         {
+            if (!RTI_CONFIG->startCmds.isEmpty())
+            {
+                iconWindow.showStartupCommandsOption();
+            }
+
             iconWindow.show();
 
             if (RTI_NETLOG.isConfigurationError())
@@ -197,8 +202,14 @@ void rdsOperationWindow::callShutDown()
 
     if (ret==QMessageBox::Yes)
     {
-        log.log("Shut down.");
-        RTI_NETLOG.postEvent(EventInfo::Type::Shutdown,EventInfo::Detail::Information,EventInfo::Severity::Success);
+        log.log("Shutdown on user request.");
+        log.flush();
+        // Send event in non-async mode
+
+        QNetworkReply::NetworkError networkError;
+        int networkStatusCode=0;
+        RTI_NETLOG.postEventSync(networkError, networkStatusCode, EventInfo::Type::Shutdown,EventInfo::Detail::Information,EventInfo::Severity::Success, "", "", 5000);
+
         RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
         qApp->quit();
     }
@@ -207,7 +218,7 @@ void rdsOperationWindow::callShutDown()
 
 void rdsOperationWindow::callImmediateShutdown()
 {
-    log.log("Immediate shut down.");
+    log.log("Immediate shutdown.");
     log.flush();
     RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
     qApp->quit();

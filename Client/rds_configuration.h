@@ -58,6 +58,7 @@ public:
     QString netDriveReconnectCmd;
     bool    netDriveCreateBasepath;
     QString netRemoteConfigFile;
+    bool    netDriveStartupCmdsAfterFail;
 
     QString logServerPath;
     QString logApiKey;

@@ -57,6 +57,10 @@ void rdsConfiguration::loadConfiguration()
     netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath",false).toBool();
     netRemoteConfigFile   =settings.value("Network/RemoteConfigFile",   "").toString();
 
+    // Hidden option for rerunning the startup commands if connecting
+    // to the network drive failed for three times
+    netDriveStartupCmdsAfterFail=settings.value("Network/DriveStartupCmdsAfterFail",false).toBool();
+
     logServerPath         =settings.value("LogServer/ServerPath",       "").toString();
     logApiKey             =settings.value("LogServer/ApiKey",           "").toString();
     logSendScanInfo       =settings.value("LogServer/SendScanInfo",     true).toBool();
@@ -132,6 +136,7 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("Network/DriveReconnectCmd",  netDriveReconnectCmd);
     settings.setValue("Network/DriveCreateBasepath",netDriveCreateBasepath);
     settings.setValue("Network/RemoteConfigFile",   netRemoteConfigFile);
+    settings.setValue("Network/DriveStartupCmdsAfterFail",netDriveStartupCmdsAfterFail);
 
     settings.setValue("LogServer/ServerPath",       logServerPath);
     settings.setValue("LogServer/ApiKey",           logApiKey);

@@ -44,14 +44,16 @@ public:
         RDS_VE11B   =  13,
         RDS_VE11C   =  14,
         RDS_VE11U   =  15,
-        RDS_VE11P   =  16
+        RDS_VE11P   =  16,
+        RDS_XA10A   =  17
     };
 
     enum rdsSyngoLines
     {
-        RDS_VB = 0,
-        RDS_VD = 1,
-        RDS_VE = 2
+        RDS_VB   = 0,
+        RDS_VD   = 1,
+        RDS_VE   = 2,
+        RDS_XA   = 3
     };
 
     enum rdsRaidToolFormat
@@ -108,6 +110,7 @@ public:
     bool    isSyngoVBLine();
     bool    isSyngoVDLine();
     bool    isSyngoVELine();
+    bool    isSyngoXALine();
 
     QString getSyngoImagerIP();
     int     getRaidToolFormat();
@@ -170,7 +173,6 @@ private:
 };
 
 
-
 inline void rdsRuntimeInformation::setMode(rdsRuntimeInformation::rdsModes newMode)
 {
     mode=newMode;
@@ -223,7 +225,6 @@ inline rdsLog* rdsRuntimeInformation::getLogInstance()
 {
     return logInstance;
 }
-
 
 
 inline void rdsRuntimeInformation::log(QString text)
@@ -405,6 +406,10 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString(int syngoVersionEn
         versionString="VE11P";
         break;
 
+    case RDS_XA10A:
+        versionString="XA10A";
+        break;
+
     default:
         versionString="Unknown - Use with care!";
         break;
@@ -429,6 +434,12 @@ inline bool rdsRuntimeInformation::isSyngoVDLine()
 inline bool rdsRuntimeInformation::isSyngoVELine()
 {
     return (syngoMRLine==RDS_VE);
+}
+
+
+inline bool rdsRuntimeInformation::isSyngoXALine()
+{
+    return (syngoMRLine==RDS_XA);
 }
 
 
@@ -493,6 +504,7 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     case RDS_VE11C:
     case RDS_VE11U:
     case RDS_VE11P:
+    case RDS_XA10A:
         return RDS_RAIDTOOL_VE;
         break;
     case RDS_VB15A:
@@ -532,6 +544,9 @@ inline int rdsRuntimeInformation::getSyngoMRLine()
     case RDS_VE11U:
     case RDS_VE11P:
         return RDS_VE;
+        break;
+    case RDS_XA10A:
+        return RDS_XA;
         break;
     }
 }

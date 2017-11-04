@@ -342,6 +342,14 @@ void rdsProcessControl::performUpdate()
             else
             {
                 RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Error, "Opening connection failed");
+
+                // Rerun the startup commands if reconnecting failed for three times. Maybe this will
+                // resolve the connection problem.
+                if ((RTI_CONFIG->netDriveStartupCmdsAfterFail) &&
+                    (connectionFailureCount > RDS_STARTUPCMDAFTERFAIL_COUNT))
+                {
+                    RTI->getWindowInstance()->runStartCmds();
+                }
             }
         }
 

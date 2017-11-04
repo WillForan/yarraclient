@@ -268,7 +268,7 @@ void NetLogger::postEvent(EventInfo::Type type, EventInfo::Detail detail, EventI
 }
 
 
-bool NetLogger::postEventSync(EventInfo::Type type, QNetworkReply::NetworkError& error, int& status_code, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data)
+bool NetLogger::postEventSync(QNetworkReply::NetworkError& error, int& status_code, EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data, int timeoutMsec)
 {
     if (!configured)
     {
@@ -278,7 +278,7 @@ bool NetLogger::postEventSync(EventInfo::Type type, QNetworkReply::NetworkError&
     QUrlQuery query=buildEventQuery(type,detail,severity,info,data);
 
     QString errorString="";
-    return postData(query,NETLOG_ENDPT_EVENT,error,status_code,errorString);
+    return postData(query,NETLOG_ENDPT_EVENT,error,status_code,errorString,timeoutMsec);
 }
 
 
@@ -309,7 +309,7 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
 // It returns true if and only if it recieves an HTTP 200 OK response. Otherwise, there's either a network error
 // or, if the network succeeded but the server failed, an HTTP status code.
 
-bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkError& error, int &http_status, QString &errorString)
+bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkError& error, int &http_status, QString &errorString, int timeoutMsec)
 {    
     if (!configured)
     {
@@ -332,7 +332,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
     // Use eventloop to wait until post event has finished. Event loop will timeout after 20sec
     QEventLoop eventLoop;
     QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-    QTimer::singleShot(NETLOG_POST_TIMEOUT, &eventLoop, SLOT(quit()));
+    QTimer::singleShot(timeoutMsec, &eventLoop, SLOT(quit()));
 
     if (reply->isRunning())
     {

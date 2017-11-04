@@ -22,14 +22,22 @@ public:
     void clearError();
     void setError();
 
+    void showStartupCommandsOption();
+
 private:
     Ui::rdsIconWindow* ui;
 
     void mouseDoubleClickEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 
     bool    animRunning;
     bool    error;
     QMovie* anim;
+    bool    showStartupCommandsEntry;
+
+private slots:
+    void showStatusWindow();
+    void runStartupCommands();
 
 };
 

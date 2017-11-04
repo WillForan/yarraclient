@@ -1,9 +1,10 @@
 #include <QDesktopWidget>
+#include <QMenu>
 
 #include "rds_iconwindow.h"
 #include "ui_rds_iconwindow.h"
-
 #include "rds_global.h"
+#include "rds_operationwindow.h"
 
 
 // Note: For the animation to work, qgif.dll from the QT plugin folder has to be put in C:\yarra\imageformats
@@ -35,7 +36,14 @@ rdsIconWindow::rdsIconWindow(QWidget *parent) :
     // Menubar of Syngo MR is 25 pixels high
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignTop, QSize(32,25), qApp->desktop()->availableGeometry()));
 
+    showStartupCommandsEntry=false;
     error=false;
+}
+
+
+void rdsIconWindow::showStartupCommandsOption()
+{
+    showStartupCommandsEntry=true;
 }
 
 
@@ -49,6 +57,40 @@ void rdsIconWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
     RTI->showOperationWindow();    
     clearError();
+}
+
+
+void rdsIconWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button()==Qt::RightButton)
+    {
+        QMenu infoMenu(this);
+        infoMenu.addAction("Yarra RDS Client - Ver " + QString(RDS_VERSION));
+        infoMenu.addSeparator();
+        infoMenu.addAction("Show Status Window...",this,SLOT(showStatusWindow()));
+        if (showStartupCommandsEntry)
+        {
+            infoMenu.addAction("Run Startup Commands",this,SLOT(runStartupCommands()));
+        }
+        infoMenu.exec(this->mapToGlobal((event->pos())));
+    }
+}
+
+
+void rdsIconWindow::showStatusWindow()
+{
+    RTI->showOperationWindow();
+    clearError();
+}
+
+
+void rdsIconWindow::runStartupCommands()
+{
+    if (RTI->getControlInstance()->getState()==rdsProcessControl::STATE_IDLE)
+    {
+        RTI->log("User requet to rerun startup commands.");
+        RTI->getWindowInstance()->runStartCmds();
+    }
 }
 
 

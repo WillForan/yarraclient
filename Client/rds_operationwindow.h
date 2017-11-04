@@ -44,10 +44,10 @@ public slots:
     void setUIModeIdle();
 
     void updateInfoUI();
+    void runStartCmds();
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
-    void runStartCmds();
 
     void retryNetlogConfiguration();
 

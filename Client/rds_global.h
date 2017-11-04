@@ -6,7 +6,7 @@
 
 
 // Definitions
-#define RDS_VERSION     "0.52b18"
+#define RDS_VERSION     "0.52b19"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -30,6 +30,7 @@
 #define RDS_RAIDTOOL_PATH      "C:/MedCom/bin"
 #define RDS_RAIDTOOL_NAME      "RaidTool.exe"
 #define RDS_RAIDSIMULATOR_NAME "RaidSimulator.exe"
+
 
 #define RDS_SYNGODETECT_VB13A "C:/MedCom/MriProduct/inst/build_VB13A_label.txt"
 #define RDS_SYNGODETECT_VB15A "C:/MedCom/MriProduct/inst/build_VB15A_label.txt"
@@ -58,7 +59,8 @@
 #define RDS_UPDATETIME_RETRY      5
 #define RDS_UPDATETIME_RAIDRETRY  2
 
-#define RDS_CONNECTIONFAILURE_COUNT 5
+#define RDS_CONNECTIONFAILURE_COUNT   5
+#define RDS_STARTUPCMDAFTERFAIL_COUNT 3
 
 #define RDS_DISKLIMIT_WARNING     3000000000
 #define RDS_DISKLIMIT_ALTERNATING 5000000000
