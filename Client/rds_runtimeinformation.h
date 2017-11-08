@@ -23,7 +23,7 @@ public:
         RDS_OPERATION
     };
 
-    #define RDS_SYNGOVERSIONS_COUNT 17
+    #define RDS_SYNGOVERSIONS_COUNT 18
 
     enum rdsSyngoVersions
     {
@@ -114,6 +114,7 @@ public:
 
     QString getSyngoImagerIP();
     int     getRaidToolFormat();
+    QString getSyngoXABinPath();
 
     qint64 getFreeDiskSpace(QString path="");
 
@@ -166,10 +167,13 @@ private:
     int syngoMRLine;
 
     void determineSyngoVersion();
+    int  determineNumarisXVersion();
 
     bool postponementRequest;
     bool severeErrors;
 
+    bool    detectedNumarisX;
+    QString numarisXBinPath;
 };
 
 
@@ -555,6 +559,12 @@ inline int rdsRuntimeInformation::getSyngoMRLine()
 inline void rdsRuntimeInformation::setPreventStart()
 {
     preventStart=true;
+}
+
+
+inline QString rdsRuntimeInformation::getSyngoXABinPath()
+{
+    return numarisXBinPath;
 }
 
 

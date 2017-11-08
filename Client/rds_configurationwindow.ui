@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -343,7 +343,7 @@
        <item row="3" column="2">
         <widget class="QCheckBox" name="indicatorCheckbox">
          <property name="text">
-          <string>Show RDS indicator in top-right corner</string>
+          <string>Show RDS indicator icon on screen</string>
          </property>
         </widget>
        </item>

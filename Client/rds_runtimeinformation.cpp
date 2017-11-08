@@ -33,6 +33,15 @@ rdsRuntimeInformation::rdsRuntimeInformation()
 
     postponementRequest=false;
     severeErrors=false;
+
+    // Read environment variables for detection of NumarisX versions
+    detectedNumarisX=false;
+
+    if (QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME","")=="Numaris/X")
+    {
+        detectedNumarisX=true;
+        numarisXBinPath=QProcessEnvironment::systemEnvironment().value("MED_BIN","");
+    }
 }
 
 
@@ -57,13 +66,19 @@ void rdsRuntimeInformation::prepare()
         simulatorExists=true;
     }
 
-    // Check for existance of syngoMR
-    QDir syngoDir(RDS_RAIDTOOL_PATH);
+    // Check for existance of syngoMR installation and binary path for RaidTool
+    QString raidToolPath=RDS_RAIDTOOL_PATH;
+    if (detectedNumarisX)
+    {
+        raidToolPath=numarisXBinPath;
+    }
+
+    QDir syngoDir(raidToolPath);
     syngoMRExists=false;
 
     if (syngoDir.exists())
     {
-        if (syngoDir.exists(RDS_RAIDTOOL_PATH))
+        if (syngoDir.exists(raidToolPath))
         {
             syngoMRExists=true;
         }
@@ -174,7 +189,7 @@ bool rdsRuntimeInformation::prepareEnvironment()
 }
 
 
-#define RDS_SYNGODETECT(ID,IDFILE) if (myDir.exists(IDFILE)) { syngoMRVersion=ID; }
+#define RDS_SYNGODETECT(ID,IDFILE) if ((syngoMRVersion==RDS_INVALID) && (myDir.exists(IDFILE))) { syngoMRVersion=ID; }
 
 void rdsRuntimeInformation::determineSyngoVersion()
 {
@@ -182,35 +197,80 @@ void rdsRuntimeInformation::determineSyngoVersion()
     syngoMRVersion=RDS_INVALID;
     QDir myDir;  
 
-    // VB line
-    RDS_SYNGODETECT(RDS_VB13A,RDS_SYNGODETECT_VB13A);
-    RDS_SYNGODETECT(RDS_VB15A,RDS_SYNGODETECT_VB15A);
-    RDS_SYNGODETECT(RDS_VB17A,RDS_SYNGODETECT_VB17A);
-    RDS_SYNGODETECT(RDS_VB19A,RDS_SYNGODETECT_VB19A);
+    if (detectedNumarisX)
+    {
+        // XA line
+        syngoMRVersion=determineNumarisXVersion();
+    }
+    else
+    {
+        // VB line
+        RDS_SYNGODETECT(RDS_VB13A,RDS_SYNGODETECT_VB13A);
+        RDS_SYNGODETECT(RDS_VB15A,RDS_SYNGODETECT_VB15A);
+        RDS_SYNGODETECT(RDS_VB17A,RDS_SYNGODETECT_VB17A);
+        RDS_SYNGODETECT(RDS_VB19A,RDS_SYNGODETECT_VB19A);
 
-    // VB-P line
-    RDS_SYNGODETECT(RDS_VB18P,RDS_SYNGODETECT_VB18P);
-    RDS_SYNGODETECT(RDS_VB20P,RDS_SYNGODETECT_VB20P);
+        // VB-P line
+        RDS_SYNGODETECT(RDS_VB18P,RDS_SYNGODETECT_VB18P);
+        RDS_SYNGODETECT(RDS_VB20P,RDS_SYNGODETECT_VB20P);
 
-    // VD line
-    RDS_SYNGODETECT(RDS_VD11A,RDS_SYNGODETECT_VD11A);
-    RDS_SYNGODETECT(RDS_VD11D,RDS_SYNGODETECT_VD11D);
-    RDS_SYNGODETECT(RDS_VD13A,RDS_SYNGODETECT_VD13A);
-    RDS_SYNGODETECT(RDS_VD13B,RDS_SYNGODETECT_VD13B);
-    RDS_SYNGODETECT(RDS_VD13C,RDS_SYNGODETECT_VD13C);
-    RDS_SYNGODETECT(RDS_VD13D,RDS_SYNGODETECT_VD13D);
+        // VD line
+        RDS_SYNGODETECT(RDS_VD11A,RDS_SYNGODETECT_VD11A);
+        RDS_SYNGODETECT(RDS_VD11D,RDS_SYNGODETECT_VD11D);
+        RDS_SYNGODETECT(RDS_VD13A,RDS_SYNGODETECT_VD13A);
+        RDS_SYNGODETECT(RDS_VD13B,RDS_SYNGODETECT_VD13B);
+        RDS_SYNGODETECT(RDS_VD13C,RDS_SYNGODETECT_VD13C);
+        RDS_SYNGODETECT(RDS_VD13D,RDS_SYNGODETECT_VD13D);
 
-    // VE line
-    RDS_SYNGODETECT(RDS_VE11A,RDS_SYNGODETECT_VE11A);
-    RDS_SYNGODETECT(RDS_VE11B,RDS_SYNGODETECT_VE11B);
-    RDS_SYNGODETECT(RDS_VE11C,RDS_SYNGODETECT_VE11C);
-    RDS_SYNGODETECT(RDS_VE11U,RDS_SYNGODETECT_VE11U);
-    RDS_SYNGODETECT(RDS_VE11P,RDS_SYNGODETECT_VE11P);
-
-    // XA line
-    // TODO: Detect XA version
+        // VE line
+        RDS_SYNGODETECT(RDS_VE11A,RDS_SYNGODETECT_VE11A);
+        RDS_SYNGODETECT(RDS_VE11B,RDS_SYNGODETECT_VE11B);
+        RDS_SYNGODETECT(RDS_VE11C,RDS_SYNGODETECT_VE11C);
+        RDS_SYNGODETECT(RDS_VE11U,RDS_SYNGODETECT_VE11U);
+        RDS_SYNGODETECT(RDS_VE11P,RDS_SYNGODETECT_VE11P);
+    }
 
     syngoMRLine=getSyngoMRLine();
+}
+
+
+int rdsRuntimeInformation::determineNumarisXVersion()
+{
+    if (!QFile::exists("C:\\Program Files\\Siemens\\Numaris\\MriProduct\\SoftwareState\\CurrentState.txt"))
+    {
+        return RDS_INVALID;
+    }
+
+    QFile stateFile("C:\\Program Files\\Siemens\\Numaris\\MriProduct\\SoftwareState\\CurrentState.txt");
+
+    if (!stateFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return RDS_INVALID;
+    }
+
+    int detectedVersion=RDS_INVALID;
+
+    QString buffer="";
+    QTextStream stream(&stateFile);
+
+    while (stream.readLineInto(&buffer))
+    {
+        if (buffer.contains("Numaris = "))
+        {
+            buffer.remove(0,buffer.indexOf("(")+1);
+            buffer.truncate(buffer.indexOf("."));
+
+            if (buffer=="VA10A")
+            {
+                detectedVersion=RDS_XA10A;
+                break;
+            }
+        }
+    }
+
+    stateFile.close();
+
+    return detectedVersion;
 }
 
 

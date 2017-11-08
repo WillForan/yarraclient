@@ -20,7 +20,7 @@ rdsDebugWindow::rdsDebugWindow(QWidget *parent) :
         ui->syngoBox->addItem(RTI->getSyngoMRVersionString(i));
     }
 
-    ui->syngoBox->setCurrentIndex(RDS_SYNGOVERSIONS_COUNT-3);
+    ui->syngoBox->setCurrentIndex(RDS_SYNGOVERSIONS_COUNT-4);
 }
 
 

@@ -33,8 +33,16 @@ rdsIconWindow::rdsIconWindow(QWidget *parent) :
     ui->errorIconLabel->setVisible(false);
     ui->staticIconLabel->setVisible(true);
 
-    // Menubar of Syngo MR is 25 pixels high
-    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignTop, QSize(32,25), qApp->desktop()->availableGeometry()));
+    if (RTI->isSyngoXALine())
+    {
+        // For NumarixX, place the icon in the status bar
+        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignBottom, QSize(32,25), qApp->desktop()->screenGeometry()));
+    }
+    else
+    {
+        // Menubar of Syngo MR is 25 pixels high
+        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignTop, QSize(32,25), qApp->desktop()->availableGeometry()));
+    }
 
     showStartupCommandsEntry=false;
     error=false;

@@ -58,7 +58,15 @@ rdsRaid::rdsRaid()
     }
     else
     {
-        raidToolCmd=QDir::toNativeSeparators( RDS_RAIDTOOL_PATH+QString("/") ) + RDS_RAIDTOOL_NAME;
+        // The new Syngo version uses a different path for the binaries where the RaidTool is located
+        if (RTI->isSyngoXALine())
+        {
+            raidToolCmd=QDir::toNativeSeparators( RTI->getSyngoXABinPath()+QString("/") ) + RDS_RAIDTOOL_NAME;
+        }
+        else
+        {
+            raidToolCmd=QDir::toNativeSeparators( RDS_RAIDTOOL_PATH+QString("/") ) + RDS_RAIDTOOL_NAME;
+        }
     }
 
     // For VD13 use local patched versions of the RaidTool that flush stdout
