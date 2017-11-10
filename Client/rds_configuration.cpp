@@ -68,10 +68,12 @@ void rdsConfiguration::loadConfiguration()
     // to the network drive failed for three times
     netDriveStartupCmdsAfterFail=settings.value("Network/DriveStartupCmdsAfterFail",false).toBool();
 
-    logServerPath         =settings.value("LogServer/ServerPath",       "").toString();
-    logApiKey             =settings.value("LogServer/ApiKey",           "").toString();
-    logSendScanInfo       =settings.value("LogServer/SendScanInfo",     true).toBool();
-    logUpdateFrequency    =settings.value("LogServer/UpdateFrequency",  4).toInt();
+    logServerPath         =settings.value("LogServer/ServerPath",          "").toString();
+    logApiKey             =settings.value("LogServer/ApiKey",              "").toString();
+    logSendScanInfo       =settings.value("LogServer/SendScanInfo",        true).toBool();
+    logSendHeartbeat      =settings.value("LogServer/SendHeartbeat",       true).toBool();
+    logUpdateFrequency    =settings.value("LogServer/UpdateFrequency",     4).toInt();
+    logUpdateFrequencyUnit=settings.value("LogServer/UpdateFrequencyUnit", 0).toInt();
 
     startCmds.clear();
     int startCmdsCount    =settings.value("StartCmds/Count",            0).toInt();
@@ -145,10 +147,12 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("Network/RemoteConfigFile",   netRemoteConfigFile);
     settings.setValue("Network/DriveStartupCmdsAfterFail",netDriveStartupCmdsAfterFail);
 
-    settings.setValue("LogServer/ServerPath",       logServerPath);
-    settings.setValue("LogServer/ApiKey",           logApiKey);
-    settings.setValue("LogServer/SendScanInfo",     logSendScanInfo);
-    settings.setValue("LogServer/UpdateFrequency",  logUpdateFrequency);
+    settings.setValue("LogServer/ServerPath",         logServerPath);
+    settings.setValue("LogServer/ApiKey",             logApiKey);
+    settings.setValue("LogServer/SendHeartbeat",      logSendHeartbeat);
+    settings.setValue("LogServer/SendScanInfo",       logSendScanInfo);
+    settings.setValue("LogServer/UpdateFrequency",    logUpdateFrequency);
+    settings.setValue("LogServer/UpdateFrequencyUnit",logUpdateFrequencyUnit);
 
     settings.setValue("StartCmds/Count",            startCmds.count());
     for (int i=0; i<startCmds.count(); i++)

@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -1100,6 +1100,13 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="logServerSendHeartbeatsCheckbox">
+         <property name="text">
+          <string>Send heartbeats to server</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="logServerSendScansCheckbox">
          <property name="text">
           <string>Send protocol statistics to server</string>
@@ -1127,7 +1134,7 @@ p, li { white-space: pre-wrap; }
             <number>1</number>
            </property>
            <property name="maximum">
-            <number>24</number>
+            <number>60</number>
            </property>
            <property name="value">
             <number>4</number>
@@ -1135,10 +1142,17 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="logServerPushFrequencyUnitLabel">
-           <property name="text">
-            <string>hours</string>
-           </property>
+          <widget class="QComboBox" name="logServerPushFrequencyUnitCombobox">
+           <item>
+            <property name="text">
+             <string>hours</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>minutes</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>

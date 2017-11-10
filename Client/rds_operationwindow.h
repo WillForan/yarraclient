@@ -50,6 +50,7 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
     void retryNetlogConfiguration();
+    void sendHeartbeat();
 
 protected:
     void closeEvent(QCloseEvent *event);    
@@ -72,6 +73,7 @@ private:
     rdsProcessControl control;
 
     QTimer controlTimer;
+    QTimer heartbeatTimer;
 
     rdsDebugWindow debugWindow;
 };

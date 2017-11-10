@@ -6,7 +6,7 @@
 
 
 // Definitions
-#define RDS_VERSION     "0.52b19"
+#define RDS_VERSION     "0.52b20"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -17,6 +17,7 @@
 #define RDS_CONNECT_TIMEOUT      1200000
 #define RDS_NETLOG_RETRYINTERVAL 1800000
 #define RDS_MAXLOGSIZE           1000000
+#define RDS_HEARTBEAT_INTERVAL   300000
 
 #define RDS_DIR_LOG   "log"
 #define RDS_DIR_QUEUE "queue"

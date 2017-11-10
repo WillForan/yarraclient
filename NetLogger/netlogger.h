@@ -39,7 +39,6 @@ protected:
     EventInfo::SourceType source_type;
 
     QNetworkAccessManager* networkManager;
-
 };
 
 

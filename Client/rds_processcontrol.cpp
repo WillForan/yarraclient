@@ -755,7 +755,17 @@ void rdsProcessControl::setNextPeriodicUpdate()
     if (RTI_NETLOG.isConfigured() && (RTI_CONFIG->logSendScanInfo))
     {
         nextLogServerOnlyUpdate=lastLogServerOnlyUpdate;
-        nextLogServerOnlyUpdate=nextLogServerOnlyUpdate.addSecs(RTI_CONFIG->logUpdateFrequency * 3600);
+
+        // Calculate the update time
+        int updateTime=RTI_CONFIG->logUpdateFrequency * 3600;
+
+        // If update time is given in minutes
+        if (RTI_CONFIG->logUpdateFrequencyUnit==1)
+        {
+            updateTime=RTI_CONFIG->logUpdateFrequency * 60;
+        }
+
+        nextLogServerOnlyUpdate=nextLogServerOnlyUpdate.addSecs(updateTime);
     }
 }
 

@@ -61,8 +61,10 @@ public:
 
     QString logServerPath;
     QString logApiKey;
+    bool    logSendHeartbeat;
     bool    logSendScanInfo;
     int     logUpdateFrequency;
+    int     logUpdateFrequencyUnit;
 
     QStringList startCmds;
 

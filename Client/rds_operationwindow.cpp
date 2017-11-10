@@ -107,6 +107,13 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         connect(&controlTimer, SIGNAL(timeout()), this, SLOT(checkForUpdate()));
         controlTimer.start();
 
+        if (RTI_CONFIG->logSendHeartbeat)
+        {
+            heartbeatTimer.setInterval(RDS_HEARTBEAT_INTERVAL);
+            connect(&heartbeatTimer, SIGNAL(timeout()), this, SLOT(sendHeartbeat()));
+            heartbeatTimer.start();
+        }
+
         if (RTI_CONFIG->infoShowIcon)
         {
             if (!RTI_CONFIG->startCmds.isEmpty())
@@ -454,3 +461,17 @@ void rdsOperationWindow::retryNetlogConfiguration()
         QTimer::singleShot(RDS_NETLOG_RETRYINTERVAL, this, SLOT(retryNetlogConfiguration()));
     }
 }
+
+
+void rdsOperationWindow::sendHeartbeat()
+{
+    heartbeatTimer.stop();
+
+    if (control.getState()==rdsProcessControl::STATE_IDLE)
+    {
+        RTI_NETLOG.postEvent(EventInfo::Type::Heartbeat,EventInfo::Detail::Diagnostics,EventInfo::Severity::Success,"","");
+    }
+
+    heartbeatTimer.start();
+}
+

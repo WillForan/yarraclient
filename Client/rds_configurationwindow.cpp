@@ -161,8 +161,10 @@ void rdsConfigurationWindow::readConfiguration()
 
     ui->logServerPathEdit->setText(config.logServerPath);
     ui->logServerApiKeyEdit->setText(config.logApiKey);
+    ui->logServerSendHeartbeatsCheckbox->setChecked(config.logSendHeartbeat);
     ui->logServerSendScansCheckbox->setChecked(config.logSendScanInfo);
     ui->logServerPushFrequencySpinbox->setValue(config.logUpdateFrequency);
+    ui->logServerPushFrequencyUnitCombobox->setCurrentIndex(config.logUpdateFrequencyUnit);
 
     ui->startCmdEdit->clear();
     ui->startCmdEdit->setPlainText(config.startCmds.join('\n'));
@@ -201,8 +203,10 @@ void rdsConfigurationWindow::storeConfiguration()
 
     config.logServerPath=ui->logServerPathEdit->text();
     config.logApiKey=ui->logServerApiKeyEdit->text();
+    config.logSendHeartbeat=ui->logServerSendHeartbeatsCheckbox->isChecked();
     config.logSendScanInfo=ui->logServerSendScansCheckbox->isChecked();
     config.logUpdateFrequency=ui->logServerPushFrequencySpinbox->value();
+    config.logUpdateFrequencyUnit=ui->logServerPushFrequencyUnitCombobox->currentIndex();
 
     config.infoUpdateMode=ui->updateCombobox->currentIndex();
     config.infoUpdatePeriodUnit=ui->updatePeriodCombobox->currentIndex();
