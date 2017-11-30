@@ -300,7 +300,7 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
     cmd << "-o " + filePath;
 
     // For the VD line, add option for inclusion of adjustment scans
-    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()))
+    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()) || (RTI->isSyngoXALine()))
     {
         if (saveAdjustments)
         {
@@ -309,7 +309,7 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
     }
 
     // For the VD/VE line and VB20P, add options for anonymization
-    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine())
+    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine() || (RTI->isSyngoXALine()))
         || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB20P)
         || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB19A))
     {
@@ -430,7 +430,7 @@ bool rdsRaid::readRaidList()
     // Starting with VB20P, also direcoty entries are anonymize (VD13 not yet affected).
     if ((RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB20P)
         || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB19A)
-        || (RTI->isSyngoVELine()))
+        || (RTI->isSyngoVELine()) || (RTI->isSyngoXALine()))
     {
         opt << "-k";
     }
@@ -852,7 +852,7 @@ bool rdsRaid::createExportList()
 bool rdsRaid::anonymizeCurrentFile()
 {
     // NOTE: On VD11+, RaidTool does the job for us
-    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()))
+    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()) || (RTI->isSyngoXALine()))
     {
         return true;
     }
@@ -876,7 +876,7 @@ bool rdsRaid::anonymizeCurrentFile()
 bool rdsRaid::findAdjustmentScans()
 {
     // NOTE: On VD11+, RaidTool does the job for us
-    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()))
+    if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()) || (RTI->isSyngoXALine()))
     {
         return true;
     }
