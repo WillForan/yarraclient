@@ -24,6 +24,7 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
     filename="";
     firstFileDialog=true;
     defaultMode=-1;
+
     task.scanFilename="";
     task.taskFilename="";
     task.lockFilename="";
@@ -52,7 +53,8 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
     if (!network.readConfiguration())
     {
         // Configuration is incomplete, so shut down
-        if (! isConsole ) {
+        if (! isConsole )
+        {
             QMessageBox msgBox;
             msgBox.setWindowTitle("Configuration Invalid");
             msgBox.setText("The Yarra stand-alone client has not been configured correctly.\n\nPlease check the configuration.");
@@ -61,7 +63,9 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
             msgBox.exec();
 
             QTimer::singleShot(0, this, SLOT(showFirstConfiguration()));
-        } else {
+        }
+        else
+        {
             qInfo() << "Configuration Invalid";
             qInfo() << "The Yarra stand-alone client has not been configured correctly.\n\nPlease check the configuration.";
         }
@@ -69,7 +73,10 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
     }
 
     sacBootDialog bootDialog;
-    if ( ! isConsole ) bootDialog.show();
+    if (!isConsole)
+    {
+        bootDialog.show();
+    }
 
     if (!network.openConnection(isConsole))
     {
@@ -93,7 +100,6 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
     }
 
     bootDialog.close();
-
 
     if (modeList.modes.count()==0)
     {
@@ -148,51 +154,56 @@ void sacMainWindow::on_selectFileButton_clicked()
             close();
         }
         */
-    } else if (fileInfo.completeSuffix() == "sac" )
-    {
-        auto reply = QMessageBox::question(this, "Test", "Submit this batch of raw files?",
-                                        QMessageBox::Yes|QMessageBox::No);
-        if (reply == QMessageBox::Yes) {
-            handleBatchFile(fileInfo.absoluteFilePath());
-        }
     }
     else
     {
-        filename=newFilename;
-
-        analyzeDatFile(filename, task.patientName, task.protocolName);
-        if (task.patientName.length()>0)
+        if (fileInfo.completeSuffix() == "sac")
         {
-            ui->patnameEdit->setText(task.patientName);
-        }
-
-        int initMode=-1;
-        // Check if a default mode has been defined. If so, use it to preselect the mode.
-        if (defaultMode!=-1)
-        {
-            initMode=defaultMode;
-            //on_modeCombobox_currentIndexChanged(defaultMode);
+            auto reply = QMessageBox::question(this, "Test", "Submit this batch of raw files?",
+                                               QMessageBox::Yes|QMessageBox::No);
+            if (reply == QMessageBox::Yes)
+            {
+                handleBatchFile(fileInfo.absoluteFilePath());
+            }
         }
         else
         {
-            // Check if a protocol has been detected. If so, check if there is a
-            // matching reconstruction mode. If so, preselect it.
-            if (task.protocolName.length()>0)
-            {
-                initMode=detectMode(task.protocolName);
-            }
-        }
-        // If neither a default mode has been defined, nor a mode has been detected,
-        // keep the mode as it is, otherwise change it.
-        if (initMode!=-1)
-        {
-            ui->modeCombobox->setCurrentIndex(initMode);
-        }
+            filename=newFilename;
 
-        QFileInfo fileinfo(filename);
-        QString newtaskID=fileinfo.fileName();
-        newtaskID.truncate(newtaskID.indexOf("."+fileinfo.completeSuffix()));
-        ui->taskIDEdit->setText(newtaskID);
+            analyzeDatFile(filename, task.patientName, task.protocolName);
+            if (task.patientName.length()>0)
+            {
+                ui->patnameEdit->setText(task.patientName);
+            }
+
+            int initMode=-1;
+            // Check if a default mode has been defined. If so, use it to preselect the mode.
+            if (defaultMode!=-1)
+            {
+                initMode=defaultMode;
+                //on_modeCombobox_currentIndexChanged(defaultMode);
+            }
+            else
+            {
+                // Check if a protocol has been detected. If so, check if there is a
+                // matching reconstruction mode. If so, preselect it.
+                if (task.protocolName.length()>0)
+                {
+                    initMode=detectMode(task.protocolName);
+                }
+            }
+            // If neither a default mode has been defined, nor a mode has been detected,
+            // keep the mode as it is, otherwise change it.
+            if (initMode!=-1)
+            {
+                ui->modeCombobox->setCurrentIndex(initMode);
+            }
+
+            QFileInfo fileinfo(filename);
+            QString newtaskID=fileinfo.fileName();
+            newtaskID.truncate(newtaskID.indexOf("."+fileinfo.completeSuffix()));
+            ui->taskIDEdit->setText(newtaskID);
+        }
     }
 
     ui->filenameEdit->setText(filename);
@@ -727,7 +738,7 @@ bool sacMainWindow::handleBatchFile(QString file)
     while (1)
     {
         QString folder = QString("Scans/Folder") + QString::number(i);
-        QString file = QString("Scans/File") + QString::number(i);
+        QString file   = QString("Scans/File") + QString::number(i);
 
         if (!config.contains(folder) || !config.contains(file))
         {
@@ -743,10 +754,12 @@ bool sacMainWindow::handleBatchFile(QString file)
         while(1)
         {
             QString mode = QString("Modes/ReconMode") + QString::number(j);
+
             if (!config.contains(mode))
             {
              break;
             }
+
             mode = config.value(mode,"").toString();
             qInfo() << folder << file << mode;
             submitFileOfBatch(folder, file, mode, QString(), TaskPriority::Normal);
@@ -770,7 +783,7 @@ bool sacMainWindow::submitFileOfBatch(QString file_path, QString file_name, QStr
     bool foundMode;
     for (auto &modeInfo: modeList.modes)
     {
-        if (modeInfo->idName == mode )
+        if (modeInfo->idName == mode)
         {
             the_task.modeReadable = modeInfo->readableName;
             foundMode = true;
@@ -798,10 +811,12 @@ bool sacMainWindow::submitFileOfBatch(QString file_path, QString file_name, QStr
         task.taskFilename+=ORT_TASK_EXTENSION_NIGHT;
     }
     else
+    {
         if (priority == TaskPriority::HighPriority)
         {
             task.taskFilename+=ORT_TASK_EXTENSION_PRIO;
         }
+    }
 
     QString newtaskID=fileinfo.fileName();
     newtaskID.truncate(newtaskID.indexOf("."+fileinfo.completeSuffix()));
@@ -834,7 +849,7 @@ bool sacMainWindow::submitFileOfBatch(QString file_path, QString file_name, QStr
 void sacMainWindow::showBatchDialog()
 {
     sacBatchDialog batchDialog(this);
-    batchDialog.prepare(modeList.modes, ui->notificationEdit->text());
+    batchDialog.prepare(modeList.modes, ui->notificationEdit->text(), defaultMode);
 
     while(true)
     {
@@ -893,13 +908,18 @@ void sacMainWindow::showBatchDialog()
             priority = TaskPriority::HighPriority;
         }
 
-        if (submitBatch(batchDialog.files->stringList(), batchDialog.modes->stringList(), batchDialog.ui->notificationEdit->text(), priority));
+        if (submitBatch(batchDialog.files->stringList(), batchDialog.modes->stringList(), batchDialog.ui->notificationEdit->text(), priority))
+        {
             QMessageBox::information(this, "Batch finished", "Submitted batch to server.", QMessageBox::Ok);
+        }
+
         break;
     }
 }
 
-bool sacMainWindow::submitBatch(QStringList files, QStringList modes, QString notify, TaskPriority priority) {
+
+bool sacMainWindow::submitBatch(QStringList files, QStringList modes, QString notify, TaskPriority priority)
+{
     for (QString file: files)
     {
         QFileInfo fi(file);
@@ -910,8 +930,10 @@ bool sacMainWindow::submitBatch(QStringList files, QStringList modes, QString no
             {
                 int reply;
                 if (!isConsole)
+                {
                     reply = QMessageBox::question(this, "Transfer Error", "Submitting " + file + " < " + mode + " > failed. Retry?",
-                                                QMessageBox::Yes|QMessageBox::Ignore|QMessageBox::Abort);
+                                                  QMessageBox::Yes|QMessageBox::Ignore|QMessageBox::Abort);
+                }
 
                 if(reply == QMessageBox::Abort || isConsole)
                 {
@@ -932,30 +954,39 @@ bool sacMainWindow::submitBatch(QStringList files, QStringList modes, QString no
             }
         }
     }
+
     return true;
 }
 
-bool sacMainWindow::readBatchFile(QString fileName, QStringList& files, QStringList& modes, QString& notify, TaskPriority& priority) {
+
+bool sacMainWindow::readBatchFile(QString fileName, QStringList& files, QStringList& modes, QString& notify, TaskPriority& priority)
+{
     QFileInfo fileInfo = QFileInfo(fileName);
-    if (! fileInfo.exists() ) {
+    if (! fileInfo.exists() )
+    {
         qInfo() << "Batch file not found";
         return false;
     }
+
     QSettings batchInfo(fileInfo.absoluteFilePath(), QSettings::IniFormat);
 
     notify = batchInfo.value("Info/Notify","").toString();
+
     QString priority_s = batchInfo.value("Info/Priority","").toString();
-    if (priority_s == "Normal") priority = TaskPriority::Normal;
-    if (priority_s == "Night") priority = TaskPriority::Night;
+    if (priority_s == "Normal")       priority = TaskPriority::Normal;
+    if (priority_s == "Night")        priority = TaskPriority::Night;
     if (priority_s == "HighPriority") priority = TaskPriority::HighPriority;
+
     int i=0;
     while (1)
     {
         QString scan = QString("Scans/Scan") + QString::number(i);
+
         if (!batchInfo.contains(scan))
         {
             break;
         }
+
         scan = batchInfo.value(scan,"" ).toString();
         files.append(scan);
         i++;
@@ -972,9 +1003,9 @@ bool sacMainWindow::readBatchFile(QString fileName, QStringList& files, QStringL
         }
 
         mode=batchInfo.value(mode,"" ).toString();
-
         modes.append(mode);
         i++;
     }
+
     return true;
 }

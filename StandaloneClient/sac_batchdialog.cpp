@@ -34,7 +34,7 @@ sacBatchDialog::~sacBatchDialog()
 }
 
 
-void sacBatchDialog::prepare(QList<ortModeEntry*> modes,QString notification)
+void sacBatchDialog::prepare(QList<ortModeEntry*> modes,QString notification, int defaultMode)
 {
     ui->notificationEdit->setText(notification);
     modesInfo = modes;
@@ -42,6 +42,11 @@ void sacBatchDialog::prepare(QList<ortModeEntry*> modes,QString notification)
     for (ortModeEntry* mode: modesInfo)
     {
         ui->modeComboBox->addItem(mode->readableName);
+    }
+
+    if ((defaultMode>=0) and (defaultMode<ui->modeComboBox->count()))
+    {
+        ui->modeComboBox->setCurrentIndex(defaultMode);
     }
 }
 
@@ -101,13 +106,20 @@ void sacBatchDialog::on_importBatchFileButton_clicked()
         TaskPriority priority;
         mainWindow->readBatchFile(newFilename,files_l, modes_l, notify, priority);
         ui->notificationEdit->setText(notify);
-        if ( priority == TaskPriority::Normal ) {
+        if ( priority == TaskPriority::Normal )
+        {
             ui->priorityCombobox->setCurrentIndex(0);
-        } else if ( priority == TaskPriority::Night ) {
-            ui->priorityCombobox->setCurrentIndex(1);
-        } else if ( priority == TaskPriority::HighPriority ) {
-            ui->priorityCombobox->setCurrentIndex(2);
         }
+        else
+            if ( priority == TaskPriority::Night )
+            {
+                ui->priorityCombobox->setCurrentIndex(1);
+            }
+            else
+                if ( priority == TaskPriority::HighPriority )
+                {
+                    ui->priorityCombobox->setCurrentIndex(2);
+                }
         files->setStringList( files_l );
         modes->setStringList( modes_l );
     }

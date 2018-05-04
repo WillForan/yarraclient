@@ -9,8 +9,9 @@
 #include "../OfflineReconClient/ort_returnonfocus.h"
 
 
-namespace Ui {
-class sacMainWindow;
+namespace Ui
+{
+    class sacMainWindow;
 }
 
 
@@ -32,7 +33,8 @@ struct Task
 };
 
 
-enum TaskPriority {
+enum TaskPriority
+{
     Normal=0,
     Night,
     HighPriority
@@ -76,6 +78,7 @@ public:
     bool submitBatch(QStringList files, QStringList modes, QString notify, TaskPriority priority);
     void updateDialogHeight();
     bool readBatchFile(QString fileName, QStringList& files, QStringList& modes, QString& notify, TaskPriority& priority);
+
 private slots:
     void on_selectFileButton_clicked();
     void on_cancelButton_clicked();

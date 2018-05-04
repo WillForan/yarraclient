@@ -24,7 +24,7 @@ public:
     QStringListModel *modes;
 
     sacMainWindow* mainWindow;
-    void prepare(QList<ortModeEntry*> modes,QString notification);
+    void prepare(QList<ortModeEntry*> modes, QString notification, int defaultMode);
 
     QList<ortModeEntry*> modesInfo;
 
