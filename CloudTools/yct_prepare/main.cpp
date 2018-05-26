@@ -75,6 +75,6 @@ int main(int argc, char *argv[])
             twixAnonymizer.dumpProtocol=true;
         }
 
-        return twixAnonymizer.processFile(rawFilename,taskFilename, phiPath);
+        return twixAnonymizer.processFile(rawFilename,taskFilename,phiPath);
     }
 }
