@@ -780,12 +780,14 @@ bool sacMainWindow::submitFileOfBatch(QString file_path, QString file_name, QStr
 
     the_task.mode = mode;
 
-    bool foundMode;
+    QString modeNotification="";
+    bool   foundMode;
     for (auto &modeInfo: modeList.modes)
     {
         if (modeInfo->idName == mode)
         {
             the_task.modeReadable = modeInfo->readableName;
+            modeNotification=modeInfo->mailConfirmation;
             foundMode = true;
             break;
         }
@@ -798,13 +800,47 @@ bool sacMainWindow::submitFileOfBatch(QString file_path, QString file_name, QStr
         return false;
     }
 
-    the_task.accNumber="0";
+    // Combine notification addresses from UI and mode definiton
     the_task.notification = notification;
+
+    if (!modeNotification.isEmpty())
+    {
+        if (!the_task.notification.isEmpty())
+        {
+            the_task.notification += ",";
+        }
+        the_task.notification += modeNotification;
+    }
+
     QFileInfo fileinfo(the_file);
+
+
     the_task.scanFilename = file_name;
+
+    // Check if the file already exists on the server. If so, add a timestamp and check again.
+    // Do this 5 times. If that can't resolve it, then go on and fail with error message during
+    // the copy procedure.
+    for (int i=0; i<5; i++)
+    {
+        if (network.fileExistsOnServer(the_task.scanFilename))
+        {
+            QFileInfo newFile(the_task.scanFilename);
+            QString timestamp="_" + QTime::currentTime().toString("hhmmsszzz");
+            the_task.scanFilename=newFile.completeBaseName() + timestamp + "." + newFile.suffix();
+
+            RTI->log("File exists on server. Adding timestamp: " + the_task.scanFilename);
+        }
+        else
+        {
+            break;
+        }
+    }
+
     the_task.scanFileSize = fileinfo.size();
     the_task.taskCreationTime=QDateTime::currentDateTime();
     the_task.taskFilename=the_task.scanFilename+ORT_TASK_EXTENSION;
+    the_task.accNumber="0";
+    the_task.paramValue=0;
 
     if (priority == TaskPriority::Night)
     {
@@ -829,6 +865,7 @@ bool sacMainWindow::submitFileOfBatch(QString file_path, QString file_name, QStr
 
     if (!network.copyMeasurementFile(the_file,the_task.scanFilename))
     {
+        RTI->log("ERROR: Unable to copy file " + the_file);
         copyDialog.hide();
         return false;
     }
@@ -836,7 +873,9 @@ bool sacMainWindow::submitFileOfBatch(QString file_path, QString file_name, QStr
     copyDialog.hide();
 
     if (!generateTaskFile(the_task))
-    {
+    {        
+        RTI->log("ERROR: Unable to generate task file for " + the_file);
+
         // Task-file creation failed, so remove scan file
         QFile::remove(network.serverDir.absoluteFilePath(the_task.scanFilename));
         return false;
@@ -850,6 +889,8 @@ void sacMainWindow::showBatchDialog()
 {
     sacBatchDialog batchDialog(this);
     batchDialog.prepare(modeList.modes, ui->notificationEdit->text(), defaultMode);
+
+    this->hide();
 
     while(true)
     {
@@ -906,15 +947,17 @@ void sacMainWindow::showBatchDialog()
         if (ui->priorityCombobox->currentIndex()==2)
         {
             priority = TaskPriority::HighPriority;
-        }
+        }      
 
         if (submitBatch(batchDialog.files->stringList(), batchDialog.modes->stringList(), batchDialog.ui->notificationEdit->text(), priority))
         {
-            QMessageBox::information(this, "Batch finished", "Submitted batch to server.", QMessageBox::Ok);
+            QMessageBox::information(this, "Batch submitted", "Successfully submitted batch task to server.", QMessageBox::Ok);
         }
 
         break;
     }
+
+    this->show();
 }
 
 
@@ -931,12 +974,13 @@ bool sacMainWindow::submitBatch(QStringList files, QStringList modes, QString no
                 int reply;
                 if (!isConsole)
                 {
-                    reply = QMessageBox::question(this, "Transfer Error", "Submitting " + file + " < " + mode + " > failed. Retry?",
+                    reply = QMessageBox::question(this, "Transfer Error", "Submitting " + file + " for mode < " + mode + " > failed. Retry?",
                                                   QMessageBox::Yes|QMessageBox::Ignore|QMessageBox::Abort);
                 }
 
                 if(reply == QMessageBox::Abort || isConsole)
                 {
+                    RTI->log("ERROR: Submitting file failed " + file + " for mode " + mode);
                     qCritical() << "Submitting " << file << " < " << mode << " > failed.";
                     return false;
                 }
@@ -964,7 +1008,8 @@ bool sacMainWindow::readBatchFile(QString fileName, QStringList& files, QStringL
     QFileInfo fileInfo = QFileInfo(fileName);
     if (! fileInfo.exists() )
     {
-        qInfo() << "Batch file not found";
+        RTI->log("ERROR: Batch file not found");
+        qInfo() << "ERROR: Batch file not found";
         return false;
     }
 

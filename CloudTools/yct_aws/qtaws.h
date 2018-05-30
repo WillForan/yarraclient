@@ -5,6 +5,8 @@
 // Copyright (c) 2015 Morten Johan Sørvig
 // https://github.com/msorvig/qts3
 
+// TODO: Add timeout for REST requests
+
 
 #ifndef QTAWS_P_H
 #define QTAWS_P_H
@@ -53,6 +55,7 @@ public:
 protected:
     QtAWSReplyPrivate *d; // ### should be explicitly shared.
 };
+
 
 
 class QtAWSReplyPrivate

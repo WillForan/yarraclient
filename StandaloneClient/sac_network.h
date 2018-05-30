@@ -34,6 +34,8 @@ public:
 
     bool copyMeasurementFile(QString sourceFile, QString targetFile);
 
+    bool fileExistsOnServer(QString filename);
+
 };
 
 

@@ -142,9 +142,18 @@ void sacNetwork::closeConnection()
 }
 
 
+bool sacNetwork::fileExistsOnServer(QString filename)
+{
+    serverDir.refresh();
+    QString fullFileName=serverDir.absoluteFilePath(filename);
+    return (QFile::exists(fullFileName));
+}
+
+
 bool sacNetwork::copyMeasurementFile(QString sourceFile, QString targetFile)
 {
     copyErrorMsg="";
+    serverDir.refresh();
 
     QString sourceName=sourceFile;
     QString destName=serverDir.absoluteFilePath(targetFile);
