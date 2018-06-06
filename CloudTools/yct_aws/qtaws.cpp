@@ -485,7 +485,6 @@ QNetworkReply *QtAWSPrivate::sendRequest(const QByteArray &verb, const QNetworkR
         payloadBuffer.open(QIODevice::ReadOnly);
     }
 
-
     // Send request
     QNetworkReply *reply = m_networkAccessManager->sendCustomRequest(
         request, verb, payload.isEmpty() ? nullptr : &payloadBuffer);
@@ -528,6 +527,9 @@ void QtAWSPrivate::processNetworkReplyState(QtAWSReplyPrivate *awsReply, QNetwor
 {
     awsReply->m_networkReply=networkReply;
 
+    // Read the reply content
+    awsReply->m_byteArrayData = networkReply->readAll();
+
     // No error
     if (networkReply->error()==QNetworkReply::NoError)
     {
@@ -540,12 +542,6 @@ void QtAWSPrivate::processNetworkReplyState(QtAWSReplyPrivate *awsReply, QNetwor
     // set the S3 error to NetworkError and forward the error string.
     awsReply->m_awsError      =QtAWSReply::NetworkError;
     awsReply->m_awsErrorString=networkReply->errorString();
-
-    // Read the reply content, which will typically contain an XML structure
-    // describing the error
-    awsReply->m_byteArrayData = networkReply->readAll();
-    if (awsReply->m_byteArrayData.isEmpty())
-        return;
 
 
     // TODO: Implement API-specific error handling

@@ -24,24 +24,42 @@ int main(int argc, char *argv[])
     int ct=0;
     qint64 val=0;
 
-    for (int i=0; i<10; i++)
+    for (int i=0; i<1; i++)
     {
         qint64 ref=QDateTime::currentMSecsSinceEpoch();
 
-        QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/ping",
+        QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/modes",
                                                 QByteArray(), region.toLatin1(), QByteArray(), QStringList());
 
-        qDebug() << i << ": " << QDateTime::currentMSecsSinceEpoch() - ref << " ms";
         val+=QDateTime::currentMSecsSinceEpoch() - ref;
         ct++;
+        qDebug() << i << ": " << val << " ms";
+        qDebug() << "";
+
+        /*
+        qDebug() << reply.anyErrorString();
+        qDebug() << reply.awsErrorString();
+        qDebug() << reply.networkErrorString();
+        qDebug() << reply.networkError();
+        qDebug() << reply.replyData();
+        reply.printReply();
+        */
 
         QJsonDocument jsonReply =QJsonDocument::fromJson(reply.replyData());
-        QJsonObject   jsonObject=jsonReply.object();
 
-        QStringList keys = jsonObject.keys();
-        foreach(QString key, keys)
+        for (int i=0; i<jsonReply.array().count(); i++)
         {
-            qDebug() << key << ": " << jsonObject[key].toString();
+            qDebug() << "-- Mode " << i << "--";
+
+            QJsonObject jsonObject=jsonReply.array()[i].toObject();
+
+            QStringList keys = jsonObject.keys();
+            foreach(QString key, keys)
+            {
+                qDebug() << key << ": " << jsonObject[key].toString();
+            }
+
+            qDebug() << "";
         }
     }
 
