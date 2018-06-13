@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/ycaicon_256.png</file>
+        <file>images/ycalogo.png</file>
+    </qresource>
+</RCC>

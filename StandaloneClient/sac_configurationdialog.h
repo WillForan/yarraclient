@@ -23,13 +23,16 @@ public:
 
 private slots:
     void on_cancelButton_clicked();
-
     void on_saveButton_clicked();
+    void on_cloudCheckbox_clicked(bool checked);
+    void on_cloudCredentialsButton_clicked();
 
 private:
     Ui::sacConfigurationDialog *ui;
 
     sacMainWindow* mainWindow;
+
+    void updateCloudCredentialStatus();
 
 };
 

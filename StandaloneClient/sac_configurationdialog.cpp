@@ -6,12 +6,19 @@
 
 #include "ui_sac_configurationdialog.h"
 
+#include "../CloudTools/yct_common.h"
+
 
 sacConfigurationDialog::sacConfigurationDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::sacConfigurationDialog)
 {
     ui->setupUi(this);
+
+    Qt::WindowFlags flags = windowFlags();
+    flags |= Qt::MSWindowsFixedSizeDialogHint;
+    flags &= ~Qt::WindowContextHelpButtonHint;
+    setWindowFlags(flags);
 
     setWindowTitle("Yarra - SAC Configuration");
     ui->versionLabel->setText("Version " + QString(SAC_VERSION) + ", Build date " + QString(__DATE__));
@@ -24,6 +31,17 @@ sacConfigurationDialog::sacConfigurationDialog(QWidget *parent) :
                                     qApp->desktop()->availableGeometry()));
 
     ui->tabWidget->setCurrentIndex(0);
+
+    for (int i=0; i<yctAWSCommon::regionCount; i++)
+    {
+        ui->cloudRegionCombobox->addItem(yctAWSCommon::getRegionName((yctAWSCommon::Regions) i),
+                                         yctAWSCommon::getRegionID((yctAWSCommon::Regions) i));
+    }
+
+
+    // TODO: Load cloud configuration
+    this->on_cloudCheckbox_clicked(false);
+    this->updateCloudCredentialStatus();
 }
 
 
@@ -88,3 +106,38 @@ void sacConfigurationDialog::on_saveButton_clicked()
     close();
 }
 
+
+void sacConfigurationDialog::on_cloudCheckbox_clicked(bool checked)
+{
+    ui->cloudConnectionButton ->setEnabled(checked);
+    ui->cloudCredetialsEdit   ->setEnabled(checked);
+    ui->cloudRegionCombobox   ->setEnabled(checked);
+    ui->cloudCredentialsButton->setEnabled(checked);
+    ui->cloudCredetialsLabel  ->setEnabled(checked);
+    ui->cloudRegionLabel      ->setEnabled(checked);
+}
+
+
+void sacConfigurationDialog::on_cloudCredentialsButton_clicked()
+{
+    QString awsKey=QInputDialog::getText(this, "Enter the YarraCloud Key", "Please enter your YarraCloud Key.<br>&nbsp;<br>If you don't have this information, sign into http://admin.yarracloud.com and go to Configuration -> Account.");
+    if (awsKey.isEmpty())
+    {
+        return;
+    }
+
+    QString awsSecret=QInputDialog::getText(this, "Enter the YarraCloud Secret", "Please enter your YarraCloud Secret.<br>&nbsp;<br>If you don't have this information, sign into http://admin.yarracloud.com and go to Configuration -> Account.");
+    if (awsSecret.isEmpty())
+    {
+        return;
+    }
+
+    // TODO: Base64 encoding of credentials
+}
+
+
+void sacConfigurationDialog::updateCloudCredentialStatus()
+{
+    // TODO
+    ui->cloudCredetialsEdit->setText("-- Missing --");
+}

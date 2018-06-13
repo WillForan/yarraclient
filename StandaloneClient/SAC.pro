@@ -39,7 +39,8 @@ HEADERS  += sac_mainwindow.h \
     sac_network.h \
     sac_copydialog.h \
     sac_configurationdialog.h \
-    sac_twixheader.h
+    sac_twixheader.h \
+    ../CloudTools/yct_common.h
 
 FORMS    += sac_mainwindow.ui \
     sac_bootdialog.ui \
