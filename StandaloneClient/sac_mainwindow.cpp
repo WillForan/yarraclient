@@ -50,6 +50,8 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
     log.start();
     RTI->setLogInstance(&log);
 
+    cloudConfig.loadConfiguration();
+
     if (!network.readConfiguration())
     {
         // Configuration is incomplete, so shut down

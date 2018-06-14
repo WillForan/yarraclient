@@ -23,6 +23,8 @@ public:
 
     QDir serverDir;
 
+    bool cloudSupportEnabled;
+
     QString copyErrorMsg;
     bool showConfigurationAfterError;
 

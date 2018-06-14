@@ -35,7 +35,6 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
 
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
-/*    connect(ui->shutdownButton, SIGNAL(clicked()), this, SLOT(callShutDown()));*/
 
     ui->versionLabel->setText("Version " + QString(YCA_VERSION) + ", Build date " + QString(__DATE__));
 
@@ -43,10 +42,9 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,size(),
                                     qApp->desktop()->availableGeometry()));
 
-    int closeHeight=ui->closeButton->height();
-//    ui->closeContextButton->setFixedHeight(closeHeight);
-
+    config.loadConfiguration();
 }
+
 
 ycaMainWindow::~ycaMainWindow()
 {
@@ -108,4 +106,24 @@ void ycaMainWindow::on_closeContextButton_clicked()
     infoMenu.addAction("Restart", this,  SLOT(callShutDown()));
     infoMenu.addAction("Shutdown", this, SLOT(callShutDown()));
     infoMenu.exec(ui->closeContextButton->mapToGlobal(QPoint(0,0)));
+}
+
+
+void ycaMainWindow::on_statusRefreshButton_clicked()
+{
+    //config.loadConfiguration();
+    /*
+    config.key="Test-Key";
+    config.secret="Test-Secret";
+    config.saveConfiguration();
+    */
+
+    /*
+    ui->activeTasksTable->setRowCount(1);
+    ui->activeTasksTable->setColumnCount(3);
+
+    ui->activeTasksTable->setItem(0,0,new QTableWidgetItem(config.key));
+    ui->activeTasksTable->setItem(0,1,new QTableWidgetItem(config.secret));
+    ui->activeTasksTable->setItem(0,2,new QTableWidgetItem(config.getRegion()));
+    */
 }

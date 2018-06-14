@@ -24,7 +24,10 @@ SOURCES += main.cpp\
     sac_network.cpp \
     sac_copydialog.cpp \
     sac_configurationdialog.cpp \
-    ../NetLogger/netlogger.cpp
+    ../NetLogger/netlogger.cpp \
+    ../CloudTools/yct_configuration.cpp \
+    ../CloudTools/yct_aws/qtawsqnam.cpp \
+    ../CloudTools/yct_aws/qtaws.cpp
 
 HEADERS  += sac_mainwindow.h \
     ../Client/rds_runtimeinformation.h \
@@ -40,7 +43,9 @@ HEADERS  += sac_mainwindow.h \
     sac_copydialog.h \
     sac_configurationdialog.h \
     sac_twixheader.h \
-    ../CloudTools/yct_common.h
+    ../CloudTools/yct_common.h \
+    ../CloudTools/yct_aws/qtawsqnam.h \
+    ../CloudTools/yct_aws/qtaws.h
 
 FORMS    += sac_mainwindow.ui \
     sac_bootdialog.ui \

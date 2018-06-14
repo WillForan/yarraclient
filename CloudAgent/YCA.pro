@@ -15,11 +15,14 @@ TARGET = YCA
 TEMPLATE = app
 
 SOURCES += main.cpp\
-        yca_mainwindow.cpp
+        yca_mainwindow.cpp \
+    ../CloudTools/yct_configuration.cpp
 
 HEADERS  += yca_mainwindow.h \
     main.h \
-    yca_global.h
+    yca_global.h \
+    ../CloudTools/yct_common.h \
+    ../CloudTools/yct_configuration.h
 
 FORMS    += yca_mainwindow.ui
 

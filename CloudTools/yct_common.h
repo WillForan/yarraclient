@@ -4,6 +4,9 @@
 #include <QtCore>
 
 
+#define YCT_INI_NAME "/yct.ini"
+
+
 class yctAWSCommon
 {
 public:

@@ -7,6 +7,7 @@
 #include "ui_sac_configurationdialog.h"
 
 #include "../CloudTools/yct_common.h"
+#include "../CloudTools/yct_aws/qtaws.h"
 
 
 sacConfigurationDialog::sacConfigurationDialog(QWidget *parent) :
@@ -37,11 +38,6 @@ sacConfigurationDialog::sacConfigurationDialog(QWidget *parent) :
         ui->cloudRegionCombobox->addItem(yctAWSCommon::getRegionName((yctAWSCommon::Regions) i),
                                          yctAWSCommon::getRegionID((yctAWSCommon::Regions) i));
     }
-
-
-    // TODO: Load cloud configuration
-    this->on_cloudCheckbox_clicked(false);
-    this->updateCloudCredentialStatus();
 }
 
 
@@ -66,6 +62,11 @@ void sacConfigurationDialog::prepare(sacMainWindow* mainWindowPtr)
         ui->modeCombobox->addItem(mainWindow->modeList.modes.at(i)->readableName);
     }
     ui->modeCombobox->setCurrentIndex(mainWindow->defaultMode);
+
+    ui->cloudCheckbox->setChecked(mainWindow->network.cloudSupportEnabled);
+    this->on_cloudCheckbox_clicked(mainWindow->network.cloudSupportEnabled);
+    this->updateCloudCredentialStatus();
+    ui->cloudRegionCombobox->setCurrentIndex(mainWindow->cloudConfig.getRegionInt());
 }
 
 
@@ -92,8 +93,12 @@ void sacConfigurationDialog::on_saveButton_clicked()
     {
         mainWindow->network.preferredMode=mainWindow->modeList.modes.at(selectMode)->idName;
     }
+    mainWindow->network.cloudSupportEnabled=ui->cloudCheckbox->isChecked();
 
     mainWindow->network.writeConfiguration();
+
+    mainWindow->cloudConfig.setRegion(ui->cloudRegionCombobox->currentIndex());
+    mainWindow->cloudConfig.saveConfiguration();
 
     QMessageBox msgBox(this);
     msgBox.setWindowTitle("Configuration Saved");
@@ -132,12 +137,38 @@ void sacConfigurationDialog::on_cloudCredentialsButton_clicked()
         return;
     }
 
-    // TODO: Base64 encoding of credentials
+    mainWindow->cloudConfig.key=awsKey;
+    mainWindow->cloudConfig.secret=awsSecret;
+
+    updateCloudCredentialStatus();
 }
 
 
 void sacConfigurationDialog::updateCloudCredentialStatus()
 {
-    // TODO
-    ui->cloudCredetialsEdit->setText("-- Missing --");
+    if (mainWindow->cloudConfig.isConfigurationValid())
+    {
+        ui->cloudCredetialsEdit->setText("-- Provided --");
+    }
+    else
+    {
+        ui->cloudCredetialsEdit->setText("-- Missing --");
+    }
+
+}
+
+
+void sacConfigurationDialog::on_cloudConnectionButton_clicked()
+{
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QtAWSRequest awsRequest(mainWindow->cloudConfig.key, mainWindow->cloudConfig.secret);
+    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/modes",
+                                            QByteArray(), mainWindow->cloudConfig.getRegion().toLatin1(), QByteArray(), QStringList());
+    QApplication::restoreOverrideCursor();
+
+    // TODO: Format reply better
+
+    QMessageBox msgBox;
+    msgBox.setText("Response: <br>"+reply.replyData());
+    msgBox.exec();
 }

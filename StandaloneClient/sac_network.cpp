@@ -15,6 +15,7 @@ sacNetwork::sacNetwork()
     preferredMode="";
     copyErrorMsg="";
     showConfigurationAfterError=false;
+    cloudSupportEnabled=false;
 }
 
 
@@ -29,8 +30,9 @@ bool sacNetwork::readConfiguration()
         connectCmd =    config.value("Configuration/ConnectCmd","").toString();
         disconnectCmd = config.value("Configuration/DisconnectCmd","").toString();
         systemName =    config.value("Configuration/Name","Unknown").toString();
-        defaultNotification = config.value("Configuration/DefaultNotification","").toString();
-        preferredMode = config.value("Configuration/PreferredMode","").toString();
+        defaultNotification=config.value("Configuration/DefaultNotification","").toString();
+        preferredMode      =config.value("Configuration/PreferredMode","").toString();
+        cloudSupportEnabled=config.value("Configuration/CloudSupport",false).toBool();
 
         if (serverPath.length()==0)
         {
@@ -53,6 +55,7 @@ void sacNetwork::writeConfiguration()
         config.setValue("Configuration/Name",systemName);
         config.setValue("Configuration/DefaultNotification",defaultNotification);
         config.setValue("Configuration/PreferredMode",preferredMode);
+        config.setValue("Configuration/CloudSupport",cloudSupportEnabled);
     }
 }
 

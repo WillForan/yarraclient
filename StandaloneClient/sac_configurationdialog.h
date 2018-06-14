@@ -27,6 +27,8 @@ private slots:
     void on_cloudCheckbox_clicked(bool checked);
     void on_cloudCredentialsButton_clicked();
 
+    void on_cloudConnectionButton_clicked();
+
 private:
     Ui::sacConfigurationDialog *ui;
 

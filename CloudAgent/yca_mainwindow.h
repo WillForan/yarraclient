@@ -6,6 +6,8 @@
 #include <QCloseEvent>
 #include <QMenu>
 
+#include "../CloudTools/yct_configuration.h"
+
 
 namespace Ui {
 class ycaMainWindow;
@@ -31,12 +33,16 @@ private slots:
     void on_closeButton_clicked();
     void on_closeContextButton_clicked();
 
+    void on_statusRefreshButton_clicked();
+
 private:
     Ui::ycaMainWindow* ui;
 
     QSystemTrayIcon* trayIcon;
     QMenu* trayIconMenu;
     QAction* trayItemShutdown;
+
+    yctConfiguration config;
 
 };
 

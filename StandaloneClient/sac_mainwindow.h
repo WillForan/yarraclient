@@ -7,6 +7,7 @@
 #include "../Client/rds_log.h"
 
 #include "../OfflineReconClient/ort_returnonfocus.h"
+#include "../CloudTools/yct_configuration.h"
 
 
 namespace Ui
@@ -55,6 +56,7 @@ public:
     sacNetwork network;
     ortModeList modeList;
     rdsLog log;
+    yctConfiguration cloudConfig;
 
     bool firstFileDialog;
     int defaultMode;
