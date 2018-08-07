@@ -2,6 +2,7 @@
 
 #include <QtCore>
 #include <QtNetwork/QNetworkReply>
+#include <QTimer>
 
 
 BlockingNetworkAccessManager::BlockingNetworkAccessManager(QObject *parent)
@@ -83,8 +84,17 @@ QNetworkReply *ThreadsafeBlockingNetworkAccesManager::sendCustomRequest(
     // Wait until the request completes, or is cancelled, or HEAD returns headers.
     {
         QMutexLocker lock(&m_mutex);
-        while (!(reply->isFinished() || m_cancellAll || (isHead && reply->rawHeaderList().count() > 0))) {
-            m_waitCompleted.wait(&m_mutex);
+        while (!(reply->isFinished() || m_cancellAll || (isHead && reply->rawHeaderList().count() > 0)))
+        {
+            m_waitCompleted.wait(&m_mutex, 8000);
+
+            // TODO: Check if the reqest timed out, and if so terminate
+            /*
+            if (!reply->isFinished())
+            {
+                m_cancellAll=true;
+            }
+            */
         }
     }
 

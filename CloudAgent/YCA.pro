@@ -16,13 +16,17 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         yca_mainwindow.cpp \
-    ../CloudTools/yct_configuration.cpp
+    ../CloudTools/yct_configuration.cpp \
+    ../CloudTools/yct_aws/qtawsqnam.cpp \
+    ../CloudTools/yct_aws/qtaws.cpp
 
 HEADERS  += yca_mainwindow.h \
     main.h \
     yca_global.h \
     ../CloudTools/yct_common.h \
-    ../CloudTools/yct_configuration.h
+    ../CloudTools/yct_configuration.h \
+    ../CloudTools/yct_aws/qtawsqnam.h \
+    ../CloudTools/yct_aws/qtaws.h
 
 FORMS    += yca_mainwindow.ui
 

@@ -95,7 +95,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 
         if (connectError)
         {            
-            network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"No connection to server");
+            network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"No connection to server");
             QTimer::singleShot(0, qApp, SLOT(quit()));
             return;
         }
@@ -110,7 +110,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 
     if (!modeList.readModeList())
     {
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read mode list");
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read mode list");
         QTimer::singleShot(0, qApp, SLOT(quit()));
         return;
     }
@@ -339,7 +339,7 @@ void ortMainWindow::on_sendButton_clicked()
     if (selectedFID==-1)
     {
         RTI->log("ERROR: Invalid FID after pressing Send button");
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid FID after pressing Send button");
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid FID after pressing Send button");
         showTransferError("Invalid FID has been selected.");
         return;
     }
@@ -353,7 +353,7 @@ void ortMainWindow::on_sendButton_clicked()
     if ((selectedMode<0) or (selectedMode>=modeList.modes.count()))
     {
         RTI->log("ERROR: Invalid mode has been selected.");
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid mode has been selected");
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid mode has been selected");
         showTransferError("Invalid reconstruction mode has been selected.");
         return;
     }
@@ -393,7 +393,7 @@ void ortMainWindow::on_sendButton_clicked()
     {
         // Error handling
         waitDialog.close();
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to connect to required server");
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to connect to required server");
         showTransferError(network.errorReason);
         this->show();
         return;
@@ -443,7 +443,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     if (!reconTask.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
     {
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
         return;
@@ -478,7 +478,7 @@ void ortMainWindow::on_sendButton_clicked()
         }
         else
         {
-            network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error transfering file: "+reconTask.getErrorMessageUI());
+            network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error transfering file: "+reconTask.getErrorMessageUI());
             showTransferError(reconTask.getErrorMessageUI());
             this->show();
         }
@@ -488,7 +488,7 @@ void ortMainWindow::on_sendButton_clicked()
     if (!reconTask.generateTaskFile())
     {
         copyDialog.close();
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error generating task: "+reconTask.getErrorMessageUI());
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error generating task: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
         return;
@@ -504,12 +504,12 @@ void ortMainWindow::on_sendButton_clicked()
     if (reconTask.isSubmissionSuccessful())
     {
         //RTI->log(getTaskInfo(reconTask));
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,getTaskInfo(reconTask));
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,getTaskInfo(reconTask));
         this->close();
     }
     else
     {
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error with task submission: "+reconTask.getErrorMessageUI());
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error with task submission: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
     }

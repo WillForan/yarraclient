@@ -311,7 +311,8 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
     // For the VD/VE line and VB20P, add options for anonymization
     if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine() || (RTI->isSyngoXALine()))
         || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB20P)
-        || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB19A))
+        || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB19A)
+        || (RTI->getSyngoMRVersion()==rdsRuntimeInformation::RDS_VB19B))
     {
         if (!anonymize)
         {

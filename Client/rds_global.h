@@ -6,7 +6,7 @@
 
 
 // Definitions
-#define RDS_VERSION     "0.52"
+#define RDS_VERSION     "0.53b2"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -37,6 +37,7 @@
 #define RDS_SYNGODETECT_VB15A "C:/MedCom/MriProduct/inst/build_VB15A_label.txt"
 #define RDS_SYNGODETECT_VB17A "C:/MedCom/MriProduct/inst/build_VB17A_label.txt"
 #define RDS_SYNGODETECT_VB19A "C:/MedCom/MriProduct/inst/build_VB19A_label.txt"
+#define RDS_SYNGODETECT_VB19B "C:/MedCom/MriProduct/inst/build_VB19B_label.txt"
 #define RDS_SYNGODETECT_VB18P "C:/MedCom/MriProduct/inst/build_VB18P_label.txt"
 #define RDS_SYNGODETECT_VB20P "C:/MedCom/MriProduct/inst/build_VB20P_label.txt"
 #define RDS_SYNGODETECT_VD11A "C:/MedCom/MriProduct/inst/build_VD11A_label.txt"

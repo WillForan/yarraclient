@@ -33,12 +33,12 @@ public:
     ~ThreadsafeBlockingNetworkAccesManager();
     QNetworkReply *sendCustomRequest(const QNetworkRequest &request, const QByteArray &verb,
                                      QIODevice *data = 0);
-    void cancelAll();
     void waitForAll();
     int pendingRequests();
 
 public slots:
     void wakeWaitingThreads();
+    void cancelAll();
 
 private:
     QNetworkAccessManager *m_networkAccessManager;

@@ -268,6 +268,14 @@ void NetLogger::postEvent(EventInfo::Type type, EventInfo::Detail detail, EventI
 }
 
 
+bool NetLogger::postEventSync(EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data, int timeoutMsec)
+{
+    QNetworkReply::NetworkError networkError;
+    int networkStatusCode=0;
+    return postEventSync(type, detail, severity, info, data, timeoutMsec);
+}
+
+
 bool NetLogger::postEventSync(QNetworkReply::NetworkError& error, int& status_code, EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data, int timeoutMsec)
 {
     if (!configured)

@@ -45,7 +45,8 @@ public:
         RDS_VE11C   =  14,
         RDS_VE11U   =  15,
         RDS_VE11P   =  16,
-        RDS_XA10A   =  17
+        RDS_XA10A   =  17,
+        RDS_VB19B   =  18
     };
 
     enum rdsSyngoLines
@@ -414,6 +415,10 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString(int syngoVersionEn
         versionString="XA10A";
         break;
 
+    case RDS_VB19B:
+        versionString="VB19B";
+        break;
+
     default:
         versionString="Unknown - Use with care!";
         break;
@@ -531,6 +536,7 @@ inline int rdsRuntimeInformation::getSyngoMRLine()
     case RDS_VB19A:
     case RDS_VB18P:
     case RDS_VB20P:
+    case RDS_VB19B:
     default:
         return RDS_VB;
         break;

@@ -6,6 +6,9 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 
+#include "../CloudTools/yct_common.h"
+#include "../CloudTools/yct_aws/qtaws.h"
+
 
 ycaMainWindow::ycaMainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -111,6 +114,17 @@ void ycaMainWindow::on_closeContextButton_clicked()
 
 void ycaMainWindow::on_statusRefreshButton_clicked()
 {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QtAWSRequest awsRequest(config.key, config.secret);
+    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/modes",
+                                            QByteArray(), config.getRegion().toLatin1(), QByteArray(), QStringList());
+    QApplication::restoreOverrideCursor();
+
+    ui->activeTasksTable->setRowCount(1);
+    ui->activeTasksTable->setColumnCount(1);
+    ui->activeTasksTable->setItem(0,0,new QTableWidgetItem(QString(reply.replyData())));
+
+
     //config.loadConfiguration();
     /*
     config.key="Test-Key";
