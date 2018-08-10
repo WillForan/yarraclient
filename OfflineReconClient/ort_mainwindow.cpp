@@ -54,6 +54,8 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
             ortConfigurationDialog::executeDialog();
         }
 
+        RTI->log("Invalid configuration. Terminating.");
+
         // Shutdown the client
         QTimer::singleShot(0, qApp, SLOT(quit()));        
         return;
@@ -61,6 +63,10 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 
     // Forward system name (necessary to define filename of the exported scans)
     raid.setORTSystemName(config.ortSystemName);
+
+    RTI->log("System: "+config.ortSystemName);
+    RTI->log("Serial: "+config.infoSerialNumber);
+    RTI->log("Type:   "+config.infoScannerType);
 
     // Show a splash screen while the network connection is established, so that the user
     // knows that something is going on.
@@ -150,6 +156,7 @@ ortMainWindow::~ortMainWindow()
         QProcess::startDetached(qApp->applicationDirPath() + "/RDS.exe -silent");
     }
 
+    RTI->log("Shutdown.");
     RTI->setLogInstance(0);
     log.finish();
 

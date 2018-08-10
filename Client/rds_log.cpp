@@ -33,12 +33,19 @@ void rdsLog::start()
     }
 
     #ifdef YARRA_APP_RDS
-        log("Service started  (V "+QString(RDS_VERSION)+")");        
+        log("Service started (V "+QString(RDS_VERSION)+")");
     #endif
+
+    #ifdef YARRA_APP_ORT
+        log("");
+        log("ORT Client started (V "+QString(RDS_VERSION)+")");
+        log("Detected Syngo version: "+RTI->getSyngoMRVersionString(RTI->getSyngoMRVersion()));
+    #endif
+
 
     if (RTI->isSimulation())
     {
-        log("Service is running in simulation mode.");
+        log("Running in simulation mode.");
     }
 }
 
