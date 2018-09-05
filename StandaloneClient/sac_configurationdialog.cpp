@@ -32,12 +32,6 @@ sacConfigurationDialog::sacConfigurationDialog(QWidget *parent) :
                                     qApp->desktop()->availableGeometry()));
 
     ui->tabWidget->setCurrentIndex(0);
-
-    for (int i=0; i<yctAWSCommon::regionCount; i++)
-    {
-        ui->cloudRegionCombobox->addItem(yctAWSCommon::getRegionName((yctAWSCommon::Regions) i),
-                                         yctAWSCommon::getRegionID((yctAWSCommon::Regions) i));
-    }
 }
 
 
@@ -66,7 +60,6 @@ void sacConfigurationDialog::prepare(sacMainWindow* mainWindowPtr)
     ui->cloudCheckbox->setChecked(mainWindow->network.cloudSupportEnabled);
     this->on_cloudCheckbox_clicked(mainWindow->network.cloudSupportEnabled);
     this->updateCloudCredentialStatus();
-    ui->cloudRegionCombobox->setCurrentIndex(mainWindow->cloudConfig.getRegionInt());
 }
 
 
@@ -96,8 +89,6 @@ void sacConfigurationDialog::on_saveButton_clicked()
     mainWindow->network.cloudSupportEnabled=ui->cloudCheckbox->isChecked();
 
     mainWindow->network.writeConfiguration();
-
-    mainWindow->cloudConfig.setRegion(ui->cloudRegionCombobox->currentIndex());
     mainWindow->cloudConfig.saveConfiguration();
 
     QMessageBox msgBox(this);
@@ -116,22 +107,20 @@ void sacConfigurationDialog::on_cloudCheckbox_clicked(bool checked)
 {
     ui->cloudConnectionButton ->setEnabled(checked);
     ui->cloudCredetialsEdit   ->setEnabled(checked);
-    ui->cloudRegionCombobox   ->setEnabled(checked);
     ui->cloudCredentialsButton->setEnabled(checked);
     ui->cloudCredetialsLabel  ->setEnabled(checked);
-    ui->cloudRegionLabel      ->setEnabled(checked);
 }
 
 
 void sacConfigurationDialog::on_cloudCredentialsButton_clicked()
 {
-    QString awsKey=QInputDialog::getText(this, "Enter the YarraCloud Key", "Please enter your YarraCloud Key.<br>&nbsp;<br>If you don't have this information, sign into http://admin.yarracloud.com and go to Configuration -> Account.");
+    QString awsKey=QInputDialog::getText(this, "Enter the YarraCloud Key ID", "Please enter your YarraCloud Key ID.<br>&nbsp;<br>If you don't have this information, sign into http://admin.yarracloud.com and go to Configuration -> Access Keys.");
     if (awsKey.isEmpty())
     {
         return;
     }
 
-    QString awsSecret=QInputDialog::getText(this, "Enter the YarraCloud Secret", "Please enter your YarraCloud Secret.<br>&nbsp;<br>If you don't have this information, sign into http://admin.yarracloud.com and go to Configuration -> Account.");
+    QString awsSecret=QInputDialog::getText(this, "Enter the YarraCloud Secret Key", "Please enter your YarraCloud Secret Key.<br>&nbsp;<br>If you don't have this information, sign into http://admin.yarracloud.com and go to Configuration -> Access Keys.");
     if (awsSecret.isEmpty())
     {
         return;
@@ -148,7 +137,7 @@ void sacConfigurationDialog::updateCloudCredentialStatus()
 {
     if (mainWindow->cloudConfig.isConfigurationValid())
     {
-        ui->cloudCredetialsEdit->setText("-- Provided --");
+        ui->cloudCredetialsEdit->setText(mainWindow->cloudConfig.key);
     }
     else
     {
@@ -163,7 +152,7 @@ void sacConfigurationDialog::on_cloudConnectionButton_clicked()
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QtAWSRequest awsRequest(mainWindow->cloudConfig.key, mainWindow->cloudConfig.secret);
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/modes",
-                                            QByteArray(), mainWindow->cloudConfig.getRegion().toLatin1(), QByteArray(), QStringList());
+                                            QByteArray(), YCT_API_REGION, QByteArray(), QStringList());
     QApplication::restoreOverrideCursor();
 
     // TODO: Format reply better

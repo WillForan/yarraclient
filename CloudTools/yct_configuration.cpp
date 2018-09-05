@@ -5,7 +5,6 @@ yctConfiguration::yctConfiguration()
 {
     key="";
     secret="";
-    region=yctAWSCommon::Regions::us_east_1;
 }
 
 
@@ -15,11 +14,9 @@ bool yctConfiguration::loadConfiguration()
 
     QString tempKey   =settings.value("Settings/Value1","").toString();
     QString tempSecret=settings.value("Settings/Value2","").toString();
-    int     tempRegion=settings.value("Settings/Value3",0) .toInt();
 
     key   =QByteArray::fromBase64(tempKey.toLatin1());
     secret=QByteArray::fromBase64(tempSecret.toLatin1());
-    region=(yctAWSCommon::Regions) tempRegion;
 
     return true;
 }
@@ -34,7 +31,6 @@ bool yctConfiguration::saveConfiguration()
 
     settings.setValue("Settings/Value1", tempKey);
     settings.setValue("Settings/Value2", tempSecret);
-    settings.setValue("Settings/Value3", (int) region);
 
     return true;
 }

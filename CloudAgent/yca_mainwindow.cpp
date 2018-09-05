@@ -117,7 +117,7 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QtAWSRequest awsRequest(config.key, config.secret);
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/modes",
-                                            QByteArray(), config.getRegion().toLatin1(), QByteArray(), QStringList());
+                                            QByteArray(), YCT_API_REGION, QByteArray(), QStringList());
     QApplication::restoreOverrideCursor();
 
     ui->activeTasksTable->setRowCount(1);

@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <property name="iconSize">
        <size>
@@ -386,7 +386,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QLabel" name="label_16">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For updates and documentation, please visit: &lt;a href=&quot;http://yarra.rocks&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#F7B02C;&quot;&gt;http://yarra.rocks&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;Made with &lt;span style=&quot; font-family:'arial'; font-size:15px; color:#F7B02C;&quot;&gt;♥&lt;/span&gt; in NYC, by the Yarra team at &lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#F7B02C;&quot;&gt;CAI&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#F7B02C; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#F7B02C;&quot;&gt;R&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For updates and documentation, please visit: &lt;a href=&quot;http://yarraframework.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#F7B02C;&quot;&gt;http://yarraframework.com&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;Made with &lt;span style=&quot; font-family:'arial'; font-size:15px; color:#F7B02C;&quot;&gt;♥&lt;/span&gt; in NYC, by the Yarra team at &lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#F7B02C;&quot;&gt;CAI&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#F7B02C; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#F7B02C;&quot;&gt;R&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

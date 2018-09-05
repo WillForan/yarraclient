@@ -4,7 +4,8 @@
 #include <QtCore>
 
 
-#define YCT_INI_NAME "/yct.ini"
+#define YCT_INI_NAME   "/yct.ini"
+#define YCT_API_REGION "us-east-1"
 
 
 class yctAWSCommon
