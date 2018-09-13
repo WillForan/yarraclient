@@ -113,6 +113,26 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
         for (int i=0; i<modeList.modes.count(); i++)
         {
             ui->modeCombobox->addItem(modeList.modes.at(i)->readableName);
+
+            /*
+            // Icons for indicating whether the mode is reconstructed
+            // on premise, in the cloud, or elasically
+            if (i>10)
+            {
+                if (i>20)
+                {
+                    ui->modeCombobox->setItemIcon(i,QIcon(":/images/cloud.png"));
+                }
+                else
+                {
+                    ui->modeCombobox->setItemIcon(i,QIcon(":/images/elastic.png"));
+                }
+            }
+            else
+            {
+                ui->modeCombobox->setItemIcon(i,QIcon(":/images/premise.png"));
+            }
+            */
         }
         on_modeCombobox_currentIndexChanged(0);
 

@@ -118,11 +118,21 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
     QtAWSRequest awsRequest(config.key, config.secret);
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/modes",
                                             QByteArray(), YCT_API_REGION, QByteArray(), QStringList());
-    QApplication::restoreOverrideCursor();
 
     ui->activeTasksTable->setRowCount(1);
     ui->activeTasksTable->setColumnCount(1);
-    ui->activeTasksTable->setItem(0,0,new QTableWidgetItem(QString(reply.replyData())));
+
+    if (!reply.isSuccess())
+    {
+        ui->activeTasksTable->setItem(0,0,new QTableWidgetItem(QString("Error")));
+    }
+    else
+    {
+        ui->activeTasksTable->setItem(0,0,new QTableWidgetItem(QString(reply.replyData())));
+    }
+
+    QApplication::restoreOverrideCursor();
+
 
 
     //config.loadConfiguration();

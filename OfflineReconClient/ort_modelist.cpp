@@ -123,6 +123,7 @@ bool ortModeList::readModeList()
             modes.at(i)->requiresAdjScans  =modeFileIni.value(modeName+"/RequiresAdjScans",   false).toBool();
             modes.at(i)->minimumSizeMB     =modeFileIni.value(modeName+"/MinimumSizeMB",      ORT_MINSIZEMB).toDouble();
             modes.at(i)->requiredServerType=modeFileIni.value(modeName+"/RequiredServerType", "").toString();
+            modes.at(i)->computeMode       =ortModeEntry::OnPremise;
 
             // Read first user parameter
             modes.at(i)->paramLabel      =modeFileIni.value(modeName+"/ParamLabel",       "").toString();

@@ -7,30 +7,39 @@
 class ortModeEntry
 {
 public:
-    QString idName;
-    QString readableName;
-    QString protocolTag;
-    QString mailConfirmation;
-    bool    requiresACC;
-    bool    requiresAdjScans;
-    double  minimumSizeMB;
-    QString requiredServerType;
+
+    enum ComputeMode
+    {
+        OnPremise=0,
+        Cloud,
+        Elastic
+    };
+
+    QString     idName;
+    QString     readableName;
+    QString     protocolTag;
+    QString     mailConfirmation;
+    bool        requiresACC;
+    bool        requiresAdjScans;
+    double      minimumSizeMB;
+    QString     requiredServerType;
+    ComputeMode computeMode;
 
     // User selectable parameter 1
-    QString paramLabel;
-    QString paramDescription;
-    double  paramDefault;
-    double  paramMin;
-    double  paramMax;
-    bool    paramIsFloat;
+    QString     paramLabel;
+    QString     paramDescription;
+    double      paramDefault;
+    double      paramMin;
+    double      paramMax;
+    bool        paramIsFloat;
 
     // User selectable parameter 2
-    QString param2Label;
-    QString param2Description;
-    double  param2Default;
-    double  param2Min;
-    double  param2Max;
-    bool    param2IsFloat;
+    QString     param2Label;
+    QString     param2Description;
+    double      param2Default;
+    double      param2Min;
+    double      param2Max;
+    bool        param2IsFloat;
 };
 
 

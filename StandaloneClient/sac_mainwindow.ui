@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>717</width>
-    <height>410</height>
+    <height>426</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -306,6 +306,15 @@
            <height>24</height>
           </size>
          </property>
+         <property name="iconSize">
+          <size>
+           <width>18</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="frame">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="3" column="0">
@@ -393,7 +402,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="sac.qrc">:/images/saclogo.png</pixmap>
+           <pixmap>:/images/saclogo.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -469,8 +478,6 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="sac.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
