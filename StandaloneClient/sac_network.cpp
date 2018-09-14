@@ -34,7 +34,7 @@ bool sacNetwork::readConfiguration()
         preferredMode      =config.value("Configuration/PreferredMode","").toString();
         cloudSupportEnabled=config.value("Configuration/CloudSupport",false).toBool();
 
-        if (serverPath.length()==0)
+        if ((serverPath.length()==0) && (!cloudSupportEnabled))
         {
             return false;
         }

@@ -8,6 +8,7 @@
 
 #include "../OfflineReconClient/ort_returnonfocus.h"
 #include "../CloudTools/yct_configuration.h"
+#include "../CloudTools/yct_api.h"
 
 
 namespace Ui
@@ -56,7 +57,9 @@ public:
     sacNetwork network;
     ortModeList modeList;
     rdsLog log;
+
     yctConfiguration cloudConfig;
+    yctAPI           cloud;
 
     bool firstFileDialog;
     int defaultMode;

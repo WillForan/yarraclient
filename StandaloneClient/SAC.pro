@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     ../NetLogger/netlogger.cpp \
     ../CloudTools/yct_configuration.cpp \
     ../CloudTools/yct_aws/qtawsqnam.cpp \
-    ../CloudTools/yct_aws/qtaws.cpp
+    ../CloudTools/yct_aws/qtaws.cpp \
+    ../CloudTools/yct_api.cpp
 
 HEADERS  += sac_mainwindow.h \
     ../Client/rds_runtimeinformation.h \

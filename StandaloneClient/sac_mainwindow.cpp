@@ -50,6 +50,7 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
     log.start();
     RTI->setLogInstance(&log);
 
+    cloud.setConfiguration(&cloudConfig);
     cloudConfig.loadConfiguration();
 
     if (!network.readConfiguration())
@@ -80,25 +81,50 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
         bootDialog.show();
     }
 
-    if (!network.openConnection(isConsole))
+    if ((network.serverPath.isEmpty()) && (network.cloudSupportEnabled))
     {
-        if (network.showConfigurationAfterError)
+        // If no server path is given but cloud support is enabled, then
+        // the user probably only wants to use cloud recon. In that case,
+        // don't try to connect to avoid error messages
+    }
+    else
+    {
+        // If cloud support is off, or if a local server path has provided,
+        // then try to connect to the server.
+
+        if (!network.openConnection(isConsole))
         {
-            QTimer::singleShot(0, this, SLOT(showFirstConfiguration()));
+            if (network.showConfigurationAfterError)
+            {
+                QTimer::singleShot(0, this, SLOT(showFirstConfiguration()));
+            }
+            else
+            {
+                QTimer::singleShot(0, qApp, SLOT(quit()));
+            }
+            return;
         }
-        else
+
+        modeList.network=&network;
+
+        if (!modeList.readModeList())
         {
             QTimer::singleShot(0, qApp, SLOT(quit()));
+            return;
         }
-        return;
     }
 
-    modeList.network=&network;
+    bool cloudModeLoaded=false;
 
-    if (!modeList.readModeList())
+    if (network.cloudSupportEnabled)
     {
-        QTimer::singleShot(0, qApp, SLOT(quit()));
-        return;
+        // Connect to the cloud service and read the list of cloud modes
+        int cloudModes=cloud.readModeList(&modeList);
+
+        if (cloudModes>0)
+        {
+            cloudModeLoaded=true;
+        }
     }
 
     bootDialog.close();
@@ -114,25 +140,26 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
         {
             ui->modeCombobox->addItem(modeList.modes.at(i)->readableName);
 
-            /*
-            // Icons for indicating whether the mode is reconstructed
-            // on premise, in the cloud, or elasically
-            if (i>10)
+            // If at least one cloud mode has been loaded, add icons to
+            // indicate where the modes are reconstructed
+            if (cloudModeLoaded)
             {
-                if (i>20)
+                switch (modeList.modes.at(i)->computeMode)
                 {
+                default:
+                case ortModeEntry::OnPremise:
+                    ui->modeCombobox->setItemIcon(i,QIcon(":/images/premise.png"));
+                    break;
+
+                case ortModeEntry::Cloud:
                     ui->modeCombobox->setItemIcon(i,QIcon(":/images/cloud.png"));
-                }
-                else
-                {
+                    break;
+
+                case ortModeEntry::Elastic:
                     ui->modeCombobox->setItemIcon(i,QIcon(":/images/elastic.png"));
+                    break;
                 }
             }
-            else
-            {
-                ui->modeCombobox->setItemIcon(i,QIcon(":/images/premise.png"));
-            }
-            */
         }
         on_modeCombobox_currentIndexChanged(0);
 
@@ -154,6 +181,11 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
 
 sacMainWindow::~sacMainWindow()
 {
+    if (network.cloudSupportEnabled)
+    {
+        cloud.launchCloudAgent();
+    }
+
     network.closeConnection();
 
     RTI->setLogInstance(0);
@@ -273,8 +305,8 @@ void sacMainWindow::on_sendButton_clicked()
     task.mode=modeList.modes.at(selectedIndex)->idName;
     task.modeReadable=modeList.modes.at(selectedIndex)->readableName;
 
-    QString confirmText="Are you sure to submit the following reconstruction task?   \n\n";
-    confirmText+="Patient: " + task.patientName + "\nACC#: ";
+    QString confirmText="Are you sure to submit the following task?   <br><br>";
+    confirmText+="Patient: " + task.patientName + "<br>ACC#: ";
     if (task.accNumber.length()>0)
     {
         confirmText+=task.accNumber;
@@ -283,7 +315,13 @@ void sacMainWindow::on_sendButton_clicked()
     {
         confirmText+="NONE";
     }
-    confirmText+="\nMode: " + task.modeReadable + "\n";
+    confirmText+="<br>Mode: " + task.modeReadable + "<br>";
+
+    if (modeList.modes.at(selectedIndex)->computeMode != ortModeEntry::OnPremise)
+    {
+        confirmText+="<br><strong>Note:</strong> You selected a YarraCloud-supported reconstruction.<br>The costs for the processing will be charged to your institution's credit card. Learn more about YarraCloud at <a href=\"http://yarracloud.com\"><span style=\"text-decoration: underline; color:#43b02a;\">http://yarracloud.com</span></a>.";
+    }
+
 
     if (QMessageBox::question(this, "Confirm Submission", confirmText, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)!=QMessageBox::Yes)
     {
