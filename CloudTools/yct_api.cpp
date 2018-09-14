@@ -45,12 +45,18 @@ int yctAPI::readModeList(ortModeList* modeList)
 
         foreach(QString key, keys)
         {
+            qDebug() << key << ": " << jsonObject[key].toString();
+
             if (key=="Name")
             {
                 idName=jsonObject[key].toString();
             }
-            //qDebug() << key << ": " << jsonObject[key].toString();
 
+            if (key=="ClientConfig")
+            {
+                QJsonObject config = jsonObject.value(QString("ClientConfig")).toObject();
+                qDebug() << config;
+            }
             // TODO: Properly parse the json structure
         }
 

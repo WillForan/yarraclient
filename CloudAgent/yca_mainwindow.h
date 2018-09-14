@@ -7,6 +7,7 @@
 #include <QMenu>
 
 #include "../CloudTools/yct_configuration.h"
+#include "yca_transferindicator.h"
 
 
 namespace Ui {
@@ -25,7 +26,8 @@ protected:
     void closeEvent(QCloseEvent* event);
 
 public slots:
-    void callShutDown();
+    void callShutDown(bool askConfirmation=true);
+    void callSubmit();
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
@@ -35,6 +37,9 @@ private slots:
 
     void on_statusRefreshButton_clicked();
 
+    void on_pushButton_5_clicked();
+    void on_pushButton_3_clicked();
+
 private:
     Ui::ycaMainWindow* ui;
 
@@ -43,6 +48,7 @@ private:
     QAction* trayItemShutdown;
 
     yctConfiguration config;
+    ycaTransferIndicator indicator;
 
 };
 

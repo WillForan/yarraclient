@@ -29,7 +29,12 @@ void ycaApplication::respond(const QString &message)
 
     if (message=="terminate")
     {
-        ((ycaMainWindow*) activationWindow())->callShutDown();
+        ((ycaMainWindow*) activationWindow())->callShutDown(false);
+    }
+
+    if (message=="submit")
+    {
+        ((ycaMainWindow*) activationWindow())->callSubmit();
     }
 
     // TODO: Command for refreshing the configuraiton

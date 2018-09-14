@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>images/ycaicon_256.png</file>
         <file>images/ycalogo.png</file>
+        <file>images/indicator.gif</file>
     </qresource>
 </RCC>

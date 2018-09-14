@@ -45,6 +45,7 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,size(),
                                     qApp->desktop()->availableGeometry()));
 
+    indicator.setMainDialog((QDialog*) this);
     config.loadConfiguration();
 }
 
@@ -65,22 +66,35 @@ void ycaMainWindow::closeEvent(QCloseEvent* event)
 }
 
 
-void ycaMainWindow::callShutDown()
+void ycaMainWindow::callShutDown(bool askConfirmation)
 {
     // TODO: Check if there are pending uploads/downloads
 
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Shutdown Agent?");
-    msgBox.setText("Do you really want to shutdown the agent? Outgoing jobs and finished reconstructions will not be transfered anymore.");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    msgBox.setWindowIcon(YCA_ICON);
-    int ret = msgBox.exec();
+    if (askConfirmation)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Shutdown Agent?");
+        msgBox.setText("Do you really want to shutdown the agent? Outgoing jobs and finished reconstructions will not be transfered anymore.");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        msgBox.setWindowIcon(YCA_ICON);
+        int ret = msgBox.exec();
 
-    if (ret==QMessageBox::Yes)
+        if (ret==QMessageBox::Yes)
+        {
+            qApp->quit();
+        }
+    }
+    else
     {
         qApp->quit();
     }
+}
+
+
+void ycaMainWindow::callSubmit()
+{
+    indicator.showIndicator();
 }
 
 
@@ -150,4 +164,16 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
     ui->activeTasksTable->setItem(0,1,new QTableWidgetItem(config.secret));
     ui->activeTasksTable->setItem(0,2,new QTableWidgetItem(config.getRegion()));
     */
+}
+
+
+void ycaMainWindow::on_pushButton_5_clicked()
+{
+    indicator.showIndicator();
+}
+
+
+void ycaMainWindow::on_pushButton_3_clicked()
+{
+    indicator.hideIndicator();
 }
