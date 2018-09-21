@@ -13,7 +13,8 @@ TEMPLATE = app
 INCLUDEPATH += ../Client/qtsingleapplication/src
 include(../Client/qtsingleapplication/src/qtsingleapplication.pri)
 
-DEFINES+=YARRA_APP_ORT
+DEFINES += YARRA_APP_ORT
+#DEFINES += NETLOGGER_DISABLE_DOMAIN_VALIDATION
 
 SOURCES += main.cpp \
     ort_mainwindow.cpp \

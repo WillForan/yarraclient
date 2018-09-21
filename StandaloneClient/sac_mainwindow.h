@@ -21,7 +21,7 @@ struct Task
 {
     QString taskID;
     QString scanFilename;
-    int paramValue;
+    int     paramValue;
     QString patientName;
     QString accNumber;
     QString mode;
@@ -32,6 +32,8 @@ struct Task
     QString protocolName;
     QDateTime taskCreationTime;
     qint64 scanFileSize;
+
+    bool   cloudReconstruction;
 };
 
 
@@ -54,9 +56,9 @@ public:
     bool restartApp;
     bool isConsole;
 
-    sacNetwork network;
+    sacNetwork  network;
     ortModeList modeList;
-    rdsLog log;
+    rdsLog      log;
 
     yctConfiguration cloudConfig;
     yctAPI           cloud;

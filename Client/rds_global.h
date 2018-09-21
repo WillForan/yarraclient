@@ -4,7 +4,6 @@
 // Include definition of the singleton for runtime control
 #include "rds_runtimeinformation.h"
 
-
 // Definitions
 #define RDS_VERSION     "0.53b3"
 #define RDS_PASSWORD    "nyc2012"

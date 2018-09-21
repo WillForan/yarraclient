@@ -56,6 +56,11 @@ NetLogger::~NetLogger()
 
 bool NetLogger::isServerInSameDomain(QString serverPath)
 {
+#ifdef NETLOGGER_DISABLE_DOMAIN_VALIDATION
+    RTI->log("Domain validation disabled.");
+    return true;
+#endif
+
     QString errorMessage="";
     bool error=false;
 

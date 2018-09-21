@@ -25,7 +25,11 @@ ortConfigurationDialog::ortConfigurationDialog(QWidget *parent) :
     flags &= ~Qt::WindowContextHelpButtonHint;
     setWindowFlags(flags);
 
-    ui->versionLabel->setText("Version " + QString(ORT_VERSION) + ", Build date " + QString(__DATE__));
+    QString versionText="Version " + QString(ORT_VERSION) + ", Build date " + QString(__DATE__);
+#ifdef NETLOGGER_DISABLE_DOMAIN_VALIDATION
+    versionText += ", Domain Validation OFF";
+#endif
+    ui->versionLabel->setText(versionText);
 
     ui->systemNameEdit->setToolTip("Please enter a unique name to identify this MR system.");
     ui->systemNameLabel->setToolTip(ui->systemNameEdit->toolTip());
@@ -281,6 +285,8 @@ void ortConfigurationDialog::on_logServerTestButton_clicked()
 
     socket.disconnectFromHost();
 
+#ifndef NETLOGGER_DISABLE_DOMAIN_VALIDATION
+
     // Lookup the hostname of the local client from the DNS server
     if (!error)
     {
@@ -332,6 +338,8 @@ void ortConfigurationDialog::on_logServerTestButton_clicked()
             }
         }
     }
+
+#endif
 
     // Check if the server responds to the test entry point
     if (!error)

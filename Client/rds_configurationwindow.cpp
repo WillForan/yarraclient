@@ -41,7 +41,11 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
     ui->networkModeCombobox->setCurrentIndex(0);
     ui->networkStackedWidget->setCurrentIndex(0);
 
-    ui->versionLabel->setText("Version " + QString(RDS_VERSION) + ", Build date " + QString(__DATE__));
+    QString versionText="Version " + QString(RDS_VERSION) + ", Build date " + QString(__DATE__);
+#ifdef NETLOGGER_DISABLE_DOMAIN_VALIDATION
+    versionText += ", Domain Validation OFF";
+#endif
+    ui->versionLabel->setText(versionText);
 
     // Center the window on the screen
     setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,size(),
@@ -446,6 +450,8 @@ void rdsConfigurationWindow::callLogServerTestConnection()
 
     socket.disconnectFromHost();
 
+#ifndef NETLOGGER_DISABLE_DOMAIN_VALIDATION
+
     // Lookup the hostname of the local client from the DNS server
     if (!error)
     {
@@ -497,6 +503,8 @@ void rdsConfigurationWindow::callLogServerTestConnection()
             }
         }
     }
+
+#endif
 
     // Check if the server responds to the test entry point
     if (!error)

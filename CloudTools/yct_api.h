@@ -11,10 +11,9 @@ public:
 
     yctAPI();
     void setConfiguration(yctConfiguration* configuration);
-
-    int readModeList(ortModeList* modeList);
-
+    int  readModeList(ortModeList* modeList);
     void launchCloudAgent();
+    bool createCloudFolders();
 
 protected:
 

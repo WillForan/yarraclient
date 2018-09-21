@@ -300,9 +300,20 @@ void sacMainWindow::on_sendButton_clicked()
         return;
     }
 
-    task.patientName=ui->patnameEdit->text();
-    task.accNumber=ui->accEdit->text().toUpper();
-    task.mode=modeList.modes.at(selectedIndex)->idName;
+    // TODO: For elastic modes, decide where the reconstruction should be done
+
+    if (modeList.modes.at(selectedIndex)->computeMode!=ortModeEntry::OnPremise)
+    {
+        task.cloudReconstruction=true;
+    }
+    else
+    {
+        task.cloudReconstruction=false;
+    }
+
+    task.patientName =ui->patnameEdit->text();
+    task.accNumber   =ui->accEdit->text().toUpper();
+    task.mode        =modeList.modes.at(selectedIndex)->idName;
     task.modeReadable=modeList.modes.at(selectedIndex)->readableName;
 
     QString confirmText="Are you sure to submit the following task?   <br><br>";
@@ -317,11 +328,10 @@ void sacMainWindow::on_sendButton_clicked()
     }
     confirmText+="<br>Mode: " + task.modeReadable + "<br>";
 
-    if (modeList.modes.at(selectedIndex)->computeMode != ortModeEntry::OnPremise)
+    if (task.cloudReconstruction)
     {
         confirmText+="<br><strong>Note:</strong> You selected a YarraCloud-supported reconstruction.<br>The costs for the processing will be charged to your institution's credit card. Learn more about YarraCloud at <a href=\"http://yarracloud.com\"><span style=\"text-decoration: underline; color:#43b02a;\">http://yarracloud.com</span></a>.";
     }
-
 
     if (QMessageBox::question(this, "Confirm Submission", confirmText, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)!=QMessageBox::Yes)
     {
@@ -334,85 +344,76 @@ void sacMainWindow::on_sendButton_clicked()
     sacCopyDialog copyDialog;
     copyDialog.show();
 
-    task.taskID=ui->taskIDEdit->text();
-
-    // Remove space and other characters that might cause problems
-    task.taskID.remove(QChar('.'),  Qt::CaseInsensitive);
-    task.taskID.remove(QChar('/'),  Qt::CaseInsensitive);
-    task.taskID.remove(QChar('\\'), Qt::CaseInsensitive);
-    task.taskID.remove(QChar(':'),  Qt::CaseInsensitive);
-    task.taskID.remove(QChar(' '),  Qt::CaseInsensitive);
-
-    task.scanFilename=task.taskID;
-
-    // Read the parameter value if the protocol uses one
-    if (paramVisible)
+    if (task.cloudReconstruction)
     {
-        task.paramValue=ui->paramEdit->text().toInt();
+        // Perform cloud-based reconstruction
 
-        if (task.paramValue>modeList.modes.at(selectedIndex)->paramMax)
-        {
-            task.paramValue=modeList.modes.at(selectedIndex)->paramMax;
-        }
-        if (task.paramValue<modeList.modes.at(selectedIndex)->paramMin)
-        {
-            task.paramValue=modeList.modes.at(selectedIndex)->paramMin;
-        }
-
-        task.scanFilename+=QString(RTI_SEPT_CHAR)+"P"+QString::number(task.paramValue);
+        // TODO
     }
     else
     {
-        task.paramValue=0;
-    }
+        // Perform normal submission to on-premise server
 
-    task.taskFilename=task.scanFilename+ORT_TASK_EXTENSION;
+        task.taskID=ui->taskIDEdit->text();
 
-    if (ui->priorityCombobox->currentIndex()==1)
-    {
-        task.taskFilename+=ORT_TASK_EXTENSION_NIGHT;
-    }
-    if (ui->priorityCombobox->currentIndex()==2)
-    {
-        task.taskFilename+=ORT_TASK_EXTENSION_PRIO;
-    }
+        // Remove space and other characters that might cause problems
+        task.taskID.remove(QChar('.'),  Qt::CaseInsensitive);
+        task.taskID.remove(QChar('/'),  Qt::CaseInsensitive);
+        task.taskID.remove(QChar('\\'), Qt::CaseInsensitive);
+        task.taskID.remove(QChar(':'),  Qt::CaseInsensitive);
+        task.taskID.remove(QChar(' '),  Qt::CaseInsensitive);
 
-    task.lockFilename=task.scanFilename+ORT_LOCK_EXTENSION;
-    task.scanFilename+=".dat";
+        task.scanFilename=task.taskID;
 
-    // First, get the notification addresses defined for the selected mode
-    task.notification=modeList.modes.at(selectedIndex)->mailConfirmation;
-
-    // Attach the entry from the dialog. Add separator character if needed
-    QString mailRecipient=ui->notificationEdit->text();
-    if ((task.notification!="") && (mailRecipient!=""))
-    {
-        task.notification+=",";
-    }
-    task.notification+=mailRecipient;
-
-    task.scanFileSize=QFileInfo(filename).size();
-    if (!network.copyMeasurementFile(filename,task.scanFilename))
-    {
-        copyDialog.close();
-        this->show();
-        this->activateWindow();
-        RTI->processEvents();
-
-        QMessageBox msgBox(this);
-        msgBox.setWindowTitle("Transfer Error");
-        msgBox.setText("The following problem occurred while transferring the data:\n\n" + network.copyErrorMsg + "\n\nThe reconstruction task will not be performed.");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.exec();       
-    }
-    else
-    {
-        if (!generateTaskFile(task))
+        // Read the parameter value if the protocol uses one
+        if (paramVisible)
         {
-            // Task-file creation failed, so remove scan file
-            QFile::remove(network.serverDir.absoluteFilePath(task.scanFilename));
+            task.paramValue=ui->paramEdit->text().toInt();
 
+            if (task.paramValue>modeList.modes.at(selectedIndex)->paramMax)
+            {
+                task.paramValue=modeList.modes.at(selectedIndex)->paramMax;
+            }
+            if (task.paramValue<modeList.modes.at(selectedIndex)->paramMin)
+            {
+                task.paramValue=modeList.modes.at(selectedIndex)->paramMin;
+            }
+
+            task.scanFilename+=QString(RTI_SEPT_CHAR)+"P"+QString::number(task.paramValue);
+        }
+        else
+        {
+            task.paramValue=0;
+        }
+
+        task.taskFilename=task.scanFilename+ORT_TASK_EXTENSION;
+
+        if (ui->priorityCombobox->currentIndex()==1)
+        {
+            task.taskFilename+=ORT_TASK_EXTENSION_NIGHT;
+        }
+        if (ui->priorityCombobox->currentIndex()==2)
+        {
+            task.taskFilename+=ORT_TASK_EXTENSION_PRIO;
+        }
+
+        task.lockFilename=task.scanFilename+ORT_LOCK_EXTENSION;
+        task.scanFilename+=".dat";
+
+        // First, get the notification addresses defined for the selected mode
+        task.notification=modeList.modes.at(selectedIndex)->mailConfirmation;
+
+        // Attach the entry from the dialog. Add separator character if needed
+        QString mailRecipient=ui->notificationEdit->text();
+        if ((task.notification!="") && (mailRecipient!=""))
+        {
+            task.notification+=",";
+        }
+        task.notification+=mailRecipient;
+
+        task.scanFileSize=QFileInfo(filename).size();
+        if (!network.copyMeasurementFile(filename,task.scanFilename))
+        {
             copyDialog.close();
             this->show();
             this->activateWindow();
@@ -420,23 +421,43 @@ void sacMainWindow::on_sendButton_clicked()
 
             QMessageBox msgBox(this);
             msgBox.setWindowTitle("Transfer Error");
-            msgBox.setText("The task file could not be created on the server. Refer to the log file for further information.\n\nThe reconstruction task will not be performed.");
+            msgBox.setText("The following problem occurred while transferring the data:\n\n" + network.copyErrorMsg + "\n\nThe reconstruction task will not be performed.");
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.exec();
         }
         else
         {
-            copyDialog.close();
-            this->show();
-            this->activateWindow();
-            RTI->processEvents();
+            if (!generateTaskFile(task))
+            {
+                // Task-file creation failed, so remove scan file
+                QFile::remove(network.serverDir.absoluteFilePath(task.scanFilename));
 
-            QMessageBox msgBox(this);
-            msgBox.setWindowTitle("Task Submitted");
-            msgBox.setText("The reconstruction task has successfully been sent to the Yarra server.");
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.exec();
+                copyDialog.close();
+                this->show();
+                this->activateWindow();
+                RTI->processEvents();
+
+                QMessageBox msgBox(this);
+                msgBox.setWindowTitle("Transfer Error");
+                msgBox.setText("The task file could not be created on the server. Refer to the log file for further information.\n\nThe reconstruction task will not be performed.");
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+            }
+            else
+            {
+                copyDialog.close();
+                this->show();
+                this->activateWindow();
+                RTI->processEvents();
+
+                QMessageBox msgBox(this);
+                msgBox.setWindowTitle("Task Submitted");
+                msgBox.setText("The reconstruction task has successfully been sent to the Yarra server.");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+            }
         }
     }
 }

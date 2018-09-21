@@ -81,4 +81,29 @@ void yctAPI::launchCloudAgent()
 }
 
 
+bool yctAPI::createCloudFolders()
+{
+    bool success=true;
+
+    QDir appPath(qApp->applicationDirPath());
+
+    if (!appPath.mkdir(qApp->applicationDirPath()+YCT_CLOUDFOLDER_IN))
+    {
+        // TODO: Add logging options
+
+        success=false;
+    }
+
+    if (!appPath.mkdir(qApp->applicationDirPath()+YCT_CLOUDFOLDER_OUT))
+    {
+        success=false;
+    }
+
+    if (!appPath.mkdir(qApp->applicationDirPath()+YCT_CLOUDFOLDER_PHI))
+    {
+        success=false;
+    }
+
+    return success;
+}
 

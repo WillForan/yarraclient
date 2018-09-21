@@ -7,6 +7,7 @@
 QT += core widgets gui xml svg
 
 DEFINES += YARRA_APP_RDS
+#DEFINES += NETLOGGER_DISABLE_DOMAIN_VALIDATION
 
 TARGET    = RDS
 TEMPLATE  = app
