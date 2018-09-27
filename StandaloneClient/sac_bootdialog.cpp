@@ -22,3 +22,10 @@ sacBootDialog::~sacBootDialog()
 {
     delete ui;
 }
+
+
+void sacBootDialog::setText(QString text)
+{
+    ui->textLabel->setText(text);
+}
+

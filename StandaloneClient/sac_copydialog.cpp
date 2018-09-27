@@ -24,6 +24,12 @@ sacCopyDialog::sacCopyDialog(QWidget *parent) :
 }
 
 
+void sacCopyDialog::setText(QString text)
+{
+    ui->textLabel->setText(text);
+}
+
+
 sacCopyDialog::~sacCopyDialog()
 {
     delete ui;

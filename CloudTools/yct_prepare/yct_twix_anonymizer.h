@@ -16,14 +16,21 @@ public:
         name="";
         dateOfBirth="";
         mrn="";
+
         acc="";
+        uuid="";
+        taskid="";
     }
 
+    // Information extracted from TWIX file
     QString name;
     QString dateOfBirth;
     QString mrn;
+
+    // Externally delivered information
     QString acc;
     QString uuid;
+    QString taskid;
 };
 
 
@@ -55,10 +62,9 @@ public:
 
     yctTWIXAnonymizer();
 
-    bool processFile(QString twixFilename, QString taskFilename, QString phiPath);
+    bool processFile(QString twixFilename, QString phiPath, QString acc, QString taskid, QString uuid);
     bool processMeasurement(QFile* file);
-    bool cleanTaskFile(QString taskFilename);
-    bool checkAndStorePatientData(QString taskFilename, QString phiPath);
+    bool checkAndStorePatientData(QString twixFilename, QString phiPath);
 
     int analyzeLine(QByteArray* line);
     int clearLine(QByteArray* line);

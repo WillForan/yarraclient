@@ -15,6 +15,8 @@ public:
     explicit sacCopyDialog(QWidget *parent = 0);
     ~sacCopyDialog();
 
+    void setText(QString text);
+
 private:
     Ui::sacCopyDialog *ui;
 };

@@ -7,9 +7,10 @@
 #define YCT_INI_NAME   "/yct.ini"
 #define YCT_API_REGION "us-east-1"
 
-#define YCT_CLOUDFOLDER_OUT "/cloud/out"
-#define YCT_CLOUDFOLDER_IN  "/cloud/in"
-#define YCT_CLOUDFOLDER_PHI "/cloud/phi"
+#define YCT_CLOUDFOLDER_OUT     "/cloud/out"
+#define YCT_CLOUDFOLDER_IN      "/cloud/in"
+#define YCT_CLOUDFOLDER_PHI     "/cloud/phi"
+#define YCT_CLOUDFOLDER_ARCHIVE "/cloud/phi_archive"
 
 
 class yctAWSCommon

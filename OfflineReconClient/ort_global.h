@@ -18,6 +18,8 @@
 #define ORT_TASK_DIR             "queue"
 #define ORT_TASK_EXTENSION       ".task"
 #define ORT_LOCK_EXTENSION       ".lock"
+#define ORT_TWIX_EXTENSION       ".dat"
+#define ORT_PHI_EXTENSION        ".phi"
 #define ORT_TASK_EXTENSION_PRIO  "_prio"
 #define ORT_TASK_EXTENSION_NIGHT "_night"
 #define ORT_INVALID              "X-INVALID-X"

@@ -15,6 +15,8 @@ public:
     explicit sacBootDialog(QWidget *parent = 0);
     ~sacBootDialog();
 
+    void setText(QString text);
+
 private:
     Ui::sacBootDialog *ui;
 };

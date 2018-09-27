@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
     printf("\nYarra CloudTools - Rawdata Preprocessor %s\n", YCT_TWIXANONYMIZER_VER);
     printf("--------------------------------------------\n\n");
 
-    if (argc < 3)
+    if (argc < 4)
     {
-        printf("Usage:   yct_prepare [filename.dat] [path for filename.phi] [options]\n\n");
+        printf("Usage:   yct_prepare [filename.dat] [path for filename.phi] [acc] [options]\n\n");
         printf("Options: --testing  Only test the processing but don't modify file\n");
         printf("         --debug    Output additional debug information\n");
         printf("         --dump     Dump the protocol from the TWIX file\n");
@@ -34,13 +34,6 @@ int main(int argc, char *argv[])
         }
 
         QFileInfo twixFile(rawFilename);
-        QString taskFilename=twixFile.absolutePath()+"/"+twixFile.completeBaseName()+".task";
-
-        if (!QFile::exists(taskFilename))
-        {
-            printf("Task file not found (%s)\n\n", qPrintable(taskFilename));
-            return 1;
-        }
 
         QDir phiDir(phiPath);
         if (!phiDir.exists())
@@ -52,7 +45,7 @@ int main(int argc, char *argv[])
         yctTWIXAnonymizer twixAnonymizer;
 
         QString options="";
-        for (int i=3; i<argc; i++)
+        for (int i=4; i<argc; i++)
         {
             options+=QString::fromLocal8Bit(argv[i])+" ";
         }
@@ -75,6 +68,11 @@ int main(int argc, char *argv[])
             twixAnonymizer.dumpProtocol=true;
         }
 
-        return twixAnonymizer.processFile(rawFilename,taskFilename,phiPath);
+        QString uuid=QUuid::createUuid().toString();
+        QString acc=QString::fromLocal8Bit(argv[3]);
+        QFileInfo filename(rawFilename);
+        QString taskid=filename.completeBaseName();
+
+        return twixAnonymizer.processFile(rawFilename,phiPath,acc,taskid,uuid);
     }
 }

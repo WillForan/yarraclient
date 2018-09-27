@@ -151,13 +151,73 @@ void sacConfigurationDialog::on_cloudConnectionButton_clicked()
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QtAWSRequest awsRequest(mainWindow->cloudConfig.key, mainWindow->cloudConfig.secret);
-    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/modes",
+    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/user_status",
                                             QByteArray(), YCT_API_REGION, QByteArray(), QStringList());
+
+    bool success=true;
+    QString errorReason="";
+    QString userRegion="";
+
+    qDebug() << reply.replyData();
+
+    if (!reply.isSuccess())
+    {
+        qDebug() << reply.anyErrorString();
+        errorReason=reply.anyErrorString();
+
+        //errorReason="Network error: " + QString::number((int) reply.networkError());
+
+        if (reply.networkError()==QNetworkReply::ContentOperationNotPermittedError)
+        {
+            errorReason="YarraCloud Key ID or Secret is invalid.";
+        }
+
+        success=false;
+    }
+
+    if (success)
+    {
+        QJsonDocument jsonReply =QJsonDocument::fromJson(reply.replyData());
+        QJsonObject   jsonObject=jsonReply.object();
+        QStringList   keys      =jsonObject.keys();
+
+        foreach(QString key, keys)
+        {
+            qDebug() << key << ": " << jsonObject[key];
+
+            if (key=="can_submit_jobs")
+            {
+                success=jsonObject[key].toBool();
+                errorReason="Missing payment method or account has been disabled.";
+            }
+
+            if (key=="region")
+            {
+                userRegion=jsonObject[key].toString();
+            }
+        }
+    }
+
+
+    if (!success)
+    {
+        ui->cloudConnectionLabel->setText("<span style=""color:#990000;""><strong>&nbsp; Failure</strong></span>");
+    }
+    else
+    {
+        ui->cloudConnectionLabel->setText("<span style=""color:#009900;""><strong>&nbsp; Success</strong></span>&nbsp; (Region: " + userRegion + ")");
+    }
+
     QApplication::restoreOverrideCursor();
+    RTI->processEvents();
 
-    // TODO: Format reply better
-
-    QMessageBox msgBox;
-    msgBox.setText("Response: <br>"+reply.replyData());
-    msgBox.exec();
+    if (!success)
+    {
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("YarraCloud Problem");
+        msgBox.setText("Testing the connection to YarraCloud was <strong>not successful</strong>.<br><br>Reason: "+errorReason);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+    }
 }

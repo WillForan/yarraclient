@@ -9,6 +9,7 @@
 #include "../OfflineReconClient/ort_returnonfocus.h"
 #include "../CloudTools/yct_configuration.h"
 #include "../CloudTools/yct_api.h"
+#include "../CloudTools/yct_prepare/yct_twix_anonymizer.h"
 
 
 namespace Ui
@@ -19,21 +20,23 @@ namespace Ui
 
 struct Task
 {
-    QString taskID;
-    QString scanFilename;
-    int     paramValue;
-    QString patientName;
-    QString accNumber;
-    QString mode;
-    QString modeReadable;
-    QString notification;
-    QString taskFilename;
-    QString lockFilename;
-    QString protocolName;
+    QString   taskID;
+    QString   scanFilename;
+    int       paramValue;
+    QString   patientName;
+    QString   accNumber;
+    QString   mode;
+    QString   modeReadable;
+    QString   notification;
+    QString   taskFilename;
+    QString   lockFilename;
+    QString   protocolName;
     QDateTime taskCreationTime;
-    qint64 scanFileSize;
+    qint64    scanFileSize;
 
-    bool   cloudReconstruction;
+    QString   uuid;
+    bool      cloudReconstruction;
+
 };
 
 
@@ -60,8 +63,9 @@ public:
     ortModeList modeList;
     rdsLog      log;
 
-    yctConfiguration cloudConfig;
-    yctAPI           cloud;
+    yctConfiguration  cloudConfig;
+    yctAPI            cloud;
+    yctTWIXAnonymizer twixAnonymizer;
 
     bool firstFileDialog;
     int defaultMode;
@@ -78,13 +82,16 @@ public:
     bool didStart;
 
     Task task;
-    bool generateTaskFile(Task& a_task);
+    bool generateTaskFile(Task& a_task, bool cloudRecon=false);
     void analyzeDatFile(QString filename, QString& detectedPatname, QString& detectedProtocol);
     bool submitFileOfBatch(QString file_path, QString file_name, QString mode, QString notification, TaskPriority priority);
     bool handleBatchFile(QString file);
     bool submitBatch(QStringList files, QStringList modes, QString notify, TaskPriority priority);
     void updateDialogHeight();
     bool readBatchFile(QString fileName, QStringList& files, QStringList& modes, QString& notify, TaskPriority& priority);
+
+    bool processCloudRecon();
+    bool showCloudProblem(QString text);
 
 private slots:
     void on_selectFileButton_clicked();

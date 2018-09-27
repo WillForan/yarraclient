@@ -28,7 +28,9 @@ SOURCES += main.cpp\
     ../CloudTools/yct_configuration.cpp \
     ../CloudTools/yct_aws/qtawsqnam.cpp \
     ../CloudTools/yct_aws/qtaws.cpp \
-    ../CloudTools/yct_api.cpp
+    ../CloudTools/yct_api.cpp \
+    ../CloudTools/yct_prepare/yct_twix_anonymizer.cpp
+
 
 HEADERS  += sac_mainwindow.h \
     ../Client/rds_runtimeinformation.h \
@@ -46,13 +48,16 @@ HEADERS  += sac_mainwindow.h \
     sac_twixheader.h \
     ../CloudTools/yct_common.h \
     ../CloudTools/yct_aws/qtawsqnam.h \
-    ../CloudTools/yct_aws/qtaws.h
+    ../CloudTools/yct_aws/qtaws.h \
+    ../CloudTools/yct_prepare/yct_twix_anonymizer.h
+
 
 FORMS    += sac_mainwindow.ui \
     sac_bootdialog.ui \
     sac_copydialog.ui \
     sac_configurationdialog.ui \
     sac_batchdialog.ui
+
 
 RESOURCES += \
     sac.qrc

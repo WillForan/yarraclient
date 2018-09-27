@@ -93,7 +93,7 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
         // then try to connect to the server.
 
         if (!network.openConnection(isConsole))
-        {
+        {           
             if (network.showConfigurationAfterError)
             {
                 QTimer::singleShot(0, this, SLOT(showFirstConfiguration()));
@@ -109,6 +109,7 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
 
         if (!modeList.readModeList())
         {
+            QApplication::restoreOverrideCursor();
             QTimer::singleShot(0, qApp, SLOT(quit()));
             return;
         }
@@ -118,13 +119,41 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
 
     if (network.cloudSupportEnabled)
     {
+        if (!cloud.createCloudFolders())
+        {
+            RTI->log("ERROR: Preparing cloud folder failed.");
+
+            showCloudProblem("Unable to prepare folder for cloud reconstruction.<br>Please check you local client installation.");
+            return;
+        }
+
+        bootDialog.setText("Connecting to YarraCloud. Please wait...");
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        qApp->processEvents();
+
+        if (!cloud.validateUser())
+        {
+            QApplication::restoreOverrideCursor();
+            showCloudProblem("Unable to validate your YarraCloud account.<br>You will not be able to perform cloud reconstructions.<br><br>Reason: " + cloud.errorReason);
+            return;
+        }
+
         // Connect to the cloud service and read the list of cloud modes
         int cloudModes=cloud.readModeList(&modeList);
+
+        if (cloudModes<0)
+        {
+            QApplication::restoreOverrideCursor();
+            showCloudProblem("Unable to read mode list from cloud.<br><br>Reason: " + cloud.errorReason);
+            return;
+        }
 
         if (cloudModes>0)
         {
             cloudModeLoaded=true;
         }
+
+        QApplication::restoreOverrideCursor();
     }
 
     bootDialog.close();
@@ -192,6 +221,35 @@ sacMainWindow::~sacMainWindow()
     log.finish();
 
     delete ui;
+}
+
+
+bool sacMainWindow::showCloudProblem(QString text)
+{
+    bool result=false;
+
+    QMessageBox msgBox(0);
+    msgBox.setWindowTitle("YarraCloud");
+    msgBox.setText(text+"<br><br>Do you want to review the configuration?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowIcon(ORT_ICON);
+    msgBox.setIcon(QMessageBox::Information);
+
+    if (msgBox.exec() == QMessageBox::Yes)
+    {
+        result=true;
+    }
+
+    if (result)
+    {
+        QTimer::singleShot(0, this, SLOT(showFirstConfiguration()));
+    }
+    else
+    {
+        QTimer::singleShot(0, qApp, SLOT(quit()));
+    }
+
+    return result;
 }
 
 
@@ -340,52 +398,94 @@ void sacMainWindow::on_sendButton_clicked()
 
     this->hide();    
     RTI->processEvents();
-
     sacCopyDialog copyDialog;
-    copyDialog.show();
 
     if (task.cloudReconstruction)
     {
-        // Perform cloud-based reconstruction
+        copyDialog.setText("Preparing cloud reconstruction...");
+    }
+    else
+    {
+        copyDialog.setText("The reconstruction task is being sent to the Yarra server...");
+    }
+    copyDialog.show();
 
-        // TODO
+    // First, get the notification addresses defined for the selected mode
+    // This will be empty for cloud-based modes
+    task.notification=modeList.modes.at(selectedIndex)->mailConfirmation;
+
+    // Attach the entry from the dialog. Add separator character if needed
+    QString mailRecipient=ui->notificationEdit->text();
+    if ((task.notification!="") && (mailRecipient!=""))
+    {
+        task.notification+=",";
+    }
+    task.notification+=mailRecipient;
+
+    // Now read the parameter value if the protocol uses one
+    if (paramVisible)
+    {
+        task.paramValue=ui->paramEdit->text().toInt();
+
+        if (task.paramValue>modeList.modes.at(selectedIndex)->paramMax)
+        {
+            task.paramValue=modeList.modes.at(selectedIndex)->paramMax;
+        }
+        if (task.paramValue<modeList.modes.at(selectedIndex)->paramMin)
+        {
+            task.paramValue=modeList.modes.at(selectedIndex)->paramMin;
+        }
+
+        task.scanFilename+=QString(RTI_SEPT_CHAR)+"P"+QString::number(task.paramValue);
+    }
+    else
+    {
+        task.paramValue=0;
+    }
+
+    task.scanFileSize=QFileInfo(filename).size();
+
+    task.taskID=ui->taskIDEdit->text();
+    // Remove space and other characters that might cause problems
+    task.taskID.remove(QChar('.'),  Qt::CaseInsensitive);
+    task.taskID.remove(QChar('/'),  Qt::CaseInsensitive);
+    task.taskID.remove(QChar('\\'), Qt::CaseInsensitive);
+    task.taskID.remove(QChar(':'),  Qt::CaseInsensitive);
+    task.taskID.remove(QChar(' '),  Qt::CaseInsensitive);
+
+    // For the actual submission, distinguish between cloud reconstruction
+    // and on-premise reconstruction
+    if (task.cloudReconstruction)
+    {
+        // Generate UUID for task that is used to link the anonymized cloud reconstruction to the PHI
+        task.uuid=cloud.createUUID();
+
+        // Perform cloud-based reconstruction
+        bool result=processCloudRecon();
+
+        copyDialog.close();
+        this->show();
+        this->activateWindow();
+        RTI->processEvents();
+
+        QMessageBox msgBox(this);
+        if (result)
+        {
+            msgBox.setWindowTitle("Task Prepared");
+            msgBox.setText("The reconstruction has been prepared for transmission to YarraCloud <br>and is now being uploaded.<br><br>You will be notified when the transfer has been finished.");
+        }
+        else
+        {
+            //TODO: Show error message
+        }
+
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
     }
     else
     {
         // Perform normal submission to on-premise server
-
-        task.taskID=ui->taskIDEdit->text();
-
-        // Remove space and other characters that might cause problems
-        task.taskID.remove(QChar('.'),  Qt::CaseInsensitive);
-        task.taskID.remove(QChar('/'),  Qt::CaseInsensitive);
-        task.taskID.remove(QChar('\\'), Qt::CaseInsensitive);
-        task.taskID.remove(QChar(':'),  Qt::CaseInsensitive);
-        task.taskID.remove(QChar(' '),  Qt::CaseInsensitive);
-
         task.scanFilename=task.taskID;
-
-        // Read the parameter value if the protocol uses one
-        if (paramVisible)
-        {
-            task.paramValue=ui->paramEdit->text().toInt();
-
-            if (task.paramValue>modeList.modes.at(selectedIndex)->paramMax)
-            {
-                task.paramValue=modeList.modes.at(selectedIndex)->paramMax;
-            }
-            if (task.paramValue<modeList.modes.at(selectedIndex)->paramMin)
-            {
-                task.paramValue=modeList.modes.at(selectedIndex)->paramMin;
-            }
-
-            task.scanFilename+=QString(RTI_SEPT_CHAR)+"P"+QString::number(task.paramValue);
-        }
-        else
-        {
-            task.paramValue=0;
-        }
-
         task.taskFilename=task.scanFilename+ORT_TASK_EXTENSION;
 
         if (ui->priorityCombobox->currentIndex()==1)
@@ -400,18 +500,6 @@ void sacMainWindow::on_sendButton_clicked()
         task.lockFilename=task.scanFilename+ORT_LOCK_EXTENSION;
         task.scanFilename+=".dat";
 
-        // First, get the notification addresses defined for the selected mode
-        task.notification=modeList.modes.at(selectedIndex)->mailConfirmation;
-
-        // Attach the entry from the dialog. Add separator character if needed
-        QString mailRecipient=ui->notificationEdit->text();
-        if ((task.notification!="") && (mailRecipient!=""))
-        {
-            task.notification+=",";
-        }
-        task.notification+=mailRecipient;
-
-        task.scanFileSize=QFileInfo(filename).size();
         if (!network.copyMeasurementFile(filename,task.scanFilename))
         {
             copyDialog.close();
@@ -463,10 +551,55 @@ void sacMainWindow::on_sendButton_clicked()
 }
 
 
-bool sacMainWindow::generateTaskFile(Task &a_task)
+bool sacMainWindow::processCloudRecon()
+{
+    bool error=false;
+
+    task.scanFilename=task.uuid+ORT_TWIX_EXTENSION;
+    task.taskFilename=task.uuid+ORT_TASK_EXTENSION;
+    task.lockFilename=task.uuid+ORT_LOCK_EXTENSION;
+
+    // Store the on-premise server location and move the directory to the outgoing cloud path
+    QDir serverPath=network.serverDir;
+    network.serverDir.cd(cloud.getCloudPath(YCT_CLOUDFOLDER_OUT));
+
+    // TODO: Check if file already exists in OUT folder
+
+    if (!network.copyMeasurementFile(filename,task.scanFilename))
+    {
+        // TODO: Error handling
+
+        error=true;
+    }
+
+    if (!error)
+    {
+        if (!twixAnonymizer.processFile(cloud.getCloudPath(YCT_CLOUDFOLDER_OUT)+"/"+task.scanFilename,
+                                        cloud.getCloudPath(YCT_CLOUDFOLDER_PHI),
+                                        task.accNumber, task.taskID, task.uuid))
+        {
+            // TODO: Error handling
+            error=true;
+
+            // TODO: Remove file from OUT folder
+        }
+    }
+
+    if (!error)
+    {
+        generateTaskFile(task, true);
+    }
+
+    // Restore the on-premise server location
+    network.serverDir=serverPath;
+
+    return true;
+}
+
+
+bool sacMainWindow::generateTaskFile(Task &a_task, bool cloudRecon)
 {
     a_task.taskCreationTime=QDateTime::currentDateTime();
-
     QLockFile lockFile(network.serverDir.filePath(a_task.lockFilename));
 
     if (!lockFile.isLocked())
@@ -482,11 +615,8 @@ bool sacMainWindow::generateTaskFile(Task &a_task)
 
             // Write the entries
             taskFile.setValue("Task/ReconMode", a_task.mode);
-            taskFile.setValue("Task/ACC", a_task.accNumber);
-            taskFile.setValue("Task/EMailNotification", a_task.notification);
             taskFile.setValue("Task/ScanFile", a_task.scanFilename);
             taskFile.setValue("Task/AdjustmentFilesCount", 0);
-            taskFile.setValue("Task/PatientName", a_task.patientName);
             taskFile.setValue("Task/ScanProtocol", a_task.protocolName);
             taskFile.setValue("Task/ReconName", a_task.modeReadable);
             taskFile.setValue("Task/ParamValue", a_task.paramValue);
@@ -497,6 +627,21 @@ bool sacMainWindow::generateTaskFile(Task &a_task)
             taskFile.setValue("Information/TaskTime", a_task.taskCreationTime.time().toString(Qt::ISODate));
             taskFile.setValue("Information/SystemVendor",  "Siemens");
             taskFile.setValue("Information/SystemVersion", "Unknown");
+
+            taskFile.setValue("Information/YarraClient",   "SAC");
+            taskFile.setValue("Information/ClientVersion", SAC_VERSION);
+
+            // Write PHI relevant information only for on-premise recons
+            if (cloudRecon==false)
+            {
+                taskFile.setValue("Task/ACC", a_task.accNumber);
+                taskFile.setValue("Task/PatientName", a_task.patientName);
+                taskFile.setValue("Task/EMailNotification", a_task.notification);
+            }
+            else
+            {
+                taskFile.setValue("Task/UUID", a_task.uuid);
+            }
 
             // Flush the entries into the file
             taskFile.sync();
@@ -567,6 +712,17 @@ void sacMainWindow::on_modeCombobox_currentIndexChanged(int index)
         updateDialogHeight();
     }
 
+    if (modeList.modes.at(index)->computeMode==ortModeEntry::OnPremise)
+    {
+        ui->priorityCombobox ->setEnabled(true);
+        ui->priorityLabel    ->setEnabled(true);
+    }
+    else
+    {
+        ui->priorityCombobox ->setEnabled(false);
+        ui->priorityLabel    ->setEnabled(false);
+    }
+
     QFont accFont=ui->accLabel->font();
     accFont.setBold(modeList.modes.at(index)->requiresACC);
     ui->accLabel->setFont(accFont);
@@ -612,10 +768,20 @@ void sacMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
     QString versionString="SAC Client Version ";
     versionString+=SAC_VERSION;
 
-    QString serverString="Server:  " + modeList.serverName;
+    QString serverString="Server:  ";
 
     QMenu infoMenu(this);
     infoMenu.addAction(versionString);
+
+    if ((modeList.serverName.isEmpty()) && (network.cloudSupportEnabled))
+    {
+        serverString += "yarracloud.com";
+    }
+    else
+    {
+        serverString += modeList.serverName;
+    }
+
     infoMenu.addAction(serverString);
     infoMenu.addSeparator();
     infoMenu.addAction("Configuration...", this, SLOT(showConfiguration()));

@@ -24,8 +24,13 @@ yctTWIXAnonymizer::yctTWIXAnonymizer()
 }
 
 
-bool yctTWIXAnonymizer::processFile(QString twixFilename, QString taskFilename, QString phiPath)
+bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath, QString acc, QString taskid, QString uuid)
 {
+    // Populate the externally provided information
+    patientInformation.uuid  =uuid;
+    patientInformation.acc   =acc;
+    patientInformation.taskid=taskid;
+
     bool result=false;
 
     QFile file(twixFilename);
@@ -142,7 +147,7 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString taskFilename, 
         dumpFile.close();
     }
 
-    if (!checkAndStorePatientData(taskFilename,phiPath))
+    if (!checkAndStorePatientData(twixFilename, phiPath))
     {
         return false;
     }   
@@ -280,21 +285,15 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
 }
 
 
-bool yctTWIXAnonymizer::checkAndStorePatientData(QString taskFilename, QString phiPath)
+bool yctTWIXAnonymizer::checkAndStorePatientData(QString twixFilename, QString phiPath)
 {
-    patientInformation.uuid=QUuid::createUuid().toString();
-
-    if (!cleanTaskFile(taskFilename))
-    {
-        return false;
-    }
-
     DBG("");
     DBG("Patient name:  " + patientInformation.name.toStdString());
     DBG("Date of birth: " + patientInformation.dateOfBirth.toStdString());
     DBG("MRN:           " + patientInformation.mrn.toStdString());
     DBG("ACC:           " + patientInformation.acc.toStdString());
     DBG("UUID:          " + patientInformation.uuid.toStdString());
+    DBG("TaskID:        " + patientInformation.taskid.toStdString());
     DBG("");
 
     QDir phiDir(phiPath);
@@ -304,8 +303,8 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString taskFilename, QString p
         return false;
     }
 
-    QFileInfo taskFile(taskFilename);
-    QString phiFilename=taskFile.completeBaseName()+".phi";
+    QFileInfo twixFile(twixFilename);
+    QString phiFilename=phiPath+"/"+twixFile.completeBaseName()+".phi";
 
     if (QFile::exists(phiFilename))
     {
@@ -314,37 +313,12 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString taskFilename, QString p
     }
 
     QSettings phiFile(phiFilename, QSettings::IniFormat);
-    phiFile.setValue("PHI/Name", patientInformation.name);
-    phiFile.setValue("PHI/DOB",  patientInformation.dateOfBirth);
-    phiFile.setValue("PHI/MRN",  patientInformation.mrn);
-    phiFile.setValue("PHI/ACC",  patientInformation.acc);
-    phiFile.setValue("PHI/UUID", patientInformation.uuid);
-
-    return true;
-}
-
-
-bool yctTWIXAnonymizer::cleanTaskFile(QString taskFilename)
-{
-    QSettings taskFile(taskFilename, QSettings::IniFormat);
-
-    // First, check if it was possible to open and read the .task file
-    QString validityTest=taskFile.value("Task/PatientName","").toString();
-    if (validityTest.isEmpty())
-    {
-        LOG("ERROR: Reading information from task file not possible (patient name is missing)");
-        return false;
-    }
-
-    // Read the ACC, so that this information can be kept locally
-    patientInformation.acc=taskFile.value("Task/ACC","").toString();
-
-    // Now, remove sensitive information from the task file
-    taskFile.setValue("Task/ACC",        "000000");
-    taskFile.setValue("Task/PatientName","YYYYYYYYYY");
-
-    // Store additional information for the cloud processing
-    taskFile.setValue("CloudTools/UUID", patientInformation.uuid);
+    phiFile.setValue("PHI/NAME",   patientInformation.name);
+    phiFile.setValue("PHI/DOB",    patientInformation.dateOfBirth);
+    phiFile.setValue("PHI/MRN",    patientInformation.mrn);
+    phiFile.setValue("PHI/ACC",    patientInformation.acc);
+    phiFile.setValue("PHI/UUID",   patientInformation.uuid);
+    phiFile.setValue("PHI/TASKID", patientInformation.taskid);
 
     return true;
 }
