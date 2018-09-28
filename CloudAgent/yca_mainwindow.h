@@ -10,9 +10,30 @@
 #include "yca_transferindicator.h"
 
 
-namespace Ui {
-class ycaMainWindow;
+namespace Ui
+{
+    class ycaMainWindow;
 }
+
+
+class ycaWorker : public QObject
+{
+    Q_OBJECT
+
+public:
+    ycaWorker();
+    void shutdown();
+
+public slots:
+    void startTimer();
+    void stopTimer();
+    void timerCall();
+
+private:
+    QThread transferThread;
+    QTimer  transferTimer;
+};
+
 
 class ycaMainWindow : public QMainWindow
 {
@@ -49,6 +70,8 @@ private:
 
     yctConfiguration config;
     ycaTransferIndicator indicator;
+
+    ycaWorker transferWorker;
 
 };
 

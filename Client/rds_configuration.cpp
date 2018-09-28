@@ -6,7 +6,7 @@ rdsConfiguration::rdsConfiguration()
 {
     // Read information about the system from the environment variables
     infoSerialNumber   =QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER",  "0");
-    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "");
+    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unknown");
 
     // Read information specifically for NumarisX
     if (QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME","")=="Numaris/X")

@@ -10,6 +10,45 @@
 #include "../CloudTools/yct_aws/qtaws.h"
 
 
+
+ycaWorker::ycaWorker()
+{
+    moveToThread(&transferThread);
+    transferTimer.moveToThread(&transferThread);
+    transferThread.start();
+    QMetaObject::invokeMethod(this, "startTimer", Qt::QueuedConnection);
+}
+
+
+void ycaWorker::shutdown()
+{
+    QMetaObject::invokeMethod(this, "stopTimer", Qt::QueuedConnection);
+}
+
+
+void ycaWorker::startTimer()
+{
+    this->connect(&transferTimer, SIGNAL(timeout()), SLOT(timerCall()), Qt::DirectConnection);
+    transferTimer.setInterval(1000);
+    transferTimer.start();
+}
+
+
+void ycaWorker::stopTimer()
+{
+    transferTimer.stop();
+    transferThread.quit();
+}
+
+
+void ycaWorker::timerCall()
+{
+    transferTimer.stop();
+    qInfo() << "Called";
+    transferTimer.start();
+}
+
+
 ycaMainWindow::ycaMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ycaMainWindow)
@@ -47,6 +86,7 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
 
     indicator.setMainDialog((QDialog*) this);
     config.loadConfiguration();
+
 }
 
 
@@ -82,6 +122,7 @@ void ycaMainWindow::callShutDown(bool askConfirmation)
 
         if (ret==QMessageBox::Yes)
         {
+            transferWorker.shutdown();
             qApp->quit();
         }
     }
@@ -176,4 +217,5 @@ void ycaMainWindow::on_pushButton_5_clicked()
 void ycaMainWindow::on_pushButton_3_clicked()
 {
     indicator.hideIndicator();
+    trayIcon->showMessage("YarraCloud", "Case has been uploaded\nCase ID: 4IKX8", QSystemTrayIcon::NoIcon);
 }

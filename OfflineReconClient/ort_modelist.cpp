@@ -12,6 +12,34 @@
 #endif
 
 
+ortModeEntry::ortModeEntry()
+{
+    idName="";
+    readableName="";
+    protocolTag="";
+    mailConfirmation="";
+    requiresACC=true;
+    requiresAdjScans=false;
+    minimumSizeMB=1024;
+    requiredServerType="";
+    computeMode=OnPremise;
+
+    paramLabel="";
+    paramDescription="";
+    paramDefault=0;
+    paramMin=0;
+    paramMax=0;
+    paramIsFloat=false;
+
+    param2Label="";
+    param2Description="";
+    param2Default=0;
+    param2Min=0;
+    param2Max=0;
+    param2IsFloat=false;
+}
+
+
 ortModeList::ortModeList()
 {
     network=0;

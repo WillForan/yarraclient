@@ -7,8 +7,8 @@ ortConfiguration::ortConfiguration()
     ortSystemName=ORT_INVALID;
 
     infoSerialNumber   =QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER",   "0");
-    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "");
-    infoSoftwareVersion=QProcessEnvironment::systemEnvironment().value("SOFTWARE_VERSION","");
+    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unkown");
+    infoSoftwareVersion=QProcessEnvironment::systemEnvironment().value("SOFTWARE_VERSION","Unkown");
 }
 
 

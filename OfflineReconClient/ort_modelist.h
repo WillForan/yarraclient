@@ -15,6 +15,8 @@ public:
         Elastic
     };
 
+    ortModeEntry();
+
     QString     idName;
     QString     readableName;
     QString     protocolTag;

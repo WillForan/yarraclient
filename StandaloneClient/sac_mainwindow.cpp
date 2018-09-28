@@ -620,6 +620,7 @@ bool sacMainWindow::generateTaskFile(Task &a_task, bool cloudRecon)
             taskFile.setValue("Task/ScanProtocol", a_task.protocolName);
             taskFile.setValue("Task/ReconName", a_task.modeReadable);
             taskFile.setValue("Task/ParamValue", a_task.paramValue);
+            taskFile.setValue("Task/EMailNotification", a_task.notification);
 
             taskFile.setValue("Information/SystemName", network.systemName);
             taskFile.setValue("Information/ScanFileSize", a_task.scanFileSize);
@@ -636,7 +637,6 @@ bool sacMainWindow::generateTaskFile(Task &a_task, bool cloudRecon)
             {
                 taskFile.setValue("Task/ACC", a_task.accNumber);
                 taskFile.setValue("Task/PatientName", a_task.patientName);
-                taskFile.setValue("Task/EMailNotification", a_task.notification);
             }
             else
             {
@@ -839,7 +839,7 @@ int sacMainWindow::detectMode(QString protocol)
 
     for (int i=0; i<modeList.modes.count(); i++)
     {
-        if (protocol.contains(modeList.modes.at(i)->protocolTag))
+        if ((!modeList.modes.at(i)->protocolTag.isEmpty()) && (protocol.contains(modeList.modes.at(i)->protocolTag)))
         {
             detectedMode=i;
             break;

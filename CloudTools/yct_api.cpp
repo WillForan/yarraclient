@@ -61,6 +61,7 @@ bool yctAPI::validateUser()
     return canSubmit;
 }
 
+#define keycmp(a,b) QString::compare(a,b,Qt::CaseInsensitive)==0
 
 int yctAPI::readModeList(ortModeList* modeList)
 {
@@ -88,12 +89,10 @@ int yctAPI::readModeList(ortModeList* modeList)
 
     for (int i=0; i<jsonReply.array().count(); i++)
     {
-        QString idName="";
-        QString readableName="";
-        QString tag="";
-
         QJsonObject jsonObject=jsonReply.array()[i].toObject();
         QStringList keys = jsonObject.keys();
+
+        ortModeEntry* newEntry=new ortModeEntry;
 
         foreach(QString key, keys)
         {
@@ -101,7 +100,7 @@ int yctAPI::readModeList(ortModeList* modeList)
 
             if (key=="Name")
             {
-                idName=jsonObject[key].toString();
+                newEntry->idName=jsonObject[key].toString();
             }
 
             if (key=="ClientConfig")
@@ -111,14 +110,49 @@ int yctAPI::readModeList(ortModeList* modeList)
 
                 foreach(QString clientKey, clientConfigKeys)
                 {
-                    if (clientKey=="Name")
+                    if (keycmp(clientKey,"Name"))
                     {
-                        readableName=clientConfig[clientKey].toString();
+                        newEntry->readableName=clientConfig[clientKey].toString();
                     }
 
-                    if (clientKey=="Tag")
+                    if (keycmp(clientKey,"Tag"))
                     {
-                        tag=clientConfig[clientKey].toString();
+                        newEntry->protocolTag=clientConfig[clientKey].toString();
+                    }
+
+                    if (keycmp(clientKey,"MinimumSizeMB"))
+                    {
+                        newEntry->minimumSizeMB=clientConfig[clientKey].toDouble();
+                    }
+
+                    if (keycmp(clientKey,"ParamLabel"))
+                    {
+                        newEntry->paramLabel=clientConfig[clientKey].toString();
+                    }
+
+                    if (keycmp(clientKey,"ParamDescription"))
+                    {
+                        newEntry->paramDescription=clientConfig[clientKey].toString();
+                    }
+
+                    if (keycmp(clientKey,"ParamDefault"))
+                    {
+                        newEntry->paramDefault=clientConfig[clientKey].toDouble();
+                    }
+
+                    if (keycmp(clientKey,"ParamMin"))
+                    {
+                        newEntry->paramMin=clientConfig[clientKey].toDouble();
+                    }
+
+                    if (keycmp(clientKey,"ParamMax"))
+                    {
+                        newEntry->paramMax=clientConfig[clientKey].toDouble();
+                    }
+
+                    if (keycmp(clientKey,"ParamIsFloat"))
+                    {
+                        newEntry->paramIsFloat=clientConfig[clientKey].toBool();
                     }
 
                     //qDebug() << "ClientConfig: " << clientKey << ": " << clientConfig[clientKey].toString();
@@ -126,26 +160,35 @@ int yctAPI::readModeList(ortModeList* modeList)
 
                 //qDebug() << config;
             }
-            // TODO: Properly parse the json structure
         }
 
-        if (!idName.isEmpty())
+        if (!newEntry->idName.isEmpty())
         {
-            if (readableName.isEmpty())
+            if (newEntry->readableName.isEmpty())
             {
-                readableName=idName;
+                newEntry->readableName=newEntry->idName;
             }
 
-            ortModeEntry* newEntry=new ortModeEntry;
-            newEntry->idName=idName;
-            newEntry->readableName=readableName;
-            newEntry->protocolTag=tag;
-            newEntry->computeMode=ortModeEntry::Cloud;
+            // If the parameter is an integer parameter, then round all values to integers
+            if (!newEntry->paramIsFloat)
+            {
+                newEntry->paramDefault=int(newEntry->paramDefault);
+                newEntry->paramMin    =int(newEntry->paramMin);
+                newEntry->paramMax    =int(newEntry->paramMax);
+            }
+
             // Cloud modes always require an ACC because the destination (PACS/drive)
             // can vary among customers
             newEntry->requiresACC=true;
+            newEntry->computeMode=ortModeEntry::Cloud;
+
             modeList->modes.append(newEntry);
             cloudModes++;
+        }
+        else
+        {
+            delete newEntry;
+            newEntry=0;
         }
     }
 
