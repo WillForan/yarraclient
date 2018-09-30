@@ -16,13 +16,18 @@ namespace Ui
 }
 
 
+class ycaMainWindow;
+
 class ycaWorker : public QObject
 {
     Q_OBJECT
 
 public:
     ycaWorker();
+    void setParent(ycaMainWindow* myParent);
+
     void shutdown();
+    void trigger();
 
 public slots:
     void startTimer();
@@ -32,6 +37,11 @@ public slots:
 private:
     QThread transferThread;
     QTimer  transferTimer;
+
+    bool processingActive;
+
+    ycaMainWindow* parent;
+
 };
 
 
@@ -49,6 +59,10 @@ protected:
 public slots:
     void callShutDown(bool askConfirmation=true);
     void callSubmit();
+
+    void showIndicator();
+    void hideIndicator();
+
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);

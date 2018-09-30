@@ -1,10 +1,10 @@
 #include "yca_mainwindow.h"
 #include "yca_global.h"
-
 #include "ui_yca_mainwindow.h"
 
 #include <QDesktopWidget>
 #include <QMessageBox>
+#include <QTest>
 
 #include "../CloudTools/yct_common.h"
 #include "../CloudTools/yct_aws/qtaws.h"
@@ -13,9 +13,19 @@
 
 ycaWorker::ycaWorker()
 {
+    qInfo() << "Main Thread: " << QThread::currentThreadId();
+
+    processingActive=false;
+
     moveToThread(&transferThread);
     transferTimer.moveToThread(&transferThread);
     transferThread.start();
+}
+
+
+void ycaWorker::setParent(ycaMainWindow* myParent)
+{
+    parent=myParent;
     QMetaObject::invokeMethod(this, "startTimer", Qt::QueuedConnection);
 }
 
@@ -26,10 +36,19 @@ void ycaWorker::shutdown()
 }
 
 
+void ycaWorker::trigger()
+{
+    if (!processingActive)
+    {
+        QMetaObject::invokeMethod(this, "timerCall", Qt::QueuedConnection);
+    }
+}
+
+
 void ycaWorker::startTimer()
 {
     this->connect(&transferTimer, SIGNAL(timeout()), SLOT(timerCall()), Qt::DirectConnection);
-    transferTimer.setInterval(1000);
+    transferTimer.setInterval(60000);
     transferTimer.start();
 }
 
@@ -43,9 +62,17 @@ void ycaWorker::stopTimer()
 
 void ycaWorker::timerCall()
 {
+    processingActive=true;
     transferTimer.stop();
-    qInfo() << "Called";
+    QMetaObject::invokeMethod(parent, "showIndicator", Qt::QueuedConnection);
+
+    //qInfo() << "Called. Thread: " << QThread::currentThreadId();
+    QTest::qSleep(5000);
+
+
+    QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
     transferTimer.start();
+    processingActive=false;
 }
 
 
@@ -54,6 +81,7 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     ui(new Ui::ycaMainWindow)
 {
     ui->setupUi(this);
+    transferWorker.setParent(this);
 
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;
@@ -133,9 +161,21 @@ void ycaMainWindow::callShutDown(bool askConfirmation)
 }
 
 
-void ycaMainWindow::callSubmit()
+void ycaMainWindow::showIndicator()
 {
     indicator.showIndicator();
+}
+
+
+void ycaMainWindow::hideIndicator()
+{
+    indicator.hideIndicator();
+}
+
+
+void ycaMainWindow::callSubmit()
+{
+    transferWorker.trigger();
 }
 
 
@@ -210,7 +250,8 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
 
 void ycaMainWindow::on_pushButton_5_clicked()
 {
-    indicator.showIndicator();
+    transferWorker.trigger();
+    //indicator.showIndicator();
 }
 
 
