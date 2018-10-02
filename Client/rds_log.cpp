@@ -38,10 +38,13 @@ void rdsLog::start()
 
     #ifdef YARRA_APP_ORT
         log("");
-        log("ORT Client started (V "+QString(RDS_VERSION)+")");
+        log("ORT Client started (V "+QString(ORT_VERSION)+")");
         log("Detected Syngo version: "+RTI->getSyngoMRVersionString(RTI->getSyngoMRVersion()));
     #endif
 
+    #ifdef YARRA_APP_YCA
+        log("Service started (V "+QString(YCA_VERSION)+")");
+    #endif
 
     if (RTI->isSimulation())
     {
@@ -99,6 +102,10 @@ QString rdsLog::getLogFilename()
 
 #ifdef YARRA_APP_SAC
     return "sac.log";
+#endif
+
+#ifdef YARRA_APP_YCA
+    return QString(RDS_DIR_LOG)+"/yca.log";
 #endif
 }
 

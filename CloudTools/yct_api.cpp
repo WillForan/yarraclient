@@ -2,6 +2,7 @@
 #include "yct_common.h"
 #include "yct_configuration.h"
 #include "yct_aws/qtaws.h"
+#include "../CloudAgent/yca_task.h"
 
 #include "../OfflineReconClient/ort_modelist.h"
 #include "../Client/rds_global.h"
@@ -60,6 +61,9 @@ bool yctAPI::validateUser()
 
     return canSubmit;
 }
+
+
+#ifdef YARRA_APP_SAC
 
 #define keycmp(a,b) QString::compare(a,b,Qt::CaseInsensitive)==0
 
@@ -208,6 +212,8 @@ void yctAPI::launchCloudAgent(QString params)
     QProcess::startDetached(cmd);
 }
 
+#endif
+
 
 bool yctAPI::createCloudFolders()
 {
@@ -256,5 +262,11 @@ QString yctAPI::createUUID()
     // Remove the curly braces enclosing the id
     uuidString=uuidString.mid(1,uuidString.length()-2);
     return uuidString;
+}
+
+
+bool yctAPI::uploadCase(ycaTask* task)
+{
+    return true;
 }
 

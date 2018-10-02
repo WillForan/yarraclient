@@ -8,6 +8,8 @@
 
 #include "../CloudTools/yct_configuration.h"
 #include "yca_transferindicator.h"
+#include "yca_task.h"
+#include "../CloudTools/yct_api.h"
 
 
 namespace Ui
@@ -21,6 +23,14 @@ class ycaMainWindow;
 class ycaWorker : public QObject
 {
     Q_OBJECT
+
+enum Process
+{
+    Idle=0,
+    Upload,
+    Download,
+    Storage
+};
 
 public:
     ycaWorker();
@@ -38,9 +48,15 @@ private:
     QThread transferThread;
     QTimer  transferTimer;
 
-    bool processingActive;
+    bool    processingActive;
+    QString currentTaskID;
+    Process currentProcess;
+
+    bool    userInvalidShown;
 
     ycaMainWindow* parent;
+
+    void updateParentStatus();
 
 };
 
@@ -62,16 +78,15 @@ public slots:
 
     void showIndicator();
     void hideIndicator();
-
+    void showNotification(QString text);
+    void showStatus(QString text);
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
     void on_closeButton_clicked();
     void on_closeContextButton_clicked();
-
     void on_statusRefreshButton_clicked();
-
     void on_pushButton_5_clicked();
     void on_pushButton_3_clicked();
 
@@ -82,11 +97,17 @@ private:
     QMenu* trayIconMenu;
     QAction* trayItemShutdown;
 
-    yctConfiguration config;
+    yctConfiguration     config;
     ycaTransferIndicator indicator;
+    ycaWorker            transferWorker;
+    ycaTaskList          taskList;
 
-    ycaWorker transferWorker;
+public:
+    ycaTaskHelper        taskHelper;
+    yctAPI               cloud;
 
 };
 
+
 #endif // YCA_MAINWINDOW_H
+
