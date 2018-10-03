@@ -8,6 +8,7 @@ class yctAPI;
 
 class ycaTask
 {    
+public:
     enum TaskStatus
     {
         Invalid=0,
@@ -22,7 +23,6 @@ class ycaTask
         ProcessingError
     };
 
-public:
     ycaTask();
 
     TaskStatus  status;
@@ -32,10 +32,14 @@ public:
     QString     shortcode;
     QString     reconMode;
 
+    QString     mrn;
+    QString     dob;
+    QString     acc;
+    QString     taskID;
+
     QString     taskFilename;
     QString     phiFilename;
     QStringList twixFilenames;
-
 };
 
 typedef QList<ycaTask*> ycaTaskList;
@@ -51,7 +55,8 @@ public:
 
     bool getScheduledTasks(ycaTaskList& taskList);
     bool getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool includeArchive);
-    bool checkScanfiles(QString taskID, ycaTask* task);
+    bool checkScanfiles(QString taskID, ycaTask* task);    
+    bool readPHIData(QString filepath, ycaTask* task);
 
     void clearTaskList(ycaTaskList& list);
 

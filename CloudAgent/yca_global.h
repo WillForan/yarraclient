@@ -5,5 +5,6 @@
 
 #define YCA_VERSION "0.1b1"
 
+#define YCA_HELPER_TIMEOUT 300000
 
 #endif // YCA_GLOBAL_H

@@ -155,7 +155,6 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     ui(new Ui::ycaMainWindow)
 {
     ui->setupUi(this);
-    transferWorker.setParent(this);
 
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;
@@ -200,11 +199,30 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setWindowIcon(YCA_ICON);
         msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
 
+        transferWorker.shutdown();
         QTimer::singleShot(0, qApp, SLOT(quit()));
         return;
     }
 
+    QDir appDir(qApp->applicationDirPath());
+    if (!appDir.exists("YCA_helper.exe"))
+    {
+        QMessageBox msgBox(0);
+        msgBox.setWindowTitle("Yarra Cloud Agent");
+        msgBox.setText("Unable to find folder application YCA_helper.exe.<br>Please check you local client installation.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowIcon(YCA_ICON);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
+
+        transferWorker.shutdown();
+        QTimer::singleShot(0, qApp, SLOT(quit()));
+        return;
+    }
+
+    transferWorker.setParent(this);
     taskHelper.clearTaskList(taskList);
 }
 
@@ -303,13 +321,21 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
     taskHelper.getAllTasks(taskList, true, false);
 
     ui->activeTasksTable->setRowCount(taskList.count());
-    ui->activeTasksTable->setColumnCount(1);
+    ui->activeTasksTable->setColumnCount(5);
 
-    ui->activeTasksTable->setHorizontalHeaderItem(0,new QTableWidgetItem("Patient"));
+    ui->activeTasksTable->setHorizontalHeaderItem(0,new QTableWidgetItem("Status"));
+    ui->activeTasksTable->setHorizontalHeaderItem(1,new QTableWidgetItem("Patient"));
+    ui->activeTasksTable->setHorizontalHeaderItem(2,new QTableWidgetItem("ACC"));
+    ui->activeTasksTable->setHorizontalHeaderItem(3,new QTableWidgetItem("MRN"));
+    ui->activeTasksTable->setHorizontalHeaderItem(4,new QTableWidgetItem("ID"));
 
     for (int i=0; i<taskList.count(); i++)
     {
-        ui->activeTasksTable->setItem(i,0,new QTableWidgetItem(taskList.at(i)->uuid));
+        ui->activeTasksTable->setItem(i,0,new QTableWidgetItem(""));
+        ui->activeTasksTable->setItem(i,1,new QTableWidgetItem(taskList.at(i)->patientName));
+        ui->activeTasksTable->setItem(i,2,new QTableWidgetItem(taskList.at(i)->acc));
+        ui->activeTasksTable->setItem(i,3,new QTableWidgetItem(taskList.at(i)->mrn));
+        ui->activeTasksTable->setItem(i,4,new QTableWidgetItem(taskList.at(i)->uuid));
     }
 
 

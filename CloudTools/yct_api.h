@@ -1,15 +1,19 @@
 #ifndef YCTAPI_H
 #define YCTAPI_H
 
+#include <QtWidgets>
 #include <QString>
+#include <QStringList>
 
 
 class yctConfiguration;
 class ortModeList;
 class ycaTask;
 
-class yctAPI
+class yctAPI : public QObject
 {
+    Q_OBJECT
+
 public:
 
     yctAPI();
@@ -24,13 +28,17 @@ public:
     QString getCloudPath(QString folder);
     QString createUUID();
 
-    bool    uploadCase(ycaTask* task);
+    bool    uploadCase  (ycaTask* task);
+    bool    downloadCase(ycaTask* task);
 
     QString errorReason;
 
 protected:
 
     yctConfiguration* config;
+
+    QStringList helperAppOutput;
+    int callHelperApp(QString cmd);
 
 };
 

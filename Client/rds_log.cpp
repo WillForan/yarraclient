@@ -1,6 +1,9 @@
 #include "rds_log.h"
 #include "rds_global.h"
 
+#ifdef YARRA_APP_ORT
+    #include "ort_global.h"
+#endif
 
 rdsLog::rdsLog()
 {

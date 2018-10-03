@@ -33,6 +33,8 @@ void ycaTaskHelper::setCloudInstance(yctAPI* apiInstance)
 
 bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
 {
+    // TODO: Insert mutex
+
     clearTaskList(taskList);
 
     QString outPath=cloud->getCloudPath(YCT_CLOUDFOLDER_OUT);
@@ -57,15 +59,15 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
 
     for (int i=0; i<fileList.count(); i++)
     {
-        QString taskID=fileList.at(i).baseName();
+        QString uuid=fileList.at(i).baseName();
 
-        if (outDir.exists(taskID+".lock"))
+        if (outDir.exists(uuid+".lock"))
         {
             // File is currently being written. So ignore it for now.
             continue;
         }
 
-        if (!phiDir.exists(taskID+".phi"))
+        if (!phiDir.exists(uuid+".phi"))
         {
             // PHI file is missing! Something must be wrong.
             // TODO: Error reporting
@@ -73,9 +75,9 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
         }
 
         ycaTask* task=new ycaTask();
-        task->uuid=taskID;
+        task->uuid=uuid;
 
-        if (!checkScanfiles(taskID,task))
+        if (!checkScanfiles(uuid,task))
         {
             // Scan files are missing! Something must be wrong.
             // TODO: Error reporting
@@ -103,6 +105,8 @@ void ycaTaskHelper::clearTaskList(ycaTaskList& list)
 
 bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool includeArchive)
 {
+    // TODO: Insert mutex
+
     clearTaskList(taskList);
 
     QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
@@ -127,9 +131,14 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
 
         for (int i=0; i<fileList.count(); i++)
         {
-            QString taskID=fileList.at(i).baseName();
+            QString uuid=fileList.at(i).baseName();
             ycaTask* task=new ycaTask();
-            task->uuid=taskID;
+            task->uuid=uuid;
+            // task->status
+            if (!readPHIData(fileList.at(i).absoluteFilePath(),task))
+            {
+                // TODO: Error handling
+            }
 
             taskList.append(task);
         }
@@ -141,9 +150,14 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
 
         for (int i=0; i<fileList.count(); i++)
         {
-            QString taskID=fileList.at(i).baseName();
+            QString uuid=fileList.at(i).baseName();
             ycaTask* task=new ycaTask();
-            task->uuid=taskID;
+            task->uuid=uuid;
+            task->status=ycaTask::Archvied;
+            if (!readPHIData(fileList.at(i).absoluteFilePath(),task))
+            {
+                // TODO: Error handling
+            }
 
             taskList.append(task);
         }
@@ -218,3 +232,24 @@ bool ycaTaskHelper::checkScanfiles(QString taskID, ycaTask* task)
     return true;
 }
 
+
+bool ycaTaskHelper::readPHIData(QString filepath, ycaTask* task)
+{
+    QSettings phiFile(filepath, QSettings::IniFormat);
+
+    if (phiFile.value("PHI/UUID","").toString() != task->uuid)
+    {
+        // UUID does not match. Something is wrong
+        return false;
+    }
+
+    task->patientName=phiFile.value("PHI/NAME","").toString();
+    task->mrn        =phiFile.value("PHI/MRN","").toString();
+    task->dob        =phiFile.value("PHI/DOB","").toString();
+    task->acc        =phiFile.value("PHI/ACC","").toString();
+    task->taskID     =phiFile.value("PHI/TASKID","").toString();
+
+    // TODO: Error checking
+
+    return true;
+}
