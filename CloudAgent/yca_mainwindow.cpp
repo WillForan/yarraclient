@@ -330,7 +330,9 @@ void ycaMainWindow::on_closeContextButton_clicked()
 
 void ycaMainWindow::on_statusRefreshButton_clicked()
 {
+    mutex.lock();
     taskHelper.getAllTasks(taskList, true, false);
+    mutex.unlock();
 
     ui->activeTasksTable->setRowCount(taskList.count());
     ui->activeTasksTable->setColumnCount(5);

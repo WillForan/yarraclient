@@ -72,6 +72,8 @@ public:
 
     bool shuttingDown;
 
+    QMutex  mutex;
+
 protected:
     void closeEvent(QCloseEvent* event);
 

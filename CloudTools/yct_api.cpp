@@ -323,15 +323,21 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup)
     }
 
     cmdLine += path+task->taskFilename;
-
     qInfo() << cmdLine;
 
-    /*
-    if (callHelperApp(cmdLine)==0)
+    int exitcode=callHelperApp(cmdLine);
+    if (exitcode==0)
     {
         success=true;
     }
-    */
+    else
+    {
+        success=false;
+        // TODO: Error handling
+    }
+
+    // TODO: If successful, delete TWIX and task file from OUT folder
+    //       Enclose in global mutex
 
     return success;
 }
@@ -339,7 +345,40 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup)
 
 bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup)
 {
-    return true;
+    bool success=false;
+
+    QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
+                    setup->region + " " + setup->inBucket + " download ";
+
+    QString path=getCloudPath(YCT_CLOUDFOLDER_IN)+"/"+task->taskID;
+
+    QDir dir(getCloudPath(YCT_CLOUDFOLDER_IN));
+    if (!dir.mkpath(path))
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
+    // TODO: Check available disk space
+
+    cmdLine += path;
+    qInfo() << cmdLine;
+
+    int exitcode=callHelperApp(cmdLine);
+    if (exitcode==0)
+    {
+        success=true;
+    }
+    else
+    {
+        success=false;
+        // TODO: Error handling
+    }
+
+    // TODO: If successful, move PHI file to ARCHIVE
+    //       Enclose in global mutex
+
+    return success;
 }
 
 
