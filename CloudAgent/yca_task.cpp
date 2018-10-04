@@ -76,6 +76,7 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
 
         ycaTask* task=new ycaTask();
         task->uuid=uuid;
+        task->taskFilename=uuid+".task";
 
         if (!checkScanfiles(uuid,task))
         {

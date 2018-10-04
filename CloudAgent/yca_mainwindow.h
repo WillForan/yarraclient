@@ -39,6 +39,10 @@ public:
     void shutdown();
     void trigger();
 
+    bool    processingActive;
+    QString currentTaskID;
+    Process currentProcess;
+
 public slots:
     void startTimer();
     void stopTimer();
@@ -48,11 +52,8 @@ private:
     QThread transferThread;
     QTimer  transferTimer;
 
-    bool    processingActive;
-    QString currentTaskID;
-    Process currentProcess;
-
-    bool    userInvalidShown;
+    yctTransferInformation transferInformation;
+    bool                   userInvalidShown;
 
     ycaMainWindow* parent;
 
@@ -68,6 +69,8 @@ class ycaMainWindow : public QMainWindow
 public:
     explicit ycaMainWindow(QWidget *parent = 0);
     ~ycaMainWindow();
+
+    bool shuttingDown;
 
 protected:
     void closeEvent(QCloseEvent* event);

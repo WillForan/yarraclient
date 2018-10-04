@@ -49,6 +49,8 @@ int main(int argc, char *argv[])
     ycaApplication a(argc, argv);
     Q_INIT_RESOURCE(yca);
 
+    bool triggerSubmission=false;
+
     // If the application is already running, send a message instead of launching
     // another instance
     if (a.isRunning())
@@ -65,6 +67,17 @@ int main(int argc, char *argv[])
         // Shutdown this instance
         return 0;
     }
+    else
+    {
+        if (argc>1)
+        {
+            if (QString(argv[1])=="submit")
+            {
+                triggerSubmission=true;
+            }
+        }
+
+    }
 
     // Set color scheme
     qApp->setStyle(QStyleFactory::create("Fusion"));
@@ -75,6 +88,10 @@ int main(int argc, char *argv[])
 
     ycaMainWindow w;
     a.setActivationWindow(&w, false);
+    if ((triggerSubmission) && (!w.shuttingDown))
+    {
+        QTimer::singleShot(0, &w, SLOT(callSubmit()));
+    }
     a.exec();
     a.setActivationWindow(0, false);
 

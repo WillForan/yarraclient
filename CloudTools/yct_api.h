@@ -10,6 +10,19 @@ class yctConfiguration;
 class ortModeList;
 class ycaTask;
 
+
+class yctTransferInformation
+{
+public:
+    yctTransferInformation();
+
+    QString username;
+    QString inBucket;
+    QString outBucket;
+    QString region;
+};
+
+
 class yctAPI : public QObject
 {
     Q_OBJECT
@@ -24,12 +37,12 @@ public:
     void    launchCloudAgent(QString params="");
 #endif
     bool    createCloudFolders();
-    bool    validateUser();
+    bool    validateUser(yctTransferInformation* transferInformation=0);
     QString getCloudPath(QString folder);
     QString createUUID();
 
-    bool    uploadCase  (ycaTask* task);
-    bool    downloadCase(ycaTask* task);
+    bool    uploadCase  (ycaTask* task, yctTransferInformation* setup);
+    bool    downloadCase(ycaTask* task, yctTransferInformation* setup);
 
     QString errorReason;
 

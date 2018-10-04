@@ -21,6 +21,16 @@
 #include <QProcess>
 
 
+yctTransferInformation::yctTransferInformation()
+{
+    username="";
+    inBucket="";
+    outBucket="";
+    region="";
+}
+
+
+
 yctAPI::yctAPI()
 {
     config=0;
@@ -34,7 +44,7 @@ void yctAPI::setConfiguration(yctConfiguration* configuration)
 }
 
 
-bool yctAPI::validateUser()
+bool yctAPI::validateUser(yctTransferInformation* transferInformation)
 {
     QtAWSRequest awsRequest(config->key, config->secret);
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/user_status",
@@ -69,6 +79,26 @@ bool yctAPI::validateUser()
         {
             canSubmit=jsonObject[key].toBool();
             errorReason="Missing payment method or account has been disabled.";
+        }
+
+        if (transferInformation!=0)
+        {
+            if (key=="username")
+            {
+                transferInformation->username=jsonObject[key].toString();
+            }
+            if (key=="in_bucket")
+            {
+                transferInformation->inBucket=jsonObject[key].toString();
+            }
+            if (key=="out_bucket")
+            {
+                transferInformation->outBucket=jsonObject[key].toString();
+            }
+            if (key=="region")
+            {
+                transferInformation->region=jsonObject[key].toString();
+            }
         }
     }
 
@@ -278,13 +308,36 @@ QString yctAPI::createUUID()
 }
 
 
-bool yctAPI::uploadCase(ycaTask* task)
+bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup)
 {
-    return true;
+    bool success=false;
+
+    QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
+                    setup->region + " " + setup->inBucket + " upload ";
+
+    QString path=getCloudPath(YCT_CLOUDFOLDER_OUT)+"/";
+
+    for (int i=0; i<task->twixFilenames.count(); i++)
+    {
+        cmdLine += path+task->twixFilenames.at(i)+" ";
+    }
+
+    cmdLine += path+task->taskFilename;
+
+    qInfo() << cmdLine;
+
+    /*
+    if (callHelperApp(cmdLine)==0)
+    {
+        success=true;
+    }
+    */
+
+    return success;
 }
 
 
-bool yctAPI::downloadCase(ycaTask* task)
+bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup)
 {
     return true;
 }
@@ -294,9 +347,12 @@ int yctAPI::callHelperApp(QString cmd)
 {
     // Clear the output buffer
     helperAppOutput.clear();
+    int exitcode=-1;
+    bool success=false;
 
     QProcess *myProcess = new QProcess(0);
     myProcess->setReadChannel(QProcess::StandardOutput);
+    QString helperCmd=qApp->applicationDirPath()+"/YCA_helper.exe";
 
     QStringList args;
     args << cmd;
@@ -304,11 +360,8 @@ int yctAPI::callHelperApp(QString cmd)
     args.clear();
     args << argLine.split(" ");
 
-    QString helperCmd=qApp->applicationDirPath()+"/YCA_helper.exe";
     //RTI->debug("Calling RAID tool: " + raidToolCmd);
     //RTI->debug("Arguments: " + argLine );
-
-    bool success=false;
 
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
@@ -372,6 +425,7 @@ int yctAPI::callHelperApp(QString cmd)
     {
         // The process timeed out. Probably some error occured.
         RTI->log("ERROR: Timeout during call of YCA helper!");
+        exitcode=-1;
     }
     else
     {
@@ -389,10 +443,15 @@ int yctAPI::callHelperApp(QString cmd)
                 helperAppOutput << QString(buf);
             }
         } while (lineLength!=-1);
+
+        if (myProcess->exitStatus()==QProcess::NormalExit)
+        {
+            exitcode=myProcess->exitCode();
+        }
     }
 
     delete myProcess;
     myProcess=0;
 
-    return 0;
+    return exitcode;
 }

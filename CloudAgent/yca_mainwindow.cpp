@@ -75,7 +75,7 @@ void ycaWorker::timerCall()
 
     if (!taskList.empty())
     {
-        if (!parent->cloud.validateUser())
+        if (!parent->cloud.validateUser(&transferInformation))
         {
             if (!userInvalidShown)
             {
@@ -92,13 +92,19 @@ void ycaWorker::timerCall()
             currentProcess=Upload;
             updateParentStatus();
 
-            for (int i=0; i<taskList.count(); i++)
+            // Only upload 10 cases per time, then first download the recon
+            int uploadCount=0;
+
+            while ((!taskList.isEmpty()) && (uploadCount<10))
             {
-                if (!parent->cloud.uploadCase(taskList.at(i)))
+                if (!parent->cloud.uploadCase(taskList.takeFirst(),&transferInformation))
                 {
                     // TODO: Error handling
                 }
+                uploadCount++;
             }
+
+            // Update list again? Maybe new cases have been added meanwhile
 
             QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
         }
@@ -155,6 +161,7 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     ui(new Ui::ycaMainWindow)
 {
     ui->setupUi(this);
+    shuttingDown=false;
 
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;
@@ -179,6 +186,9 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
+    connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
+
+
     ui->versionLabel->setText("Version " + QString(YCA_VERSION) + ", Build date " + QString(__DATE__));
 
     // Center the window on the screen
@@ -202,6 +212,7 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
         msgBox.exec();
 
         transferWorker.shutdown();
+        shuttingDown=true;
         QTimer::singleShot(0, qApp, SLOT(quit()));
         return;
     }
@@ -218,6 +229,7 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
         msgBox.exec();
 
         transferWorker.shutdown();
+        shuttingDown=true;
         QTimer::singleShot(0, qApp, SLOT(quit()));
         return;
     }
