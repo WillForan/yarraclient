@@ -2,7 +2,7 @@
 #include "yct_common.h"
 #include "yct_configuration.h"
 #include "yct_aws/qtaws.h"
-#include "yca_global.h"
+#include "../CloudAgent/yca_global.h"
 #include "../CloudAgent/yca_task.h"
 
 #include "../OfflineReconClient/ort_modelist.h"
@@ -295,7 +295,7 @@ bool yctAPI::createCloudFolders()
 
 QString yctAPI::getCloudPath(QString folder)
 {
-    return qApp->applicationDirPath()+"/"+folder;
+    return qApp->applicationDirPath()+folder;
 }
 
 
@@ -308,12 +308,36 @@ QString yctAPI::createUUID()
 }
 
 
-bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup)
+bool yctAPI::getJobStatus()
+{
+    QtAWSRequest awsRequest(config->key, config->secret);
+    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/jobs",
+                                            QByteArray(), YCT_API_REGION, QByteArray(), QStringList());
+
+    if (!reply.isSuccess())
+    {
+        //qDebug() << reply.anyErrorString();
+        errorReason=reply.anyErrorString();
+
+        if (reply.networkError()==QNetworkReply::ContentOperationNotPermittedError)
+        {
+            errorReason="YarraCloud Key ID or Secret is invalid.";
+        }
+
+        return false;
+    }
+
+    qDebug() << reply.replyData();
+}
+
+
+bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mutex)
 {
     bool success=false;
 
+    // Compose the command line for the help app
     QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
-                    setup->region + " " + setup->inBucket + " upload ";
+                    setup->region + " " + setup->inBucket + " " + task->uuid + " upload ";
 
     QString path=getCloudPath(YCT_CLOUDFOLDER_OUT)+"/";
 
@@ -325,6 +349,9 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup)
     cmdLine += path+task->taskFilename;
     qInfo() << cmdLine;
 
+    // TODO: Batch call if commandline is too long
+
+    // Execute the helper app to perform the multi-part upload
     int exitcode=callHelperApp(cmdLine);
     if (exitcode==0)
     {
@@ -336,19 +363,66 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup)
         // TODO: Error handling
     }
 
-    // TODO: If successful, delete TWIX and task file from OUT folder
-    //       Enclose in global mutex
+    if (success)
+    {
+        // Call the job submission endpoint to trigger the processing
+
+        QString      jsonText="{\"name\":\""+ task->uuid +"\", \"task_file_name\": \"" + task->taskFilename +"\", \"recon_mode\":\"" + task->reconMode + "\"}";
+        QByteArray   jsonString=jsonText.toUtf8();
+        QtAWSRequest awsRequest(config->key, config->secret);
+        QtAWSReply   reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/job_submit",
+                                                  QByteArray(), YCT_API_REGION, jsonString, QStringList());
+
+        if (!reply.isSuccess())
+        {
+            // TODO: Error handling
+
+            errorReason=reply.anyErrorString();
+
+            if (reply.networkError()==QNetworkReply::ContentOperationNotPermittedError)
+            {
+                errorReason="YarraCloud Key ID or Secret is invalid.";
+            }
+
+            success=false;
+        }
+
+        qDebug() << reply.replyData();
+
+        // TODO: Evaluate returned json
+    }
+
+    // If successful, delete TWIX and task file from OUT folder
+    if (success)
+    {
+        mutex->lock();
+
+        for (int i=0; i<task->twixFilenames.count(); i++)
+        {
+            if (!QFile::remove(path+task->twixFilenames.at(i)))
+            {
+                // TODO: Error handling
+            }
+        }
+
+        if (!QFile::remove(path+task->taskFilename))
+        {
+            // TODO: Error handling
+        }
+
+        mutex->unlock();
+    }
 
     return success;
 }
 
 
-bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup)
+bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mutex)
 {
     bool success=false;
 
     QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
-                    setup->region + " " + setup->inBucket + " download ";
+                    setup->region + " " + setup->inBucket + " " + task->uuid + " download ";
 
     QString path=getCloudPath(YCT_CLOUDFOLDER_IN)+"/"+task->taskID;
 

@@ -24,12 +24,14 @@ yctTWIXAnonymizer::yctTWIXAnonymizer()
 }
 
 
-bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath, QString acc, QString taskid, QString uuid)
+bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
+                                    QString acc, QString taskid, QString uuid, QString mode)
 {
     // Populate the externally provided information
     patientInformation.uuid  =uuid;
     patientInformation.acc   =acc;
     patientInformation.taskid=taskid;
+    patientInformation.mode  =mode;
 
     bool result=false;
 
@@ -294,6 +296,7 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString twixFilename, QString p
     DBG("ACC:           " + patientInformation.acc.toStdString());
     DBG("UUID:          " + patientInformation.uuid.toStdString());
     DBG("TaskID:        " + patientInformation.taskid.toStdString());
+    DBG("Mode:          " + patientInformation.mode.toStdString());
     DBG("");
 
     QDir phiDir(phiPath);
@@ -319,6 +322,7 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString twixFilename, QString p
     phiFile.setValue("PHI/ACC",    patientInformation.acc);
     phiFile.setValue("PHI/UUID",   patientInformation.uuid);
     phiFile.setValue("PHI/TASKID", patientInformation.taskid);
+    phiFile.setValue("PHI/MODE",   patientInformation.mode);
 
     return true;
 }

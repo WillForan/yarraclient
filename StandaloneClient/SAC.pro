@@ -49,7 +49,8 @@ HEADERS  += sac_mainwindow.h \
     ../CloudTools/yct_common.h \
     ../CloudTools/yct_aws/qtawsqnam.h \
     ../CloudTools/yct_aws/qtaws.h \
-    ../CloudTools/yct_prepare/yct_twix_anonymizer.h
+    ../CloudTools/yct_prepare/yct_twix_anonymizer.h \
+    ../CloudTools/yct_api.h
 
 
 FORMS    += sac_mainwindow.ui \

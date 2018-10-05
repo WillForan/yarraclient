@@ -576,7 +576,7 @@ bool sacMainWindow::processCloudRecon()
     {
         if (!twixAnonymizer.processFile(cloud.getCloudPath(YCT_CLOUDFOLDER_OUT)+"/"+task.scanFilename,
                                         cloud.getCloudPath(YCT_CLOUDFOLDER_PHI),
-                                        task.accNumber, task.taskID, task.uuid))
+                                        task.accNumber, task.taskID, task.uuid, task.mode))
         {
             // TODO: Error handling
             error=true;
@@ -588,6 +588,7 @@ bool sacMainWindow::processCloudRecon()
     if (!error)
     {
         generateTaskFile(task, true);
+        cloud.launchCloudAgent("submit");
     }
 
     // Restore the on-premise server location

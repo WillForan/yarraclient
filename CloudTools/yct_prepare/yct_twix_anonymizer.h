@@ -31,6 +31,7 @@ public:
     QString acc;
     QString uuid;
     QString taskid;
+    QString mode;
 };
 
 
@@ -62,7 +63,7 @@ public:
 
     yctTWIXAnonymizer();
 
-    bool processFile(QString twixFilename, QString phiPath, QString acc, QString taskid, QString uuid);
+    bool processFile(QString twixFilename, QString phiPath, QString acc, QString taskid, QString uuid, QString mode);
     bool processMeasurement(QFile* file);
     bool checkAndStorePatientData(QString twixFilename, QString phiPath);
 

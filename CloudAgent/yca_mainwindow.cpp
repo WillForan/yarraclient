@@ -97,7 +97,7 @@ void ycaWorker::timerCall()
 
             while ((!taskList.isEmpty()) && (uploadCount<10))
             {
-                if (!parent->cloud.uploadCase(taskList.takeFirst(),&transferInformation))
+                if (!parent->cloud.uploadCase(taskList.takeFirst(), &transferInformation, &parent->mutex))
                 {
                     // TODO: Error handling
                 }
@@ -114,6 +114,7 @@ void ycaWorker::timerCall()
     // TODO: Download incoming jobs on at a time
     currentProcess=Download;
     updateParentStatus();
+
 
 
     // TODO: Push downloaded jobs to destination

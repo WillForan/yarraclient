@@ -28,7 +28,6 @@ class yctAPI : public QObject
     Q_OBJECT
 
 public:
-
     yctAPI();
     void    setConfiguration(yctConfiguration* configuration);
 
@@ -41,8 +40,10 @@ public:
     QString getCloudPath(QString folder);
     QString createUUID();
 
-    bool    uploadCase  (ycaTask* task, yctTransferInformation* setup);
-    bool    downloadCase(ycaTask* task, yctTransferInformation* setup);
+    bool    uploadCase  (ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
+    bool    downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
+
+    bool    getJobStatus();
 
     QString errorReason;
 

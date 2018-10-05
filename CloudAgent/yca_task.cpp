@@ -95,6 +95,56 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
 }
 
 
+bool ycaTaskHelper::getRunningTasks(ycaTaskList& taskList)
+{
+    clearTaskList(taskList);
+
+    //TODO
+
+    QString outPath=cloud->getCloudPath(YCT_CLOUDFOLDER_OUT);
+    QDir outDir(outPath);
+    if (!outDir.exists())
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
+    QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
+    QDir phiDir(phiPath);
+    if (!phiDir.exists())
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
+    QFileInfoList fileList=phiDir.entryInfoList(QStringList("*.phi"),QDir::Files,QDir::Time);
+
+    //qInfo() << "Parsing folder...";
+
+    for (int i=0; i<fileList.count(); i++)
+    {
+        QString uuid=fileList.at(i).baseName();
+
+        if (outDir.exists(uuid+".lock"))
+        {
+            // File is currently being written. So ignore it for now.
+            continue;
+        }
+
+        if (outDir.exists(uuid+".task"))
+        {
+            // File has not been uploaded yet
+            continue;
+        }
+
+        ycaTask* task=new ycaTask();
+        task->uuid=uuid;
+        task->taskFilename=uuid+".task";
+        taskList.append(task);
+    }
+}
+
+
 void ycaTaskHelper::clearTaskList(ycaTaskList& list)
 {
     while (!list.isEmpty())
@@ -135,10 +185,27 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
             QString uuid=fileList.at(i).baseName();
             ycaTask* task=new ycaTask();
             task->uuid=uuid;
-            // task->status
+
+            if (outDir.exists(uuid+".lock"))
+            {
+                // File is currently being written. So ignore it for now.
+                task->status=ycaTask::Prepearing;
+                taskList.append(task);
+                continue;
+            }
+
             if (!readPHIData(fileList.at(i).absoluteFilePath(),task))
             {
                 // TODO: Error handling
+            }
+
+            if (outDir.exists(uuid+".task"))
+            {
+                task->status=ycaTask::Scheduled;
+            }
+            else
+            {
+                task->status=ycaTask::Processing;
             }
 
             taskList.append(task);

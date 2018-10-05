@@ -9,6 +9,7 @@ class yctAPI;
 class ycaTask
 {    
 public:
+
     enum TaskStatus
     {
         Invalid=0,
@@ -16,6 +17,7 @@ public:
         Scheduled,
         Uploading,
         Processing,
+        AwaitingDownload,
         Downloading,
         Storage,
         Archvied,
@@ -54,6 +56,7 @@ public:
     yctAPI* cloud;
 
     bool getScheduledTasks(ycaTaskList& taskList);
+    bool getRunningTasks(ycaTaskList& taskList);
     bool getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool includeArchive);
     bool checkScanfiles(QString taskID, ycaTask* task);    
     bool readPHIData(QString filepath, ycaTask* task);
