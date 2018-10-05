@@ -116,12 +116,10 @@ void ycaWorker::timerCall()
     updateParentStatus();
 
 
-
     // TODO: Push downloaded jobs to destination
     // TODO: Retrieve storage location for each job
     currentProcess=Storage;
     updateParentStatus();
-    QTest::qSleep(5000);
 
     currentProcess=Idle;
     updateParentStatus();
@@ -237,6 +235,17 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
 
     transferWorker.setParent(this);
     taskHelper.clearTaskList(taskList);
+
+    ui->activeTasksTable->setColumnCount(5);
+    ui->activeTasksTable->setHorizontalHeaderItem(0,new QTableWidgetItem("Status"));
+    ui->activeTasksTable->setHorizontalHeaderItem(1,new QTableWidgetItem("Patient"));
+    ui->activeTasksTable->setHorizontalHeaderItem(2,new QTableWidgetItem("ACC"));
+    ui->activeTasksTable->setHorizontalHeaderItem(3,new QTableWidgetItem("MRN"));
+    ui->activeTasksTable->setHorizontalHeaderItem(4,new QTableWidgetItem("ID"));
+    ui->activeTasksTable->horizontalHeader()->resizeSection(0,130);
+    ui->activeTasksTable->horizontalHeader()->resizeSection(1,220);
+    ui->activeTasksTable->horizontalHeader()->resizeSection(2,90);
+    ui->activeTasksTable->horizontalHeader()->resizeSection(3,90);
 }
 
 
@@ -336,51 +345,36 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
     mutex.unlock();
 
     ui->activeTasksTable->setRowCount(taskList.count());
-    ui->activeTasksTable->setColumnCount(5);
 
-    ui->activeTasksTable->setHorizontalHeaderItem(0,new QTableWidgetItem("Status"));
-    ui->activeTasksTable->setHorizontalHeaderItem(1,new QTableWidgetItem("Patient"));
-    ui->activeTasksTable->setHorizontalHeaderItem(2,new QTableWidgetItem("ACC"));
-    ui->activeTasksTable->setHorizontalHeaderItem(3,new QTableWidgetItem("MRN"));
-    ui->activeTasksTable->setHorizontalHeaderItem(4,new QTableWidgetItem("ID"));
-
+    QTableWidgetItem* item=0;
     for (int i=0; i<taskList.count(); i++)
     {
-        ui->activeTasksTable->setItem(i,0,new QTableWidgetItem(""));
-        ui->activeTasksTable->setItem(i,1,new QTableWidgetItem(taskList.at(i)->patientName));
-        ui->activeTasksTable->setItem(i,2,new QTableWidgetItem(taskList.at(i)->acc));
-        ui->activeTasksTable->setItem(i,3,new QTableWidgetItem(taskList.at(i)->mrn));
-        ui->activeTasksTable->setItem(i,4,new QTableWidgetItem(taskList.at(i)->uuid));
+        item=new QTableWidgetItem(taskList.at(i)->getStatus());
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->activeTasksTable->setItem(i,0,item);
+
+        item=new QTableWidgetItem(taskList.at(i)->patientName);
+        item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        ui->activeTasksTable->setItem(i,1,item);
+
+        item=new QTableWidgetItem(taskList.at(i)->acc);
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->activeTasksTable->setItem(i,2,item);
+
+        item=new QTableWidgetItem(taskList.at(i)->mrn);
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->activeTasksTable->setItem(i,3,item);
+
+        item=new QTableWidgetItem(taskList.at(i)->uuid);
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->activeTasksTable->setItem(i,4,item);
     }
 
-
-/*
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    QtAWSRequest awsRequest(config.key, config.secret);
-    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/modes",
-                                            QByteArray(), YCT_API_REGION, QByteArray(), QStringList());
-
-    ui->activeTasksTable->setRowCount(1);
-    ui->activeTasksTable->setColumnCount(1);
-
-    if (!reply.isSuccess())
+    if (ui->activeTasksTable->rowCount()>0)
     {
-        ui->activeTasksTable->setItem(0,0,new QTableWidgetItem(QString("Error")));
+        int colCount=ui->activeTasksTable->columnCount()-1;
+        ui->activeTasksTable->setRangeSelected(QTableWidgetSelectionRange(0,0,0,colCount),true);
     }
-    else
-    {
-        ui->activeTasksTable->setItem(0,0,new QTableWidgetItem(QString(reply.replyData())));
-    }
-
-    QApplication::restoreOverrideCursor();
-*/
-}
-
-
-void ycaMainWindow::on_pushButton_5_clicked()
-{
-    transferWorker.trigger();
-    //indicator.showIndicator();
 }
 
 
@@ -399,5 +393,48 @@ void ycaMainWindow::showNotification(QString text)
 void ycaMainWindow::showStatus(QString text)
 {
     ui->statusLabel->setText(text);
+}
+
+
+void ycaMainWindow::on_detailsButton_clicked()
+{
+    if (ui->activeTasksTable->selectedRanges().empty())
+    {
+        return;
+    }
+
+    int selectedTask=ui->activeTasksTable->selectedRanges().at(0).topRow();
+
+    if ((selectedTask>=0) && (selectedTask<taskList.count()))
+    {
+        ycaTask* taskItem=taskList.at(selectedTask);
+
+        QString infoText="Patient: " + taskItem->patientName +"<br>";
+
+        QMessageBox msgBox(0);
+        msgBox.setWindowTitle("Task Information");
+        msgBox.setText(infoText);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowIcon(YCA_ICON);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
+    }
+}
+
+
+void ycaMainWindow::on_tabWidget_currentChanged(int index)
+{
+    // Update the active jobs list when changing ot the tab
+    if (index==0)
+    {
+        on_statusRefreshButton_clicked();
+    }
+}
+
+
+void ycaMainWindow::showEvent(QShowEvent* event)
+{
+    QWidget::showEvent(event);
+    on_tabWidget_currentChanged(ui->tabWidget->currentIndex());
 }
 

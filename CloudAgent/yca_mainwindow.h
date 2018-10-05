@@ -76,6 +76,7 @@ public:
 
 protected:
     void closeEvent(QCloseEvent* event);
+    void showEvent(QShowEvent* event);
 
 public slots:
     void callShutDown(bool askConfirmation=true);
@@ -84,7 +85,7 @@ public slots:
     void showIndicator();
     void hideIndicator();
     void showNotification(QString text);
-    void showStatus(QString text);
+    void showStatus(QString text);    
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
@@ -92,8 +93,10 @@ private slots:
     void on_closeButton_clicked();
     void on_closeContextButton_clicked();
     void on_statusRefreshButton_clicked();
-    void on_pushButton_5_clicked();
     void on_pushButton_3_clicked();
+    void on_detailsButton_clicked();
+
+    void on_tabWidget_currentChanged(int index);
 
 private:
     Ui::ycaMainWindow* ui;

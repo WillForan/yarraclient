@@ -13,21 +13,23 @@ public:
     enum TaskStatus
     {
         Invalid=0,
-        Prepearing,
+        Preparing,
         Scheduled,
-        Uploading,
         Processing,
-        AwaitingDownload,
+        Uploading,
+        Running,
+        Ready,
         Downloading,
         Storage,
-        Archvied,
-        TranferError,
-        ProcessingError
+        Archived,
+        ErrorTransfer,
+        ErrorProcessing
     };
 
     ycaTask();
 
     TaskStatus  status;
+    QString     getStatus();
 
     QString     patientName;
     QString     uuid;

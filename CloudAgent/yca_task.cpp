@@ -19,6 +19,55 @@ ycaTask::ycaTask()
 }
 
 
+QString ycaTask::getStatus()
+{
+    QString str="";
+
+    switch (status)
+    {
+    default:
+    case Invalid:
+        str="Invalid";
+        break;
+    case Preparing:
+        str="Preparing";
+        break;
+    case Scheduled:
+        str="Scheduled";
+        break;
+    case Processing:
+        str="Processing";
+        break;
+    case Uploading:
+        str="Uploading";
+        break;
+    case Running:
+        str="Running";
+        break;
+    case Ready:
+        str="Ready";
+        break;
+    case Downloading:
+        str="Downloading";
+        break;
+    case Storage:
+        str="Storage";
+        break;
+    case Archived:
+        str="Completed";
+        break;
+    case ErrorTransfer:
+        str="Transfer Error";
+        break;
+    case ErrorProcessing:
+        str="Processing Error";
+        break;
+    }
+
+    return str;
+}
+
+
 ycaTaskHelper::ycaTaskHelper()
 {
     cloud=0;
@@ -176,6 +225,14 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
         return false;
     }
 
+    QString outPath=cloud->getCloudPath(YCT_CLOUDFOLDER_OUT);
+    QDir outDir(outPath);
+    if (!outDir.exists())
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
     if (includeCurrent)
     {
         QFileInfoList fileList=phiDir.entryInfoList(QStringList("*.phi"),QDir::Files,QDir::Time);
@@ -189,7 +246,7 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
             if (outDir.exists(uuid+".lock"))
             {
                 // File is currently being written. So ignore it for now.
-                task->status=ycaTask::Prepearing;
+                task->status=ycaTask::Preparing;
                 taskList.append(task);
                 continue;
             }
@@ -221,13 +278,22 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
             QString uuid=fileList.at(i).baseName();
             ycaTask* task=new ycaTask();
             task->uuid=uuid;
-            task->status=ycaTask::Archvied;
+            task->status=ycaTask::Archived;
             if (!readPHIData(fileList.at(i).absoluteFilePath(),task))
             {
                 // TODO: Error handling
             }
 
             taskList.append(task);
+        }
+    }
+
+    // Now select the cases living in the cloud and query their status
+    for (int i=0; i<taskList.count(); i++)
+    {
+        if (taskList.at(i)->status==ycaTask::Processing)
+        {
+            // TODO
         }
     }
 
