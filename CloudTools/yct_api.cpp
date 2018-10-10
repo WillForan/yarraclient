@@ -308,15 +308,47 @@ QString yctAPI::createUUID()
 }
 
 
-bool yctAPI::getJobStatus()
+bool yctAPI::getJobStatus(ycaTaskList* taskList)
 {
+    if (taskList->empty())
+    {
+        return true;
+    }
+
+    //
+
+    QString runningTasks="[";
+    for (int i=0; i<taskList->count(); i++)
+    {
+        //runningTasks+="{ \"name\": \"" + taskList->at(i)->uuid + "\", \"task_file_name\": \"" + taskList->at(i)->uuid + ".task\", \"recon_mode\": \"" + "GRASP Brainmets" /*taskList->at(i)->reconMode*/ + "\" }";
+        runningTasks+="{ \"name\": \"" + taskList->at(i)->uuid + "\" }";
+
+        if (i<taskList->count()-1)
+        {
+            runningTasks+=", ";
+        }
+    }
+    runningTasks+="]";
+
+
+    QByteArray content=runningTasks.toUtf8();
+
     QtAWSRequest awsRequest(config->key, config->secret);
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/jobs",
-                                            QByteArray(), YCT_API_REGION, QByteArray(), QStringList());
+                                            QByteArray(), YCT_API_REGION, content, QStringList());
+
+    /*
+    // For querying the destitnation
+    //runningTasks="{ \"recon_mode\": \"" + QString("GRASP Brainmets") + "\" }";
+    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/mode_destinations",
+                                            QByteArray(), YCT_API_REGION, content, QStringList());
+    */
+
+    qDebug() << "Request: " << runningTasks;
 
     if (!reply.isSuccess())
     {
-        //qDebug() << reply.anyErrorString();
+        qDebug() << reply.anyErrorString();
         errorReason=reply.anyErrorString();
 
         if (reply.networkError()==QNetworkReply::ContentOperationNotPermittedError)
@@ -328,6 +360,8 @@ bool yctAPI::getJobStatus()
     }
 
     qDebug() << reply.replyData();
+
+    return true;
 }
 
 

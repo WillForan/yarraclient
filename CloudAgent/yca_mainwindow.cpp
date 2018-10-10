@@ -104,17 +104,16 @@ void ycaWorker::timerCall()
                 uploadCount++;
             }
 
-            // Update list again? Maybe new cases have been added meanwhile
-
             QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
         }
     }
+
+    parent->taskHelper.getRunningTasks(taskList);
 
     // TODO: Check status of incoming jobs
     // TODO: Download incoming jobs on at a time
     currentProcess=Download;
     updateParentStatus();
-
 
     // TODO: Push downloaded jobs to destination
     // TODO: Retrieve storage location for each job
@@ -438,3 +437,8 @@ void ycaMainWindow::showEvent(QShowEvent* event)
     on_tabWidget_currentChanged(ui->tabWidget->currentIndex());
 }
 
+
+void ycaMainWindow::on_pushButton_4_clicked()
+{
+    cloud.getJobStatus(&taskList);
+}

@@ -148,8 +148,6 @@ bool ycaTaskHelper::getRunningTasks(ycaTaskList& taskList)
 {
     clearTaskList(taskList);
 
-    //TODO
-
     QString outPath=cloud->getCloudPath(YCT_CLOUDFOLDER_OUT);
     QDir outDir(outPath);
     if (!outDir.exists())
@@ -189,8 +187,12 @@ bool ycaTaskHelper::getRunningTasks(ycaTaskList& taskList)
         ycaTask* task=new ycaTask();
         task->uuid=uuid;
         task->taskFilename=uuid+".task";
-        taskList.append(task);
+        task->status=ycaTask::Running;
+        taskList.append(task);        
     }
+
+
+
 }
 
 

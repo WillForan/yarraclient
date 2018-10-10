@@ -43,7 +43,7 @@ public:
     bool    uploadCase  (ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
     bool    downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
 
-    bool    getJobStatus();
+    bool    getJobStatus(QList<ycaTask*>* taskList);
 
     QString errorReason;
 
