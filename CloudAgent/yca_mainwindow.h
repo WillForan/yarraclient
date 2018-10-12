@@ -24,14 +24,6 @@ class ycaWorker : public QObject
 {
     Q_OBJECT
 
-enum Process
-{
-    Idle=0,
-    Upload,
-    Download,
-    Storage
-};
-
 public:
     ycaWorker();
     void setParent(ycaMainWindow* myParent);
@@ -39,9 +31,9 @@ public:
     void shutdown();
     void trigger();
 
-    bool    processingActive;
-    QString currentTaskID;
-    Process currentProcess;
+    bool                   processingActive;
+    ycaTask::WorkerProcess currentProcess;
+    QString                currentTaskID;
 
 public slots:
     void startTimer();
@@ -89,6 +81,8 @@ public slots:
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
+
+    void updateUI();
 
     void on_closeButton_clicked();
     void on_closeContextButton_clicked();

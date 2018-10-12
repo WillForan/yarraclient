@@ -42,6 +42,20 @@ public:
     static QString getRegionID(Regions region);
     static QString getRegionName(Regions region);
 
+    enum BatchStatus
+    {
+        INVALID=-1,
+        SUBMITTED=0,
+        PENDING,
+        RUNNABLE,
+        STARTING,
+        RUNNING,
+        SUCCEEDED,
+        FAILED
+    };
+
+    static BatchStatus getBatchStatus(QString value);
+
 };
 
 
@@ -160,6 +174,47 @@ inline QString yctAWSCommon::getRegionName(Regions region)
     }
 
     return "";
+}
+
+
+inline yctAWSCommon::BatchStatus yctAWSCommon::getBatchStatus(QString value)
+{
+    if (value=="FAILED")
+    {
+        return FAILED;
+    }
+
+    if (value=="SUCCEEDED")
+    {
+        return SUCCEEDED;
+    }
+
+    if (value=="RUNNING")
+    {
+        return RUNNING;
+    }
+
+    if (value=="SUBMITTED")
+    {
+        return SUBMITTED;
+    }
+
+    if (value=="PENDING")
+    {
+        return PENDING;
+    }
+
+    if (value=="RUNNABLE")
+    {
+        return RUNNABLE;
+    }
+
+    if (value=="STARTING")
+    {
+        return STARTING;
+    }
+
+    return INVALID;
 }
 
 

@@ -315,12 +315,9 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
         return true;
     }
 
-    //
-
     QString runningTasks="[";
     for (int i=0; i<taskList->count(); i++)
     {
-        //runningTasks+="{ \"name\": \"" + taskList->at(i)->uuid + "\", \"task_file_name\": \"" + taskList->at(i)->uuid + ".task\", \"recon_mode\": \"" + "GRASP Brainmets" /*taskList->at(i)->reconMode*/ + "\" }";
         runningTasks+="{ \"name\": \"" + taskList->at(i)->uuid + "\" }";
 
         if (i<taskList->count()-1)
@@ -330,19 +327,11 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
     }
     runningTasks+="]";
 
-
     QByteArray content=runningTasks.toUtf8();
 
     QtAWSRequest awsRequest(config->key, config->secret);
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/jobs",
                                             QByteArray(), YCT_API_REGION, content, QStringList());
-
-    /*
-    // For querying the destitnation
-    //runningTasks="{ \"recon_mode\": \"" + QString("GRASP Brainmets") + "\" }";
-    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/mode_destinations",
-                                            QByteArray(), YCT_API_REGION, content, QStringList());
-    */
 
     qDebug() << "Request: " << runningTasks;
 
@@ -359,9 +348,77 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
         return false;
     }
 
+    QJsonDocument jsonReply =QJsonDocument::fromJson(reply.replyData());
+
+    if (jsonReply.array().count() != taskList->count())
+    {
+        // TODO: Error handling!
+        return false;
+    }
+
+    for (int i=0; i<jsonReply.array().count(); i++)
+    {
+        QJsonObject jsonObject=jsonReply.array()[i].toObject();
+        QStringList keys = jsonObject.keys();
+
+        foreach(QString key, keys)
+        {
+            //qDebug() << key << ": " << jsonObject[key].toString();
+
+            if (key=="name")
+            {
+                if (jsonObject[key].toString() != taskList->at(i)->uuid)
+                {
+                    // TODO: Error handling!
+                    // Sorting of returned job list incorrect!
+                    return false;
+                }
+            }
+
+            if (key=="status")
+            {
+                QString statusStr=jsonObject[key].toString();
+                yctAWSCommon::BatchStatus batchStatus=yctAWSCommon::getBatchStatus(statusStr);
+
+                switch (batchStatus)
+                {
+                case yctAWSCommon::SUBMITTED:
+                case yctAWSCommon::PENDING:
+                case yctAWSCommon::RUNNABLE:
+                case yctAWSCommon::STARTING:
+                case yctAWSCommon::RUNNING:
+                    taskList->at(i)->status=ycaTask::tsRunning;
+                    break;
+
+                case yctAWSCommon::SUCCEEDED:
+                    taskList->at(i)->status=ycaTask::tsReady;
+                    break;
+
+                case yctAWSCommon::FAILED:
+                    taskList->at(i)->status=ycaTask::tsErrorProcessing;
+                    break;
+
+                case yctAWSCommon::INVALID:
+                default:
+                    // TODO: Error reporting
+                    return false;
+                    break;
+                }
+            }
+        }
+    }
+
     qDebug() << reply.replyData();
 
     return true;
+
+    /*
+    // For querying the destitnation
+    //runningTasks="{ \"recon_mode\": \"" + QString("GRASP Brainmets") + "\" }";
+    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/mode_destinations",
+                                            QByteArray(), YCT_API_REGION, content, QStringList());
+    */
+
 }
 
 

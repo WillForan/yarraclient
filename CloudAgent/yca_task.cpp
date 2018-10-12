@@ -7,13 +7,19 @@
 
 ycaTask::ycaTask()
 {
-    status=Invalid;
+    status=tsInvalid;
+    result=trInProcess;
 
     patientName="";
     uuid="";
     shortcode="";
     taskFilename="";
     phiFilename="";
+
+    retryDelay=QDateTime::currentDateTime();
+    uploadRetry=0;
+    downloadRetry=0;
+    storageRetry=0;
 
     twixFilenames.clear();
 }
@@ -26,40 +32,40 @@ QString ycaTask::getStatus()
     switch (status)
     {
     default:
-    case Invalid:
+    case tsInvalid:
         str="Invalid";
         break;
-    case Preparing:
+    case tsPreparing:
         str="Preparing";
         break;
-    case Scheduled:
+    case tsScheduled:
         str="Scheduled";
         break;
-    case Processing:
+    case tsProcessing:
         str="Processing";
         break;
-    case Uploading:
+    case tsUploading:
         str="Uploading";
         break;
-    case Running:
+    case tsRunning:
         str="Running";
         break;
-    case Ready:
+    case tsReady:
         str="Ready";
         break;
-    case Downloading:
+    case tsDownloading:
         str="Downloading";
         break;
-    case Storage:
+    case tsStorage:
         str="Storage";
         break;
-    case Archived:
+    case tsArchived:
         str="Completed";
         break;
-    case ErrorTransfer:
+    case tsErrorTransfer:
         str="Transfer Error";
         break;
-    case ErrorProcessing:
+    case tsErrorProcessing:
         str="Processing Error";
         break;
     }
@@ -82,8 +88,6 @@ void ycaTaskHelper::setCloudInstance(yctAPI* apiInstance)
 
 bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
 {
-    // TODO: Insert mutex
-
     clearTaskList(taskList);
 
     QString outPath=cloud->getCloudPath(YCT_CLOUDFOLDER_OUT);
@@ -144,7 +148,7 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
 }
 
 
-bool ycaTaskHelper::getRunningTasks(ycaTaskList& taskList)
+bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
 {
     clearTaskList(taskList);
 
@@ -187,12 +191,12 @@ bool ycaTaskHelper::getRunningTasks(ycaTaskList& taskList)
         ycaTask* task=new ycaTask();
         task->uuid=uuid;
         task->taskFilename=uuid+".task";
-        task->status=ycaTask::Running;
+        task->phiFilename=uuid+".phi";
+        task->status=ycaTask::tsProcessing;
         taskList.append(task);        
     }
 
-
-
+    return true;
 }
 
 
@@ -205,10 +209,8 @@ void ycaTaskHelper::clearTaskList(ycaTaskList& list)
 }
 
 
-bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool includeArchive)
+bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool includeArchive, QString workerJobID, ycaTask::WorkerProcess workerOperation)
 {
-    // TODO: Insert mutex
-
     clearTaskList(taskList);
 
     QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
@@ -248,7 +250,7 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
             if (outDir.exists(uuid+".lock"))
             {
                 // File is currently being written. So ignore it for now.
-                task->status=ycaTask::Preparing;
+                task->status=ycaTask::tsPreparing;
                 taskList.append(task);
                 continue;
             }
@@ -260,11 +262,11 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
 
             if (outDir.exists(uuid+".task"))
             {
-                task->status=ycaTask::Scheduled;
+                task->status=ycaTask::tsScheduled;
             }
             else
             {
-                task->status=ycaTask::Processing;
+                task->status=ycaTask::tsProcessing;
             }
 
             taskList.append(task);
@@ -280,7 +282,7 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
             QString uuid=fileList.at(i).baseName();
             ycaTask* task=new ycaTask();
             task->uuid=uuid;
-            task->status=ycaTask::Archived;
+            task->status=ycaTask::tsArchived;
             if (!readPHIData(fileList.at(i).absoluteFilePath(),task))
             {
                 // TODO: Error handling
@@ -290,14 +292,37 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
         }
     }
 
-    // Now select the cases living in the cloud and query their status
+    // Now fetch the status of the jobs that are living in the cloud currently
+    ycaTaskList processingTasks;
     for (int i=0; i<taskList.count(); i++)
     {
-        if (taskList.at(i)->status==ycaTask::Processing)
+        if (taskList.at(i)->status==ycaTask::tsProcessing)
         {
-            // TODO
+            if (workerJobID==taskList.at(i)->uuid)
+            {
+                // If the worker thread is currently uploading/downloading the job
+                switch (workerOperation)
+                {
+                case ycaTask::wpUpload:
+                    taskList.at(i)->status=ycaTask::tsUploading;
+                    break;
+                case ycaTask::wpDownload:
+                    taskList.at(i)->status=ycaTask::tsDownloading;
+                    break;
+                case ycaTask::wpStorage:
+                    taskList.at(i)->status=ycaTask::tsStorage;
+                    break;
+                default:
+                    break;
+                };
+            }
+            else
+            {
+                processingTasks.append(taskList.at(i));
+            }
         }
     }
+    cloud->getJobStatus(&processingTasks);
 
     return true;
 }
@@ -385,7 +410,114 @@ bool ycaTaskHelper::readPHIData(QString filepath, ycaTask* task)
     task->acc        =phiFile.value("PHI/ACC","").toString();
     task->taskID     =phiFile.value("PHI/TASKID","").toString();
 
+    task->result       =ycaTask::TaskResult(phiFile.value("STATUS/RESULT",ycaTask::trInProcess).toInt());
+    task->retryDelay   =phiFile.value("STATUS/DELAY",QDateTime::currentDateTime()).toDateTime();
+    task->uploadRetry  =phiFile.value("STATUS/RETRY_UPLOAD",0).toInt();
+    task->downloadRetry=phiFile.value("STATUS/RETRY_DOWNLOAD",0).toInt();
+    task->storageRetry =phiFile.value("STATUS/RETRY_STORAGE",0).toInt();
+
     // TODO: Error checking
 
     return true;
 }
+
+
+bool ycaTaskHelper::saveResultToPHI(QString filepath, ycaTask::TaskResult result)
+{
+    QSettings phiFile(filepath, QSettings::IniFormat);
+
+    if (phiFile.value("PHI/UUID","").toString().isEmpty())
+    {
+        // UUID is missing. PHI file seems invalid.
+        return false;
+    }
+
+    phiFile.setValue("STATUS/RESULT",result);
+
+    return true;
+}
+
+
+void ycaTaskHelper::getJobsForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList)
+{
+    clearTaskList(downloadList);
+    clearTaskList(archiveList);
+
+    for (int i=0; i<taskList.count(); i++)
+    {
+        if (taskList.at(i)->status==ycaTask::tsReady)
+        {
+            downloadList.append(taskList.at(i));
+        }
+        else
+        {
+            if (taskList.at(i)->status==ycaTask::tsErrorProcessing)
+            {
+                archiveList.append(taskList.at(i));
+            }
+        }
+    }
+}
+
+
+bool ycaTaskHelper::archiveJobs(ycaTaskList& archiveList)
+{
+    QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
+    QDir phiDir(phiPath);
+    if (!phiDir.exists())
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
+    QString archivePath=cloud->getCloudPath(YCT_CLOUDFOLDER_ARCHIVE);
+    QDir archiveDir(archivePath);
+    if (!archiveDir.exists())
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
+    while (!archiveList.isEmpty())
+    {
+        ycaTask* currentTask=archiveList.takeFirst();
+
+        qInfo() << "Processing file: " << phiPath+"/"+currentTask->phiFilename;
+        qInfo() << "Moving to: " << archivePath+"/"+currentTask->phiFilename;
+
+        // Move the file into the archive folder
+        if (!phiDir.rename(phiPath+"/"+currentTask->phiFilename, archivePath+"/"+currentTask->phiFilename))
+        {
+            // TODO: Error handling
+            return false;
+        }
+
+        ycaTask::TaskResult result=ycaTask::trInProcess;
+
+        switch (currentTask->status)
+        {
+        case ycaTask::tsStorage:
+            result=ycaTask::trSuccess;
+            break;
+        case ycaTask::tsErrorProcessing:
+            result=ycaTask::trAbortedProcessing;
+            break;
+        case ycaTask::tsErrorTransfer:
+            result=ycaTask::trAbortedTransfer;
+            break;
+        case ycaTask::tsErrorStorage:
+            result=ycaTask::trAbortedStorage;
+            break;
+        default:
+            break;
+        }
+
+        // Now, add the result status to the moved PHI file
+        saveResultToPHI(archivePath+"/"+currentTask->phiFilename, result);
+
+        currentTask->status=ycaTask::tsArchived;
+    }
+
+    return true;
+}
+

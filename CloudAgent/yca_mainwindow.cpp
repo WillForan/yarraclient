@@ -15,7 +15,7 @@ ycaWorker::ycaWorker()
     //qInfo() << "Main Thread: " << QThread::currentThreadId();
 
     processingActive=false;
-    currentProcess=Idle;
+    currentProcess=ycaTask::wpIdle;
     currentTaskID="";
     userInvalidShown=false;
 
@@ -89,7 +89,7 @@ void ycaWorker::timerCall()
         {
             QMetaObject::invokeMethod(parent, "showIndicator", Qt::QueuedConnection);
 
-            currentProcess=Upload;
+            currentProcess=ycaTask::wpUpload;
             updateParentStatus();
 
             // Only upload 10 cases per time, then first download the recon
@@ -97,35 +97,88 @@ void ycaWorker::timerCall()
 
             while ((!taskList.isEmpty()) && (uploadCount<10))
             {
+                parent->mutex.lock();
+                currentTaskID=taskList.first()->uuid;
+                parent->mutex.unlock();
+
                 if (!parent->cloud.uploadCase(taskList.takeFirst(), &transferInformation, &parent->mutex))
                 {
                     // TODO: Error handling
                 }
                 uploadCount++;
+
+                parent->mutex.lock();
+                currentTaskID="";
+                parent->mutex.unlock();
             }
 
             QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
         }
     }
 
-    parent->taskHelper.getRunningTasks(taskList);
+    parent->mutex.lock();
+    parent->taskHelper.getProcessingTasks(taskList);
+    parent->cloud.getJobStatus(&taskList);
+    // TODO: Get error status
+    parent->mutex.unlock();
 
-    // TODO: Check status of incoming jobs
-    // TODO: Download incoming jobs on at a time
-    currentProcess=Download;
-    updateParentStatus();
+    ycaTaskList jobsToArchive;
+    ycaTaskList jobsToDownload;
+    parent->taskHelper.getJobsForDownloadArchive(taskList, jobsToDownload, jobsToArchive);
+
+    if (!jobsToDownload.empty())
+    {
+        QMetaObject::invokeMethod(parent, "showIndicator", Qt::QueuedConnection);
+
+        currentProcess=ycaTask::wpDownload;
+        updateParentStatus();
+
+        while (!jobsToDownload.isEmpty())
+        {
+            parent->mutex.lock();
+            currentTaskID=jobsToDownload.first()->uuid;
+            parent->mutex.unlock();
+
+            /*
+            if (!parent->cloud.uploadCase(taskList.takeFirst(), &transferInformation, &parent->mutex))
+            {
+                // TODO: Error handling
+            }
+            */
+
+            parent->mutex.lock();
+            currentTaskID="";
+            parent->mutex.unlock();
+        }
+
+        QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
+    }
+
+    if (!jobsToArchive.empty())
+    {
+        parent->mutex.lock();
+        if (!parent->taskHelper.archiveJobs(jobsToArchive))
+        {
+            // TODO: Error handling
+        }
+        parent->mutex.unlock();
+    }
 
     // TODO: Push downloaded jobs to destination
     // TODO: Retrieve storage location for each job
-    currentProcess=Storage;
+    currentProcess=ycaTask::wpStorage;
     updateParentStatus();
 
-    currentProcess=Idle;
+    currentProcess=ycaTask::wpIdle;
     updateParentStatus();
 
     transferTimer.start();
     processingActive=false;
 
+    if (parent->isVisible())
+    {
+        QMetaObject::invokeMethod(parent, "updateUI", Qt::QueuedConnection);
+    }
 }
 
 
@@ -136,16 +189,16 @@ void ycaWorker::updateParentStatus()
     switch (currentProcess)
     {
     default:
-    case Idle:
+    case ycaTask::wpIdle:
         text="<span style=\" font-weight:600; color:#E0A526;\">Idle</span>";
         break;
-    case Upload:
+    case ycaTask::wpUpload:
         text="<span style=\" font-weight:600; color:#580f8b;\">Uploading tasks...</span>";
         break;
-    case Download:
+    case ycaTask::wpDownload:
         text="<span style=\" font-weight:600; color:#580f8b;\">Downloading results...</span>";
         break;
-    case Storage:
+    case ycaTask::wpStorage:
         text="<span style=\" font-weight:600; color:#580f8b;\">Storing results...</span>";
         break;
     }
@@ -339,6 +392,8 @@ void ycaMainWindow::on_closeContextButton_clicked()
 
 void ycaMainWindow::on_statusRefreshButton_clicked()
 {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
     mutex.lock();
     taskHelper.getAllTasks(taskList, true, false);
     mutex.unlock();
@@ -374,6 +429,8 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
         int colCount=ui->activeTasksTable->columnCount()-1;
         ui->activeTasksTable->setRangeSelected(QTableWidgetSelectionRange(0,0,0,colCount),true);
     }
+
+    QApplication::restoreOverrideCursor();
 }
 
 
@@ -434,6 +491,14 @@ void ycaMainWindow::on_tabWidget_currentChanged(int index)
 void ycaMainWindow::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
+    qApp->processEvents();
+    QTimer::singleShot(0,this,SLOT(updateUI()));
+}
+
+
+void ycaMainWindow::updateUI()
+{
+    qApp->processEvents();
     on_tabWidget_currentChanged(ui->tabWidget->currentIndex());
 }
 
