@@ -30,7 +30,6 @@ yctTransferInformation::yctTransferInformation()
 }
 
 
-
 yctAPI::yctAPI()
 {
     config=0;
@@ -333,7 +332,7 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/jobs",
                                             QByteArray(), YCT_API_REGION, content, QStringList());
 
-    qDebug() << "Request: " << runningTasks;
+    //qDebug() << "Request: " << runningTasks;
 
     if (!reply.isSuccess())
     {
@@ -512,10 +511,11 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
 {
     bool success=false;
 
-    QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
-                    setup->region + " " + setup->inBucket + " " + task->uuid + " download ";
-
     QString path=getCloudPath(YCT_CLOUDFOLDER_IN)+"/"+task->taskID;
+
+    QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
+                    setup->region + " " + setup->inBucket + " " + task->uuid + " download " + path;
+
 
     QDir dir(getCloudPath(YCT_CLOUDFOLDER_IN));
     if (!dir.mkpath(path))
@@ -523,6 +523,13 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
         // TODO: Error reporting
         return false;
     }
+
+    // Create INCOMPLETE file
+    QFile incompleteFile(path+"/"+YCT_INCOMPLETE_FILE);
+    incompleteFile.open(QIODevice::ReadWrite);
+    QString incompleteContent="INCOMPLETE YARRACLOUD DOWNLOAD " + QDateTime::currentDateTime().toString();
+    incompleteFile.write(incompleteContent.toUtf8());
+    incompleteFile.close();
 
     // TODO: Check available disk space
 
@@ -540,8 +547,12 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
         // TODO: Error handling
     }
 
-    // TODO: If successful, move PHI file to ARCHIVE
-    //       Enclose in global mutex
+    // Remove INCOMPLETE file
+
+    if (!QFile::remove(path+"/"+YCT_INCOMPLETE_FILE))
+    {
+        // TODO: Error handling
+    }
 
     return success;
 }

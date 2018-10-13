@@ -70,6 +70,11 @@ void ycaWorker::timerCall()
     processingActive=true;
     transferTimer.stop();
 
+    if (parent->taskHelper.removeIncompleteDownloads())
+    {
+        // TODO: Error handing
+    }
+
     ycaTaskList taskList;
     parent->taskHelper.getScheduledTasks(taskList);
 
@@ -136,15 +141,14 @@ void ycaWorker::timerCall()
         while (!jobsToDownload.isEmpty())
         {
             parent->mutex.lock();
-            currentTaskID=jobsToDownload.first()->uuid;
+            ycaTask* currentTask=jobsToDownload.takeFirst();
+            currentTaskID=currentTask->uuid;
             parent->mutex.unlock();
 
-            /*
-            if (!parent->cloud.uploadCase(taskList.takeFirst(), &transferInformation, &parent->mutex))
+            if (!parent->cloud.downloadCase(currentTask, &transferInformation, &parent->mutex))
             {
                 // TODO: Error handling
             }
-            */
 
             parent->mutex.lock();
             currentTaskID="";
@@ -153,6 +157,14 @@ void ycaWorker::timerCall()
 
         QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
     }
+
+    // TODO: Push downloaded jobs to destination
+    // TODO: Retrieve storage location for each job
+    currentProcess=ycaTask::wpStorage;
+    updateParentStatus();
+
+    ycaTaskList jobsToStore;
+
 
     if (!jobsToArchive.empty())
     {
@@ -164,14 +176,8 @@ void ycaWorker::timerCall()
         parent->mutex.unlock();
     }
 
-    // TODO: Push downloaded jobs to destination
-    // TODO: Retrieve storage location for each job
-    currentProcess=ycaTask::wpStorage;
-    updateParentStatus();
-
     currentProcess=ycaTask::wpIdle;
     updateParentStatus();
-
     transferTimer.start();
     processingActive=false;
 

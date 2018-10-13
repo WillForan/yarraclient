@@ -53,8 +53,8 @@ public:
 
     QString     patientName;
     QString     uuid;
-    QString     shortcode;
     QString     reconMode;
+    QString     shortcode;
 
     QString     mrn;
     QString     dob;
@@ -92,6 +92,8 @@ public:
     void getJobsForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList);
     bool archiveJobs(ycaTaskList& archiveList);
     void clearTaskList(ycaTaskList& list);
+
+    bool removeIncompleteDownloads();
 
 };
 

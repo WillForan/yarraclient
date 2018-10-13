@@ -160,6 +160,8 @@ bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
         return false;
     }
 
+    QString inPath=cloud->getCloudPath(YCT_CLOUDFOLDER_IN);
+
     QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
     QDir phiDir(phiPath);
     if (!phiDir.exists())
@@ -185,6 +187,13 @@ bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
         if (outDir.exists(uuid+".task"))
         {
             // File has not been uploaded yet
+            continue;
+        }
+
+        QDir inTaskDir(inPath+"/"+uuid);
+        if (!inTaskDir.exists())
+        {
+            // Case has already been downloaded
             continue;
         }
 
@@ -322,7 +331,11 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
             }
         }
     }
-    cloud->getJobStatus(&processingTasks);
+
+    if (!processingTasks.isEmpty())
+    {
+        cloud->getJobStatus(&processingTasks);
+    }
 
     return true;
 }
@@ -396,25 +409,28 @@ bool ycaTaskHelper::checkScanfiles(QString taskID, ycaTask* task)
 
 bool ycaTaskHelper::readPHIData(QString filepath, ycaTask* task)
 {
-    QSettings phiFile(filepath, QSettings::IniFormat);
-
-    if (phiFile.value("PHI/UUID","").toString() != task->uuid)
     {
-        // UUID does not match. Something is wrong
-        return false;
+        QSettings phiFile(filepath, QSettings::IniFormat);
+
+        if (phiFile.value("PHI/UUID","").toString() != task->uuid)
+        {
+            // UUID does not match. Something is wrong
+            return false;
+        }
+
+        task->patientName=phiFile.value("PHI/NAME","").toString();
+        task->mrn        =phiFile.value("PHI/MRN","").toString();
+        task->dob        =phiFile.value("PHI/DOB","").toString();
+        task->acc        =phiFile.value("PHI/ACC","").toString();
+        task->taskID     =phiFile.value("PHI/TASKID","").toString();
+        task->reconMode  =phiFile.value("PHI/MODE","").toString();
+
+        task->result       =ycaTask::TaskResult(phiFile.value("STATUS/RESULT",ycaTask::trInProcess).toInt());
+        task->retryDelay   =phiFile.value("STATUS/DELAY",QDateTime::currentDateTime()).toDateTime();
+        task->uploadRetry  =phiFile.value("STATUS/RETRY_UPLOAD",0).toInt();
+        task->downloadRetry=phiFile.value("STATUS/RETRY_DOWNLOAD",0).toInt();
+        task->storageRetry =phiFile.value("STATUS/RETRY_STORAGE",0).toInt();
     }
-
-    task->patientName=phiFile.value("PHI/NAME","").toString();
-    task->mrn        =phiFile.value("PHI/MRN","").toString();
-    task->dob        =phiFile.value("PHI/DOB","").toString();
-    task->acc        =phiFile.value("PHI/ACC","").toString();
-    task->taskID     =phiFile.value("PHI/TASKID","").toString();
-
-    task->result       =ycaTask::TaskResult(phiFile.value("STATUS/RESULT",ycaTask::trInProcess).toInt());
-    task->retryDelay   =phiFile.value("STATUS/DELAY",QDateTime::currentDateTime()).toDateTime();
-    task->uploadRetry  =phiFile.value("STATUS/RETRY_UPLOAD",0).toInt();
-    task->downloadRetry=phiFile.value("STATUS/RETRY_DOWNLOAD",0).toInt();
-    task->storageRetry =phiFile.value("STATUS/RETRY_STORAGE",0).toInt();
 
     // TODO: Error checking
 
@@ -482,6 +498,13 @@ bool ycaTaskHelper::archiveJobs(ycaTaskList& archiveList)
     {
         ycaTask* currentTask=archiveList.takeFirst();
 
+        // If the job has not been flagged as complete or aborted,
+        // don't move it
+        if (currentTask->result==ycaTask::trInProcess)
+        {
+            continue;
+        }
+
         qInfo() << "Processing file: " << phiPath+"/"+currentTask->phiFilename;
         qInfo() << "Moving to: " << archivePath+"/"+currentTask->phiFilename;
 
@@ -521,3 +544,34 @@ bool ycaTaskHelper::archiveJobs(ycaTaskList& archiveList)
     return true;
 }
 
+
+bool ycaTaskHelper::removeIncompleteDownloads()
+{
+    QString inPath=cloud->getCloudPath(YCT_CLOUDFOLDER_IN);
+    QDir inDir(inPath);
+    if (!inDir.exists())
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
+    QFileInfoList dirList=inDir.entryInfoList(QStringList("*"),QDir::Dirs|QDir::NoDotAndDotDot,QDir::Time);
+
+    for (int i=0; i<dirList.count(); i++)
+    {
+        qInfo() << dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE;
+
+        if (QFile::exists(dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE))
+        {
+            // INCOMPLETE file found, so folder is from incomplete download.
+            // Remove the folder and download again.
+            QDir incompleteDir(dirList.at(i).filePath());
+            if (!incompleteDir.removeRecursively())
+            {
+                // TODO: Error handling!
+            }
+        }
+    }
+
+    return true;
+}
