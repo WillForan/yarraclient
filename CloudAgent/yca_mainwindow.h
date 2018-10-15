@@ -32,8 +32,10 @@ public:
     void trigger();
 
     bool                   processingActive;
+    bool                   processingPaused;
     ycaTask::WorkerProcess currentProcess;
     QString                currentTaskID;
+
 
 public slots:
     void startTimer();
@@ -91,8 +93,12 @@ private slots:
     void on_detailsButton_clicked();
 
     void on_tabWidget_currentChanged(int index);
+    void on_transferButton_clicked();
 
     void on_pushButton_4_clicked();
+
+
+    void on_pauseButton_clicked();
 
 private:
     Ui::ycaMainWindow* ui;

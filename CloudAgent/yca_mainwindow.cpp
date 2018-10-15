@@ -15,6 +15,7 @@ ycaWorker::ycaWorker()
     //qInfo() << "Main Thread: " << QThread::currentThreadId();
 
     processingActive=false;
+    processingPaused=false;
     currentProcess=ycaTask::wpIdle;
     currentTaskID="";
     userInvalidShown=false;
@@ -66,6 +67,10 @@ void ycaWorker::stopTimer()
 void ycaWorker::timerCall()
 {
     //qInfo() << "Called. Thread: " << QThread::currentThreadId();
+    if (processingPaused)
+    {
+        return;
+    }
 
     processingActive=true;
     transferTimer.stop();
@@ -129,7 +134,7 @@ void ycaWorker::timerCall()
 
     ycaTaskList jobsToArchive;
     ycaTaskList jobsToDownload;
-    parent->taskHelper.getJobsForDownloadArchive(taskList, jobsToDownload, jobsToArchive);
+    parent->taskHelper.getTasksForDownloadArchive(taskList, jobsToDownload, jobsToArchive);
 
     if (!jobsToDownload.empty())
     {
@@ -163,13 +168,15 @@ void ycaWorker::timerCall()
     currentProcess=ycaTask::wpStorage;
     updateParentStatus();
 
-    ycaTaskList jobsToStore;
-
+    if (!parent->taskHelper.storeTasks(jobsToArchive))
+    {
+        // TODO: Error handling
+    }
 
     if (!jobsToArchive.empty())
     {
         parent->mutex.lock();
-        if (!parent->taskHelper.archiveJobs(jobsToArchive))
+        if (!parent->taskHelper.archiveTasks(jobsToArchive))
         {
             // TODO: Error handling
         }
@@ -511,5 +518,25 @@ void ycaMainWindow::updateUI()
 
 void ycaMainWindow::on_pushButton_4_clicked()
 {
-    cloud.getJobStatus(&taskList);
+    //cloud.getJobStatus(&taskList);
+    ycaTaskList temp;
+    taskHelper.storeTasks(temp);
+}
+
+
+void ycaMainWindow::on_transferButton_clicked()
+{
+    callSubmit();
+}
+
+void ycaMainWindow::on_pauseButton_clicked()
+{
+    if (ui->pauseButton->isChecked())
+    {
+        transferWorker.processingPaused=true;
+    }
+    else
+    {
+        transferWorker.processingPaused=false;
+    }
 }

@@ -89,9 +89,11 @@ public:
     bool readPHIData(QString filepath, ycaTask* task);
     bool saveResultToPHI(QString filepath, ycaTask::TaskResult result);
 
-    void getJobsForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList);
-    bool archiveJobs(ycaTaskList& archiveList);
+    void getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList);
+    bool archiveTasks(ycaTaskList& archiveList);
     void clearTaskList(ycaTaskList& list);
+
+    bool storeTasks(ycaTaskList& archiveList);
 
     bool removeIncompleteDownloads();
 

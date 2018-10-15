@@ -454,7 +454,7 @@ bool ycaTaskHelper::saveResultToPHI(QString filepath, ycaTask::TaskResult result
 }
 
 
-void ycaTaskHelper::getJobsForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList)
+void ycaTaskHelper::getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList)
 {
     clearTaskList(downloadList);
     clearTaskList(archiveList);
@@ -476,7 +476,7 @@ void ycaTaskHelper::getJobsForDownloadArchive(ycaTaskList& taskList, ycaTaskList
 }
 
 
-bool ycaTaskHelper::archiveJobs(ycaTaskList& archiveList)
+bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList)
 {
     QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
     QDir phiDir(phiPath);
@@ -572,6 +572,59 @@ bool ycaTaskHelper::removeIncompleteDownloads()
             }
         }
     }
+
+    return true;
+}
+
+
+bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
+{
+    QString inPath=cloud->getCloudPath(YCT_CLOUDFOLDER_IN);
+    QDir inDir(inPath);
+    if (!inDir.exists())
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
+    QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
+    QDir phiDir(phiPath);
+    if (!phiDir.exists())
+    {
+        // TODO: Error reporting
+        return false;
+    }
+
+    QFileInfoList dirList=inDir.entryInfoList(QStringList("*"),QDir::Dirs|QDir::NoDotAndDotDot,QDir::Time);
+
+    for (int i=0; i<dirList.count(); i++)
+    {
+        if (QFile::exists(dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE))
+        {
+            // INCOMPLETE file found, so folder is from incomplete download.
+            continue;
+        }
+
+        QString phiFile=phiDir.absoluteFilePath(dirList.at(i).fileName()+".phi");
+        if (!QFile::exists(phiFile))
+        {
+            // Corresponding file with PHI information not found. Can't store task.
+            // TODO: Error handling
+            continue;
+        }
+
+        ycaTask* currentTask=new ycaTask;
+        if (!readPHIData(phiFile, currentTask))
+        {
+            delete currentTask;
+            currentTask=0;
+            continue;
+        }
+
+        qInfo() << "Name:";
+        qInfo() << dirList.at(i).fileName();
+    }
+
 
     return true;
 }
