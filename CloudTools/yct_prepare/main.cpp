@@ -73,6 +73,6 @@ int main(int argc, char *argv[])
         QFileInfo filename(rawFilename);
         QString taskid=filename.completeBaseName();
 
-        return twixAnonymizer.processFile(rawFilename,phiPath,acc,taskid,uuid);
+        return twixAnonymizer.processFile(rawFilename,phiPath,acc,taskid,uuid,"");
     }
 }

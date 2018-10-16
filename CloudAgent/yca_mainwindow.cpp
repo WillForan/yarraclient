@@ -4,7 +4,7 @@
 
 #include <QDesktopWidget>
 #include <QMessageBox>
-#include <QTest>
+//#include <QTest>
 
 #include "../CloudTools/yct_common.h"
 #include "../CloudTools/yct_aws/qtaws.h"
@@ -132,35 +132,66 @@ void ycaWorker::timerCall()
     // TODO: Get error status
     parent->mutex.unlock();
 
+    qDebug() << "JobsinList:";
+    for (int i=0; i< taskList.count(); i++)
+    {
+        qDebug() << taskList.at(i)->patientName << " " << taskList.at(i)->status;
+    }
+
     ycaTaskList jobsToArchive;
     ycaTaskList jobsToDownload;
     parent->taskHelper.getTasksForDownloadArchive(taskList, jobsToDownload, jobsToArchive);
 
+    qDebug() << "JobsToDownload:";
+    for (int i=0; i< jobsToDownload.count(); i++)
+    {
+        qDebug() << jobsToDownload.at(i)->patientName;
+    }
+
     if (!jobsToDownload.empty())
     {
-        QMetaObject::invokeMethod(parent, "showIndicator", Qt::QueuedConnection);
-
-        currentProcess=ycaTask::wpDownload;
-        updateParentStatus();
-
-        while (!jobsToDownload.isEmpty())
+        if (transferInformation.username.isEmpty())
         {
-            parent->mutex.lock();
-            ycaTask* currentTask=jobsToDownload.takeFirst();
-            currentTaskID=currentTask->uuid;
-            parent->mutex.unlock();
-
-            if (!parent->cloud.downloadCase(currentTask, &transferInformation, &parent->mutex))
+            if (!parent->cloud.validateUser(&transferInformation))
             {
-                // TODO: Error handling
-            }
+                if (!userInvalidShown)
+                {
+                    QMetaObject::invokeMethod(parent, "showNotification", Qt::QueuedConnection,  Q_ARG(QString, "Cannot process cases. User account is missing payment information or has been diabled."));
 
-            parent->mutex.lock();
-            currentTaskID="";
-            parent->mutex.unlock();
+                    // Avoid that the message is shown during every timer event
+                    userInvalidShown=true;
+                }
+            }
         }
 
-        QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
+        if (transferInformation.userAllowed)
+        {
+            QMetaObject::invokeMethod(parent, "showIndicator", Qt::QueuedConnection);
+
+            currentProcess=ycaTask::wpDownload;
+            updateParentStatus();
+
+            while (!jobsToDownload.isEmpty())
+            {
+                parent->mutex.lock();
+                ycaTask* currentTask=jobsToDownload.takeFirst();
+                currentTaskID=currentTask->uuid;
+                parent->mutex.unlock();
+
+                qDebug() << "Now downloading...";
+
+                if (!parent->cloud.downloadCase(currentTask, &transferInformation, &parent->mutex))
+                {
+                    // TODO: Error handling
+                }
+
+                parent->mutex.lock();
+                currentTaskID="";
+                parent->mutex.unlock();
+            }
+
+            QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
+        }
     }
 
     // TODO: Push downloaded jobs to destination
@@ -411,6 +442,8 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
     taskHelper.getAllTasks(taskList, true, false);
     mutex.unlock();
 
+    ui->activeTasksTable->clearContents();
+    qApp->processEvents();
     ui->activeTasksTable->setRowCount(taskList.count());
 
     QTableWidgetItem* item=0;

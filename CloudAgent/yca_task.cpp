@@ -172,7 +172,7 @@ bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
 
     QFileInfoList fileList=phiDir.entryInfoList(QStringList("*.phi"),QDir::Files,QDir::Time);
 
-    //qInfo() << "Parsing folder...";
+    qDebug() << "Parsing folder...";
 
     for (int i=0; i<fileList.count(); i++)
     {
@@ -191,7 +191,7 @@ bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
         }
 
         QDir inTaskDir(inPath+"/"+uuid);
-        if (!inTaskDir.exists())
+        if (inTaskDir.exists())
         {
             // Case has already been downloaded
             continue;
@@ -505,8 +505,8 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList)
             continue;
         }
 
-        qInfo() << "Processing file: " << phiPath+"/"+currentTask->phiFilename;
-        qInfo() << "Moving to: " << archivePath+"/"+currentTask->phiFilename;
+        //qInfo() << "Processing file: " << phiPath+"/"+currentTask->phiFilename;
+        //qInfo() << "Moving to: " << archivePath+"/"+currentTask->phiFilename;
 
         // Move the file into the archive folder
         if (!phiDir.rename(phiPath+"/"+currentTask->phiFilename, archivePath+"/"+currentTask->phiFilename))
@@ -559,7 +559,7 @@ bool ycaTaskHelper::removeIncompleteDownloads()
 
     for (int i=0; i<dirList.count(); i++)
     {
-        qInfo() << dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE;
+        //qInfo() << dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE;
 
         if (QFile::exists(dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE))
         {
@@ -621,8 +621,8 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
             continue;
         }
 
-        qInfo() << "Name:";
-        qInfo() << dirList.at(i).fileName();
+        //qInfo() << "Name:";
+        //qInfo() << dirList.at(i).fileName();
     }
 
 

@@ -27,6 +27,7 @@ yctTransferInformation::yctTransferInformation()
     inBucket="";
     outBucket="";
     region="";
+    userAllowed=false;
 }
 
 
@@ -101,6 +102,7 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
         }
     }
 
+    transferInformation->userAllowed=canSubmit;
     return canSubmit;
 }
 
@@ -138,11 +140,11 @@ int yctAPI::readModeList(ortModeList* modeList)
         QJsonObject jsonObject=jsonReply.array()[i].toObject();
         QStringList keys = jsonObject.keys();
 
-        ortModeEntry* newEntry=new ortModeEntry;
+        ortModeEntry* newEntry=new ortModeEntry();
 
         foreach(QString key, keys)
         {
-            //qDebug() << key << ": " << jsonObject[key].toString();
+            qDebug() << key << ": " << jsonObject[key].toString();
 
             if (key=="Name")
             {
@@ -168,7 +170,7 @@ int yctAPI::readModeList(ortModeList* modeList)
 
                     if (keycmp(clientKey,"MinimumSizeMB"))
                     {
-                        newEntry->minimumSizeMB=clientConfig[clientKey].toDouble();
+                        newEntry->minimumSizeMB=clientConfig[clientKey].toString().toDouble();
                     }
 
                     if (keycmp(clientKey,"ParamLabel"))
@@ -183,22 +185,22 @@ int yctAPI::readModeList(ortModeList* modeList)
 
                     if (keycmp(clientKey,"ParamDefault"))
                     {
-                        newEntry->paramDefault=clientConfig[clientKey].toDouble();
+                        newEntry->paramDefault=clientConfig[clientKey].toString().toDouble();
                     }
 
                     if (keycmp(clientKey,"ParamMin"))
                     {
-                        newEntry->paramMin=clientConfig[clientKey].toDouble();
+                        newEntry->paramMin=clientConfig[clientKey].toString().toDouble();
                     }
 
                     if (keycmp(clientKey,"ParamMax"))
                     {
-                        newEntry->paramMax=clientConfig[clientKey].toDouble();
+                        newEntry->paramMax=clientConfig[clientKey].toString().toDouble();
                     }
 
                     if (keycmp(clientKey,"ParamIsFloat"))
                     {
-                        newEntry->paramIsFloat=clientConfig[clientKey].toBool();
+                        newEntry->paramIsFloat=(clientConfig[clientKey].toString()=="TRUE");
                     }
 
                     //qDebug() << "ClientConfig: " << clientKey << ": " << clientConfig[clientKey].toString();
@@ -332,7 +334,7 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/jobs",
                                             QByteArray(), YCT_API_REGION, content, QStringList());
 
-    //qDebug() << "Request: " << runningTasks;
+    qDebug() << "Request: " << runningTasks;
 
     if (!reply.isSuccess())
     {
@@ -362,8 +364,9 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
 
         foreach(QString key, keys)
         {
-            //qDebug() << key << ": " << jsonObject[key].toString();
+            qDebug() << key << ": " << jsonObject[key].toString();
 
+            /*
             if (key=="name")
             {
                 if (jsonObject[key].toString() != taskList->at(i)->uuid)
@@ -373,6 +376,7 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
                     return false;
                 }
             }
+            */
 
             if (key=="status")
             {
@@ -437,7 +441,7 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
     }
 
     cmdLine += path+task->taskFilename;
-    qInfo() << cmdLine;
+    //qInfo() << cmdLine;
 
     // TODO: Batch call if commandline is too long
 
@@ -511,10 +515,10 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
 {
     bool success=false;
 
-    QString path=getCloudPath(YCT_CLOUDFOLDER_IN)+"/"+task->taskID;
+    QString path=getCloudPath(YCT_CLOUDFOLDER_IN)+"/"+task->uuid;
 
     QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
-                    setup->region + " " + setup->inBucket + " " + task->uuid + " download " + path;
+                    setup->region + " " + setup->outBucket + " " + task->uuid + " download " + path;
 
 
     QDir dir(getCloudPath(YCT_CLOUDFOLDER_IN));
@@ -533,26 +537,34 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
 
     // TODO: Check available disk space
 
-    cmdLine += path;
-    qInfo() << cmdLine;
+    qDebug() << cmdLine;
 
     int exitcode=callHelperApp(cmdLine);
+
+    qDebug() << "Helper output:";
+    for (int i=0; i<helperAppOutput.count(); i++)
+    {
+        qDebug() << helperAppOutput.at(i);
+    }
+
     if (exitcode==0)
     {
         success=true;
+
+        // Remove INCOMPLETE file
+        if (!QFile::remove(path+"/"+YCT_INCOMPLETE_FILE))
+        {
+            // TODO: Error handling
+        }
     }
     else
     {
+        qDebug() << "Exec error";
         success=false;
         // TODO: Error handling
     }
 
-    // Remove INCOMPLETE file
-
-    if (!QFile::remove(path+"/"+YCT_INCOMPLETE_FILE))
-    {
-        // TODO: Error handling
-    }
+    qDebug() << "Finished execution";
 
     return success;
 }

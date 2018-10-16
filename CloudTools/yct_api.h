@@ -17,9 +17,11 @@ public:
     yctTransferInformation();
 
     QString username;
+    bool    userAllowed;
+
     QString inBucket;
     QString outBucket;
-    QString region;
+    QString region;    
 };
 
 
