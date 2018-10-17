@@ -275,7 +275,7 @@
            <number>4</number>
           </property>
           <item>
-           <widget class="QPushButton" name="statusRefreshButton_3">
+           <widget class="QPushButton" name="clearArchiveButton">
             <property name="maximumSize">
              <size>
               <width>80</width>
@@ -342,6 +342,38 @@
         <string>Options</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <property name="spacing">
+         <number>7</number>
+        </property>
+        <property name="leftMargin">
+         <number>15</number>
+        </property>
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <item>
+         <widget class="QCheckBox" name="notificationsCheckbox">
+          <property name="text">
+           <string>Show notifications on task updates</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::MinimumExpanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>4</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>

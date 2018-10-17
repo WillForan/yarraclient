@@ -10,8 +10,9 @@ class yctConfiguration
 public:
     yctConfiguration();
 
-    QString               key;
-    QString               secret;
+    QString key;
+    QString secret;
+    bool    showNotifications;
 
     bool loadConfiguration();
     bool saveConfiguration();

@@ -99,10 +99,11 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
             {
                 transferInformation->region=jsonObject[key].toString();
             }
+
+            transferInformation->userAllowed=canSubmit;
         }
     }
 
-    transferInformation->userAllowed=canSubmit;
     return canSubmit;
 }
 
@@ -320,6 +321,7 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
     for (int i=0; i<taskList->count(); i++)
     {
         runningTasks+="{ \"name\": \"" + taskList->at(i)->uuid + "\" }";
+        //runningTasks+="\"" + taskList->at(i)->uuid + "\" ";
 
         if (i<taskList->count()-1)
         {
@@ -518,7 +520,7 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
     QString path=getCloudPath(YCT_CLOUDFOLDER_IN)+"/"+task->uuid;
 
     QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
-                    setup->region + " " + setup->outBucket + " " + task->uuid + " download " + path;
+                    setup->region + " " + setup->outBucket + " " + task->uuid + " download " + getCloudPath(YCT_CLOUDFOLDER_IN);
 
 
     QDir dir(getCloudPath(YCT_CLOUDFOLDER_IN));

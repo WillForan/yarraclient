@@ -5,6 +5,7 @@ yctConfiguration::yctConfiguration()
 {
     key="";
     secret="";
+    showNotifications=true;
 }
 
 
@@ -14,6 +15,7 @@ bool yctConfiguration::loadConfiguration()
 
     QString tempKey   =settings.value("Settings/Value1","").toString();
     QString tempSecret=settings.value("Settings/Value2","").toString();
+    showNotifications =settings.value("Settings/ShowNotifications",true).toBool();
 
     key   =QByteArray::fromBase64(tempKey.toLatin1());
     secret=QByteArray::fromBase64(tempSecret.toLatin1());
@@ -31,6 +33,7 @@ bool yctConfiguration::saveConfiguration()
 
     settings.setValue("Settings/Value1", tempKey);
     settings.setValue("Settings/Value2", tempSecret);
+    settings.setValue("Settings/ShowNotifications",showNotifications);
 
     return true;
 }

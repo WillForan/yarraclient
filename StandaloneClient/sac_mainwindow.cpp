@@ -462,6 +462,7 @@ void sacMainWindow::on_sendButton_clicked()
 
         // Perform cloud-based reconstruction
         bool result=processCloudRecon();
+        RTI->processEvents();
 
         copyDialog.close();
         this->show();

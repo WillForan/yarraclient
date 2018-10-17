@@ -296,6 +296,8 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     config.loadConfiguration();
     taskHelper.setCloudInstance(&cloud);
 
+    ui->notificationsCheckbox->setChecked(config.showNotifications);
+
     if (!cloud.createCloudFolders())
     {
         QMessageBox msgBox(0);
@@ -562,6 +564,7 @@ void ycaMainWindow::on_transferButton_clicked()
     callSubmit();
 }
 
+
 void ycaMainWindow::on_pauseButton_clicked()
 {
     if (ui->pauseButton->isChecked())
@@ -572,4 +575,27 @@ void ycaMainWindow::on_pauseButton_clicked()
     {
         transferWorker.processingPaused=false;
     }
+}
+
+
+void ycaMainWindow::on_clearArchiveButton_clicked()
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Clear Tasks?");
+    msgBox.setText("Do you really want to clear the list of completed / failed tasks? The task information will be deleted and cannot be recovered.");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setWindowIcon(YCA_ICON);
+    int ret = msgBox.exec();
+
+    if (ret==QMessageBox::Yes)
+    {
+
+    }
+}
+
+void ycaMainWindow::on_notificationsCheckbox_clicked()
+{
+    config.showNotifications=ui->notificationsCheckbox->isChecked();
+    config.saveConfiguration();
 }

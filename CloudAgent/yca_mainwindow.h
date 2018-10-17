@@ -97,8 +97,10 @@ private slots:
 
     void on_pushButton_4_clicked();
 
-
     void on_pauseButton_clicked();
+    void on_clearArchiveButton_clicked();
+
+    void on_notificationsCheckbox_clicked();
 
 private:
     Ui::ycaMainWindow* ui;

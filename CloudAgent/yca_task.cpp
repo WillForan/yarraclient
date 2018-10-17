@@ -238,6 +238,8 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
         return false;
     }
 
+    QString inPath=cloud->getCloudPath(YCT_CLOUDFOLDER_IN);
+
     QString outPath=cloud->getCloudPath(YCT_CLOUDFOLDER_OUT);
     QDir outDir(outPath);
     if (!outDir.exists())
@@ -272,9 +274,19 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
             if (outDir.exists(uuid+".task"))
             {
                 task->status=ycaTask::tsScheduled;
+                taskList.append(task);
+                continue;
+            }
+
+            QDir inTaskDir(inPath+"/"+uuid);
+            if (inTaskDir.exists())
+            {
+                // Case has already been downloaded
+                task->status=ycaTask::tsStorage;
             }
             else
             {
+                // Case must be in the cloud or on its way in/out there
                 task->status=ycaTask::tsProcessing;
             }
 
