@@ -74,6 +74,34 @@ QString ycaTask::getStatus()
 }
 
 
+QString ycaTask::getResult()
+{
+    QString str="";
+
+    switch (result)
+    {
+    default:
+    case trInProcess:
+        str="Processing";
+        break;
+    case trSuccess:
+        str="Sucess";
+        break;
+    case trAbortedTransfer:
+        str="Aborted (Transfer)";
+        break;
+    case trAbortedProcessing:
+        str="Aborted (Processing)";
+        break;
+    case trAbortedStorage:
+        str="Aborted (Storage)";
+        break;
+    }
+
+    return str;
+}
+
+
 ycaTaskHelper::ycaTaskHelper()
 {
     cloud=0;

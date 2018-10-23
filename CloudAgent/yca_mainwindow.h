@@ -89,18 +89,20 @@ private slots:
     void on_closeButton_clicked();
     void on_closeContextButton_clicked();
     void on_statusRefreshButton_clicked();
-    void on_pushButton_3_clicked();
     void on_detailsButton_clicked();
-
     void on_tabWidget_currentChanged(int index);
     void on_transferButton_clicked();
-
-    void on_pushButton_4_clicked();
-
     void on_pauseButton_clicked();
     void on_clearArchiveButton_clicked();
-
     void on_notificationsCheckbox_clicked();
+    void on_refreshArchiveButton_clicked();
+    void on_archiveDetailsButton_clicked();
+    void on_searchButton_clicked();
+    void on_searchEdit_returnPressed();
+    void on_detailsSearchButton_clicked();
+
+    void on_pushButton_3_clicked();
+    void on_pushButton_4_clicked();
 
 private:
     Ui::ycaMainWindow* ui;
@@ -113,6 +115,9 @@ private:
     ycaTransferIndicator indicator;
     ycaWorker            transferWorker;
     ycaTaskList          taskList;
+    ycaTaskList          archiveList;
+
+    bool checkForDCMTK();
 
 public:
     ycaTaskHelper        taskHelper;

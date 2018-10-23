@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
     qApp->setStyle(QStyleFactory::create("Fusion"));
     QPalette newPalette=QPalette(QColor(240,240,240),QColor(240,240,240));
     newPalette.setColor(QPalette::Highlight, QColor(247,176,44));
+    //newPalette.setColor(QPalette::Highlight, QColor(192,152,95));
     //newPalette.setColor(QPalette::Highlight, QColor(88,15,139));
     qApp->setPalette(newPalette);
 

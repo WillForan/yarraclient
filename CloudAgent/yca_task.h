@@ -50,6 +50,7 @@ public:
     TaskStatus  status;
     TaskResult  result;
     QString     getStatus();
+    QString     getResult();
 
     QString     patientName;
     QString     uuid;

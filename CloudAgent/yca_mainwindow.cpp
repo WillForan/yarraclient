@@ -331,6 +331,22 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
         return;
     }
 
+    if (!checkForDCMTK())
+    {
+        QMessageBox msgBox(0);
+        msgBox.setWindowTitle("Yarra Cloud Agent");
+        msgBox.setText("Unable to locate DCMTK binaries.<br>Please check you local client installation.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowIcon(YCA_ICON);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
+
+        transferWorker.shutdown();
+        shuttingDown=true;
+        QTimer::singleShot(0, qApp, SLOT(quit()));
+        return;
+    }
+
     transferWorker.setParent(this);
     taskHelper.clearTaskList(taskList);
 
@@ -344,6 +360,28 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     ui->activeTasksTable->horizontalHeader()->resizeSection(1,220);
     ui->activeTasksTable->horizontalHeader()->resizeSection(2,90);
     ui->activeTasksTable->horizontalHeader()->resizeSection(3,90);
+
+    ui->archiveTasksTable->setColumnCount(5);
+    ui->archiveTasksTable->setHorizontalHeaderItem(0,new QTableWidgetItem("Status"));
+    ui->archiveTasksTable->setHorizontalHeaderItem(1,new QTableWidgetItem("Patient"));
+    ui->archiveTasksTable->setHorizontalHeaderItem(2,new QTableWidgetItem("ACC"));
+    ui->archiveTasksTable->setHorizontalHeaderItem(3,new QTableWidgetItem("MRN"));
+    ui->archiveTasksTable->setHorizontalHeaderItem(4,new QTableWidgetItem("ID"));
+    ui->archiveTasksTable->horizontalHeader()->resizeSection(0,130);
+    ui->archiveTasksTable->horizontalHeader()->resizeSection(1,220);
+    ui->archiveTasksTable->horizontalHeader()->resizeSection(2,90);
+    ui->archiveTasksTable->horizontalHeader()->resizeSection(3,90);
+
+    ui->searchTable->setColumnCount(5);
+    ui->searchTable->setHorizontalHeaderItem(0,new QTableWidgetItem("Status"));
+    ui->searchTable->setHorizontalHeaderItem(1,new QTableWidgetItem("Patient"));
+    ui->searchTable->setHorizontalHeaderItem(2,new QTableWidgetItem("ACC"));
+    ui->searchTable->setHorizontalHeaderItem(3,new QTableWidgetItem("MRN"));
+    ui->searchTable->setHorizontalHeaderItem(4,new QTableWidgetItem("ID"));
+    ui->searchTable->horizontalHeader()->resizeSection(0,130);
+    ui->searchTable->horizontalHeader()->resizeSection(1,220);
+    ui->searchTable->horizontalHeader()->resizeSection(2,90);
+    ui->searchTable->horizontalHeader()->resizeSection(3,90);
 }
 
 
@@ -533,6 +571,16 @@ void ycaMainWindow::on_tabWidget_currentChanged(int index)
     {
         on_statusRefreshButton_clicked();
     }
+
+    if (index==1)
+    {
+        on_refreshArchiveButton_clicked();
+    }
+
+    if (index==2)
+    {
+        ui->searchEdit->setFocus();
+    }
 }
 
 
@@ -594,8 +642,164 @@ void ycaMainWindow::on_clearArchiveButton_clicked()
     }
 }
 
+
 void ycaMainWindow::on_notificationsCheckbox_clicked()
 {
     config.showNotifications=ui->notificationsCheckbox->isChecked();
     config.saveConfiguration();
+}
+
+
+void ycaMainWindow::on_refreshArchiveButton_clicked()
+{
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    mutex.lock();
+    taskHelper.getAllTasks(archiveList, false, true);
+    mutex.unlock();
+
+    ui->archiveTasksTable->clearContents();
+    qApp->processEvents();
+    ui->archiveTasksTable->setRowCount(archiveList.count());
+
+    QTableWidgetItem* item=0;
+    for (int i=0; i<archiveList.count(); i++)
+    {
+        item=new QTableWidgetItem(archiveList.at(i)->getResult());
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->archiveTasksTable->setItem(i,0,item);
+
+        item=new QTableWidgetItem(archiveList.at(i)->patientName);
+        item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        ui->archiveTasksTable->setItem(i,1,item);
+
+        item=new QTableWidgetItem(archiveList.at(i)->acc);
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->archiveTasksTable->setItem(i,2,item);
+
+        item=new QTableWidgetItem(archiveList.at(i)->mrn);
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->archiveTasksTable->setItem(i,3,item);
+
+        item=new QTableWidgetItem(archiveList.at(i)->uuid);
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->archiveTasksTable->setItem(i,4,item);
+    }
+
+    if (ui->archiveTasksTable->rowCount()>0)
+    {
+        int colCount=ui->archiveTasksTable->columnCount()-1;
+        ui->archiveTasksTable->setRangeSelected(QTableWidgetSelectionRange(0,0,0,colCount),true);
+    }
+
+    QApplication::restoreOverrideCursor();
+}
+
+
+void ycaMainWindow::on_archiveDetailsButton_clicked()
+{
+    if (ui->archiveTasksTable->selectedRanges().empty())
+    {
+        return;
+    }
+
+}
+
+
+void ycaMainWindow::on_searchButton_clicked()
+{
+    ui->searchTable->clearContents();
+    taskHelper.clearTaskList(taskList);
+
+    ycaTaskList searchList;
+    taskHelper.getAllTasks(searchList,true,true);
+
+    while (!searchList.empty())
+    {
+        ycaTask* task=searchList.takeFirst();
+        if ((!ui->searchEdit->text().isEmpty()) && (task->patientName.contains(ui->searchEdit->text(),Qt::CaseInsensitive)))
+        {
+            taskList.append(task);
+        }
+        else
+        {
+            delete task;
+            task=0;
+        }
+    }
+
+    if (taskList.empty())
+    {
+        ui->searchTable->setRowCount(1);
+
+        QTableWidgetItem* item=new QTableWidgetItem("Nothing found");
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->searchTable->setItem(0,0,item);
+        ui->searchTable->setItem(0,1,new QTableWidgetItem(""));
+        ui->searchTable->setItem(0,2,new QTableWidgetItem(""));
+        ui->searchTable->setItem(0,3,new QTableWidgetItem(""));
+        ui->searchTable->setItem(0,4,new QTableWidgetItem(""));
+    }
+    else
+    {
+        ui->searchTable->setRowCount(taskList.count());
+        QTableWidgetItem* item=0;
+        for (int i=0; i<taskList.count(); i++)
+        {
+            item=new QTableWidgetItem(taskList.at(i)->getStatus());
+            item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+            ui->searchTable->setItem(i,0,item);
+
+            item=new QTableWidgetItem(taskList.at(i)->patientName);
+            item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+            ui->searchTable->setItem(i,1,item);
+
+            item=new QTableWidgetItem(taskList.at(i)->acc);
+            item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+            ui->searchTable->setItem(i,2,item);
+
+            item=new QTableWidgetItem(taskList.at(i)->mrn);
+            item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+            ui->searchTable->setItem(i,3,item);
+
+            item=new QTableWidgetItem(taskList.at(i)->uuid);
+            item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+            ui->searchTable->setItem(i,4,item);
+        }
+    }
+}
+
+
+void ycaMainWindow::on_searchEdit_returnPressed()
+{
+    on_searchButton_clicked();
+}
+
+
+void ycaMainWindow::on_detailsSearchButton_clicked()
+{
+    // TODO
+}
+
+
+bool ycaMainWindow::checkForDCMTK()
+{
+    QDir appDir(qApp->applicationDirPath());
+
+    if (!appDir.exists(YCA_DCMTK_DCMODIFY))
+    {
+        return false;
+    }
+
+    if (!appDir.exists(YCA_DCMTK_STORESCU))
+    {
+        return false;
+    }
+
+    if (!appDir.exists(YCA_DCMTK_COPYRIGHT))
+    {
+        return false;
+    }
+
+    return true;
 }
