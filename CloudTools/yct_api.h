@@ -44,8 +44,8 @@ public:
 
     bool    uploadCase  (ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
     bool    downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
-
     bool    getJobStatus(QList<ycaTask*>* taskList);
+    bool    insertPHI   (QString path, ycaTask* task);
 
     QString errorReason;
 
@@ -54,7 +54,7 @@ protected:
     yctConfiguration* config;
 
     QStringList helperAppOutput;
-    int callHelperApp(QString cmd);
+    int callHelperApp(QString binary, QString parameters);
 
 };
 

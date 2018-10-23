@@ -448,7 +448,7 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
     // TODO: Batch call if commandline is too long
 
     // Execute the helper app to perform the multi-part upload
-    int exitcode=callHelperApp(cmdLine);
+    int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine);
     if (exitcode==0)
     {
         success=true;
@@ -541,7 +541,7 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
 
     qDebug() << cmdLine;
 
-    int exitcode=callHelperApp(cmdLine);
+    int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine);
 
     qDebug() << "Helper output:";
     for (int i=0; i<helperAppOutput.count(); i++)
@@ -572,7 +572,21 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
 }
 
 
-int yctAPI::callHelperApp(QString cmd)
+bool yctAPI::insertPHI(QString path, ycaTask* task)
+{
+    // TODO
+    QString cmd="";
+
+    if (!callHelperApp(YCT_DCMTK_DCMODIFY,cmd))
+    {
+
+    }
+
+    return true;
+}
+
+
+int yctAPI::callHelperApp(QString binary, QString parameters)
 {
     // Clear the output buffer
     helperAppOutput.clear();
@@ -581,10 +595,10 @@ int yctAPI::callHelperApp(QString cmd)
 
     QProcess *myProcess = new QProcess(0);
     myProcess->setReadChannel(QProcess::StandardOutput);
-    QString helperCmd=qApp->applicationDirPath()+"/YCA_helper.exe";
+    QString helperCmd=qApp->applicationDirPath()+"/"+binary;
 
     QStringList args;
-    args << cmd;
+    args << parameters;
     QString argLine=args.join(" ");
     args.clear();
     args << argLine.split(" ");
@@ -594,7 +608,7 @@ int yctAPI::callHelperApp(QString cmd)
 
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
-    timeoutTimer.setInterval(YCA_HELPER_TIMEOUT);
+    timeoutTimer.setInterval(YCT_HELPER_TIMEOUT);
     QEventLoop q;
     connect(myProcess, SIGNAL(finished(int , QProcess::ExitStatus)), &q, SLOT(quit()));
     connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
@@ -611,7 +625,7 @@ int yctAPI::callHelperApp(QString cmd)
     {
         timeoutTimer.stop();
         RTI->log("Warning: QEventLoop returned too early. Starting secondary loop.");
-        while ((myProcess->state()==QProcess::Running) && (ti.elapsed()<YCA_HELPER_TIMEOUT))
+        while ((myProcess->state()==QProcess::Running) && (ti.elapsed()<YCT_HELPER_TIMEOUT))
         {
             RTI->processEvents();
             Sleep(RDS_SLEEP_INTERVAL);

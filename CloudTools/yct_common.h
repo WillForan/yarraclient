@@ -13,6 +13,13 @@
 #define YCT_CLOUDFOLDER_PHI     "/cloud/phi"
 #define YCT_CLOUDFOLDER_ARCHIVE "/cloud/phi_archive"
 
+#define YCT_DCMTK_DCMODIFY      "dcmtk/dcmodify.exe"
+#define YCT_DCMTK_STORESCU      "dcmtk/storescu.exe"
+#define YCT_DCMTK_COPYRIGHT     "dcmtk/COPYRIGHT"
+#define YCT_HELPER_APP          "YCA_helper.exe"
+
+#define YCT_HELPER_TIMEOUT 300000
+
 
 class yctAWSCommon
 {

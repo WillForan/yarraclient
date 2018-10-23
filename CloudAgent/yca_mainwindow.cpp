@@ -786,17 +786,17 @@ bool ycaMainWindow::checkForDCMTK()
 {
     QDir appDir(qApp->applicationDirPath());
 
-    if (!appDir.exists(YCA_DCMTK_DCMODIFY))
+    if (!appDir.exists(YCT_DCMTK_DCMODIFY))
     {
         return false;
     }
 
-    if (!appDir.exists(YCA_DCMTK_STORESCU))
+    if (!appDir.exists(YCT_DCMTK_STORESCU))
     {
         return false;
     }
 
-    if (!appDir.exists(YCA_DCMTK_COPYRIGHT))
+    if (!appDir.exists(YCT_DCMTK_COPYRIGHT))
     {
         return false;
     }

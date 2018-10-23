@@ -661,6 +661,14 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
             continue;
         }
 
+        if (!cloud->insertPHI(dirList.at(i).filePath(),currentTask))
+        {
+            // TODO: Error reporting
+            delete currentTask;
+            currentTask=0;
+            continue;
+        }
+
         //qInfo() << "Name:";
         //qInfo() << dirList.at(i).fileName();
     }
@@ -668,3 +676,5 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
 
     return true;
 }
+
+
