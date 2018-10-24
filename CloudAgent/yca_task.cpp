@@ -639,8 +639,14 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
 
     for (int i=0; i<dirList.count(); i++)
     {
-        if (QFile::exists(dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE))
+        //qDebug() << "Check: " << dirList.at(i).filePath();
+
+        QString incompleteFile=dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE;
+
+        if (QFile::exists(incompleteFile))
         {
+            qDebug() << "INCOMPLETE file found, folder is from incomplete download: " << incompleteFile;
+
             // INCOMPLETE file found, so folder is from incomplete download.
             continue;
         }
@@ -648,18 +654,26 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
         QString phiFile=phiDir.absoluteFilePath(dirList.at(i).fileName()+".phi");
         if (!QFile::exists(phiFile))
         {
+            qDebug() << "File with PHI information not found. Can't store task: " << phiFile;
+
             // Corresponding file with PHI information not found. Can't store task.
             // TODO: Error handling
             continue;
         }
 
         ycaTask* currentTask=new ycaTask;
+        currentTask->uuid=dirList.at(i).fileName();
+
         if (!readPHIData(phiFile, currentTask))
-        {
+        {            
+            qDebug() << "Error reading PHI file " << phiFile;
+
             delete currentTask;
             currentTask=0;
             continue;
         }
+
+        //qDebug() << "PHI Insertion: " << dirList.at(i).filePath();
 
         if (!cloud->insertPHI(dirList.at(i).filePath(),currentTask))
         {
@@ -672,7 +686,6 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
         //qInfo() << "Name:";
         //qInfo() << dirList.at(i).fileName();
     }
-
 
     return true;
 }

@@ -577,10 +577,32 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
     // TODO
     QString cmd="";
 
+    QDir tarDir(path+"/output_files");
+
+    if (!tarDir.exists())
+    {
+        // TODO: Error handling
+        qDebug() << "Folder with extracted files does not exist: " << tarDir.absolutePath();
+        return false;
+    }
+
+    if (tarDir.entryInfoList(QStringList("*"),QDir::Files).isEmpty())
+    {
+        // TODO: Error handling
+        qDebug() << "Reconstruction created no output";
+        return false;
+    }
+
+    /*
+
     if (!callHelperApp(YCT_DCMTK_DCMODIFY,cmd))
     {
 
     }
+
+    */
+
+    qDebug() << "Inserting PHI!";
 
     return true;
 }
