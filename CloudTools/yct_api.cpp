@@ -320,7 +320,8 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
     QString runningTasks="[";
     for (int i=0; i<taskList->count(); i++)
     {
-        runningTasks+="{ \"name\": \"" + taskList->at(i)->uuid + "\" }";
+        runningTasks+=" \"" + taskList->at(i)->uuid + "\" ";
+        //runningTasks+="{ \"name\": \"" + taskList->at(i)->uuid + "\" }";
         //runningTasks+="\"" + taskList->at(i)->uuid + "\" ";
 
         if (i<taskList->count()-1)
@@ -351,13 +352,28 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
         return false;
     }
 
+    qDebug() << "Response:" << reply.replyData();
+
     QJsonDocument jsonReply =QJsonDocument::fromJson(reply.replyData());
 
+    QJsonObject jsonObject=jsonReply.object();
+    QStringList keys = jsonObject.keys();
+
+    foreach(QString key, keys)
+    {
+        qDebug() << key ;
+        //qDebug() << key << ": " << jsonObject[key].toString();
+    }
+
+
+    /*
     if (jsonReply.array().count() != taskList->count())
     {
+        qDebug() << "Error: Reponse count doesn't match";
         // TODO: Error handling!
         return false;
     }
+    */
 
     for (int i=0; i<jsonReply.array().count(); i++)
     {
@@ -412,8 +428,6 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
             }
         }
     }
-
-    qDebug() << reply.replyData();
 
     return true;
 
@@ -574,9 +588,6 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
 
 bool yctAPI::insertPHI(QString path, ycaTask* task)
 {
-    // TODO
-    QString cmd="";
-
     QDir tarDir(path+"/output_files");
 
     if (!tarDir.exists())
@@ -593,16 +604,31 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
         return false;
     }
 
-    /*
+    QString dicomPath=tarDir.absolutePath()+"/*.dcm ";
 
-    if (!callHelperApp(YCT_DCMTK_DCMODIFY,cmd))
+    QString cmd="";
+    cmd += "-i \"(0010,0010)="+task->patientName+"\" ";
+    cmd += "-i \"(0010,0020)="+task->mrn+"\" ";
+    cmd += "-i \"(0010,0030)="+task->dob+"\" ";
+    cmd += "-i \"(0008,0050)="+task->acc+"\" ";
+    cmd += "-i \"(0010,4000)="+task->uuid+"\" ";
+    cmd += "-nb ";
+    cmd += dicomPath;
+
+    //qDebug() << "CMD: " << cmd;
+
+    if (callHelperApp(YCT_DCMTK_DCMODIFY,cmd)!=0)
     {
-
+        // TODO: Error handling
+        qDebug() << "Error executing dcmodify";
+        return false;
     }
 
-    */
-
-    qDebug() << "Inserting PHI!";
+    qDebug() << "Helper output:";
+    for (int i=0; i<helperAppOutput.count(); i++)
+    {
+        qDebug() << helperAppOutput.at(i);
+    }
 
     return true;
 }
@@ -617,16 +643,10 @@ int yctAPI::callHelperApp(QString binary, QString parameters)
 
     QProcess *myProcess = new QProcess(0);
     myProcess->setReadChannel(QProcess::StandardOutput);
-    QString helperCmd=qApp->applicationDirPath()+"/"+binary;
+    QString helperCmd=qApp->applicationDirPath()+"/"+binary+" "+parameters;
 
-    QStringList args;
-    args << parameters;
-    QString argLine=args.join(" ");
-    args.clear();
-    args << argLine.split(" ");
-
-    //RTI->debug("Calling RAID tool: " + raidToolCmd);
-    //RTI->debug("Arguments: " + argLine );
+    //qDebug() << "Calling helper tool: " + helperCmd;
+    //qDebug() << "Arguments: " + parameters.join(" ");
 
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
@@ -638,7 +658,7 @@ int yctAPI::callHelperApp(QString binary, QString parameters)
     QTime ti;
     ti.start();
     timeoutTimer.start();
-    myProcess->start(helperCmd, args);
+    myProcess->start(helperCmd);
     q.exec();
 
     // Check for problems with the event loop: Sometimes it seems to return to quickly!
