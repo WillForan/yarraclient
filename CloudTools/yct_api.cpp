@@ -1,5 +1,4 @@
 #include "yct_api.h"
-#include "yct_common.h"
 #include "yct_configuration.h"
 #include "yct_aws/qtaws.h"
 #include "../CloudAgent/yca_global.h"
@@ -28,6 +27,19 @@ yctTransferInformation::yctTransferInformation()
     outBucket="";
     region="";
     userAllowed=false;
+}
+
+
+yctStorageInformation::yctStorageInformation()
+{
+    method=ystInvalid;
+
+    pacsIP="";
+    pacsPort="";
+    pacsAET="Yarra";
+    pacsAEC="Yarra";
+
+    driveLocation="";
 }
 
 
@@ -321,13 +333,15 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
     for (int i=0; i<taskList->count(); i++)
     {
         runningTasks+=" \"" + taskList->at(i)->uuid + "\" ";
-        //runningTasks+="{ \"name\": \"" + taskList->at(i)->uuid + "\" }";
-        //runningTasks+="\"" + taskList->at(i)->uuid + "\" ";
 
         if (i<taskList->count()-1)
         {
             runningTasks+=", ";
         }
+
+        // Make sure to flag the job status as invalid in case the job can't
+        // be found in the cloud database
+        taskList->at(i)->status=ycaTask::tsInvalid;
     }
     runningTasks+="]";
 
@@ -337,7 +351,7 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/jobs",
                                             QByteArray(), YCT_API_REGION, content, QStringList());
 
-    qDebug() << "Request: " << runningTasks;
+    //qDebug() << "Request: " << runningTasks;
 
     if (!reply.isSuccess())
     {
@@ -352,92 +366,56 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
         return false;
     }
 
-    qDebug() << "Response:" << reply.replyData();
+    //qDebug() << "Response:" << reply.replyData();
 
-    QJsonDocument jsonReply =QJsonDocument::fromJson(reply.replyData());
+    QJsonDocument   jsonReply =QJsonDocument::fromJson(reply.replyData());
+    QJsonObject     jsonObject=jsonReply.object();
 
-    QJsonObject jsonObject=jsonReply.object();
-    QStringList keys = jsonObject.keys();
-
-    foreach(QString key, keys)
+    for (int i=0; i<taskList->count(); i++)
     {
-        qDebug() << key ;
-        //qDebug() << key << ": " << jsonObject[key].toString();
-    }
+        QJsonObject taskInfo      =jsonObject[taskList->at(i)->uuid].toObject();
+        QJsonObject batchInfo     =taskInfo["batch_info"].toObject();
+        QString     batchStatusStr=batchInfo["status"].toString();
 
-
-    /*
-    if (jsonReply.array().count() != taskList->count())
-    {
-        qDebug() << "Error: Reponse count doesn't match";
-        // TODO: Error handling!
-        return false;
-    }
-    */
-
-    for (int i=0; i<jsonReply.array().count(); i++)
-    {
-        QJsonObject jsonObject=jsonReply.array()[i].toObject();
-        QStringList keys = jsonObject.keys();
-
-        foreach(QString key, keys)
+        if (batchStatusStr.isEmpty())
         {
-            qDebug() << key << ": " << jsonObject[key].toString();
+            continue;
+        }
 
-            /*
-            if (key=="name")
-            {
-                if (jsonObject[key].toString() != taskList->at(i)->uuid)
-                {
-                    // TODO: Error handling!
-                    // Sorting of returned job list incorrect!
-                    return false;
-                }
-            }
-            */
+        yctAWSCommon::BatchStatus batchStatus=yctAWSCommon::getBatchStatus(batchStatusStr);
 
-            if (key=="status")
-            {
-                QString statusStr=jsonObject[key].toString();
-                yctAWSCommon::BatchStatus batchStatus=yctAWSCommon::getBatchStatus(statusStr);
+        switch (batchStatus)
+        {
+        case yctAWSCommon::SUBMITTED:
+        case yctAWSCommon::PENDING:
+        case yctAWSCommon::RUNNABLE:
+        case yctAWSCommon::STARTING:
+        case yctAWSCommon::RUNNING:
+            taskList->at(i)->status=ycaTask::tsRunning;
+            break;
 
-                switch (batchStatus)
-                {
-                case yctAWSCommon::SUBMITTED:
-                case yctAWSCommon::PENDING:
-                case yctAWSCommon::RUNNABLE:
-                case yctAWSCommon::STARTING:
-                case yctAWSCommon::RUNNING:
-                    taskList->at(i)->status=ycaTask::tsRunning;
-                    break;
+        case yctAWSCommon::SUCCEEDED:
+            taskList->at(i)->status=ycaTask::tsReady;
+            break;
 
-                case yctAWSCommon::SUCCEEDED:
-                    taskList->at(i)->status=ycaTask::tsReady;
-                    break;
+        case yctAWSCommon::FAILED:
+            taskList->at(i)->status=ycaTask::tsErrorProcessing;
+            break;
 
-                case yctAWSCommon::FAILED:
-                    taskList->at(i)->status=ycaTask::tsErrorProcessing;
-                    break;
+        case yctAWSCommon::INVALID:
+        default:
+            // TODO: Error reporting
+            return false;
+            break;
+        }
 
-                case yctAWSCommon::INVALID:
-                default:
-                    // TODO: Error reporting
-                    return false;
-                    break;
-                }
-            }
+        if (!taskInfo["cost"].isUndefined())
+        {
+            taskList->at(i)->cost=taskInfo["cost"].toDouble();
         }
     }
 
     return true;
-
-    /*
-    // For querying the destitnation
-    //runningTasks="{ \"recon_mode\": \"" + QString("GRASP Brainmets") + "\" }";
-    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/mode_destinations",
-                                            QByteArray(), YCT_API_REGION, content, QStringList());
-    */
-
 }
 
 
@@ -624,6 +602,8 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
         return false;
     }
 
+    // TODO: Search helper output for error messages
+
     qDebug() << "Helper output:";
     for (int i=0; i<helperAppOutput.count(); i++)
     {
@@ -634,7 +614,7 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
 }
 
 
-int yctAPI::callHelperApp(QString binary, QString parameters)
+int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
 {
     // Clear the output buffer
     helperAppOutput.clear();
@@ -646,11 +626,10 @@ int yctAPI::callHelperApp(QString binary, QString parameters)
     QString helperCmd=qApp->applicationDirPath()+"/"+binary+" "+parameters;
 
     //qDebug() << "Calling helper tool: " + helperCmd;
-    //qDebug() << "Arguments: " + parameters.join(" ");
 
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
-    timeoutTimer.setInterval(YCT_HELPER_TIMEOUT);
+    timeoutTimer.setInterval(execTimeout);
     QEventLoop q;
     connect(myProcess, SIGNAL(finished(int , QProcess::ExitStatus)), &q, SLOT(quit()));
     connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
@@ -667,7 +646,7 @@ int yctAPI::callHelperApp(QString binary, QString parameters)
     {
         timeoutTimer.stop();
         RTI->log("Warning: QEventLoop returned too early. Starting secondary loop.");
-        while ((myProcess->state()==QProcess::Running) && (ti.elapsed()<YCT_HELPER_TIMEOUT))
+        while ((myProcess->state()==QProcess::Running) && (ti.elapsed()<execTimeout))
         {
             RTI->processEvents();
             Sleep(RDS_SLEEP_INTERVAL);
@@ -738,5 +717,165 @@ int yctAPI::callHelperApp(QString binary, QString parameters)
     delete myProcess;
     myProcess=0;
 
+    qDebug() << "Exitcode: " << exitcode;
+
     return exitcode;
 }
+
+
+bool yctAPI::pushToDestinations(QString path, ycaTask* task)
+{
+    // Query the destinations of the mode
+    QString reqString="{ \"recon_mode\": \"" + task->reconMode + "\" }";
+    QByteArray content=reqString.toUtf8();
+
+    QtAWSRequest awsRequest(config->key, config->secret);
+    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/mode_destinations",
+                                            QByteArray(), YCT_API_REGION, content, QStringList());
+    if (!reply.isSuccess())
+    {
+        // TODO: Error handling
+        errorReason=reply.anyErrorString();
+
+        if (reply.networkError()==QNetworkReply::ContentOperationNotPermittedError)
+        {
+            errorReason="YarraCloud Key ID or Secret is invalid.";
+        }
+
+        return false;
+    }
+
+    yctStorageList storageList;
+    QJsonDocument  jsonReply=QJsonDocument::fromJson(reply.replyData());
+
+    for (int i=0; i<jsonReply.array().count(); i++)
+    {
+        QJsonObject jsonObject=jsonReply.array()[i].toObject();
+
+        yctStorageInformation* destination=new yctStorageInformation();
+        storageList.append(destination);
+
+        if (jsonObject["method"].toString()=="smb")
+        {
+            destination->method=yctStorageInformation::yctDrive;
+            destination->driveLocation=jsonObject["location"].toString();
+        }
+        else
+        {
+            if (jsonObject["method"].toString()=="PACS")
+            {
+                destination->method  =yctStorageInformation::yctPACS;
+                destination->pacsIP  =jsonObject["ip"].toString();
+                destination->pacsPort=jsonObject["port"].toString();
+                destination->pacsAET =jsonObject["aet"].toString();
+                destination->pacsAEC =jsonObject["aec"].toString();
+            }
+            else
+            {
+                qDebug() << "Unknown storage destination";
+                delete destination;
+                destination=0;
+                continue;
+            }
+        }
+
+        destination->name=jsonObject["name"].toString();
+    }
+
+    int failedTransfers=0;
+
+    while (!storageList.isEmpty())
+    {
+        yctStorageInformation* destination=storageList.takeFirst();
+
+        if (destination->method==yctStorageInformation::yctDrive)
+        {
+            if (!pushToDrive(path, task, destination))
+            {
+                // TODO: Error handling
+                qDebug() << "Drive transfer failed to " << destination->name;
+                failedTransfers++;
+            }
+        }
+
+        if (destination->method==yctStorageInformation::yctPACS)
+        {
+            if (!pushToPACS(path, task, destination))
+            {
+                // TODO: Error handling
+                qDebug() << "PACS transfer failed to " << destination->name;
+                failedTransfers++;
+            }
+        }
+
+        delete destination;
+        destination=0;
+    }
+
+    //qDebug() << reply.replyData();
+
+    return (failedTransfers==0);
+}
+
+
+bool yctAPI::pushToPACS (QString path, ycaTask* task, yctStorageInformation* destination)
+{
+    qDebug() << "Pushing to PACS destination " << destination->name;
+
+    QDir dcmDir(path+"/output_files");
+
+    if (!dcmDir.exists())
+    {
+        // TODO: Error handling
+        qDebug() << "Folder with extracted files does not exist: " << dcmDir.absolutePath();
+        return false;
+    }
+
+    if (dcmDir.entryInfoList(QStringList("*"),QDir::Files).isEmpty())
+    {
+        // TODO: Error handling
+        qDebug() << "Reconstruction created no output";
+        return false;
+    }
+
+    // TODO: Possibly change to file-by-file sending to ensure dicoms are sent in order
+
+    QString dicomPath=dcmDir.absolutePath()+"/*.dcm ";
+
+    QString cmd="--timeout 20 +sd ";
+    cmd += "-aec "+destination->pacsAEC+" ";
+    cmd += "-aet "+destination->pacsAET+" ";
+    cmd += destination->pacsIP+" ";
+    cmd += destination->pacsPort+" ";
+    cmd += dicomPath;
+
+    //qDebug() << "CMD: " << cmd;
+
+    bool success=true;
+
+    if (callHelperApp(YCT_DCMTK_STORESCU,cmd)!=0)
+    {
+        // TODO: Error handling
+        qDebug() << "Error executing storescu";
+        success=false;
+    }
+
+    // TODO: Search helper output for error messages
+
+    qDebug() << "Helper output:";
+    for (int i=0; i<helperAppOutput.count(); i++)
+    {
+        qDebug() << helperAppOutput.at(i);
+    }
+
+    return success;
+}
+
+
+bool yctAPI::pushToDrive(QString path, ycaTask* task, yctStorageInformation* destination)
+{
+    // TODO
+
+    return true;
+}
+

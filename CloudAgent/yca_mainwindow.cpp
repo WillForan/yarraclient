@@ -142,11 +142,13 @@ void ycaWorker::timerCall()
     ycaTaskList jobsToDownload;
     parent->taskHelper.getTasksForDownloadArchive(taskList, jobsToDownload, jobsToArchive);
 
+    /*
     qDebug() << "JobsToDownload:";
     for (int i=0; i< jobsToDownload.count(); i++)
     {
         qDebug() << jobsToDownload.at(i)->patientName;
     }
+    */
 
     if (!jobsToDownload.empty())
     {
@@ -190,15 +192,15 @@ void ycaWorker::timerCall()
                 parent->mutex.unlock();
             }
 
-            QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
+            // Don't hide the indicator here, because if jobs have been downloaded,
+            // a storage operation will follow
         }
     }
 
-    // TODO: Push downloaded jobs to destination
-    // TODO: Retrieve storage location for each job
     currentProcess=ycaTask::wpStorage;
-    updateParentStatus();
+    updateParentStatus();  
 
+    // Retrieve storage location for each job and push downloaded jobs to destination
     if (!parent->taskHelper.storeTasks(jobsToArchive))
     {
         // TODO: Error handling
@@ -213,6 +215,8 @@ void ycaWorker::timerCall()
         }
         parent->mutex.unlock();
     }
+
+    QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
 
     currentProcess=ycaTask::wpIdle;
     updateParentStatus();

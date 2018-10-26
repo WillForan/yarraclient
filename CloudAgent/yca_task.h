@@ -70,6 +70,8 @@ public:
     int         uploadRetry;
     int         downloadRetry;
     int         storageRetry;
+
+    double      cost;
 };
 
 typedef QList<ycaTask*> ycaTaskList;

@@ -5,6 +5,8 @@
 #include <QString>
 #include <QStringList>
 
+#include "yct_common.h"
+
 
 class yctConfiguration;
 class ortModeList;
@@ -25,6 +27,33 @@ public:
 };
 
 
+class yctStorageInformation
+{
+public:
+    yctStorageInformation();
+
+    enum StorageMethod
+    {
+        ystInvalid=0,
+        yctDrive=1,
+        yctPACS=2
+    };
+
+    QString       name;
+    StorageMethod method;
+
+    QString pacsIP;
+    QString pacsPort;
+    QString pacsAET;
+    QString pacsAEC;
+
+    QString driveLocation;
+
+};
+
+typedef QList<yctStorageInformation*> yctStorageList;
+
+
 class yctAPI : public QObject
 {
     Q_OBJECT
@@ -42,10 +71,14 @@ public:
     QString getCloudPath(QString folder);
     QString createUUID();
 
-    bool    uploadCase  (ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
-    bool    downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
-    bool    getJobStatus(QList<ycaTask*>* taskList);
-    bool    insertPHI   (QString path, ycaTask* task);
+    bool    uploadCase        (ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
+    bool    downloadCase      (ycaTask* task, yctTransferInformation* setup, QMutex* mutex=0);
+    bool    getJobStatus      (QList<ycaTask*>* taskList);
+    bool    insertPHI         (QString path, ycaTask* task);
+
+    bool    pushToDestinations(QString path, ycaTask* task);
+    bool    pushToPACS (QString path, ycaTask* task, yctStorageInformation* destination);
+    bool    pushToDrive(QString path, ycaTask* task, yctStorageInformation* destination);
 
     QString errorReason;
 
@@ -54,7 +87,7 @@ protected:
     yctConfiguration* config;
 
     QStringList helperAppOutput;
-    int callHelperApp(QString binary, QString parameters);
+    int callHelperApp(QString binary, QString parameters, int execTimeout=YCT_HELPER_TIMEOUT);
 
 };
 

@@ -21,6 +21,8 @@ ycaTask::ycaTask()
     downloadRetry=0;
     storageRetry=0;
 
+    cost=-1;
+
     twixFilenames.clear();
 }
 
@@ -639,8 +641,6 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
 
     for (int i=0; i<dirList.count(); i++)
     {
-        //qDebug() << "Check: " << dirList.at(i).filePath();
-
         QString incompleteFile=dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE;
 
         if (QFile::exists(incompleteFile))
@@ -673,8 +673,6 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
             continue;
         }
 
-        //qDebug() << "PHI Insertion: " << dirList.at(i).filePath();
-
         if (!cloud->insertPHI(dirList.at(i).filePath(),currentTask))
         {
             // TODO: Error reporting
@@ -683,7 +681,14 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
             continue;
         }
 
-        //qInfo() << "Name:";
+        if (!cloud->pushToDestinations(dirList.at(i).filePath(),currentTask))
+        {
+            // TODO: Error handling
+        }
+
+        // TODO: Folder cleanup
+
+        //qInfo() << "Name:";        
         //qInfo() << dirList.at(i).fileName();
     }
 
