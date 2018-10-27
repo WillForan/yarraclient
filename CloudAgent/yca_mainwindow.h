@@ -64,10 +64,6 @@ public:
     explicit ycaMainWindow(QWidget *parent = 0);
     ~ycaMainWindow();
 
-    bool shuttingDown;
-
-    QMutex  mutex;
-
 protected:
     void closeEvent(QCloseEvent* event);
     void showEvent(QShowEvent* event);
@@ -106,10 +102,9 @@ private slots:
 
 private:
     Ui::ycaMainWindow* ui;
-
-    QSystemTrayIcon* trayIcon;
-    QMenu* trayIconMenu;
-    QAction* trayItemShutdown;
+    QSystemTrayIcon*   trayIcon;
+    QMenu*             trayIconMenu;
+    QAction*           trayItemShutdown;
 
     yctConfiguration     config;
     ycaTransferIndicator indicator;
@@ -122,6 +117,8 @@ private:
 public:
     ycaTaskHelper        taskHelper;
     yctAPI               cloud;
+    QMutex               mutex;
+    bool                 shuttingDown;
 
 };
 

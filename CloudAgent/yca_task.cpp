@@ -496,6 +496,35 @@ bool ycaTaskHelper::saveResultToPHI(QString filepath, ycaTask::TaskResult result
 }
 
 
+bool ycaTaskHelper::saveCostsToPHI(ycaTaskList& taskList)
+{
+    for (int i=0; i<taskList.count(); i++)
+    {
+        ycaTask* task=taskList.at(i);
+        QString  filepath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI)+"/"+task->uuid+".phi";
+
+        if (!QFile::exists(filepath))
+        {
+            qDebug() << "Error: PHI file not found.";
+            continue;
+        }
+
+        QSettings phiFile(filepath, QSettings::IniFormat);
+
+        if (phiFile.value("PHI/UUID","").toString()!=task->uuid)
+        {
+            // UUID is missing. PHI file seems invalid or unable to read.
+            continue;
+        }
+
+        phiFile.setValue("STATS/COSTS",task->cost);
+    }
+
+    return true;
+}
+
+
+
 void ycaTaskHelper::getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList)
 {
     clearTaskList(downloadList);
@@ -514,7 +543,7 @@ void ycaTaskHelper::getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskLis
                 archiveList.append(taskList.at(i));
             }
         }
-    }
+    }    
 }
 
 
@@ -619,7 +648,7 @@ bool ycaTaskHelper::removeIncompleteDownloads()
 }
 
 
-bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
+bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWidget)
 {
     QString inPath=cloud->getCloudPath(YCT_CLOUDFOLDER_IN);
     QDir inDir(inPath);
@@ -638,6 +667,11 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
     }
 
     QFileInfoList dirList=inDir.entryInfoList(QStringList("*"),QDir::Dirs|QDir::NoDotAndDotDot,QDir::Time);
+
+    if ((notificationWidget!=0) && (!dirList.isEmpty()))
+    {
+        QMetaObject::invokeMethod(notificationWidget, "showIndicator", Qt::QueuedConnection);
+    }
 
     for (int i=0; i<dirList.count(); i++)
     {
@@ -684,9 +718,25 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
         if (!cloud->pushToDestinations(dirList.at(i).filePath(),currentTask))
         {
             // TODO: Error handling
+            delete currentTask;
+            currentTask=0;
+
+            // If an error occurred during transfer to one of the destinations,
+            // don't delete the folder and try again next time
+            continue;
         }
 
-        // TODO: Folder cleanup
+        // Folder cleanup
+        QDir removeDir(dirList.at(i).filePath());
+        if (!removeDir.removeRecursively())
+        {
+            qDebug() << "Error removing files from IN folder";
+            // TODO: Error reporting!
+        }
+
+        currentTask->status=ycaTask::tsStorage;
+        currentTask->result=ycaTask::trSuccess;
+        archiveList.append(currentTask);
 
         //qInfo() << "Name:";        
         //qInfo() << dirList.at(i).fileName();
@@ -694,5 +744,4 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList)
 
     return true;
 }
-
 

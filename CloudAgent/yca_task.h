@@ -91,18 +91,17 @@ public:
     bool checkScanfiles(QString taskID, ycaTask* task);    
     bool readPHIData(QString filepath, ycaTask* task);
     bool saveResultToPHI(QString filepath, ycaTask::TaskResult result);
+    bool saveCostsToPHI(ycaTaskList& taskList);
 
     void getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList);
     bool archiveTasks(ycaTaskList& archiveList);
     void clearTaskList(ycaTaskList& list);
 
-    bool storeTasks(ycaTaskList& archiveList);
+    bool storeTasks(ycaTaskList& archiveList, QObject* notificationWidget=0);
 
     bool removeIncompleteDownloads();
 
 };
-
-
 
 
 #endif // YCATASK_H

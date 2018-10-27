@@ -16,6 +16,10 @@
 #define YCT_DCMTK_DCMODIFY      "dcmtk/dcmodify.exe"
 #define YCT_DCMTK_STORESCU      "dcmtk/storescu.exe"
 #define YCT_DCMTK_COPYRIGHT     "dcmtk/COPYRIGHT"
+#define YCT_DCMTK_SUPPORT1      "dcmtk/dcmdata.dll"
+#define YCT_DCMTK_SUPPORT2      "dcmtk/dcmnet.dll"
+#define YCT_DCMTK_SUPPORT3      "dcmtk/oflog.dll"
+#define YCT_DCMTK_SUPPORT4      "dcmtk/ofstd.dll"
 #define YCT_HELPER_APP          "YCA_helper.exe"
 
 #define YCT_HELPER_TIMEOUT 300000

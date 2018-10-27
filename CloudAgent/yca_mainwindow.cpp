@@ -142,6 +142,13 @@ void ycaWorker::timerCall()
     ycaTaskList jobsToDownload;
     parent->taskHelper.getTasksForDownloadArchive(taskList, jobsToDownload, jobsToArchive);
 
+    // Both the failed and successful jobs should now have the costs set,
+    // so save the information to the PHI file
+    parent->mutex.lock();
+    parent->taskHelper.saveCostsToPHI(jobsToDownload);
+    parent->taskHelper.saveCostsToPHI(jobsToArchive);
+    parent->mutex.unlock();
+
     /*
     qDebug() << "JobsToDownload:";
     for (int i=0; i< jobsToDownload.count(); i++)
@@ -201,7 +208,7 @@ void ycaWorker::timerCall()
     updateParentStatus();  
 
     // Retrieve storage location for each job and push downloaded jobs to destination
-    if (!parent->taskHelper.storeTasks(jobsToArchive))
+    if (!parent->taskHelper.storeTasks(jobsToArchive,parent))
     {
         // TODO: Error handling
     }
@@ -800,7 +807,11 @@ bool ycaMainWindow::checkForDCMTK()
         return false;
     }
 
-    if (!appDir.exists(YCT_DCMTK_COPYRIGHT))
+    if (   (!appDir.exists(YCT_DCMTK_COPYRIGHT))
+        || (!appDir.exists(YCT_DCMTK_SUPPORT1 ))
+        || (!appDir.exists(YCT_DCMTK_SUPPORT2 ))
+        || (!appDir.exists(YCT_DCMTK_SUPPORT3 ))
+        || (!appDir.exists(YCT_DCMTK_SUPPORT4 )))
     {
         return false;
     }

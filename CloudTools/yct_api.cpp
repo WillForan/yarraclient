@@ -875,6 +875,22 @@ bool yctAPI::pushToPACS (QString path, ycaTask* task, yctStorageInformation* des
 bool yctAPI::pushToDrive(QString path, ycaTask* task, yctStorageInformation* destination)
 {
     // TODO
+    QString fullPath=destination->driveLocation+"/"+task->taskID;
+
+    QDir dir;
+    if (dir.exists(fullPath))
+    {
+        // TODO: Add timestamp
+    }
+
+    if (!dir.mkpath(fullPath))
+    {
+        qDebug() << "Error creating destination path: " + fullPath;
+        // TODO: Error handling
+        return false;
+    }
+
+    // TODO: Recursively copy files
 
     return true;
 }
