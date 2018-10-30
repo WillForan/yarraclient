@@ -87,7 +87,7 @@ QString ycaTask::getResult()
         str="Processing";
         break;
     case trSuccess:
-        str="Sucess";
+        str="Success";
         break;
     case trAbortedTransfer:
         str="Aborted (Transfer)";
@@ -460,18 +460,20 @@ bool ycaTaskHelper::readPHIData(QString filepath, ycaTask* task)
             return false;
         }
 
-        task->patientName=phiFile.value("PHI/NAME","").toString();
-        task->mrn        =phiFile.value("PHI/MRN","").toString();
-        task->dob        =phiFile.value("PHI/DOB","").toString();
-        task->acc        =phiFile.value("PHI/ACC","").toString();
-        task->taskID     =phiFile.value("PHI/TASKID","").toString();
-        task->reconMode  =phiFile.value("PHI/MODE","").toString();
+        task->patientName  =phiFile.value("PHI/NAME","").toString();
+        task->mrn          =phiFile.value("PHI/MRN","").toString();
+        task->dob          =phiFile.value("PHI/DOB","").toString();
+        task->acc          =phiFile.value("PHI/ACC","").toString();
+        task->taskID       =phiFile.value("PHI/TASKID","").toString();
+        task->reconMode    =phiFile.value("PHI/MODE","").toString();
 
         task->result       =ycaTask::TaskResult(phiFile.value("STATUS/RESULT",ycaTask::trInProcess).toInt());
         task->retryDelay   =phiFile.value("STATUS/DELAY",QDateTime::currentDateTime()).toDateTime();
         task->uploadRetry  =phiFile.value("STATUS/RETRY_UPLOAD",0).toInt();
         task->downloadRetry=phiFile.value("STATUS/RETRY_DOWNLOAD",0).toInt();
         task->storageRetry =phiFile.value("STATUS/RETRY_STORAGE",0).toInt();
+
+        task->cost         =phiFile.value("STATS/COST",0).toDouble();
     }
 
     // TODO: Error checking
@@ -517,7 +519,7 @@ bool ycaTaskHelper::saveCostsToPHI(ycaTaskList& taskList)
             continue;
         }
 
-        phiFile.setValue("STATS/COSTS",task->cost);
+        phiFile.setValue("STATS/COST",task->cost);
     }
 
     return true;
@@ -568,6 +570,9 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList)
     while (!archiveList.isEmpty())
     {
         ycaTask* currentTask=archiveList.takeFirst();
+        currentTask->phiFilename=currentTask->uuid+".phi";
+
+        qDebug() << "Archiving " << currentTask->uuid;
 
         // If the job has not been flagged as complete or aborted,
         // don't move it
@@ -576,8 +581,15 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList)
             continue;
         }
 
+        if (!phiDir.exists(currentTask->phiFilename))
+        {
+            qDebug() << "Error: PHI file not found while archiving";
+            continue;
+        }
+
         //qInfo() << "Processing file: " << phiPath+"/"+currentTask->phiFilename;
         //qInfo() << "Moving to: " << archivePath+"/"+currentTask->phiFilename;
+
 
         // Move the file into the archive folder
         if (!phiDir.rename(phiPath+"/"+currentTask->phiFilename, archivePath+"/"+currentTask->phiFilename))
@@ -717,6 +729,8 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
 
         if (!cloud->pushToDestinations(dirList.at(i).filePath(),currentTask))
         {
+            qDebug() << "Error: Storage to destinations not successful";
+
             // TODO: Error handling
             delete currentTask;
             currentTask=0;
@@ -725,6 +739,8 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
             // don't delete the folder and try again next time
             continue;
         }
+
+        qDebug() << "Storage successful, cleaning up";
 
         // Folder cleanup
         QDir removeDir(dirList.at(i).filePath());

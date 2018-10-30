@@ -215,6 +215,8 @@ void ycaWorker::timerCall()
 
     if (!jobsToArchive.empty())
     {
+        qDebug() << "Archiving jobs";
+
         parent->mutex.lock();
         if (!parent->taskHelper.archiveTasks(jobsToArchive))
         {
@@ -372,16 +374,18 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     ui->activeTasksTable->horizontalHeader()->resizeSection(2,90);
     ui->activeTasksTable->horizontalHeader()->resizeSection(3,90);
 
-    ui->archiveTasksTable->setColumnCount(5);
+    ui->archiveTasksTable->setColumnCount(6);
     ui->archiveTasksTable->setHorizontalHeaderItem(0,new QTableWidgetItem("Status"));
     ui->archiveTasksTable->setHorizontalHeaderItem(1,new QTableWidgetItem("Patient"));
     ui->archiveTasksTable->setHorizontalHeaderItem(2,new QTableWidgetItem("ACC"));
     ui->archiveTasksTable->setHorizontalHeaderItem(3,new QTableWidgetItem("MRN"));
-    ui->archiveTasksTable->setHorizontalHeaderItem(4,new QTableWidgetItem("ID"));
+    ui->archiveTasksTable->setHorizontalHeaderItem(4,new QTableWidgetItem("Cost"));
+    ui->archiveTasksTable->setHorizontalHeaderItem(5,new QTableWidgetItem("ID"));
     ui->archiveTasksTable->horizontalHeader()->resizeSection(0,130);
     ui->archiveTasksTable->horizontalHeader()->resizeSection(1,220);
     ui->archiveTasksTable->horizontalHeader()->resizeSection(2,90);
     ui->archiveTasksTable->horizontalHeader()->resizeSection(3,90);
+    ui->archiveTasksTable->horizontalHeader()->resizeSection(4,90);
 
     ui->searchTable->setColumnCount(5);
     ui->searchTable->setHorizontalHeaderItem(0,new QTableWidgetItem("Status"));
@@ -692,9 +696,13 @@ void ycaMainWindow::on_refreshArchiveButton_clicked()
         item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         ui->archiveTasksTable->setItem(i,3,item);
 
-        item=new QTableWidgetItem(archiveList.at(i)->uuid);
+        item=new QTableWidgetItem("$ "+QString::number(archiveList.at(i)->cost,'f',2));
         item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         ui->archiveTasksTable->setItem(i,4,item);
+
+        item=new QTableWidgetItem(archiveList.at(i)->uuid);
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        ui->archiveTasksTable->setItem(i,5,item);
     }
 
     if (ui->archiveTasksTable->rowCount()>0)
@@ -713,7 +721,6 @@ void ycaMainWindow::on_archiveDetailsButton_clicked()
     {
         return;
     }
-
 }
 
 

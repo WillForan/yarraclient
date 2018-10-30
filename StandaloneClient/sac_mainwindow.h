@@ -65,7 +65,6 @@ public:
 
     yctConfiguration  cloudConfig;
     yctAPI            cloud;
-    yctTWIXAnonymizer twixAnonymizer;
 
     bool firstFileDialog;
     int defaultMode;

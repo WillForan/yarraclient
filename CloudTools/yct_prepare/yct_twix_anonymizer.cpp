@@ -27,13 +27,18 @@ yctTWIXAnonymizer::yctTWIXAnonymizer()
 bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
                                     QString acc, QString taskid, QString uuid, QString mode)
 {
-    // Populate the externally provided information
-    patientInformation.uuid  =uuid;
-    patientInformation.acc   =acc;
-    patientInformation.taskid=taskid;
-    patientInformation.mode  =mode;
-
     bool result=false;
+
+    // Clean the patient data - to be sure
+    patientInformation.name       ="";
+    patientInformation.mrn        ="";
+    patientInformation.dateOfBirth="";
+
+    // Populate the externally provided information
+    patientInformation.uuid       =uuid;
+    patientInformation.acc        =acc;
+    patientInformation.taskid     =taskid;
+    patientInformation.mode       =mode;
 
     QFile file(twixFilename);
     if (!file.open(QIODevice::ReadWrite))

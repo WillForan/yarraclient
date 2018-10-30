@@ -874,13 +874,27 @@ bool yctAPI::pushToPACS (QString path, ycaTask* task, yctStorageInformation* des
 
 bool yctAPI::pushToDrive(QString path, ycaTask* task, yctStorageInformation* destination)
 {
-    // TODO
+    QDir sourceDir(path+"/output_files");
+    if (!sourceDir.exists())
+    {
+        qDebug() << "Error: Can't access files for storage";
+        return false;
+    }
+
     QString fullPath=destination->driveLocation+"/"+task->taskID;
 
     QDir dir;
     if (dir.exists(fullPath))
     {
         // TODO: Add timestamp
+        QString timeStamp=QDateTime::currentDateTime().toString("ddMMyyHHmmsszzz");
+        fullPath=fullPath+"_"+timeStamp;
+
+        if (dir.exists(fullPath))
+        {
+            qDebug() << "Can't find unique folder for TaskID";
+            return false;
+        }
     }
 
     if (!dir.mkpath(fullPath))
@@ -890,7 +904,18 @@ bool yctAPI::pushToDrive(QString path, ycaTask* task, yctStorageInformation* des
         return false;
     }
 
-    // TODO: Recursively copy files
+    // TODO: Check for disk space
+    // TODO: Recursively copy also folders
+    QStringList files=sourceDir.entryList(QStringList("*"),QDir::Files,QDir::Name);
+
+    for (int i=0; i<files.count(); i++)
+    {
+        if (!QFile::copy(sourceDir.absoluteFilePath(files.at(i)),fullPath+"/"+files.at(i)))
+        {
+            qDebug() << "Error copying file " << files.at(i);
+            return false;
+        }
+    }
 
     return true;
 }

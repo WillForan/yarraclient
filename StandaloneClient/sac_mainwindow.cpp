@@ -575,6 +575,8 @@ bool sacMainWindow::processCloudRecon()
 
     if (!error)
     {
+        yctTWIXAnonymizer twixAnonymizer;
+
         if (!twixAnonymizer.processFile(cloud.getCloudPath(YCT_CLOUDFOLDER_OUT)+"/"+task.scanFilename,
                                         cloud.getCloudPath(YCT_CLOUDFOLDER_PHI),
                                         task.accNumber, task.taskID, task.uuid, task.mode))
