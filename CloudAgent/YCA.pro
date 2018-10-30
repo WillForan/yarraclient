@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     ../CloudTools/yct_aws/qtaws.cpp \
     yca_transferindicator.cpp \
     ../CloudTools/yct_api.cpp \
-    yca_task.cpp
+    yca_task.cpp \
+    yca_threadlog.cpp
 
 HEADERS  += yca_mainwindow.h \
     main.h \
@@ -36,7 +37,8 @@ HEADERS  += yca_mainwindow.h \
     ../CloudTools/yct_aws/qtaws.h \
     ../CloudTools/yct_api.h \
     yca_transferindicator.h \
-    yca_task.h
+    yca_task.h \
+    yca_threadlog.h
 
 FORMS    += yca_mainwindow.ui \
     yca_transferindicator.ui

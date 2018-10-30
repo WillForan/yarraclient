@@ -1,10 +1,10 @@
 #include "yca_mainwindow.h"
 #include "yca_global.h"
 #include "ui_yca_mainwindow.h"
+#include "yca_threadlog.h"
 
 #include <QDesktopWidget>
 #include <QMessageBox>
-//#include <QTest>
 
 #include "../CloudTools/yct_common.h"
 #include "../CloudTools/yct_aws/qtaws.h"
@@ -12,8 +12,6 @@
 
 ycaWorker::ycaWorker()
 {
-    //qInfo() << "Main Thread: " << QThread::currentThreadId();
-
     processingActive=false;
     processingPaused=false;
     currentProcess=ycaTask::wpIdle;
@@ -54,6 +52,8 @@ void ycaWorker::startTimer()
     transferTimer.setInterval(60000);
     transferTimer.start();
     updateParentStatus();
+
+    YTL->log("Worker thread started",YTL_INFO,YTL_LOW);
 }
 
 
@@ -66,7 +66,6 @@ void ycaWorker::stopTimer()
 
 void ycaWorker::timerCall()
 {
-    //qInfo() << "Called. Thread: " << QThread::currentThreadId();
     if (processingPaused)
     {
         return;
@@ -75,8 +74,11 @@ void ycaWorker::timerCall()
     processingActive=true;
     transferTimer.stop();
 
+    YTL->log("Started worker update",YTL_INFO,YTL_MID);
+
     if (parent->taskHelper.removeIncompleteDownloads())
     {
+        YTL->log("Error while removing incomplete downloads",YTL_ERROR,YTL_HIGH);
         // TODO: Error handing
     }
 
@@ -87,6 +89,8 @@ void ycaWorker::timerCall()
     {
         if (!parent->cloud.validateUser(&transferInformation))
         {
+            YTL->log("Unable to validate user account",YTL_ERROR,YTL_HIGH);
+
             if (!userInvalidShown)
             {
                 QMetaObject::invokeMethod(parent, "showNotification", Qt::QueuedConnection,  Q_ARG(QString, "Cannot process cases. User account is missing payment information or has been diabled."));
@@ -113,6 +117,7 @@ void ycaWorker::timerCall()
 
                 if (!parent->cloud.uploadCase(taskList.takeFirst(), &transferInformation, &parent->mutex))
                 {
+                    YTL->log("Error while uploading case "+currentTaskID,YTL_ERROR,YTL_HIGH);
                     // TODO: Error handling
                 }
                 uploadCount++;
@@ -132,12 +137,6 @@ void ycaWorker::timerCall()
     // TODO: Get error status
     parent->mutex.unlock();
 
-    qDebug() << "JobsinList:";
-    for (int i=0; i< taskList.count(); i++)
-    {
-        qDebug() << taskList.at(i)->patientName << " " << taskList.at(i)->status;
-    }
-
     ycaTaskList jobsToArchive;
     ycaTaskList jobsToDownload;
     parent->taskHelper.getTasksForDownloadArchive(taskList, jobsToDownload, jobsToArchive);
@@ -149,20 +148,14 @@ void ycaWorker::timerCall()
     parent->taskHelper.saveCostsToPHI(jobsToArchive);
     parent->mutex.unlock();
 
-    /*
-    qDebug() << "JobsToDownload:";
-    for (int i=0; i< jobsToDownload.count(); i++)
-    {
-        qDebug() << jobsToDownload.at(i)->patientName;
-    }
-    */
-
     if (!jobsToDownload.empty())
     {
         if (transferInformation.username.isEmpty())
         {
             if (!parent->cloud.validateUser(&transferInformation))
             {
+                YTL->log("Unable to validate user account",YTL_ERROR,YTL_HIGH);
+
                 if (!userInvalidShown)
                 {
                     QMetaObject::invokeMethod(parent, "showNotification", Qt::QueuedConnection,  Q_ARG(QString, "Cannot process cases. User account is missing payment information or has been diabled."));
@@ -191,6 +184,8 @@ void ycaWorker::timerCall()
 
                 if (!parent->cloud.downloadCase(currentTask, &transferInformation, &parent->mutex))
                 {
+                    YTL->log("Error while downloading case "+currentTaskID,YTL_ERROR,YTL_HIGH);
+
                     // TODO: Error handling
                 }
 
@@ -210,22 +205,24 @@ void ycaWorker::timerCall()
     // Retrieve storage location for each job and push downloaded jobs to destination
     if (!parent->taskHelper.storeTasks(jobsToArchive,parent))
     {
+        YTL->log("Error while storing cases",YTL_ERROR,YTL_HIGH);
         // TODO: Error handling
     }
 
     if (!jobsToArchive.empty())
     {
-        qDebug() << "Archiving jobs";
-
         parent->mutex.lock();
         if (!parent->taskHelper.archiveTasks(jobsToArchive))
         {
+            YTL->log("Error while archiving tasks",YTL_ERROR,YTL_HIGH);
             // TODO: Error handling
         }
         parent->mutex.unlock();
     }
 
     QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
+
+    YTL->log("Completed worker update",YTL_INFO,YTL_MID);
 
     currentProcess=ycaTask::wpIdle;
     updateParentStatus();
@@ -268,6 +265,8 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ycaMainWindow)
 {
+    YTL->getInstance();
+
     ui->setupUi(this);
     shuttingDown=false;
 
@@ -296,7 +295,6 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
 
     connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
 
-
     ui->versionLabel->setText("Version " + QString(YCA_VERSION) + ", Build date " + QString(__DATE__));
 
     // Center the window on the screen
@@ -313,6 +311,8 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
 
     if (!cloud.createCloudFolders())
     {
+        YTL->log("Unable to create cloud folders",YTL_ERROR,YTL_HIGH);
+
         QMessageBox msgBox(0);
         msgBox.setWindowTitle("Yarra Cloud Agent");
         msgBox.setText("Unable to prepare folder for cloud reconstruction.<br>Please check you local client installation.");
@@ -330,6 +330,8 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     QDir appDir(qApp->applicationDirPath());
     if (!appDir.exists("YCA_helper.exe"))
     {
+        YTL->log("Unable to locate helper app",YTL_ERROR,YTL_HIGH);
+
         QMessageBox msgBox(0);
         msgBox.setWindowTitle("Yarra Cloud Agent");
         msgBox.setText("Unable to find folder application YCA_helper.exe.<br>Please check you local client installation.");
@@ -346,6 +348,8 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
 
     if (!checkForDCMTK())
     {
+        YTL->log("Unable to locate DCMTK binaries",YTL_ERROR,YTL_HIGH);
+
         QMessageBox msgBox(0);
         msgBox.setWindowTitle("Yarra Cloud Agent");
         msgBox.setText("Unable to locate DCMTK binaries.<br>Please check you local client installation.");
@@ -397,6 +401,8 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     ui->searchTable->horizontalHeader()->resizeSection(1,220);
     ui->searchTable->horizontalHeader()->resizeSection(2,90);
     ui->searchTable->horizontalHeader()->resizeSection(3,90);
+
+    YTL->log("UI thread running",YTL_INFO,YTL_LOW);
 }
 
 
@@ -433,11 +439,13 @@ void ycaMainWindow::callShutDown(bool askConfirmation)
         if (ret==QMessageBox::Yes)
         {
             transferWorker.shutdown();
+            YTL->log("Shutdown (user request)",YTL_INFO,YTL_HIGH);
             qApp->quit();
         }
     }
     else
     {
+        YTL->log("Shutdown",YTL_INFO,YTL_HIGH);
         qApp->quit();
     }
 }
@@ -474,6 +482,7 @@ void ycaMainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
+
 void ycaMainWindow::on_closeButton_clicked()
 {
     hide();
@@ -483,7 +492,6 @@ void ycaMainWindow::on_closeButton_clicked()
 void ycaMainWindow::on_closeContextButton_clicked()
 {
     QMenu infoMenu(this);
-    infoMenu.addAction("Restart", this,  SLOT(callShutDown()));
     infoMenu.addAction("Shutdown", this, SLOT(callShutDown()));
     infoMenu.exec(ui->closeContextButton->mapToGlobal(QPoint(0,0)));
 }
@@ -492,6 +500,8 @@ void ycaMainWindow::on_closeContextButton_clicked()
 void ycaMainWindow::on_statusRefreshButton_clicked()
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    YTL->log("Refreshing UI status",YTL_INFO,YTL_LOW);
 
     mutex.lock();
     taskHelper.getAllTasks(taskList, true, false);
@@ -532,12 +542,6 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
     }
 
     QApplication::restoreOverrideCursor();
-}
-
-
-void ycaMainWindow::on_pushButton_3_clicked()
-{
-    indicator.hideIndicator();
 }
 
 
@@ -614,16 +618,9 @@ void ycaMainWindow::updateUI()
 }
 
 
-void ycaMainWindow::on_pushButton_4_clicked()
-{
-    //cloud.getJobStatus(&taskList);
-    ycaTaskList temp;
-    taskHelper.storeTasks(temp);
-}
-
-
 void ycaMainWindow::on_transferButton_clicked()
 {
+    YTL->log("Transfer triggered by user",YTL_INFO,YTL_LOW);
     callSubmit();
 }
 
@@ -632,10 +629,12 @@ void ycaMainWindow::on_pauseButton_clicked()
 {
     if (ui->pauseButton->isChecked())
     {
+        YTL->log("Updates paused by user",YTL_INFO,YTL_LOW);
         transferWorker.processingPaused=true;
     }
     else
     {
+        YTL->log("Updates resumed by user",YTL_INFO,YTL_LOW);
         transferWorker.processingPaused=false;
     }
 }
@@ -653,7 +652,7 @@ void ycaMainWindow::on_clearArchiveButton_clicked()
 
     if (ret==QMessageBox::Yes)
     {
-
+        // TODO
     }
 }
 
@@ -824,4 +823,16 @@ bool ycaMainWindow::checkForDCMTK()
     }
 
     return true;
+}
+
+void ycaMainWindow::on_refreshLogButton_clicked()
+{
+    QString content;
+
+    for (int i=0; i<100; i++)
+    {
+        content += "<span style=\"background-color: #F00;\">ERROR</span> This is a test<br>";
+    }
+
+    ui->logEdit->setHtml(content);
 }

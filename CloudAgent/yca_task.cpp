@@ -1,5 +1,5 @@
 #include "yca_task.h"
-#include "yca_task.h"
+#include "yca_threadlog.h"
 
 #include "../CloudTools/yct_api.h"
 #include "../CloudTools/yct_common.h"
@@ -124,6 +124,7 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
     QDir outDir(outPath);
     if (!outDir.exists())
     {
+        YTL->log("Unable to find cloud folder OUT: "+outPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -132,6 +133,7 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
     QDir phiDir(phiPath);
     if (!phiDir.exists())
     {
+        YTL->log("Unable to find cloud folder PHI: "+phiPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -153,6 +155,7 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
         if (!phiDir.exists(uuid+".phi"))
         {
             // PHI file is missing! Something must be wrong.
+            YTL->log("Missing PHI file: "+QString(uuid+".phi"),YTL_WARNING,YTL_HIGH);
             // TODO: Error reporting
             continue;
         }
@@ -164,6 +167,7 @@ bool ycaTaskHelper::getScheduledTasks(ycaTaskList& taskList)
         if (!checkScanfiles(uuid,task))
         {
             // Scan files are missing! Something must be wrong.
+            YTL->log("Missing scan files: "+task->taskFilename,YTL_WARNING,YTL_HIGH);
             // TODO: Error reporting
 
             delete task;
@@ -202,7 +206,7 @@ bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
 
     QFileInfoList fileList=phiDir.entryInfoList(QStringList("*.phi"),QDir::Files,QDir::Time);
 
-    qDebug() << "Parsing folder...";
+    //qDebug() << "Parsing folder...";
 
     for (int i=0; i<fileList.count(); i++)
     {

@@ -97,8 +97,7 @@ private slots:
     void on_searchEdit_returnPressed();
     void on_detailsSearchButton_clicked();
 
-    void on_pushButton_3_clicked();
-    void on_pushButton_4_clicked();
+    void on_refreshLogButton_clicked();
 
 private:
     Ui::ycaMainWindow* ui;
