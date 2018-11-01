@@ -76,7 +76,7 @@ void ycaWorker::timerCall()
 
     YTL->log("Started worker update",YTL_INFO,YTL_MID);
 
-    if (parent->taskHelper.removeIncompleteDownloads())
+    if (!parent->taskHelper.removeIncompleteDownloads())
     {
         YTL->log("Error while removing incomplete downloads",YTL_ERROR,YTL_HIGH);
         // TODO: Error handing
@@ -93,7 +93,7 @@ void ycaWorker::timerCall()
 
             if (!userInvalidShown)
             {
-                QMetaObject::invokeMethod(parent, "showNotification", Qt::QueuedConnection,  Q_ARG(QString, "Cannot process cases. User account is missing payment information or has been diabled."));
+                QMetaObject::invokeMethod(parent, "showNotification", Qt::QueuedConnection,  Q_ARG(QString, "Cannot process cases. User account is missing payment information or has been disabled."));
 
                 // Avoid that the message is shown during every timer event
                 userInvalidShown=true;
@@ -158,7 +158,7 @@ void ycaWorker::timerCall()
 
                 if (!userInvalidShown)
                 {
-                    QMetaObject::invokeMethod(parent, "showNotification", Qt::QueuedConnection,  Q_ARG(QString, "Cannot process cases. User account is missing payment information or has been diabled."));
+                    QMetaObject::invokeMethod(parent, "showNotification", Qt::QueuedConnection,  Q_ARG(QString, "Cannot process cases. User account is missing payment information or has been disabled."));
 
                     // Avoid that the message is shown during every timer event
                     userInvalidShown=true;
@@ -231,7 +231,7 @@ void ycaWorker::timerCall()
 
     if (parent->isVisible())
     {
-        QMetaObject::invokeMethod(parent, "updateUI", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(parent, "updateUIWorker", Qt::QueuedConnection);
     }
 }
 
@@ -600,6 +600,15 @@ void ycaMainWindow::on_tabWidget_currentChanged(int index)
     {
         ui->searchEdit->setFocus();
     }
+
+    if (index==3)
+    {
+        on_refreshLogButton_clicked();
+    }
+    else
+    {
+        ui->logWidget->clearContents();
+    }
 }
 
 
@@ -613,8 +622,21 @@ void ycaMainWindow::showEvent(QShowEvent* event)
 
 void ycaMainWindow::updateUI()
 {
-    qApp->processEvents();
+    qApp->processEvents();    
     on_tabWidget_currentChanged(ui->tabWidget->currentIndex());
+}
+
+
+void ycaMainWindow::updateUIWorker()
+{
+    qApp->processEvents();
+
+    // If the update is triggered by the worker thread, don't update
+    // the log tab (to avoid that the scrollbar jumps back)
+    if (ui->tabWidget->currentIndex()!=3)
+    {
+        on_tabWidget_currentChanged(ui->tabWidget->currentIndex());
+    }
 }
 
 
@@ -825,14 +847,35 @@ bool ycaMainWindow::checkForDCMTK()
     return true;
 }
 
+
 void ycaMainWindow::on_refreshLogButton_clicked()
 {
-    QString content;
+    QTime t;
+    t.start();
 
-    for (int i=0; i<100; i++)
-    {
-        content += "<span style=\"background-color: #F00;\">ERROR</span> This is a test<br>";
-    }
+    int detailLevel=ui->logDetailCombobox->currentIndex();
+    YTL->readLogFile(ui->logWidget,detailLevel);
+    ui->logWidget->scrollToTop();
 
-    ui->logEdit->setHtml(content);
+    qApp->processEvents();
+    YTL->log("Log render duration: "+QString::number(t.elapsed()),YTL_WARNING,YTL_MID);
 }
+
+
+void ycaMainWindow::on_logDetailCombobox_currentIndexChanged(int index)
+{
+    on_refreshLogButton_clicked();
+}
+
+
+void ycaMainWindow::on_externalLogButton_clicked()
+{
+    QString logPath=qApp->applicationDirPath()+"/log/yca.log";
+
+    // Call notepad and show the log file
+    QString cmdLine="notepad.exe";
+    QStringList args;
+    args.append(logPath);
+    QProcess::startDetached(cmdLine, args);
+}
+

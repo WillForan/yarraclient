@@ -81,6 +81,7 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
     void updateUI();
+    void updateUIWorker();
 
     void on_closeButton_clicked();
     void on_closeContextButton_clicked();
@@ -96,8 +97,11 @@ private slots:
     void on_searchButton_clicked();
     void on_searchEdit_returnPressed();
     void on_detailsSearchButton_clicked();
-
     void on_refreshLogButton_clicked();
+
+    void on_externalLogButton_clicked();
+
+    void on_logDetailCombobox_currentIndexChanged(int index);
 
 private:
     Ui::ycaMainWindow* ui;

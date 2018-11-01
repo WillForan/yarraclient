@@ -2,9 +2,11 @@
 #define YCATHREADLOG_H
 
 #include <QtGui>
+#include <QtWidgets>
 
 #define YTL ycaThreadLog::getInstance()
-#define YTL_MAXLOGSIZE 1000000
+#define YTL_MAXLOGSIZE  1000000
+#define YTL_MAXLOGLINES 10000
 
 #define YTL_SEP "|"
 
@@ -32,15 +34,17 @@ public:
 
     enum ImportanceLevel
     {
-        Low=0,
+        High=0,
         Medium,
-        High
+        Low
     };
 
     ycaThreadLog();
     static ycaThreadLog* getInstance();
 
     void log(QString text, EntryType type=Info, ImportanceLevel level=Medium);
+
+    void readLogFile(QTableWidget* widget, int detailLevel);
 
     void lock();
     void unlock();
@@ -118,10 +122,10 @@ inline QString ycaThreadLog::getDetailLevel(ImportanceLevel level)
 
 inline QString ycaThreadLog::formatLine(QString text, EntryType type, ImportanceLevel level)
 {
-    return QDateTime::currentDateTime().toString("dd.MM.yy-hh:mm:ss")
+    return QDateTime::currentDateTime().toString("dd.MM.yy  hh:mm:ss")
            + YTL_SEP + getEntryType(type)
            + YTL_SEP + getDetailLevel(level)
-           + YTL_SEP + QString("%1").arg( (int)QThread::currentThreadId(), 6)
+           + YTL_SEP + QString::number((int)QThread::currentThreadId())
            + YTL_SEP + text
            + "\n";
 }

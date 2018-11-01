@@ -473,7 +473,7 @@ void sacMainWindow::on_sendButton_clicked()
         if (result)
         {
             msgBox.setWindowTitle("Task Prepared");
-            msgBox.setText("The reconstruction has been prepared for transmission to YarraCloud <br>and is now being uploaded.<br><br>You will be notified when the transfer has been finished.");
+            msgBox.setText("The reconstruction has been prepared for transmission to YarraCloud <br>and is now being uploaded.<br><br>You will be notified when the reconstruction has been finished.");
         }
         else
         {
