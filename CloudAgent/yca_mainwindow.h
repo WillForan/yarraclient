@@ -98,10 +98,10 @@ private slots:
     void on_searchEdit_returnPressed();
     void on_detailsSearchButton_clicked();
     void on_refreshLogButton_clicked();
-
     void on_externalLogButton_clicked();
-
-    void on_logDetailCombobox_currentIndexChanged(int index);
+    void on_logDetailCombobox_currentIndexChanged(int index);    
+    void on_logTicketButton_clicked();
+    void on_logClipboardButton_clicked();
 
 private:
     Ui::ycaMainWindow* ui;
@@ -109,7 +109,6 @@ private:
     QMenu*             trayIconMenu;
     QAction*           trayItemShutdown;
 
-    yctConfiguration     config;
     ycaTransferIndicator indicator;
     ycaWorker            transferWorker;
     ycaTaskList          taskList;
@@ -118,6 +117,7 @@ private:
     bool checkForDCMTK();
 
 public:
+    yctConfiguration     config;
     ycaTaskHelper        taskHelper;
     yctAPI               cloud;
     QMutex               mutex;

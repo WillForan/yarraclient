@@ -211,13 +211,21 @@ void ycaWorker::timerCall()
 
     if (!jobsToArchive.empty())
     {
+        QString successNotification="";
+
         parent->mutex.lock();
-        if (!parent->taskHelper.archiveTasks(jobsToArchive))
+        if (!parent->taskHelper.archiveTasks(jobsToArchive,successNotification))
         {
             YTL->log("Error while archiving tasks",YTL_ERROR,YTL_HIGH);
             // TODO: Error handling
         }
         parent->mutex.unlock();
+
+        if ((parent->config.showNotifications) && (!successNotification.isEmpty()))
+        {
+            successNotification="Tasks have been completed: \n"+successNotification;
+            QMetaObject::invokeMethod(parent, "showNotification", Qt::QueuedConnection, Q_ARG(QString, successNotification));
+        }
     }
 
     QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
@@ -850,15 +858,9 @@ bool ycaMainWindow::checkForDCMTK()
 
 void ycaMainWindow::on_refreshLogButton_clicked()
 {
-    QTime t;
-    t.start();
-
     int detailLevel=ui->logDetailCombobox->currentIndex();
     YTL->readLogFile(ui->logWidget,detailLevel);
     ui->logWidget->scrollToTop();
-
-    qApp->processEvents();
-    YTL->log("Log render duration: "+QString::number(t.elapsed()),YTL_WARNING,YTL_MID);
 }
 
 
@@ -877,5 +879,25 @@ void ycaMainWindow::on_externalLogButton_clicked()
     QStringList args;
     args.append(logPath);
     QProcess::startDetached(cmdLine, args);
+}
+
+
+void ycaMainWindow::on_logTicketButton_clicked()
+{
+    QMessageBox msgBox(0);
+    msgBox.setWindowTitle("Coming Soon");
+    msgBox.setText("Feature will be implemented soon.");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setWindowIcon(YCA_ICON);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
+}
+
+
+void ycaMainWindow::on_logClipboardButton_clicked()
+{
+    QClipboard* clipboard=QApplication::clipboard();
+    QString copyText=YTL->getClipboardString(ui->logWidget);
+    clipboard->setText(copyText);
 }
 

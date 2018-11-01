@@ -553,7 +553,7 @@ void ycaTaskHelper::getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskLis
 }
 
 
-bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList)
+bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString notificationString)
 {
     QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
     QDir phiDir(phiPath);
@@ -594,7 +594,6 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList)
         //qInfo() << "Processing file: " << phiPath+"/"+currentTask->phiFilename;
         //qInfo() << "Moving to: " << archivePath+"/"+currentTask->phiFilename;
 
-
         // Move the file into the archive folder
         if (!phiDir.rename(phiPath+"/"+currentTask->phiFilename, archivePath+"/"+currentTask->phiFilename))
         {
@@ -608,6 +607,7 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList)
         {
         case ycaTask::tsStorage:
             result=ycaTask::trSuccess;
+            notificationString+=currentTask->patientName+"\n";
             break;
         case ycaTask::tsErrorProcessing:
             result=ycaTask::trAbortedProcessing;

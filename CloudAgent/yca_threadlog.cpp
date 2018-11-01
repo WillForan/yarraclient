@@ -96,7 +96,7 @@ void ycaThreadLog::readLogFile(QTableWidget* widget, int detailLevel)
     {
         QStringList entries=fileContent.at(i).split(YTL_SEP);
 
-        QColor rowColor("#DDD");
+        QColor rowColor("#D9D9D9");
         QString typeStr="INFO";
         QString levelStr="MID";
         ImportanceLevel level=Medium;
@@ -123,19 +123,19 @@ void ycaThreadLog::readLogFile(QTableWidget* widget, int detailLevel)
             if (entries.at(1)=="E")
             {
                 typeStr="ERROR";
-                rowColor=QColor("#E8927C");
+                rowColor=QColor("#FF7270");
                 type=Error;
             }
             if (entries.at(1)=="W")
             {
                 typeStr="WARN";
-                rowColor=QColor("#DBB874");
+                rowColor=QColor("#FFD177");
                 type=Warning;
             }
 
             if ((type==Info) && (level==High))
             {
-                rowColor="#9BB8D3";
+                rowColor="#9BD5FF";
             }
 
             if ((int) level > detailLevel)
@@ -188,3 +188,42 @@ void ycaThreadLog::readLogFile(QTableWidget* widget, int detailLevel)
         widget->setItem(renderedLines,4,item);
     }
 }
+
+
+QString ycaThreadLog::getClipboardString(QTableWidget* widget)
+{
+    int startLine=0;
+    int endLine=widget->rowCount();
+
+    if (!widget->selectedRanges().empty())
+    {
+        startLine=widget->selectedRanges().at(0).topRow();
+        endLine=widget->selectedRanges().at(0).bottomRow()+1;
+    }
+
+    QString content="";
+
+    for (int i=startLine; i<endLine; i++)
+    {
+        for (int j=0; j<widget->columnCount(); j++)
+        {
+            QTableWidgetItem* item=widget->item(i,j);
+            if (item!=0)
+            {
+                content+=item->text();
+                if (j!=widget->columnCount()-1)
+                {
+                    content+=YTL_SEP;
+                }
+            }
+            else
+            {
+                content+="---\n";
+                break;
+            }
+        }
+    }
+
+    return content;
+}
+

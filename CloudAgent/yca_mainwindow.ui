@@ -454,7 +454,7 @@
       </widget>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
-        <string>Log</string>
+        <string>Diagnostics</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
@@ -564,14 +564,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="logClipboardButton">
             <property name="text">
              <string>Copy to Clipboard</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="logTicketButton">
             <property name="text">
              <string>Submit Ticket</string>
             </property>

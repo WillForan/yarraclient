@@ -94,7 +94,7 @@ public:
     bool saveCostsToPHI(ycaTaskList& taskList);
 
     void getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList);
-    bool archiveTasks(ycaTaskList& archiveList);
+    bool archiveTasks(ycaTaskList& archiveList, QString notificationString);
     void clearTaskList(ycaTaskList& list);
 
     bool storeTasks(ycaTaskList& archiveList, QObject* notificationWidget=0);

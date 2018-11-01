@@ -45,6 +45,7 @@ public:
     void log(QString text, EntryType type=Info, ImportanceLevel level=Medium);
 
     void readLogFile(QTableWidget* widget, int detailLevel);
+    QString getClipboardString(QTableWidget* widget);
 
     void lock();
     void unlock();
