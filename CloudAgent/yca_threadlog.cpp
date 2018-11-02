@@ -18,6 +18,12 @@ ycaThreadLog::ycaThreadLog()
 {
     logMutex.lock();
 
+    QDir appDir(qApp->applicationDirPath());
+    if (!appDir.exists("/log"))
+    {
+        appDir.mkdir("./log");
+    }
+
     QString logFilename=qApp->applicationDirPath()+"/log/yca.log";
 
     logfile.setFileName(logFilename);

@@ -190,6 +190,7 @@ bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
     QDir outDir(outPath);
     if (!outDir.exists())
     {
+        YTL->log("Unable to find cloud folder OUT: "+outPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -200,6 +201,7 @@ bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
     QDir phiDir(phiPath);
     if (!phiDir.exists())
     {
+        YTL->log("Unable to find cloud folder PHI: "+phiPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -260,6 +262,7 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
     QDir phiDir(phiPath);
     if (!phiDir.exists())
     {
+        YTL->log("Unable to find cloud folder PHI: "+phiPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -268,6 +271,7 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
     QDir archiveDir(archivePath);
     if (!archiveDir.exists())
     {
+        YTL->log("Unable to find cloud folder PHI_ARCHIVE: "+archivePath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -278,6 +282,7 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
     QDir outDir(outPath);
     if (!outDir.exists())
     {
+        YTL->log("Unable to find cloud folder OUT: "+outPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -302,6 +307,7 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
 
             if (!readPHIData(fileList.at(i).absoluteFilePath(),task))
             {
+                YTL->log("Unable to read PHI file: "+fileList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
                 // TODO: Error handling
             }
 
@@ -340,6 +346,7 @@ bool ycaTaskHelper::getAllTasks(ycaTaskList& taskList, bool includeCurrent, bool
             task->status=ycaTask::tsArchived;
             if (!readPHIData(fileList.at(i).absoluteFilePath(),task))
             {
+                YTL->log("Unable to read PHI_ARCHIVE file: "+fileList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
                 // TODO: Error handling
             }
 
@@ -394,6 +401,7 @@ bool ycaTaskHelper::checkScanfiles(QString taskID, ycaTask* task)
     if (taskFile.value("Task/UUID","").toString() != task->uuid)
     {
         // UUID does not match. Something is wrong
+        YTL->log("Invalid UUID in task file: "+taskID+".task",YTL_ERROR,YTL_HIGH);
         return false;
     }
 
@@ -434,8 +442,6 @@ bool ycaTaskHelper::checkScanfiles(QString taskID, ycaTask* task)
     bool fileMissing=false;
     for (int j=0; j<task->twixFilenames.count(); j++)
     {
-        //qInfo() << task->twixFilenames.at(j);
-
         if (!outDir.exists(task->twixFilenames.at(j)))
         {
             fileMissing=true;
@@ -461,6 +467,7 @@ bool ycaTaskHelper::readPHIData(QString filepath, ycaTask* task)
         if (phiFile.value("PHI/UUID","").toString() != task->uuid)
         {
             // UUID does not match. Something is wrong
+            YTL->log("Invalid UUID in PHI file: "+filepath,YTL_ERROR,YTL_HIGH);
             return false;
         }
 
@@ -493,6 +500,7 @@ bool ycaTaskHelper::saveResultToPHI(QString filepath, ycaTask::TaskResult result
     if (phiFile.value("PHI/UUID","").toString().isEmpty())
     {
         // UUID is missing. PHI file seems invalid.
+        YTL->log("Invalid UUID in PHI file: "+filepath,YTL_ERROR,YTL_HIGH);
         return false;
     }
 
@@ -511,7 +519,7 @@ bool ycaTaskHelper::saveCostsToPHI(ycaTaskList& taskList)
 
         if (!QFile::exists(filepath))
         {
-            qDebug() << "Error: PHI file not found.";
+            YTL->log("Missing PHI file: "+filepath,YTL_ERROR,YTL_HIGH);
             continue;
         }
 
@@ -520,6 +528,7 @@ bool ycaTaskHelper::saveCostsToPHI(ycaTaskList& taskList)
         if (phiFile.value("PHI/UUID","").toString()!=task->uuid)
         {
             // UUID is missing. PHI file seems invalid or unable to read.
+            YTL->log("Invalid UUID in PHI file: "+filepath,YTL_ERROR,YTL_HIGH);
             continue;
         }
 
@@ -559,6 +568,7 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString notificationS
     QDir phiDir(phiPath);
     if (!phiDir.exists())
     {
+        YTL->log("Unable to find cloud folder PHI: "+phiPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -567,6 +577,7 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString notificationS
     QDir archiveDir(archivePath);
     if (!archiveDir.exists())
     {
+        YTL->log("Unable to find cloud folder PHI_ARCHIVE: "+archivePath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -576,7 +587,7 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString notificationS
         ycaTask* currentTask=archiveList.takeFirst();
         currentTask->phiFilename=currentTask->uuid+".phi";
 
-        qDebug() << "Archiving " << currentTask->uuid;
+        //qDebug() << "Archiving " << currentTask->uuid;
 
         // If the job has not been flagged as complete or aborted,
         // don't move it
@@ -587,7 +598,7 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString notificationS
 
         if (!phiDir.exists(currentTask->phiFilename))
         {
-            qDebug() << "Error: PHI file not found while archiving";
+            YTL->log("Unable to find PHI file while archiving: "+currentTask->phiFilename,YTL_ERROR,YTL_HIGH);
             continue;
         }
 
@@ -597,6 +608,7 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString notificationS
         // Move the file into the archive folder
         if (!phiDir.rename(phiPath+"/"+currentTask->phiFilename, archivePath+"/"+currentTask->phiFilename))
         {
+            YTL->log("Unable to move PHI file: "+currentTask->phiFilename,YTL_ERROR,YTL_HIGH);
             // TODO: Error handling
             return false;
         }
@@ -623,7 +635,11 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString notificationS
         }
 
         // Now, add the result status to the moved PHI file
-        saveResultToPHI(archivePath+"/"+currentTask->phiFilename, result);
+        if (!saveResultToPHI(archivePath+"/"+currentTask->phiFilename, result))
+        {
+            YTL->log("Unable to update PHI file: "+currentTask->phiFilename,YTL_ERROR,YTL_HIGH);
+            // TODO: Error handling
+        }
 
         currentTask->status=ycaTask::tsArchived;
     }
@@ -638,6 +654,7 @@ bool ycaTaskHelper::removeIncompleteDownloads()
     QDir inDir(inPath);
     if (!inDir.exists())
     {
+        YTL->log("Unable to find cloud folder IN: "+inPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -646,15 +663,16 @@ bool ycaTaskHelper::removeIncompleteDownloads()
 
     for (int i=0; i<dirList.count(); i++)
     {
-        //qInfo() << dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE;
-
         if (QFile::exists(dirList.at(i).filePath()+"/"+YCT_INCOMPLETE_FILE))
         {
+            YTL->log("Incomplete download found: "+dirList.at(i).filePath(),YTL_WARNING,YTL_HIGH);
+
             // INCOMPLETE file found, so folder is from incomplete download.
             // Remove the folder and download again.
             QDir incompleteDir(dirList.at(i).filePath());
             if (!incompleteDir.removeRecursively())
             {
+                YTL->log("Unable to remove incomplete download: "+dirList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
                 // TODO: Error handling!
             }
         }
@@ -670,6 +688,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
     QDir inDir(inPath);
     if (!inDir.exists())
     {
+        YTL->log("Unable to find cloud folder IN: "+inPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
@@ -678,6 +697,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
     QDir phiDir(phiPath);
     if (!phiDir.exists())
     {
+        YTL->log("Unable to find cloud folder PHI: "+phiPath,YTL_ERROR,YTL_HIGH);
         // TODO: Error reporting
         return false;
     }
