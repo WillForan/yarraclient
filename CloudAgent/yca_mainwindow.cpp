@@ -8,6 +8,7 @@
 
 #include "../CloudTools/yct_common.h"
 #include "../CloudTools/yct_aws/qtaws.h"
+#include "yca_detailsdialog.h"
 
 
 ycaWorker::ycaWorker()
@@ -578,15 +579,10 @@ void ycaMainWindow::on_detailsButton_clicked()
     {
         ycaTask* taskItem=taskList.at(selectedTask);
 
-        QString infoText="Patient: " + taskItem->patientName +"<br>";
-
-        QMessageBox msgBox(0);
-        msgBox.setWindowTitle("Task Information");
-        msgBox.setText(infoText);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setWindowIcon(YCA_ICON);
-        msgBox.setIcon(QMessageBox::Information);
-        msgBox.exec();
+        ycaDetailsDialog detailsDialog;
+        detailsDialog.setTaskDetails(taskItem);
+        detailsDialog.show();
+        detailsDialog.exec();
     }
 }
 
@@ -731,6 +727,7 @@ void ycaMainWindow::on_refreshArchiveButton_clicked()
 
         item=new QTableWidgetItem(archiveList.at(i)->uuid);
         item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        item->setToolTip(archiveList.at(i)->uuid);
         ui->archiveTasksTable->setItem(i,5,item);
     }
 
@@ -749,6 +746,18 @@ void ycaMainWindow::on_archiveDetailsButton_clicked()
     if (ui->archiveTasksTable->selectedRanges().empty())
     {
         return;
+    }
+
+    int selectedTask=ui->archiveTasksTable->selectedRanges().at(0).topRow();
+
+    if ((selectedTask>=0) && (selectedTask<archiveList.count()))
+    {
+        ycaTask* taskItem=archiveList.at(selectedTask);
+
+        ycaDetailsDialog detailsDialog;
+        detailsDialog.setTaskDetails(taskItem);
+        detailsDialog.show();
+        detailsDialog.exec();
     }
 }
 
@@ -825,7 +834,22 @@ void ycaMainWindow::on_searchEdit_returnPressed()
 
 void ycaMainWindow::on_detailsSearchButton_clicked()
 {
-    // TODO
+    if (ui->searchTable->selectedRanges().empty())
+    {
+        return;
+    }
+
+    int selectedTask=ui->searchTable->selectedRanges().at(0).topRow();
+
+    if ((selectedTask>=0) && (selectedTask<taskList.count()))
+    {
+        ycaTask* taskItem=taskList.at(selectedTask);
+
+        ycaDetailsDialog detailsDialog;
+        detailsDialog.setTaskDetails(taskItem);
+        detailsDialog.show();
+        detailsDialog.exec();
+    }
 }
 
 
@@ -899,5 +923,55 @@ void ycaMainWindow::on_logClipboardButton_clicked()
     QClipboard* clipboard=QApplication::clipboard();
     QString copyText=YTL->getClipboardString(ui->logWidget);
     clipboard->setText(copyText);
+}
+
+
+void ycaMainWindow::on_logWidget_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu contextMenu(this);
+    contextMenu.addAction("Calculate Duration...", this, SLOT(logCalcDuration()));
+    contextMenu.addSeparator();
+    contextMenu.addAction("Copy", this, SLOT(on_logClipboardButton_clicked()));
+    contextMenu.exec(ui->logWidget->mapToGlobal(pos));
+}
+
+
+void ycaMainWindow::logCalcDuration()
+{
+    QString text="";
+
+    if (ui->logWidget->selectedRanges().empty()
+        || (ui->logWidget->selectedRanges().at(0).topRow()==ui->logWidget->selectedRanges().at(0).bottomRow()))
+    {
+        text="Select two different log entries to calculate duration.";
+    }
+    else
+    {
+        int startLine=ui->logWidget->selectedRanges().at(0).topRow();
+        int endLine=ui->logWidget->selectedRanges().at(0).bottomRow();
+
+        if ((ui->logWidget->item(startLine,0)==0) || (ui->logWidget->item(endLine,0)==0))
+        {
+            text="Start or end row does not contain time stamp.";
+        }
+        else
+        {
+            QString startTimeStr=ui->logWidget->item(startLine,0)->text();
+            QString endTimeStr=ui->logWidget->item(endLine,0)->text();
+
+            QDateTime startTime=QDateTime::fromString(startTimeStr,"dd.MM.yy  hh:mm:ss");
+            QDateTime endTime=QDateTime::fromString(endTimeStr,"dd.MM.yy  hh:mm:ss");
+
+            text=QString::number(endTime.msecsTo(startTime)/1000.)+" sec";
+        }
+    }
+
+    QMessageBox msgBox(0);
+    msgBox.setWindowTitle("Duration");
+    msgBox.setText(text);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setWindowIcon(YCA_ICON);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
 }
 

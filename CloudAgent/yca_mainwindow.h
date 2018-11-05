@@ -103,6 +103,9 @@ private slots:
     void on_logTicketButton_clicked();
     void on_logClipboardButton_clicked();
 
+    void on_logWidget_customContextMenuRequested(const QPoint &pos);
+    void logCalcDuration();
+
 private:
     Ui::ycaMainWindow* ui;
     QSystemTrayIcon*   trayIcon;

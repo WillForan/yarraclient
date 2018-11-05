@@ -172,6 +172,10 @@ void ycaThreadLog::readLogFile(QTableWidget* widget, int detailLevel)
             widget->setItem(renderedLines,3,item);
 
             item=new QTableWidgetItem(entries.at(4));
+            // Remove trailing \n char for tooltip
+            QString toolTipStr=entries.at(4);
+            toolTipStr.chop(1);
+            item->setToolTip(toolTipStr);
             item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
             item->setBackgroundColor(rowColor);
             widget->setItem(renderedLines,4,item);

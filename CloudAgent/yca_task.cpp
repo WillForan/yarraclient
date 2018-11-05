@@ -715,7 +715,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
 
         if (QFile::exists(incompleteFile))
         {
-            qDebug() << "INCOMPLETE file found, folder is from incomplete download: " << incompleteFile;
+            YTL->log("INCOMPLETE download. Skipping storage: "+dirList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
 
             // INCOMPLETE file found, so folder is from incomplete download.
             continue;
@@ -724,7 +724,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
         QString phiFile=phiDir.absoluteFilePath(dirList.at(i).fileName()+".phi");
         if (!QFile::exists(phiFile))
         {
-            qDebug() << "File with PHI information not found. Can't store task: " << phiFile;
+            YTL->log("Unable to find PHI file. Can't store task: "+phiFile,YTL_ERROR,YTL_HIGH);
 
             // Corresponding file with PHI information not found. Can't store task.
             // TODO: Error handling
@@ -736,7 +736,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
 
         if (!readPHIData(phiFile, currentTask))
         {            
-            qDebug() << "Error reading PHI file " << phiFile;
+            YTL->log("Unable to read PHI: "+phiFile,YTL_ERROR,YTL_HIGH);
 
             delete currentTask;
             currentTask=0;
@@ -745,6 +745,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
 
         if (!cloud->insertPHI(dirList.at(i).filePath(),currentTask))
         {
+            YTL->log("Unable to insert PHI. Skipping storage: "+dirList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
             // TODO: Error reporting
             delete currentTask;
             currentTask=0;
@@ -753,7 +754,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
 
         if (!cloud->pushToDestinations(dirList.at(i).filePath(),currentTask))
         {
-            qDebug() << "Error: Storage to destinations not successful";
+            YTL->log("Unable to store results: "+dirList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
 
             // TODO: Error handling
             delete currentTask;
@@ -764,14 +765,14 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
             continue;
         }
 
-        qDebug() << "Storage successful, cleaning up";
+        //qDebug() << "Storage successful, cleaning up";
 
         // Folder cleanup
         QDir removeDir(dirList.at(i).filePath());
         if (!removeDir.removeRecursively())
         {
-            qDebug() << "Error removing files from IN folder";
-            // TODO: Error reporting!
+            YTL->log("Unable to clean folder: "+dirList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
+            // TODO: Error handling
         }
 
         currentTask->status=ycaTask::tsStorage;
