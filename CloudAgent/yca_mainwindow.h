@@ -106,6 +106,9 @@ private slots:
     void on_logWidget_customContextMenuRequested(const QPoint &pos);
     void logCalcDuration();
 
+    void on_restartButton_clicked();
+    void on_abortButton_clicked();
+
 private:
     Ui::ycaMainWindow* ui;
     QSystemTrayIcon*   trayIcon;

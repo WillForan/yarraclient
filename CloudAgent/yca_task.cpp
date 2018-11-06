@@ -208,8 +208,6 @@ bool ycaTaskHelper::getProcessingTasks(ycaTaskList& taskList)
 
     QFileInfoList fileList=phiDir.entryInfoList(QStringList("*.phi"),QDir::Files,QDir::Time);
 
-    //qDebug() << "Parsing folder...";
-
     for (int i=0; i<fileList.count(); i++)
     {
         QString uuid=fileList.at(i).baseName();
@@ -559,6 +557,8 @@ void ycaTaskHelper::getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskLis
             }
         }
     }    
+
+    YTL->log("Tasks found for download: "+QString::number(downloadList.count()),YTL_INFO,YTL_MID);
 }
 
 
@@ -640,6 +640,8 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString& notification
             YTL->log("Unable to update PHI file: "+currentTask->phiFilename,YTL_ERROR,YTL_HIGH);
             // TODO: Error handling
         }
+
+        YTL->log("Archived task "+currentTask->uuid+" with result "+currentTask->getResult(),YTL_ERROR,YTL_HIGH);
 
         currentTask->status=ycaTask::tsArchived;
     }
@@ -743,6 +745,9 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
             continue;
         }
 
+        YTL->log("Storing task: "+currentTask->uuid,YTL_INFO,YTL_HIGH);
+
+        YTL->log("Inserting PHI",YTL_INFO,YTL_LOW);
         if (!cloud->insertPHI(dirList.at(i).filePath(),currentTask))
         {
             YTL->log("Unable to insert PHI. Skipping storage: "+dirList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
@@ -752,6 +757,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
             continue;
         }
 
+        YTL->log("Push to destinations",YTL_INFO,YTL_LOW);
         if (!cloud->pushToDestinations(dirList.at(i).filePath(),currentTask))
         {
             YTL->log("Unable to store results: "+dirList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
@@ -767,7 +773,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
 
         //qDebug() << "Storage successful, cleaning up";
 
-        // Folder cleanup
+        YTL->log("Folder cleanup",YTL_INFO,YTL_LOW);
         QDir removeDir(dirList.at(i).filePath());
         if (!removeDir.removeRecursively())
         {

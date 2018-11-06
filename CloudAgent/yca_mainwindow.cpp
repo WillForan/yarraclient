@@ -75,7 +75,7 @@ void ycaWorker::timerCall()
     processingActive=true;
     transferTimer.stop();
 
-    YTL->log("Started worker update",YTL_INFO,YTL_MID);
+    YTL->log("(Started worker update)",YTL_INFO,YTL_MID);
 
     if (!parent->taskHelper.removeIncompleteDownloads())
     {
@@ -107,7 +107,7 @@ void ycaWorker::timerCall()
             currentProcess=ycaTask::wpUpload;
             updateParentStatus();
 
-            YTL->log("Now uploading cases",YTL_INFO,YTL_MID);
+            YTL->log("(Now uploading cases)",YTL_INFO,YTL_MID);
 
             // Only upload 10 cases per time, then first download the recon
             int uploadCount=0;
@@ -153,7 +153,7 @@ void ycaWorker::timerCall()
 
     if (!jobsToDownload.empty())
     {
-        YTL->log("Now downloading cases",YTL_INFO,YTL_MID);
+        YTL->log("(Now downloading cases)",YTL_INFO,YTL_MID);
 
         if (transferInformation.username.isEmpty())
         {
@@ -185,8 +185,6 @@ void ycaWorker::timerCall()
                 currentTaskID=currentTask->uuid;
                 parent->mutex.unlock();
 
-                qDebug() << "Now downloading...";
-
                 if (!parent->cloud.downloadCase(currentTask, &transferInformation, &parent->mutex))
                 {
                     YTL->log("Error while downloading case "+currentTaskID,YTL_ERROR,YTL_HIGH);
@@ -207,7 +205,7 @@ void ycaWorker::timerCall()
     currentProcess=ycaTask::wpStorage;
     updateParentStatus();  
 
-    YTL->log("Now storing cases",YTL_INFO,YTL_MID);
+    YTL->log("(Now storing cases)",YTL_INFO,YTL_MID);
 
     // Retrieve storage location for each job and push downloaded jobs to destination
     if (!parent->taskHelper.storeTasks(jobsToArchive,parent))
@@ -218,7 +216,7 @@ void ycaWorker::timerCall()
 
     if (!jobsToArchive.empty())
     {
-        YTL->log("Now archiving cases",YTL_INFO,YTL_MID);
+        YTL->log("(Now archiving cases)",YTL_INFO,YTL_MID);
 
         QString successNotification="";
 
@@ -239,7 +237,7 @@ void ycaWorker::timerCall()
 
     QMetaObject::invokeMethod(parent, "hideIndicator", Qt::QueuedConnection);
 
-    YTL->log("Completed worker update",YTL_INFO,YTL_MID);
+    YTL->log("(Completed worker update)",YTL_INFO,YTL_MID);
 
     currentProcess=ycaTask::wpIdle;
     updateParentStatus();
@@ -996,3 +994,28 @@ void ycaMainWindow::logCalcDuration()
     msgBox.exec();
 }
 
+
+void ycaMainWindow::on_restartButton_clicked()
+{
+    // TODO
+    QMessageBox msgBox(0);
+    msgBox.setWindowTitle("Coming Soon");
+    msgBox.setText("Feature will be implemented soon.");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setWindowIcon(YCA_ICON);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
+}
+
+
+void ycaMainWindow::on_abortButton_clicked()
+{
+    // TODO
+    QMessageBox msgBox(0);
+    msgBox.setWindowTitle("Coming Soon");
+    msgBox.setText("Feature will be implemented soon.");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setWindowIcon(YCA_ICON);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
+}

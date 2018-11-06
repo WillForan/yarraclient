@@ -2,5 +2,8 @@
     <qresource prefix="/">
         <file>images/orticon_256.png</file>
         <file>images/ortlogo.png</file>
+        <file>images/cloud.png</file>		        
+        <file>images/premise.png</file>		        
+        <file>images/elastic.png</file>		                
     </qresource>
 </RCC>

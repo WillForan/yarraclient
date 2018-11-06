@@ -200,7 +200,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_3">
+           <widget class="QPushButton" name="restartButton">
             <property name="maximumSize">
              <size>
               <width>60</width>
@@ -213,7 +213,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="abortButton">
             <property name="maximumSize">
              <size>
               <width>60</width>

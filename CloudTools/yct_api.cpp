@@ -147,7 +147,7 @@ int yctAPI::readModeList(ortModeList* modeList)
     }
     errorReason="";
 
-    QJsonDocument jsonReply =QJsonDocument::fromJson(reply.replyData());
+    QJsonDocument jsonReply=QJsonDocument::fromJson(reply.replyData());
 
     int cloudModes=0;
 
@@ -427,6 +427,8 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
 {
     bool success=false;
 
+    YTL->log("Uploading case "+task->uuid,YTL_INFO,YTL_HIGH);
+
     // Compose the command line for the help app
     QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
                     setup->region + " " + setup->inBucket + " " + task->uuid + " upload ";
@@ -435,20 +437,26 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
 
     for (int i=0; i<task->twixFilenames.count(); i++)
     {
+        YTL->log("Including file "+task->twixFilenames.at(i),YTL_INFO,YTL_LOW);
         cmdLine += path+task->twixFilenames.at(i)+" ";
     }
 
-    cmdLine += path+task->taskFilename;
+    cmdLine += path+task->taskFilename;    
     //qInfo() << cmdLine;
 
     // TODO: Batch call if commandline is too long
 
-    YTL->log("Calling upload helper",YTL_INFO,YTL_LOW);
-
     // Execute the helper app to perform the multi-part upload
+    YTL->log("Calling upload helper",YTL_INFO,YTL_LOW);
     int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine);
-
     YTL->log("Upload helper finished",YTL_INFO,YTL_LOW);
+
+    YTL->log("(Helper output begin)",YTL_INFO,YTL_LOW);
+    for (int i=0; i<helperAppOutput.count(); i++)
+    {
+        YTL->log(helperAppOutput.at(i),YTL_INFO,YTL_LOW);
+    }
+    YTL->log("(Helper output end)",YTL_INFO,YTL_LOW);
 
     if (exitcode==0)
     {
@@ -523,12 +531,13 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
 bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mutex)
 {
     bool success=false;
+    YTL->log("Downloading case "+task->uuid,YTL_INFO,YTL_HIGH);
 
     QString path=getCloudPath(YCT_CLOUDFOLDER_IN)+"/"+task->uuid;
 
     QString cmdLine=setup->username + " " + config->key + " " + config->secret +" " +
                     setup->region + " " + setup->outBucket + " " + task->uuid + " download " + getCloudPath(YCT_CLOUDFOLDER_IN);
-
+    //qDebug() << cmdLine;
 
     QDir dir(getCloudPath(YCT_CLOUDFOLDER_IN));
     if (!dir.mkpath(path))
@@ -538,7 +547,7 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
         return false;
     }
 
-    // Create INCOMPLETE file
+    // Create INCOMPLETE file for detecting interrupted downloads
     QFile incompleteFile(path+"/"+YCT_INCOMPLETE_FILE);
     incompleteFile.open(QIODevice::ReadWrite);
     QString incompleteContent="INCOMPLETE YARRACLOUD DOWNLOAD " + QDateTime::currentDateTime().toString();
@@ -547,19 +556,16 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
 
     // TODO: Check available disk space
 
-    //qDebug() << cmdLine;
-
     YTL->log("Calling download helper",YTL_INFO,YTL_LOW);
-
     int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine);
-
     YTL->log("Download helper finished",YTL_INFO,YTL_LOW);
 
-    qDebug() << "Helper output:";
+    YTL->log("(Helper output begin)",YTL_INFO,YTL_LOW);
     for (int i=0; i<helperAppOutput.count(); i++)
     {
-        qDebug() << helperAppOutput.at(i);
+        YTL->log(helperAppOutput.at(i),YTL_INFO,YTL_LOW);
     }
+    YTL->log("(Helper output end)",YTL_INFO,YTL_LOW);
 
     if (exitcode==0)
     {
@@ -623,11 +629,12 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
 
     // TODO: Search helper output for error messages
 
-    qDebug() << "Helper output:";
+    YTL->log("(Helper output begin)",YTL_INFO,YTL_LOW);
     for (int i=0; i<helperAppOutput.count(); i++)
     {
-        qDebug() << helperAppOutput.at(i);
+        YTL->log(helperAppOutput.at(i),YTL_INFO,YTL_LOW);
     }
+    YTL->log("(Helper output end)",YTL_INFO,YTL_LOW);
 
     return true;
 }
@@ -896,11 +903,12 @@ bool yctAPI::pushToPACS (QString path, ycaTask* task, yctStorageInformation* des
 
     // TODO: Search helper output for error messages
 
-    qDebug() << "Helper output:";
+    YTL->log("(Helper output begin)",YTL_INFO,YTL_LOW);
     for (int i=0; i<helperAppOutput.count(); i++)
     {
-        qDebug() << helperAppOutput.at(i);
+        YTL->log(helperAppOutput.at(i),YTL_INFO,YTL_LOW);
     }
+    YTL->log("(Helper output end)",YTL_INFO,YTL_LOW);
 
     return success;
 }
