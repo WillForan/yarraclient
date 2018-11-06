@@ -21,6 +21,8 @@ public:
 
     void setTaskDetails(ycaTask* task);
 
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 private slots:
     void on_closeButton_clicked();

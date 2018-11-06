@@ -16,6 +16,7 @@ ycaThreadLog* ycaThreadLog::getInstance()
 
 ycaThreadLog::ycaThreadLog()
 {
+#ifndef YTL_DISABLED
     logMutex.lock();
 
     QDir appDir(qApp->applicationDirPath());
@@ -51,8 +52,11 @@ ycaThreadLog::ycaThreadLog()
     logfile.flush();
 
     logMutex.unlock();
+#endif
 }
 
+
+#ifndef YTL_DISABLED
 
 void ycaThreadLog::readLogFile(QTableWidget* widget, int detailLevel)
 {
@@ -236,4 +240,6 @@ QString ycaThreadLog::getClipboardString(QTableWidget* widget)
 
     return content;
 }
+
+#endif
 

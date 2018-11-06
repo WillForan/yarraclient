@@ -459,6 +459,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
          <widget class="QTableWidget" name="logWidget">
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="contextMenuPolicy">
            <enum>Qt::CustomContextMenu</enum>
           </property>

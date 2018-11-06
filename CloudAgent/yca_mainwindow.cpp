@@ -107,6 +107,8 @@ void ycaWorker::timerCall()
             currentProcess=ycaTask::wpUpload;
             updateParentStatus();
 
+            YTL->log("Now uploading cases",YTL_INFO,YTL_MID);
+
             // Only upload 10 cases per time, then first download the recon
             int uploadCount=0;
 
@@ -151,6 +153,8 @@ void ycaWorker::timerCall()
 
     if (!jobsToDownload.empty())
     {
+        YTL->log("Now downloading cases",YTL_INFO,YTL_MID);
+
         if (transferInformation.username.isEmpty())
         {
             if (!parent->cloud.validateUser(&transferInformation))
@@ -203,6 +207,8 @@ void ycaWorker::timerCall()
     currentProcess=ycaTask::wpStorage;
     updateParentStatus();  
 
+    YTL->log("Now storing cases",YTL_INFO,YTL_MID);
+
     // Retrieve storage location for each job and push downloaded jobs to destination
     if (!parent->taskHelper.storeTasks(jobsToArchive,parent))
     {
@@ -212,6 +218,8 @@ void ycaWorker::timerCall()
 
     if (!jobsToArchive.empty())
     {
+        YTL->log("Now archiving cases",YTL_INFO,YTL_MID);
+
         QString successNotification="";
 
         parent->mutex.lock();
@@ -646,7 +654,7 @@ void ycaMainWindow::updateUIWorker()
 
 void ycaMainWindow::on_transferButton_clicked()
 {
-    YTL->log("Transfer triggered by user",YTL_INFO,YTL_LOW);
+    YTL->log("Transfer triggered by user",YTL_INFO,YTL_MID);
     callSubmit();
 }
 
@@ -655,12 +663,12 @@ void ycaMainWindow::on_pauseButton_clicked()
 {
     if (ui->pauseButton->isChecked())
     {
-        YTL->log("Updates paused by user",YTL_INFO,YTL_LOW);
+        YTL->log("Updates paused by user",YTL_INFO,YTL_MID);
         transferWorker.processingPaused=true;
     }
     else
     {
-        YTL->log("Updates resumed by user",YTL_INFO,YTL_LOW);
+        YTL->log("Updates resumed by user",YTL_INFO,YTL_MID);
         transferWorker.processingPaused=false;
     }
 }
@@ -678,7 +686,13 @@ void ycaMainWindow::on_clearArchiveButton_clicked()
 
     if (ret==QMessageBox::Yes)
     {
-        // TODO
+        QMessageBox msgBox(0);
+        msgBox.setWindowTitle("Coming Soon");
+        msgBox.setText("Feature will be implemented soon.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowIcon(YCA_ICON);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
     }
 }
 
@@ -962,13 +976,20 @@ void ycaMainWindow::logCalcDuration()
             QDateTime startTime=QDateTime::fromString(startTimeStr,"dd.MM.yy  hh:mm:ss");
             QDateTime endTime=QDateTime::fromString(endTimeStr,"dd.MM.yy  hh:mm:ss");
 
-            text=QString::number(endTime.msecsTo(startTime)/1000.)+" sec";
+            int secs=endTime.msecsTo(startTime)/1000.;
+
+            if (secs>=86400)
+            {
+                text+=QString::number(int(secs/86400.))+" days + ";
+            }
+
+            text+=QDateTime::fromTime_t(secs).toUTC().toString("hh:mm:ss");
         }
     }
 
     QMessageBox msgBox(0);
     msgBox.setWindowTitle("Duration");
-    msgBox.setText(text);
+    msgBox.setText("Difference between selected events (hh:mm:ss):\n\n"+text);
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setWindowIcon(YCA_ICON);
     msgBox.setIcon(QMessageBox::Information);

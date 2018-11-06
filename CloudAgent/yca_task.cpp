@@ -562,7 +562,7 @@ void ycaTaskHelper::getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskLis
 }
 
 
-bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString notificationString)
+bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString& notificationString)
 {
     QString phiPath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI);
     QDir phiDir(phiPath);

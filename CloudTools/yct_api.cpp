@@ -1,11 +1,13 @@
 #include "yct_api.h"
 #include "yct_configuration.h"
 #include "yct_aws/qtaws.h"
+#include "../CloudAgent/yca_threadlog.h"
 #include "../CloudAgent/yca_global.h"
 #include "../CloudAgent/yca_task.h"
 
 #include "../OfflineReconClient/ort_modelist.h"
 #include "../Client/rds_global.h"
+
 
 #if defined(Q_OS_WIN)
     #include <QtCore/QLibrary>
@@ -64,7 +66,6 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
 
     if (!reply.isSuccess())
     {
-        //qDebug() << reply.anyErrorString();
         errorReason=reply.anyErrorString();
 
         if (reply.networkError()==QNetworkReply::ContentOperationNotPermittedError)
@@ -72,6 +73,7 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
             errorReason="YarraCloud Key ID or Secret is invalid.";
         }
 
+        YTL->log("AWS response error. Reason: "+errorReason,YTL_ERROR,YTL_MID);
         return false;
     }
 
@@ -85,12 +87,15 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
 
     foreach(QString key, keys)
     {
-        //qDebug() << key << ": " << jsonObject[key];
-
         if (key=="can_submit_jobs")
         {
             canSubmit=jsonObject[key].toBool();
             errorReason="Missing payment method or account has been disabled.";
+
+            if (!canSubmit)
+            {
+                YTL->log(errorReason,YTL_ERROR,YTL_MID);
+            }
         }
 
         if (transferInformation!=0)
@@ -137,7 +142,7 @@ int yctAPI::readModeList(ortModeList* modeList)
 
     if (!reply.isSuccess())
     {
-        errorReason=reply.anyErrorString();
+        errorReason=reply.anyErrorString();        
         return -1;
     }
     errorReason="";
@@ -351,8 +356,6 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/jobs",
                                             QByteArray(), YCT_API_REGION, content, QStringList());
 
-    //qDebug() << "Request: " << runningTasks;
-
     if (!reply.isSuccess())
     {
         qDebug() << reply.anyErrorString();
@@ -363,6 +366,7 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
             errorReason="YarraCloud Key ID or Secret is invalid.";
         }
 
+        YTL->log("AWS response error. Reason: "+errorReason,YTL_ERROR,YTL_MID);
         return false;
     }
 
@@ -439,21 +443,28 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
 
     // TODO: Batch call if commandline is too long
 
+    YTL->log("Calling upload helper",YTL_INFO,YTL_LOW);
+
     // Execute the helper app to perform the multi-part upload
     int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine);
+
+    YTL->log("Upload helper finished",YTL_INFO,YTL_LOW);
+
     if (exitcode==0)
     {
         success=true;
     }
     else
     {
+        YTL->log("Upload helper reported error",YTL_ERROR,YTL_MID);
         success=false;
-        // TODO: Error handling
+        // TODO: Error handling        
     }
 
     if (success)
     {
         // Call the job submission endpoint to trigger the processing
+        YTL->log("Calling API to trigger job",YTL_INFO,YTL_LOW);
 
         QString      jsonText="{\"name\":\""+ task->uuid +"\", \"task_file_name\": \"" + task->taskFilename +"\", \"recon_mode\":\"" + task->reconMode + "\"}";
         QByteArray   jsonString=jsonText.toUtf8();
@@ -463,8 +474,6 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
 
         if (!reply.isSuccess())
         {
-            // TODO: Error handling
-
             errorReason=reply.anyErrorString();
 
             if (reply.networkError()==QNetworkReply::ContentOperationNotPermittedError)
@@ -472,15 +481,19 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
                 errorReason="YarraCloud Key ID or Secret is invalid.";
             }
 
+            YTL->log("AWS response error. Reason: "+errorReason,YTL_ERROR,YTL_MID);
+
+            // TODO: Error handling
             success=false;
         }
 
-        qDebug() << reply.replyData();
-
+        // qDebug() << reply.replyData();
         // TODO: Evaluate returned json
     }
 
-    // If successful, delete TWIX and task file from OUT folder
+    // If successful, delete TWIX and task file from OUT folder    
+    YTL->log("Removing TWIX and task files",YTL_INFO,YTL_LOW);
+
     if (success)
     {
         mutex->lock();
@@ -489,12 +502,14 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
         {
             if (!QFile::remove(path+task->twixFilenames.at(i)))
             {
+                YTL->log("Unable to remove TWIX file: "+task->twixFilenames.at(i),YTL_ERROR,YTL_MID);
                 // TODO: Error handling
             }
         }
 
         if (!QFile::remove(path+task->taskFilename))
         {
+            YTL->log("Unable to remove task file: "+task->taskFilename,YTL_ERROR,YTL_MID);
             // TODO: Error handling
         }
 
@@ -518,6 +533,7 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
     QDir dir(getCloudPath(YCT_CLOUDFOLDER_IN));
     if (!dir.mkpath(path))
     {
+        YTL->log("Unable to create download folder "+path,YTL_ERROR,YTL_MID);
         // TODO: Error reporting
         return false;
     }
@@ -531,9 +547,13 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
 
     // TODO: Check available disk space
 
-    qDebug() << cmdLine;
+    //qDebug() << cmdLine;
+
+    YTL->log("Calling download helper",YTL_INFO,YTL_LOW);
 
     int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine);
+
+    YTL->log("Download helper finished",YTL_INFO,YTL_LOW);
 
     qDebug() << "Helper output:";
     for (int i=0; i<helperAppOutput.count(); i++)
@@ -549,16 +569,15 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
         if (!QFile::remove(path+"/"+YCT_INCOMPLETE_FILE))
         {
             // TODO: Error handling
+            YTL->log("Unable to remove INCOMPLETE file in "+path,YTL_ERROR,YTL_MID);
         }
     }
     else
     {
-        qDebug() << "Exec error";
+        YTL->log("Exec error. Return value: "+QString::number(exitcode),YTL_ERROR,YTL_MID);
         success=false;
         // TODO: Error handling
     }
-
-    qDebug() << "Finished execution";
 
     return success;
 }
@@ -571,14 +590,14 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
     if (!tarDir.exists())
     {
         // TODO: Error handling
-        qDebug() << "Folder with extracted files does not exist: " << tarDir.absolutePath();
+        YTL->log("Folder with extracted files not found: "+tarDir.absolutePath(),YTL_ERROR,YTL_MID);
         return false;
     }
 
     if (tarDir.entryInfoList(QStringList("*"),QDir::Files).isEmpty())
     {
         // TODO: Error handling
-        qDebug() << "Reconstruction created no output";
+        YTL->log("Reconstruction created no output",YTL_ERROR,YTL_MID);
         return false;
     }
 
@@ -598,7 +617,7 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
     if (callHelperApp(YCT_DCMTK_DCMODIFY,cmd)!=0)
     {
         // TODO: Error handling
-        qDebug() << "Error executing dcmodify";
+        YTL->log("Error executing dcmodify",YTL_ERROR,YTL_MID);
         return false;
     }
 
@@ -646,6 +665,8 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
     {
         timeoutTimer.stop();
         RTI->log("Warning: QEventLoop returned too early. Starting secondary loop.");
+        YTL->log("Warning: QEventLoop returned too early. Starting secondary loop.",YTL_WARNING,YTL_MID);
+
         while ((myProcess->state()==QProcess::Running) && (ti.elapsed()<execTimeout))
         {
             RTI->processEvents();
@@ -656,6 +677,8 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
         if (myProcess->state()==QProcess::Running)
         {
             RTI->log("Warning: Process is still active. Killing process.");
+            YTL->log("Warning: Process is still active. Killing process.",YTL_WARNING,YTL_MID);
+
             myProcess->kill();
             success=false;
         }
@@ -675,11 +698,17 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
         else
         {
             RTI->log("Warning: Process event loop timed out.");
+            YTL->log("Warning: Process event loop timed out.",YTL_WARNING,YTL_MID);
+
             RTI->log("Warning: Duration since start "+QString::number(ti.elapsed())+" ms");
+            YTL->log("Warning: Duration since start "+QString::number(ti.elapsed())+" ms",YTL_WARNING,YTL_MID);
+
             success=false;
             if (myProcess->state()==QProcess::Running)
             {
                 RTI->log("Warning: Process is still active. Killing process.");
+                YTL->log("Warning: Process is still active. Killing process.",YTL_WARNING,YTL_MID);
+
                 myProcess->kill();
             }
         }
@@ -689,6 +718,8 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
     {
         // The process timeed out. Probably some error occured.
         RTI->log("ERROR: Timeout during call of YCA helper!");
+        YTL->log("ERROR: Timeout during call of YCA helper!",YTL_ERROR,YTL_MID);
+
         exitcode=-1;
     }
     else
@@ -703,7 +734,6 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
             lineLength=myProcess->readLine(buf, sizeof(buf));
             if (lineLength != -1)
             {
-                //RTI->debug("Read line!");
                 helperAppOutput << QString(buf);
             }
         } while (lineLength!=-1);
@@ -717,8 +747,7 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
     delete myProcess;
     myProcess=0;
 
-    qDebug() << "Exitcode: " << exitcode;
-
+    YTL->log("Process exitcode: "+QString::number(exitcode),YTL_INFO,YTL_LOW);
     return exitcode;
 }
 
@@ -742,6 +771,7 @@ bool yctAPI::pushToDestinations(QString path, ycaTask* task)
             errorReason="YarraCloud Key ID or Secret is invalid.";
         }
 
+        YTL->log("AWS response error. Reason: "+errorReason,YTL_ERROR,YTL_MID);
         return false;
     }
 
@@ -772,7 +802,8 @@ bool yctAPI::pushToDestinations(QString path, ycaTask* task)
             }
             else
             {
-                qDebug() << "Unknown storage destination";
+                YTL->log("Unknown storage destination: "+jsonObject["method"].toString(),YTL_WARNING,YTL_HIGH);
+                YTL->log("Destination name: "+jsonObject["name"].toString(),YTL_WARNING,YTL_HIGH);
                 delete destination;
                 destination=0;
                 continue;
@@ -793,7 +824,7 @@ bool yctAPI::pushToDestinations(QString path, ycaTask* task)
             if (!pushToDrive(path, task, destination))
             {
                 // TODO: Error handling
-                qDebug() << "Drive transfer failed to " << destination->name;
+                YTL->log("Drive transfer failed to "+ destination->name,YTL_ERROR,YTL_HIGH);
                 failedTransfers++;
             }
         }
@@ -803,7 +834,7 @@ bool yctAPI::pushToDestinations(QString path, ycaTask* task)
             if (!pushToPACS(path, task, destination))
             {
                 // TODO: Error handling
-                qDebug() << "PACS transfer failed to " << destination->name;
+                YTL->log("PACS transfer failed to "+ destination->name,YTL_ERROR,YTL_HIGH);
                 failedTransfers++;
             }
         }
@@ -812,7 +843,10 @@ bool yctAPI::pushToDestinations(QString path, ycaTask* task)
         destination=0;
     }
 
-    //qDebug() << reply.replyData();
+    if (failedTransfers>0)
+    {
+        YTL->log("Failed storage transfers: "+QString::number(failedTransfers),YTL_WARNING,YTL_HIGH);
+    }
 
     return (failedTransfers==0);
 }
@@ -827,14 +861,14 @@ bool yctAPI::pushToPACS (QString path, ycaTask* task, yctStorageInformation* des
     if (!dcmDir.exists())
     {
         // TODO: Error handling
-        qDebug() << "Folder with extracted files does not exist: " << dcmDir.absolutePath();
+        YTL->log("Folder with extracted files does not exist:  "+dcmDir.absolutePath(),YTL_ERROR,YTL_MID);
         return false;
     }
 
     if (dcmDir.entryInfoList(QStringList("*"),QDir::Files).isEmpty())
     {
         // TODO: Error handling
-        qDebug() << "Reconstruction created no output";
+        YTL->log("Reconstruction created no output",YTL_ERROR,YTL_MID);
         return false;
     }
 
@@ -856,7 +890,7 @@ bool yctAPI::pushToPACS (QString path, ycaTask* task, yctStorageInformation* des
     if (callHelperApp(YCT_DCMTK_STORESCU,cmd)!=0)
     {
         // TODO: Error handling
-        qDebug() << "Error executing storescu";
+        YTL->log("Error executing storescu",YTL_ERROR,YTL_MID);
         success=false;
     }
 
@@ -877,7 +911,7 @@ bool yctAPI::pushToDrive(QString path, ycaTask* task, yctStorageInformation* des
     QDir sourceDir(path+"/output_files");
     if (!sourceDir.exists())
     {
-        qDebug() << "Error: Can't access files for storage";
+        YTL->log("Can't find reconstructed files",YTL_ERROR,YTL_MID);
         return false;
     }
 
@@ -886,20 +920,19 @@ bool yctAPI::pushToDrive(QString path, ycaTask* task, yctStorageInformation* des
     QDir dir;
     if (dir.exists(fullPath))
     {
-        // TODO: Add timestamp
         QString timeStamp=QDateTime::currentDateTime().toString("ddMMyyHHmmsszzz");
         fullPath=fullPath+"_"+timeStamp;
 
         if (dir.exists(fullPath))
         {
-            qDebug() << "Can't find unique folder for TaskID";
+            YTL->log("Can't create unique folder for TaskID",YTL_ERROR,YTL_MID);
             return false;
         }
     }
 
     if (!dir.mkpath(fullPath))
     {
-        qDebug() << "Error creating destination path: " + fullPath;
+        YTL->log("Can't create destination path: "+fullPath,YTL_ERROR,YTL_MID);
         // TODO: Error handling
         return false;
     }
@@ -912,7 +945,7 @@ bool yctAPI::pushToDrive(QString path, ycaTask* task, yctStorageInformation* des
     {
         if (!QFile::copy(sourceDir.absoluteFilePath(files.at(i)),fullPath+"/"+files.at(i)))
         {
-            qDebug() << "Error copying file " << files.at(i);
+            YTL->log("Error copying file: "+files.at(i),YTL_ERROR,YTL_MID);
             return false;
         }
     }

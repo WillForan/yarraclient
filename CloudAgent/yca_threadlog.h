@@ -4,6 +4,12 @@
 #include <QtGui>
 #include <QtWidgets>
 
+// Disable the thread logger for the other Yarra clients
+#ifdef YARRA_APP_SAC
+    #define YTL_DISABLED 1
+#endif
+
+
 #define YTL ycaThreadLog::getInstance()
 #define YTL_MAXLOGSIZE  1000000
 #define YTL_MAXLOGLINES 10000
@@ -44,27 +50,32 @@ public:
 
     void log(QString text, EntryType type=Info, ImportanceLevel level=Medium);
 
+#ifndef YTL_DISABLED
     void readLogFile(QTableWidget* widget, int detailLevel);
     QString getClipboardString(QTableWidget* widget);
 
     void lock();
     void unlock();
+#endif
 
 protected:
 
     static ycaThreadLog* pSingleton;
 
+#ifndef YTL_DISABLED
     QString formatLine(QString text, EntryType type, ImportanceLevel level);
     QString getEntryType(EntryType type);
     QString getDetailLevel(ImportanceLevel level);
 
     QFile  logfile;
     QMutex logMutex;
+#endif
 };
 
 
 inline void ycaThreadLog::log(QString text, EntryType type, ImportanceLevel level)
 {
+#ifndef YTL_DISABLED
     QString line=formatLine(text,type,level);
     logMutex.lock();
     logfile.write(line.toLatin1());
@@ -72,8 +83,11 @@ inline void ycaThreadLog::log(QString text, EntryType type, ImportanceLevel leve
     logMutex.unlock();
 
     qInfo() << line;
+#endif
 }
 
+
+#ifndef YTL_DISABLED
 
 inline QString ycaThreadLog::getEntryType(EntryType type)
 {
@@ -142,6 +156,8 @@ inline void ycaThreadLog::unlock()
 {
     logMutex.unlock();
 }
+
+#endif
 
 
 #endif // YCATHREADLOG_H

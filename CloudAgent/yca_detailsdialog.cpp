@@ -1,6 +1,10 @@
 #include "yca_detailsdialog.h"
 #include "ui_yca_detailsdialog.h"
 
+#include <QKeyEvent>
+#include <QMessageBox>
+#include <QClipboard>
+
 
 ycaDetailsDialog::ycaDetailsDialog(QWidget *parent) :
     QDialog(parent),
@@ -22,10 +26,10 @@ ycaDetailsDialog::~ycaDetailsDialog()
 
 
 #define YCA_ADDROW(a,b,c) ui->tableWidget->setRowCount(rowIndex+1); \
-                          if (!QString(a).isEmpty()) { color=QColor("#D9D9D9"); } else { color=QColor("#FFF"); } \
+                          if (!QString(a).isEmpty()) { color=QColor(88,15,139); textcolor=QColor("#FFF"); } else { color=QColor("#FFF"); textcolor=QColor("#000"); } \
                           item=new QTableWidgetItem(a); \
                           item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter); \
-                          item->setBackgroundColor(color); \
+                          item->setBackgroundColor(color); item->setTextColor(textcolor); \
                           item->setFont(labelFont); \
                           ui->tableWidget->setItem(rowIndex,0,item); \
                           item=new QTableWidgetItem(b); \
@@ -52,6 +56,7 @@ void ycaDetailsDialog::setTaskDetails(ycaTask* task)
     ui->tableWidget->setRowCount(0);
     QTableWidgetItem* item=0;
     QColor color;
+    QColor textcolor;
 
     QFont labelFont=ui->tableWidget->horizontalHeaderItem(0)->font();
     labelFont.setBold(true);
@@ -76,5 +81,68 @@ void ycaDetailsDialog::on_closeButton_clicked()
 {
     this->close();
 }
+
+
+void ycaDetailsDialog::keyPressEvent(QKeyEvent* event)
+{
+    if (event->type() == QKeyEvent::KeyPress)
+    {
+        if(event->matches(QKeySequence::Copy))
+        {
+            event->accept();
+
+            int startLine=0;
+            int endLine=ui->tableWidget->rowCount();
+
+            if (!ui->tableWidget->selectedRanges().empty())
+            {
+                startLine=ui->tableWidget->selectedRanges().at(0).topRow();
+                endLine=ui->tableWidget->selectedRanges().at(0).bottomRow()+1;
+            }
+
+            QString content="";
+
+            for (int i=startLine; i<endLine; i++)
+            {
+                for (int j=0; j<ui->tableWidget->columnCount(); j++)
+                {
+                    QTableWidgetItem* item=ui->tableWidget->item(i,j);
+                    if (item!=0)
+                    {
+                        content+=item->text();
+                        if (j!=ui->tableWidget->columnCount()-1)
+                        {
+                            if (j==0)
+                            {
+                                content+="  ";
+                            }
+                            else
+                            {
+                                if (!item->text().isEmpty())
+                                {
+                                    content+=": ";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            content+="\n";
+                        }
+                    }
+                    else
+                    {
+                        content+="\n";
+                        break;
+                    }
+                }
+            }
+
+            QClipboard* clipboard=QApplication::clipboard();
+            clipboard->setText(content);
+
+        }
+    }
+}
+
 
 

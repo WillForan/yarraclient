@@ -25,6 +25,7 @@ SOURCES += main.cpp\
     sac_copydialog.cpp \
     sac_configurationdialog.cpp \
     ../NetLogger/netlogger.cpp \
+    ../CloudAgent/yca_threadlog.cpp \
     ../CloudTools/yct_configuration.cpp \
     ../CloudTools/yct_aws/qtawsqnam.cpp \
     ../CloudTools/yct_aws/qtaws.cpp \
