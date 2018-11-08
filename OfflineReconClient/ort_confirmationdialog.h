@@ -26,6 +26,7 @@ public:
     void setPatientInformation(QString patientInfo);
     void setACCRequired();
     void setParamRequired(QString label, QString description, int defaultValue, int minValue, int maxValue);
+    void setCloudRecon();
 
     void updateDialogHeight();
 

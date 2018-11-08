@@ -62,7 +62,7 @@ public:
     yctAPI();
     void    setConfiguration(yctConfiguration* configuration);
 
-#ifdef YARRA_APP_SAC
+#if defined(YARRA_APP_SAC) || defined(YARRA_APP_ORT)
     int     readModeList(ortModeList* modeList);
     void    launchCloudAgent(QString params="");
 #endif

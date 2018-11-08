@@ -31,7 +31,7 @@ public:
     QString serverPath;
     QString disconnectCmd;
     QString fallbackConnectCmd;
-    int connectTimeout;
+    int     connectTimeout;
 
     QString appPath;
 

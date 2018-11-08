@@ -33,6 +33,9 @@ public:
 
     bool        highPriority;
 
+    QString     uuid;
+    bool        cloudReconstruction;
+
     bool exportDataFiles(int fileID, ortModeEntry* mode);
     bool transferDataFiles();
     bool generateTaskFile();
@@ -49,6 +52,7 @@ protected:
 
     QString errorMessageUI;
     bool reconTaskFailed;
+
 };
 
 

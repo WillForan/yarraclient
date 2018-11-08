@@ -3,6 +3,10 @@
 
 #include <QDialog>
 
+#include "../CloudTools/yct_configuration.h"
+#include "../CloudTools/yct_api.h"
+
+
 namespace Ui {
 class ortConfigurationDialog;
 }
@@ -24,14 +28,24 @@ public:
 
     bool checkAccessPassword();
 
+    yctConfiguration  cloudConfig;
+    yctAPI            cloud;
+
 private slots:
     void on_okButton_clicked();
     void on_cancelButton_clicked();
 
     void on_logServerTestButton_clicked();
 
+    void on_cloudConnectionButton_clicked();
+    void on_cloudCredentialsButton_clicked();
+    void on_cloudCheckbox_clicked(bool checked);
+
 private:
     Ui::ortConfigurationDialog *ui;
+
+    void updateCloudCredentialStatus();
+
 };
 
 #endif // ORT_CONFIGURATIONDIALOG_H

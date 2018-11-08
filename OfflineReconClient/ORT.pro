@@ -35,7 +35,14 @@ SOURCES += main.cpp \
     ort_serverlist.cpp \
     ort_configuration.cpp \
     ort_configurationdialog.cpp \
-    ../NetLogger/netlogger.cpp
+    ../NetLogger/netlogger.cpp \
+    ../CloudTools/yct_configuration.cpp \
+    ../CloudTools/yct_aws/qtawsqnam.cpp \
+    ../CloudTools/yct_aws/qtaws.cpp \
+    ../CloudTools/yct_api.cpp \
+    ../CloudTools/yct_prepare/yct_twix_anonymizer.cpp \
+    ../CloudAgent/yca_threadlog.cpp
+
 
 HEADERS  += \
     ort_mainwindow.h \
@@ -59,7 +66,12 @@ HEADERS  += \
     ort_configuration.h \
     ort_configurationdialog.h \
     ../NetLogger/netlogger.h \
-    ../NetLogger/netlog_events.h
+    ../NetLogger/netlog_events.h \
+    ../CloudTools/yct_common.h \
+    ../CloudTools/yct_aws/qtawsqnam.h \
+    ../CloudTools/yct_aws/qtaws.h \
+    ../CloudTools/yct_prepare/yct_twix_anonymizer.h \
+    ../CloudTools/yct_api.h
 
     
 FORMS    += \

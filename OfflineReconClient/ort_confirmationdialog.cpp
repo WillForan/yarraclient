@@ -232,3 +232,12 @@ void ortConfirmationDialog::insertMailAddress()
 {
     ui->mailEdit->setText(ui->mailEdit->text()+sender()->property("email").toString());
 }
+
+
+void ortConfirmationDialog::setCloudRecon()
+{
+    // TODO
+}
+
+
+

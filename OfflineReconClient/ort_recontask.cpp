@@ -29,6 +29,9 @@ ortReconTask::ortReconTask()
     fileAlreadyExists=false;
 
     highPriority=false;
+
+    uuid="";
+    cloudReconstruction=false;
 }
 
 
@@ -107,7 +110,6 @@ bool ortReconTask::transferDataFiles()
         RTI->log("NOTE: File already exists on server.");
         return false;
     }
-
 
     if (!network->transferQueueFiles())
     {

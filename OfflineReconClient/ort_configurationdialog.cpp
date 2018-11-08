@@ -9,6 +9,8 @@
 #include "ort_global.h"
 #include "../Client/rds_global.h"
 #include <../NetLogger/netlogger.h>
+#include "../CloudTools/yct_common.h"
+#include "../CloudTools/yct_aws/qtaws.h"
 
 
 ortConfigurationDialog::ortConfigurationDialog(QWidget *parent) :
@@ -146,12 +148,13 @@ void ortConfigurationDialog::readSettings()
 {
     QSettings settings(RTI->getAppPath()+"/"+ORT_INI_NAME, QSettings::IniFormat);
 
-    ui->systemNameEdit->setText(settings.value("ORT/SystemName", "").toString());
-    ui->serverPathEdit->setText(settings.value("ORT/ServerPath", "").toString());
-    ui->connectCmdEdit->setText(settings.value("ORT/ConnectCmd", "").toString());
-    ui->disconnectCmdEdit->setText(settings.value("ORT/DisconnectCmd", "").toString());
-    ui->fallbackConnectCmdEdit->setText(settings.value("ORT/FallbackConnectCmd", "").toString());
+    ui->systemNameEdit->setText          (settings.value("ORT/SystemName",         "").toString());
+    ui->serverPathEdit->setText          (settings.value("ORT/ServerPath",         "").toString());
+    ui->connectCmdEdit->setText          (settings.value("ORT/ConnectCmd",         "").toString());
+    ui->disconnectCmdEdit->setText       (settings.value("ORT/DisconnectCmd",      "").toString());
+    ui->fallbackConnectCmdEdit->setText  (settings.value("ORT/FallbackConnectCmd", "").toString());
     ui->autoLaunchRDSCheckbox->setChecked(settings.value("ORT/StartRDSOnShutdown", false).toBool());
+    ui->cloudCheckbox->setChecked        (settings.value("ORT/CloudSupport",       false).toBool());
 
     ui->serialNumberEdit->setText(RTI->getConfigInstance()->infoSerialNumber);
 
@@ -165,7 +168,11 @@ void ortConfigurationDialog::readSettings()
     }
 
     ui->logServerAddressEdit->setText(settings.value("LogServer/ServerAddress", "").toString());
-    ui->logServerAPIKeyEdit->setText(settings.value("LogServer/APIKey", "").toString());
+    ui->logServerAPIKeyEdit->setText (settings.value("LogServer/APIKey", "").toString());
+
+    cloudConfig.loadConfiguration();
+    updateCloudCredentialStatus();
+    on_cloudCheckbox_clicked(ui->cloudCheckbox->isChecked());
 }
 
 
@@ -173,12 +180,13 @@ void ortConfigurationDialog::writeSettings()
 {
     QSettings settings(RTI->getAppPath()+"/"+ORT_INI_NAME, QSettings::IniFormat);
 
-    settings.setValue("ORT/SystemName", ui->systemNameEdit->text());
-    settings.setValue("ORT/ServerPath", ui->serverPathEdit->text());
-    settings.setValue("ORT/ConnectCmd", ui->connectCmdEdit->text());
-    settings.setValue("ORT/DisconnectCmd", ui->disconnectCmdEdit->text());
-    settings.setValue("ORT/FallbackConnectCmd", ui->fallbackConnectCmdEdit->text());
-    settings.setValue("ORT/StartRDSOnShutdown", ui->autoLaunchRDSCheckbox->isChecked());
+    settings.setValue("ORT/SystemName",        ui->systemNameEdit->text());
+    settings.setValue("ORT/ServerPath",        ui->serverPathEdit->text());
+    settings.setValue("ORT/ConnectCmd",        ui->connectCmdEdit->text());
+    settings.setValue("ORT/DisconnectCmd",     ui->disconnectCmdEdit->text());
+    settings.setValue("ORT/FallbackConnectCmd",ui->fallbackConnectCmdEdit->text());
+    settings.setValue("ORT/StartRDSOnShutdown",ui->autoLaunchRDSCheckbox->isChecked());
+    settings.setValue("ORT/CloudSupport",      ui->cloudCheckbox->isChecked());
 
     QStringList emailList=ui->emailPresetsEdit->toPlainText().split("\n",QString::SkipEmptyParts);
 
@@ -191,6 +199,8 @@ void ortConfigurationDialog::writeSettings()
 
     settings.setValue("LogServer/ServerAddress",ui->logServerAddressEdit->text());
     settings.setValue("LogServer/APIKey",       ui->logServerAPIKeyEdit->text());
+
+    cloudConfig.saveConfiguration();
 }
 
 
@@ -219,7 +229,6 @@ bool ortConfigurationDialog::checkAccessPassword()
         return (pwdDialog.textValue()==RDS_PASSWORD);
     }
 }
-
 
 
 void ortConfigurationDialog::on_logServerTestButton_clicked()
@@ -396,4 +405,116 @@ void ortConfigurationDialog::on_logServerTestButton_clicked()
     }
 
     ui->logServerTestLabel->setText(output);
+}
+
+
+void ortConfigurationDialog::on_cloudConnectionButton_clicked()
+{
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    bool success=true;
+    QString errorReason="";
+    QString userRegion="";
+
+    QtAWSRequest awsRequest(cloudConfig.key, cloudConfig.secret);
+    QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/user_status",
+                                            QByteArray(), YCT_API_REGION, QByteArray(), QStringList());
+
+    if (!reply.isSuccess())
+    {
+        errorReason=reply.anyErrorString();
+
+        if (reply.networkError()==QNetworkReply::ContentOperationNotPermittedError)
+        {
+            errorReason="YarraCloud Key ID or Secret is invalid.";
+        }
+
+        success=false;
+    }
+
+    if (success)
+    {
+        QJsonDocument jsonReply =QJsonDocument::fromJson(reply.replyData());
+        QJsonObject   jsonObject=jsonReply.object();
+        QStringList   keys      =jsonObject.keys();
+
+        foreach(QString key, keys)
+        {
+            if (key=="can_submit_jobs")
+            {
+                success=jsonObject[key].toBool();
+                errorReason="Missing payment method or account has been disabled.";
+            }
+
+            if (key=="region")
+            {
+                userRegion=jsonObject[key].toString();
+            }
+        }
+    }
+
+    if (!success)
+    {
+        ui->cloudConnectionLabel->setText("<span style=""color:#990000;""><strong>&nbsp; Failure</strong></span>");
+    }
+    else
+    {
+        ui->cloudConnectionLabel->setText("<span style=""color:#009900;""><strong>&nbsp; Success</strong></span>&nbsp; (Region: " + userRegion + ")");
+    }
+
+    QApplication::restoreOverrideCursor();
+    RTI->processEvents();
+
+    if (!success)
+    {
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("YarraCloud Problem");
+        msgBox.setText("Testing the connection to YarraCloud was <strong>not successful</strong>.<br><br>Reason: "+errorReason);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+    }
+}
+
+
+void ortConfigurationDialog::on_cloudCredentialsButton_clicked()
+{
+    QString awsKey=QInputDialog::getText(this, "Enter the YarraCloud Key ID", "Please enter your YarraCloud Key ID.<br>&nbsp;<br>If you don't have this information, sign into http://admin.yarracloud.com and go to Configuration -> Access Keys.");
+    if (awsKey.isEmpty())
+    {
+        return;
+    }
+
+    QString awsSecret=QInputDialog::getText(this, "Enter the YarraCloud Secret Key", "Please enter your YarraCloud Secret Key.<br>&nbsp;<br>If you don't have this information, sign into http://admin.yarracloud.com and go to Configuration -> Access Keys.");
+    if (awsSecret.isEmpty())
+    {
+        return;
+    }
+
+    cloudConfig.key=awsKey;
+    cloudConfig.secret=awsSecret;
+
+    updateCloudCredentialStatus();
+}
+
+
+void ortConfigurationDialog::updateCloudCredentialStatus()
+{    
+    if (cloudConfig.isConfigurationValid())
+    {
+        ui->cloudCredetialsEdit->setText(cloudConfig.key);
+    }
+    else
+    {
+        ui->cloudCredetialsEdit->setText("-- Missing --");
+    }
+}
+
+
+void ortConfigurationDialog::on_cloudCheckbox_clicked(bool checked)
+{
+    ui->cloudConnectionButton ->setEnabled(checked);
+    ui->cloudCredetialsEdit   ->setEnabled(checked);
+    ui->cloudCredentialsButton->setEnabled(checked);
+    ui->cloudCredetialsLabel  ->setEnabled(checked);
 }

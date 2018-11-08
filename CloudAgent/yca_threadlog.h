@@ -8,6 +8,9 @@
 #ifdef YARRA_APP_SAC
     #define YTL_DISABLED 1
 #endif
+#ifdef YARRA_APP_ORT
+    #define YTL_DISABLED 1
+#endif
 
 
 #define YTL ycaThreadLog::getInstance()

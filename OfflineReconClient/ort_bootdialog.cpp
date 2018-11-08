@@ -29,3 +29,9 @@ void ortBootDialog::setFallbacktext()
     QString newText="Connecting to fallback server. Please wait...";
     ui->textLabel->setText(newText);
 }
+
+
+void ortBootDialog::setText(QString text)
+{
+    ui->textLabel->setText(text);
+}

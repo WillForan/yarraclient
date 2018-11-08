@@ -23,6 +23,7 @@ public:
     int         ortConnectTimeout;    
     QStringList ortMailPresets;
     bool        ortStartRDSOnShutdown;
+    bool        ortCloudSupportEnabled;
 
     QString     logServerAddress;
     QString     logServerAPIKey;
@@ -30,6 +31,8 @@ public:
     QString     infoSerialNumber;
     QString     infoScannerType;
     QString     infoSoftwareVersion;
+
 };
 
 #endif // ORT_CONFIGURATION_H
+

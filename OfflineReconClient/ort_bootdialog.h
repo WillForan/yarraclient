@@ -16,6 +16,7 @@ public:
     ~ortBootDialog();
 
     void setFallbacktext();
+    void setText(QString text);
 
 private:
     Ui::ortBootDialog *ui;

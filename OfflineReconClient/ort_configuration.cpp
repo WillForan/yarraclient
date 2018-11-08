@@ -9,6 +9,8 @@ ortConfiguration::ortConfiguration()
     infoSerialNumber   =QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER",   "0");
     infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unkown");
     infoSoftwareVersion=QProcessEnvironment::systemEnvironment().value("SOFTWARE_VERSION","Unkown");
+
+    ortCloudSupportEnabled=false;
 }
 
 
@@ -29,13 +31,14 @@ void ortConfiguration::loadConfiguration()
     QSettings settings(RTI->getAppPath()+"/"+ORT_INI_NAME, QSettings::IniFormat);
 
     // Used to test if the program has been configured once at all
-    ortSystemName=settings.value("ORT/SystemName", QString(ORT_INVALID)).toString();
-    ortServerPath=settings.value("ORT/ServerPath", "").toString();
-    ortConnectCmd=settings.value("ORT/ConnectCmd", "").toString();
-    ortDisconnectCmd=settings.value("ORT/DisconnectCmd", "").toString();
-    ortFallbackConnectCmd=settings.value("ORT/FallbackConnectCmd", "").toString();
-    ortConnectTimeout=settings.value("ORT/ConnectTimeout", 0).toInt();
-    ortStartRDSOnShutdown=settings.value("ORT/StartRDSOnShutdown", false).toBool();
+    ortSystemName         =settings.value("ORT/SystemName", QString(ORT_INVALID)).toString();
+    ortServerPath         =settings.value("ORT/ServerPath", "").toString();
+    ortConnectCmd         =settings.value("ORT/ConnectCmd", "").toString();
+    ortDisconnectCmd      =settings.value("ORT/DisconnectCmd", "").toString();
+    ortFallbackConnectCmd =settings.value("ORT/FallbackConnectCmd", "").toString();
+    ortConnectTimeout     =settings.value("ORT/ConnectTimeout", 0).toInt();
+    ortStartRDSOnShutdown =settings.value("ORT/StartRDSOnShutdown", false).toBool();
+    ortCloudSupportEnabled=settings.value("ORT/CloudSupport",false).toBool();
 
     // Read the mail presets for the ORT configuration dialog
     ortMailPresets.clear();
@@ -62,6 +65,7 @@ void ortConfiguration::saveConfiguration()
     settings.setValue("ORT/FallbackConnectCmd", ortFallbackConnectCmd);
     settings.setValue("ORT/ConnectTimeout",     ortConnectTimeout);
     settings.setValue("ORT/StartRDSOnShutdown", ortStartRDSOnShutdown);
+    settings.setValue("ORT/CloudSupport",       ortCloudSupportEnabled);
 
     // Read the mail presets for the ORT configuration dialog
     for (int i=0; i<ortMailPresets.count(); i++)
@@ -72,3 +76,4 @@ void ortConfiguration::saveConfiguration()
     settings.setValue("LogServer/ServerAddress",logServerAddress);
     settings.setValue("LogServer/APIKey",       logServerAPIKey);
 }
+

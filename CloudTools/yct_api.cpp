@@ -125,7 +125,7 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
 }
 
 
-#ifdef YARRA_APP_SAC
+#if defined(YARRA_APP_SAC) || defined(YARRA_APP_ORT)
 
 #define keycmp(a,b) QString::compare(a,b,Qt::CaseInsensitive)==0
 
@@ -257,6 +257,8 @@ int yctAPI::readModeList(ortModeList* modeList)
             newEntry=0;
         }
     }
+
+    modeList->count=modeList->modes.count();
 
     return cloudModes;
 }

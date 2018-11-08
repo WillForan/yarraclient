@@ -8,6 +8,10 @@
 #include "ort_network.h"
 #include "ort_modelist.h"
 
+#include "../CloudTools/yct_configuration.h"
+#include "../CloudTools/yct_api.h"
+#include "../CloudTools/yct_prepare/yct_twix_anonymizer.h"
+
 
 namespace Ui {
 class ortMainWindow;
@@ -35,6 +39,9 @@ public:
     ortNetwork network;
     ortModeList modeList;
 
+    yctConfiguration  cloudConfig;
+    yctAPI            cloud;
+
     int scansToShow;
 
     void updateScanList();
@@ -42,6 +49,7 @@ public:
 
     void refreshRaidList();
     void showTransferError(QString msg);
+    void showCloudProblem(QString text);
 
 private slots:
     void on_cancelButton_clicked();
@@ -65,6 +73,8 @@ private:
     bool isRaidListAvaible;
 
     QString getTaskInfo(ortReconTask& task);
+    bool processCloudRecon();
+
 
 };
 

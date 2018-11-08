@@ -32,6 +32,9 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     RTI->setConfigInstance(&dummyconfig);
     RTI->setRaidInstance(&raid);
 
+    cloud.setConfiguration(&cloudConfig);
+    cloudConfig.loadConfiguration();
+
     // Tell the raid class to not use the LPFI mechanism (which was designed for RDS).
     raid.setIgnoreLPFI();
     isRaidListAvaible=false;
@@ -81,51 +84,121 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         return;
     }
 
-    // Establish the connection to the yarra server
-    if (!network.openConnection())
+    // Connect to the on-premise server if a server path has been defined. If not and
+    // cloud support is disabled, also call it so that an error message appear. Do not
+    // call it if no server path has been defined but cloud support is enabled (because
+    // the user might only use cloud recons).
+    if ((!config.ortServerPath.isEmpty()) || (!config.ortCloudSupportEnabled))
     {
-        bool connectError=true;
-
-        // Check if a fallback server has been defined
-        if (network.fallbackConnectCmd.length()>0)
+        // Establish the connection to the yarra server
+        if (!network.openConnection())
         {
-            bootDialog.setFallbacktext();
+            bool connectError=true;
 
-            // Connect to the fallback server. If successful, then discard
-            // the connection error and continue
-            if (network.openConnection(true))
+            // Check if a fallback server has been defined
+            if (network.fallbackConnectCmd.length()>0)
             {
-                connectError=false;
+                bootDialog.setFallbacktext();
+
+                // Connect to the fallback server. If successful, then discard
+                // the connection error and continue
+                if (network.openConnection(true))
+                {
+                    connectError=false;
+                }
+            }
+
+            if (connectError)
+            {
+                network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"No connection to server");
+                QTimer::singleShot(0, qApp, SLOT(quit()));
+                return;
             }
         }
 
-        if (connectError)
-        {            
-            network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"No connection to server");
+        // OK, now connect to the ORT directory, read the configuration
+        // from there, and read the RAID list.
+
+        modeList.network=&network;
+
+        if (!modeList.readModeList())
+        {
+            network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read mode list");
             QTimer::singleShot(0, qApp, SLOT(quit()));
             return;
         }
     }
 
-    bootDialog.close();
+    // Now read cloud modes if cloud service has been enabled
+    bool cloudModeLoaded=false;
 
-    // OK, now connect to the ORT directory, read the configuration
-    // from there, and read the RAID list.
-
-    modeList.network=&network;
-
-    if (!modeList.readModeList())
+    if (config.ortCloudSupportEnabled)
     {
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read mode list");
-        QTimer::singleShot(0, qApp, SLOT(quit()));
-        return;
+        if (!cloud.createCloudFolders())
+        {
+            RTI->log("ERROR: Preparing cloud folder failed.");
+
+            showCloudProblem("Unable to prepare folder for cloud reconstruction.<br>Please check you local client installation.");
+            return;
+        }
+
+        bootDialog.setText("Connecting to YarraCloud. Please wait...");
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        qApp->processEvents();
+
+        if (!cloud.validateUser())
+        {
+            QApplication::restoreOverrideCursor();
+            showCloudProblem("Unable to validate your YarraCloud account.<br>You will not be able to perform cloud reconstructions.<br><br>Reason: " + cloud.errorReason);
+            return;
+        }
+
+        // Connect to the cloud service and read the list of cloud modes
+        int cloudModes=cloud.readModeList(&modeList);
+
+        if (cloudModes<0)
+        {
+            QApplication::restoreOverrideCursor();
+            showCloudProblem("Unable to read mode list from cloud.<br><br>Reason: " + cloud.errorReason);
+            return;
+        }
+
+        if (cloudModes>0)
+        {
+            cloudModeLoaded=true;
+        }
+
+        QApplication::restoreOverrideCursor();
     }
 
     // Show the readable names of the protocols in the UI
-    for (int i=0; i<modeList.count; i++)
+    for (int i=0; i<modeList.modes.count(); i++)
     {
         ui->modeComboBox->addItem(modeList.modes.at(i)->readableName);
+
+        // If at least one cloud mode has been loaded, add icons to
+        // indicate where the modes are reconstructed
+        if (cloudModeLoaded)
+        {
+            switch (modeList.modes.at(i)->computeMode)
+            {
+            default:
+            case ortModeEntry::OnPremise:
+                ui->modeComboBox->setItemIcon(i,QIcon(":/images/premise.png"));
+                break;
+
+            case ortModeEntry::Cloud:
+                ui->modeComboBox->setItemIcon(i,QIcon(":/images/cloud.png"));
+                break;
+
+            case ortModeEntry::Elastic:
+                ui->modeComboBox->setItemIcon(i,QIcon(":/images/elastic.png"));
+                break;
+            }
+        }
     }
+
+    bootDialog.close();
 
     isManualAssignment=false;
     ui->modeComboBox->setEnabled(false);
@@ -154,6 +227,11 @@ ortMainWindow::~ortMainWindow()
     if (config.ortStartRDSOnShutdown)
     {
         QProcess::startDetached(qApp->applicationDirPath() + "/RDS.exe -silent");
+    }
+
+    if (config.ortCloudSupportEnabled)
+    {
+        cloud.launchCloudAgent();
     }
 
     RTI->log("Shutdown.");
@@ -365,6 +443,11 @@ void ortMainWindow::on_sendButton_clicked()
         return;
     }
 
+    if (modeList.modes.at(selectedMode)->computeMode!=ortModeEntry::OnPremise)
+    {
+        confirmationDialog.setCloudRecon();
+    }
+
     if (modeList.modes.at(selectedMode)->requiresACC)
     {
         confirmationDialog.setACCRequired();
@@ -545,6 +628,23 @@ void ortMainWindow::showTransferError(QString msg)
 }
 
 
+void ortMainWindow::showCloudProblem(QString text)
+{
+    QMessageBox msgBox(0);
+    msgBox.setWindowTitle("YarraCloud");
+    msgBox.setText(text+"<br><br>Do you want to review the configuration?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowIcon(ORT_ICON);
+    msgBox.setIcon(QMessageBox::Information);
+
+    if (msgBox.exec() == QMessageBox::Yes)
+    {
+        // Call configuration dialog
+        ortConfigurationDialog::executeDialog();
+    }
+}
+
+
 void ortMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
 {
     QString versionString="ORT Client Version ";
@@ -680,3 +780,13 @@ void ortMainWindow::on_priorityButton_clicked(bool checked)
         ui->priorityButton->setPalette(this->palette());
     }
 }
+
+
+bool ortMainWindow::processCloudRecon()
+{
+    // TODO
+
+    return true;
+}
+
+
