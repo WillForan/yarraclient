@@ -38,12 +38,17 @@ public:
 
     bool exportDataFiles(int fileID, ortModeEntry* mode);
     bool transferDataFiles();
+    bool anonymizeFiles();
     bool generateTaskFile();
 
     bool isSubmissionSuccessful();
     QString getErrorMessageUI();
 
     bool fileAlreadyExists;
+
+    QString cloudOUTpath;
+    QString cloudPHIpath;
+    void setCloudPaths(QString outPath, QString phiPath);
 
 protected:
     rdsRaid* raid;
@@ -68,4 +73,12 @@ inline QString ortReconTask::getErrorMessageUI()
 }
 
 
+inline void ortReconTask::setCloudPaths(QString outPath, QString phiPath)
+{
+    cloudOUTpath=outPath;
+    cloudPHIpath=phiPath;
+}
+
+
 #endif // ORT_RECONTASK_H
+

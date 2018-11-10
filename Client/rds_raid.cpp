@@ -139,6 +139,7 @@ rdsRaid::rdsRaid()
     // when using the class within ORT (needed to remove the dependency
     // on the RTI class)
     ortSystemName="Unknown";    
+    ortTaskID="";
 }
 
 
@@ -1169,8 +1170,10 @@ void rdsRaid::dumpRaidToolOutput()
 
 
 bool rdsRaid::saveSingleFile(int fileID, bool saveAdjustments, QString modeID,
-                             QString &filename, QStringList& adjustFilenames, QString paramSuffix)
+                             QString &filename, QStringList& adjustFilenames, QString paramSuffix,
+                             QString cloudUUID)
 {
+    ortTaskID="";
     int raidCount=raidList.count();
     int raidIndex=0;
     bool scanFound=false;
@@ -1213,7 +1216,7 @@ bool rdsRaid::saveSingleFile(int fileID, bool saveAdjustments, QString modeID,
     }
 
     // Estimate filename for the main measurement
-    filename=getORTFilename(currentEntry,modeID, paramSuffix);
+    filename=getORTFilename(currentEntry,modeID,paramSuffix,cloudUUID);
 
     // Save file to queue directory
     if (!saveRaidFile(fileID, filename, saveAdjustments, false))
@@ -1234,7 +1237,7 @@ bool rdsRaid::saveSingleFile(int fileID, bool saveAdjustments, QString modeID,
         {
             int indexToSave=currentAdjustScans.at(i);
             currentEntry=raidList.at(indexToSave);
-            QString adjFilename=getORTFilename(currentEntry,modeID,paramSuffix,fileID);
+            QString adjFilename=getORTFilename(currentEntry,modeID,paramSuffix,cloudUUID,fileID,i);
             adjustFilenames.append(adjFilename);
 
             // Save file to queue directory
@@ -1250,7 +1253,7 @@ bool rdsRaid::saveSingleFile(int fileID, bool saveAdjustments, QString modeID,
 }
 
 
-QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, int refID)
+QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, QString cloudUUID, int refID, int refIndex)
 {
     QString filename="";
 
@@ -1274,7 +1277,6 @@ QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString par
         filename += QString(RTI_SEPT_CHAR) + "P" + param;
     }
 
-
     /* // NOTE: The protocol name is not attached for now because otherwise the
        //       protocol lentgh might become too long
     QString protocolName=entry->protName;
@@ -1288,6 +1290,27 @@ QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString par
 
     filename += protocolName;
     */
+
+    // In cloud mode, the files are named by the UUID. However, the normal ORT file name
+    // is still needed as taskID, so store that in a variable
+    if (!cloudUUID.isEmpty())
+    {
+        if (refID==-1)
+        {
+            // Store the "normal" ORT filename from the main scanfile as TaskID
+            ortTaskID=filename;
+        }
+
+        QString refSuffix="";
+
+        // For adjustment scans, append the index of the reference
+        if (refIndex>-1)
+        {
+            refSuffix="_"+QString::number(refIndex);
+        }
+
+        return cloudUUID+refSuffix+".dat";
+    }
 
     filename += ".dat";
 

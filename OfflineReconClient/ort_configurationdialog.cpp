@@ -116,7 +116,7 @@ void ortConfigurationDialog::on_okButton_clicked()
         return;
     }
 
-    if (ui->serverPathEdit->text().isEmpty())
+    if ((ui->serverPathEdit->text().isEmpty()) && (!ui->cloudCheckbox->isChecked()))
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Server Path Needed");

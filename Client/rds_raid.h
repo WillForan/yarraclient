@@ -80,9 +80,10 @@ public:
 
     // For ORT-use only
     bool saveSingleFile(int fileID,  bool saveAdjustments, QString modeID,
-                        QString &filename, QStringList& adjustFilenames, QString paramSuffix);
+                        QString &filename, QStringList& adjustFilenames, QString paramSuffix, QString cloudUUID="");
 
-    bool ortMissingDiskspace;
+    bool    ortMissingDiskspace;
+    QString ortTaskID;
     QString ortSystemName;
 
     void setORTSystemName(QString name);
@@ -96,6 +97,7 @@ public:
     void setLPFIScaninfo(int value);
 
     bool debugReadTestFile(QString filename);
+
 
 protected:
 
@@ -147,7 +149,7 @@ protected:
     bool useVerboseMode;
     bool missingVerboseData;
 
-    QString getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, int refID=-1);
+    QString getORTFilename(rdsRaidEntry* entry, QString modeID, QString param, QString cloudUUID, int refID=-1, int refIndex=-1);
 
 };
 

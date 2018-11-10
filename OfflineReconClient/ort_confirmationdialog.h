@@ -56,6 +56,7 @@ private:
 
     int accessionHeight;
     int paramHeight;
+    int cloudHeight;
     int expandedHeight;
 
     int paramDefault;

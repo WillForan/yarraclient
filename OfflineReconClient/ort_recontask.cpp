@@ -2,6 +2,8 @@
 #include "ort_global.h"
 #include "ort_configuration.h"
 
+#include "../CloudTools/yct_prepare/yct_twix_anonymizer.h"
+
 
 ortReconTask::ortReconTask()
 {
@@ -32,6 +34,8 @@ ortReconTask::ortReconTask()
 
     uuid="";
     cloudReconstruction=false;
+    cloudOUTpath="";
+    cloudPHIpath="";
 }
 
 
@@ -58,7 +62,13 @@ bool ortReconTask::exportDataFiles(int fileID, ortModeEntry* mode)
         modeSuffix=QString::number(paramValue);
     }
 
-    if (!raid->saveSingleFile(fileID, mode->requiresAdjScans, mode->idName, scanFile, adjustmentFiles, modeSuffix))
+    QString cloudUUID="";
+    if (cloudReconstruction)
+    {
+        cloudUUID=uuid;
+    }
+
+    if (!raid->saveSingleFile(fileID, mode->requiresAdjScans, mode->idName, scanFile, adjustmentFiles, modeSuffix,cloudUUID))
     {
         reconTaskFailed=true;
         RTI->log("ERROR: Export of raid data failed.");
@@ -157,15 +167,23 @@ bool ortReconTask::generateTaskFile()
 
             // Write the entries
             taskFile.setValue("Task/ReconMode", reconMode);
-            taskFile.setValue("Task/ACC", accNumber);
             taskFile.setValue("Task/EMailNotification", emailNotifier);
             taskFile.setValue("Task/ScanFile", scanFile);
             taskFile.setValue("Task/AdjustmentFilesCount", adjustmentFiles.count());
-            taskFile.setValue("Task/PatientName", patientName);
             taskFile.setValue("Task/ScanProtocol", scanProtocol);
             taskFile.setValue("Task/ReconName", reconName);
             taskFile.setValue("Task/ParamValue", paramValue);
             taskFile.setValue("Task/RequiredServerType", requiredServerType);
+
+            if (!cloudReconstruction)
+            {
+                taskFile.setValue("Task/ACC", accNumber);
+                taskFile.setValue("Task/PatientName", patientName);
+            }
+            else
+            {
+                taskFile.setValue("Task/UUID", uuid);
+            }
 
             taskFile.setValue("Task/CreationTimeRAID", raidCreationTime);
             taskFile.setValue("Task/CreationTimeTask", taskCreationTime.toString("dd/MM/yy")+"  "+taskCreationTime.toString("HH:mm:ss"));
@@ -209,3 +227,36 @@ bool ortReconTask::generateTaskFile()
     return true;
 }
 
+
+bool ortReconTask::anonymizeFiles()
+{
+    bool success=true;
+    QString taskID=raid->ortTaskID;
+
+    {
+        yctTWIXAnonymizer twixAnonymizer;
+
+        if (!twixAnonymizer.processFile(cloudOUTpath+"/"+scanFile, cloudPHIpath,
+                                        accNumber, taskID, uuid, reconMode))
+        {
+            // TODO: Error handling
+            success=false;
+            // TODO: Remove file from OUT folder
+        }
+    }
+
+    for (int i=0; i<adjustmentFiles.count(); i++)
+    {
+        yctTWIXAnonymizer twixAnonymizer;
+
+        if (!twixAnonymizer.processFile(cloudOUTpath+"/"+scanFile, cloudPHIpath,
+                                        accNumber, taskID, uuid, reconMode, false))
+        {
+            // TODO: Error handling
+            success=false;
+            // TODO: Remove file from OUT folder
+        }
+    }
+
+    return success;
+}

@@ -73,8 +73,13 @@ private:
     bool isRaidListAvaible;
 
     QString getTaskInfo(ortReconTask& task);
-    bool processCloudRecon();
+    bool processCloudRecon(ortReconTask& task);
 
+    QString selectedPatient;
+    QString selectedScantime;
+    QString selectedProtocol;
+    int     selectedMode;
+    int     selectedFID;
 
 };
 

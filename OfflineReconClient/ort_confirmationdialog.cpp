@@ -30,13 +30,16 @@ ortConfirmationDialog::ortConfirmationDialog(QWidget *parent) :
 
     accessionHeight=ui->accessionFrame->maximumHeight()+3+8;
     paramHeight=ui->paramFrame->maximumHeight()+3+8;
+    cloudHeight=ui->cloudFrame->maximumHeight()+3+8;
     expandedHeight=maximumHeight();
-    int newHeight=expandedHeight-accessionHeight-paramHeight;
+    int newHeight=expandedHeight-accessionHeight-paramHeight-cloudHeight;
 
     ui->accessionFrame->setVisible(false);
     ui->accessionLine->setVisible(false);
     ui->paramFrame->setVisible(false);
     ui->paramLine->setVisible(false);
+    ui->cloudLine->setVisible(false);
+    ui->cloudFrame->setVisible(false);
 
     // Install event hooks from a helper class to enforce that
     // the cursor is always set to the first character when focusing
@@ -236,7 +239,8 @@ void ortConfirmationDialog::insertMailAddress()
 
 void ortConfirmationDialog::setCloudRecon()
 {
-    // TODO
+    ui->cloudFrame->setVisible(true);
+    ui->cloudLine->setVisible(true);
 }
 
 

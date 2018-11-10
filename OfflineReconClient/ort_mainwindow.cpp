@@ -16,6 +16,12 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ortMainWindow)
 {
+    selectedPatient="";
+    selectedScantime="";
+    selectedProtocol="";
+    selectedMode=0;
+    selectedFID=-1;
+
     ui->setupUi(this);
     setWindowIcon(ORT_ICON);
     setWindowTitle("Yarra - Offline Reconstruction Task");
@@ -85,7 +91,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     }
 
     // Connect to the on-premise server if a server path has been defined. If not and
-    // cloud support is disabled, also call it so that an error message appear. Do not
+    // cloud support is disabled, also call it so that an error message appears. Do not
     // call it if no server path has been defined but cloud support is enabled (because
     // the user might only use cloud recons).
     if ((!config.ortServerPath.isEmpty()) || (!config.ortCloudSupportEnabled))
@@ -129,7 +135,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         }
     }
 
-    // Now read cloud modes if cloud service has been enabled
+    // Now read cloud modes if cloud support has been enabled
     bool cloudModeLoaded=false;
 
     if (config.ortCloudSupportEnabled)
@@ -397,20 +403,20 @@ void ortMainWindow::on_cancelButton_clicked()
 
 void ortMainWindow::on_sendButton_clicked()
 {
-    // Identify clicked item
-    int selectedFID=-1;
-    QString selectedPatient="";
-    QString selectedScantime="";
-    QString selectedProtocol="";
-    int selectedMode=ui->modeComboBox->currentIndex();
+    selectedFID=-1;
+    selectedPatient="";
+    selectedScantime="";
+    selectedProtocol="";
+    selectedMode=ui->modeComboBox->currentIndex();
 
+    // Identify clicked item
     if (ui->scansWidget->selectedRanges().count()>0)
     {
         int selectedRow=ui->scansWidget->selectedRanges().at(0).topRow();
         if (selectedRow>=0)
         {
-            selectedFID=ui->scansWidget->item(selectedRow,5)->text().toInt();
-            selectedPatient=ui->scansWidget->item(selectedRow,1)->text();
+            selectedFID     =ui->scansWidget->item(selectedRow,5)->text().toInt();
+            selectedPatient =ui->scansWidget->item(selectedRow,1)->text();
             selectedScantime=ui->scansWidget->item(selectedRow,3)->text();
             selectedProtocol=ui->scansWidget->item(selectedRow,2)->text();
         }
@@ -470,13 +476,61 @@ void ortMainWindow::on_sendButton_clicked()
 
     this->hide();
 
+    // Go ahead with the submission
+    ortReconTask reconTask;
+    reconTask.setInstances(&raid, &network, &config);
+    reconTask.setCloudPaths(cloud.getCloudPath(YCT_CLOUDFOLDER_OUT), cloud.getCloudPath(YCT_CLOUDFOLDER_PHI));
+    reconTask.reconMode       =modeList.modes.at(selectedMode)->idName;
+    reconTask.reconName       =modeList.modes.at(selectedMode)->readableName;
+    reconTask.systemName      =config.ortSystemName;
+    reconTask.patientName     =selectedPatient;
+    reconTask.scanProtocol    =selectedProtocol;
+    reconTask.raidCreationTime=selectedScantime;
+
+    // Initialize with value from the mode definition
+    reconTask.emailNotifier=modeList.modes.at(selectedMode)->mailConfirmation;
+
+    // Attach the entry from the dialog. Add separator character if needed
+    QString mailRecipient=confirmationDialog.getEnteredMail();
+    if ((reconTask.emailNotifier!="") && (mailRecipient!=""))
+    {
+        reconTask.emailNotifier+=",";
+    }
+    reconTask.emailNotifier  +=mailRecipient;
+
+    if (modeList.modes.at(selectedMode)->requiresACC)
+    {
+        reconTask.accNumber=confirmationDialog.getEnteredACC();
+    }
+
+    if (paramRequested)
+    {
+        reconTask.paramValue=confirmationDialog.getEnteredParam();
+    }
+
+    // If the selected recon is a cloud mode, delegate the submission to a separate method and
+    // return. Otherwise, continue with the usual local-server submission
+    if (modeList.modes.at(selectedMode)->computeMode!=ortModeEntry::OnPremise)
+    {
+        if (processCloudRecon(reconTask))
+        {
+            this->close();
+        }
+        else
+        {
+            this->show();
+        }
+        return;
+    }
+
     ortWaitDialog waitDialog;
     waitDialog.show();
     RTI->processEvents();
 
     // Tell the network module the name and type of the current server
-    network.currentServer=modeList.serverName;
-    QString requiredServerType=modeList.modes.at(selectedMode)->requiredServerType;
+    network.currentServer       =modeList.serverName;
+    QString requiredServerType  =modeList.modes.at(selectedMode)->requiredServerType;
+    reconTask.requiredServerType=requiredServerType;
 
     // Try to connect to a matching server (or switch server for load balancing)
     if (!network.reconnectToMatchingServer(requiredServerType))
@@ -488,43 +542,10 @@ void ortMainWindow::on_sendButton_clicked()
         this->show();
         return;
     }
+    reconTask.selectedServer=network.selectedServer;
 
     RTI->log("Reconstruction request submitted (ORT client " + QString(ORT_VERSION) + ")");
     RTI->log("Selected server: "+network.selectedServer);
-
-    // Go ahead with the action
-    ortReconTask reconTask;
-    reconTask.setInstances(&raid, &network, &config);
-
-    reconTask.reconMode=modeList.modes.at(selectedMode)->idName;
-    reconTask.reconName=modeList.modes.at(selectedMode)->readableName;
-    reconTask.requiredServerType=requiredServerType;
-
-    // Initialize with value from the mode definition
-    reconTask.emailNotifier=modeList.modes.at(selectedMode)->mailConfirmation;
-
-    // Attach the entry from the dialog. Add separator character if needed
-    QString mailRecipient=confirmationDialog.getEnteredMail();
-    if ((reconTask.emailNotifier!="") && (mailRecipient!=""))
-    {
-        reconTask.emailNotifier+=",";
-    }
-    reconTask.emailNotifier+=mailRecipient;
-
-    reconTask.systemName      =config.ortSystemName;
-    reconTask.patientName     =selectedPatient;
-    reconTask.scanProtocol    =selectedProtocol;
-    reconTask.raidCreationTime=selectedScantime;
-    reconTask.selectedServer  =network.selectedServer;
-
-    if (confirmationDialog.isACCRequired())
-    {
-        reconTask.accNumber=confirmationDialog.getEnteredACC();
-    }
-    if (paramRequested)
-    {
-        reconTask.paramValue=confirmationDialog.getEnteredParam();
-    }
 
     if (ui->priorityButton->isChecked())
     {
@@ -651,6 +672,11 @@ void ortMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
     versionString+=ORT_VERSION;
 
     QString serverString="Server:  " + modeList.serverName;
+
+    if (modeList.serverName.isEmpty())
+    {
+        QString serverString="Server:  yarracloud.com";
+    }
 
     QMenu infoMenu(this);
     infoMenu.addAction(versionString);
@@ -782,10 +808,45 @@ void ortMainWindow::on_priorityButton_clicked(bool checked)
 }
 
 
-bool ortMainWindow::processCloudRecon()
+bool ortMainWindow::processCloudRecon(ortReconTask& task)
 {
-    // TODO
+    ortWaitDialog waitDialog;
+    waitDialog.show();
+    RTI->processEvents();
 
+    task.cloudReconstruction=true;
+    task.uuid=cloud.createUUID();
+
+    // TODO: Redirect output path for RAID tool!
+
+    if (!task.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
+    {
+        // TODO
+
+        //network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
+        //showTransferError(reconTask.getErrorMessageUI());
+        //this->show();
+        waitDialog.close();
+        return false;
+    }
+
+    if (!task.anonymizeFiles())
+    {
+        // TODO: Error reporting
+        waitDialog.close();
+        return false;
+    }
+
+    if (!task.generateTaskFile())
+    {
+        // TODO: Error reporting
+        waitDialog.close();
+        return false;
+    }
+
+    cloud.launchCloudAgent("submit");
+
+    waitDialog.close();
     return true;
 }
 

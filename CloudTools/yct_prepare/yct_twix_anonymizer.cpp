@@ -25,7 +25,8 @@ yctTWIXAnonymizer::yctTWIXAnonymizer()
 
 
 bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
-                                    QString acc, QString taskid, QString uuid, QString mode)
+                                    QString acc, QString taskid, QString uuid, QString mode,
+                                    bool storePHI)
 {
     bool result=false;
 
@@ -154,10 +155,13 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
         dumpFile.close();
     }
 
-    if (!checkAndStorePatientData(twixFilename, phiPath))
+    if (storePHI)
     {
-        return false;
-    }   
+        if (!checkAndStorePatientData(twixFilename, phiPath))
+        {
+            return false;
+        }
+    }
 
     return result;
 }
