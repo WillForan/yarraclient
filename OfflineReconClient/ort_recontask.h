@@ -58,6 +58,8 @@ protected:
     QString errorMessageUI;
     bool reconTaskFailed;
 
+    bool removeTaskFiles();
+
 };
 
 

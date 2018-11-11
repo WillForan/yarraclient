@@ -69,6 +69,7 @@ public:
 
     bool findAdjustmentScans();
 
+    QDir queueDir;
     QList<rdsRaidEntry*> raidList;
     QList<int> currentAdjustScans;
 
@@ -118,7 +119,6 @@ protected:
 
     QStringList raidToolOutput;
 
-    QDir queueDir;
     QString raidToolCmd;
     QString raidToolIP;
 

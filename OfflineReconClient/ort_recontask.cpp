@@ -65,7 +65,10 @@ bool ortReconTask::exportDataFiles(int fileID, ortModeEntry* mode)
     QString cloudUUID="";
     if (cloudReconstruction)
     {
-        cloudUUID=uuid;
+        cloudUUID=uuid;        
+
+        // Temporarily redirect the export path to the cloud folder
+        raid->queueDir.cd(cloudOUTpath);
     }
 
     if (!raid->saveSingleFile(fileID, mode->requiresAdjScans, mode->idName, scanFile, adjustmentFiles, modeSuffix,cloudUUID))
@@ -82,6 +85,12 @@ bool ortReconTask::exportDataFiles(int fileID, ortModeEntry* mode)
             errorMessageUI="Local export of scan data failed.";
         }
         return false;
+    }
+
+    if (cloudReconstruction)
+    {
+        // Reset the export path to the regular queue folder
+        raid->queueDir.cd(RTI->getAppPath() + "/" + ORT_DIR_QUEUE);
     }
 
     return true;
@@ -152,7 +161,12 @@ bool ortReconTask::generateTaskFile()
 
     taskCreationTime=QDateTime::currentDateTime();
 
-    QLockFile lockFile(network->serverTaskDir.filePath(lockFilename));
+    QString lockFilePath=network->serverTaskDir.filePath(lockFilename);
+    if (cloudReconstruction)
+    {
+        lockFilePath=cloudOUTpath+"/"+lockFilename;
+    }
+    QLockFile lockFile(lockFilePath);
 
     if (!lockFile.isLocked())
     {
@@ -163,7 +177,12 @@ bool ortReconTask::generateTaskFile()
         // Scoping for the lock file
         {
             // Create the task file
-            QSettings taskFile(network->serverTaskDir.filePath(taskFilename), QSettings::IniFormat);
+            QString taskFilePath=network->serverTaskDir.filePath(taskFilename);
+            if (cloudReconstruction)
+            {
+                taskFilePath=cloudOUTpath+"/"+taskFilename;
+            }
+            QSettings taskFile(taskFilePath, QSettings::IniFormat);
 
             // Write the entries
             taskFile.setValue("Task/ReconMode", reconMode);
@@ -221,6 +240,9 @@ bool ortReconTask::generateTaskFile()
         reconTaskFailed=true;
         RTI->log("ERROR: Can't lock task file for submission.");
         errorMessageUI="Creation of task file failed.";
+
+        removeTaskFiles();
+
         return false;
     }
 
@@ -239,9 +261,9 @@ bool ortReconTask::anonymizeFiles()
         if (!twixAnonymizer.processFile(cloudOUTpath+"/"+scanFile, cloudPHIpath,
                                         accNumber, taskID, uuid, reconMode))
         {
-            // TODO: Error handling
+            RTI->log("Error while anonymizing TWIX file "+scanFile);
+            errorMessageUI="Error while anonymizing raw-data file.";
             success=false;
-            // TODO: Remove file from OUT folder
         }
     }
 
@@ -249,14 +271,54 @@ bool ortReconTask::anonymizeFiles()
     {
         yctTWIXAnonymizer twixAnonymizer;
 
-        if (!twixAnonymizer.processFile(cloudOUTpath+"/"+scanFile, cloudPHIpath,
+        if (!twixAnonymizer.processFile(cloudOUTpath+"/"+adjustmentFiles.at(i), cloudPHIpath,
                                         accNumber, taskID, uuid, reconMode, false))
         {
-            // TODO: Error handling
+            RTI->log("Error while anonymizing adjustment file "+adjustmentFiles.at(i));
+            errorMessageUI="Error while anonymizing adjustment files.";
             success=false;
-            // TODO: Remove file from OUT folder
+        }
+    }
+
+    if (!success)
+    {
+        removeTaskFiles();
+    }
+
+    return success;
+}
+
+
+bool ortReconTask::removeTaskFiles()
+{
+    bool success=true;
+
+    // Remove all files
+    QDir outDir(cloudOUTpath);
+    QFileInfoList fileList=outDir.entryInfoList(QStringList(uuid+"*.*"),QDir::Files,QDir::Time);
+
+    for (int i=0; i<fileList.count(); i++)
+    {
+        RTI->log("Removing scan file "+fileList.at(i).fileName());
+        if (!outDir.remove(fileList.at(i).fileName()))
+        {
+            RTI->log("Error removing file "+fileList.at(i).fileName());
+            success=false;
+        }
+    }
+
+    if (QFile::exists(cloudPHIpath+"/"+uuid+".phi"))
+    {
+        RTI->log("Removing phi file");
+        QString phiFilename=cloudPHIpath+"/"+uuid+".phi";
+        if (!QFile::remove(phiFilename))
+        {
+            RTI->log("Error removing phi file "+phiFilename);
+            success=false;
         }
     }
 
     return success;
 }
+
+

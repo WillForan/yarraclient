@@ -31,9 +31,9 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
     bool result=false;
 
     // Clean the patient data - to be sure
-    patientInformation.name       ="";
-    patientInformation.mrn        ="";
-    patientInformation.dateOfBirth="";
+    patientInformation.name       ="MISSING";
+    patientInformation.mrn        ="MISSING";
+    patientInformation.dateOfBirth="MISSING";
 
     // Populate the externally provided information
     patientInformation.uuid       =uuid;
@@ -332,6 +332,8 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString twixFilename, QString p
     phiFile.setValue("PHI/UUID",   patientInformation.uuid);
     phiFile.setValue("PHI/TASKID", patientInformation.taskid);
     phiFile.setValue("PHI/MODE",   patientInformation.mode);
+
+    phiFile.setValue("LOG/CREATED",QDateTime::currentDateTime().toString(Qt::ISODate));
 
     return true;
 }

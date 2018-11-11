@@ -810,6 +810,8 @@ void ortMainWindow::on_priorityButton_clicked(bool checked)
 
 bool ortMainWindow::processCloudRecon(ortReconTask& task)
 {
+    // TODO: Add logserver events
+
     ortWaitDialog waitDialog;
     waitDialog.show();
     RTI->processEvents();
@@ -817,29 +819,27 @@ bool ortMainWindow::processCloudRecon(ortReconTask& task)
     task.cloudReconstruction=true;
     task.uuid=cloud.createUUID();
 
-    // TODO: Redirect output path for RAID tool!
-
     if (!task.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
     {
-        // TODO
-
         //network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
-        //showTransferError(reconTask.getErrorMessageUI());
-        //this->show();
+        showTransferError(task.getErrorMessageUI());
+        this->show();
         waitDialog.close();
         return false;
     }
 
     if (!task.anonymizeFiles())
     {
-        // TODO: Error reporting
+        showTransferError(task.getErrorMessageUI());
+        this->show();
         waitDialog.close();
         return false;
     }
 
     if (!task.generateTaskFile())
     {
-        // TODO: Error reporting
+        showTransferError(task.getErrorMessageUI());
+        this->show();
         waitDialog.close();
         return false;
     }
