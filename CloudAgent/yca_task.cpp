@@ -483,6 +483,19 @@ bool ycaTaskHelper::readPHIData(QString filepath, ycaTask* task)
         task->storageRetry =phiFile.value("STATUS/RETRY_STORAGE",0).toInt();
 
         task->cost         =phiFile.value("STATS/COST",0).toDouble();
+
+        task->timeptCreated      =phiFile.value(YCT_TIMEPT_CREATED,QDateTime()).toDateTime();
+        task->timeptCompleted    =phiFile.value(YCT_TIMEPT_COMPLETED,QDateTime()).toDateTime();
+        task->timeptUploadBegin  =phiFile.value(YCT_TIMEPT_UPLOAD_BEGIN,QDateTime()).toDateTime();
+        task->timeptUploadEnd    =phiFile.value(YCT_TIMEPT_UPLOAD_END,QDateTime()).toDateTime();
+        task->timeptDownloadBegin=phiFile.value(YCT_TIMEPT_DOWNLOAD_BEGIN,QDateTime()).toDateTime();
+        task->timeptDownloadEnd  =phiFile.value(YCT_TIMEPT_DOWNLOAD_END,QDateTime()).toDateTime();
+        task->timeptStorageBegin =phiFile.value(YCT_TIMEPT_STORAGE_BEGIN,QDateTime()).toDateTime();
+        task->timeptStorageEnd   =phiFile.value(YCT_TIMEPT_STORAGE_END,QDateTime()).toDateTime();
+
+        task->timeptProcessingCreated=phiFile.value(YCT_TIMEPT_PROCESSING_CREATED,QDateTime()).toDateTime();
+        task->timeptProcessingBegin  =phiFile.value(YCT_TIMEPT_PROCESSING_BEGIN,QDateTime()).toDateTime();
+        task->timeptProcessingEnd    =phiFile.value(YCT_TIMEPT_PROCESSING_END,QDateTime()).toDateTime();
     }
 
     // TODO: Error checking
@@ -503,6 +516,7 @@ bool ycaTaskHelper::saveResultToPHI(QString filepath, ycaTask::TaskResult result
     }
 
     phiFile.setValue("STATUS/RESULT",result);
+    phiFile.setValue("LOG/COMPLETED",QDateTime::currentDateTime().toString(Qt::ISODate));
 
     return true;
 }
@@ -536,6 +550,42 @@ bool ycaTaskHelper::saveCostsToPHI(ycaTaskList& taskList)
     return true;
 }
 
+
+bool ycaTaskHelper::saveTimepoint(ycaTask* task, QString timepointID, QMutex* mutex)
+{
+    QString  filepath=cloud->getCloudPath(YCT_CLOUDFOLDER_PHI)+"/"+task->uuid+".phi";
+
+    if (!QFile::exists(filepath))
+    {
+        YTL->log("Missing PHI file: "+filepath,YTL_ERROR,YTL_HIGH);
+        return false;
+    }
+
+    {
+        if (mutex!=0)
+        {
+            mutex->lock();
+        }
+
+        QSettings phiFile(filepath, QSettings::IniFormat);
+
+        if (phiFile.value("PHI/UUID","").toString()!=task->uuid)
+        {
+            // UUID is missing. PHI file seems invalid or unable to read.
+            YTL->log("Invalid UUID in PHI file: "+filepath,YTL_ERROR,YTL_HIGH);
+            return false;
+        }
+
+        phiFile.setValue(timepointID,QDateTime::currentDateTime().toString(Qt::ISODate));
+
+        if (mutex!=0)
+        {
+            mutex->unlock();
+        }
+    }
+
+    return true;
+}
 
 
 void ycaTaskHelper::getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList)
@@ -684,7 +734,7 @@ bool ycaTaskHelper::removeIncompleteDownloads()
 }
 
 
-bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWidget)
+bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QMutex* mutex, QObject* notificationWidget)
 {
     QString inPath=cloud->getCloudPath(YCT_CLOUDFOLDER_IN);
     QDir inDir(inPath);
@@ -746,6 +796,7 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
         }
 
         YTL->log("Storing task: "+currentTask->uuid,YTL_INFO,YTL_HIGH);
+        saveTimepoint(currentTask,YCT_TIMEPT_STORAGE_BEGIN,mutex);
 
         YTL->log("Inserting PHI",YTL_INFO,YTL_LOW);
         if (!cloud->insertPHI(dirList.at(i).filePath(),currentTask))
@@ -780,6 +831,8 @@ bool ycaTaskHelper::storeTasks(ycaTaskList& archiveList, QObject* notificationWi
             YTL->log("Unable to clean folder: "+dirList.at(i).filePath(),YTL_ERROR,YTL_HIGH);
             // TODO: Error handling
         }
+
+        saveTimepoint(currentTask,YCT_TIMEPT_STORAGE_END,mutex);
 
         currentTask->status=ycaTask::tsStorage;
         currentTask->result=ycaTask::trSuccess;

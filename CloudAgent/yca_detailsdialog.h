@@ -29,6 +29,8 @@ private slots:
 
 private:
     Ui::ycaDetailsDialog *ui;
+
+    QString getTimeDiff(QDateTime* start, QDateTime* end);
 };
 
 

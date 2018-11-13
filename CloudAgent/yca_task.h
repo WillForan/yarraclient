@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QDateTime>
+#include <QMutex>
 
 
 class yctAPI;
@@ -72,6 +73,19 @@ public:
     int         storageRetry;
 
     double      cost;
+
+    QDateTime   timeptCreated;
+    QDateTime   timeptCompleted;
+    QDateTime   timeptUploadBegin;
+    QDateTime   timeptUploadEnd;
+    QDateTime   timeptProcessingCreated;
+    QDateTime   timeptProcessingBegin;
+    QDateTime   timeptProcessingEnd;
+    QDateTime   timeptDownloadBegin;
+    QDateTime   timeptDownloadEnd;
+    QDateTime   timeptStorageBegin;
+    QDateTime   timeptStorageEnd;
+
 };
 
 typedef QList<ycaTask*> ycaTaskList;
@@ -92,12 +106,13 @@ public:
     bool readPHIData(QString filepath, ycaTask* task);
     bool saveResultToPHI(QString filepath, ycaTask::TaskResult result);
     bool saveCostsToPHI(ycaTaskList& taskList);
+    bool saveTimepoint(ycaTask* task, QString timepointID, QMutex* mutex=0);
 
     void getTasksForDownloadArchive(ycaTaskList& taskList, ycaTaskList& downloadList, ycaTaskList& archiveList);
     bool archiveTasks(ycaTaskList& archiveList, QString& notificationString);
     void clearTaskList(ycaTaskList& list);
 
-    bool storeTasks(ycaTaskList& archiveList, QObject* notificationWidget=0);
+    bool storeTasks(ycaTaskList& archiveList, QMutex* mutex, QObject* notificationWidget=0);
 
     bool removeIncompleteDownloads();
 

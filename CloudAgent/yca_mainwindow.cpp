@@ -118,10 +118,17 @@ void ycaWorker::timerCall()
                 currentTaskID=taskList.first()->uuid;
                 parent->mutex.unlock();
 
-                if (!parent->cloud.uploadCase(taskList.takeFirst(), &transferInformation, &parent->mutex))
+                ycaTask* currentTask=taskList.takeFirst();
+                parent->taskHelper.saveTimepoint(currentTask,YCT_TIMEPT_UPLOAD_BEGIN,&parent->mutex);
+
+                if (!parent->cloud.uploadCase(currentTask, &transferInformation, &parent->mutex))
                 {
                     YTL->log("Error while uploading case "+currentTaskID,YTL_ERROR,YTL_HIGH);
                     // TODO: Error handling
+                }
+                else
+                {
+                    parent->taskHelper.saveTimepoint(currentTask,YCT_TIMEPT_UPLOAD_END,&parent->mutex);
                 }
                 uploadCount++;
 
@@ -185,11 +192,16 @@ void ycaWorker::timerCall()
                 currentTaskID=currentTask->uuid;
                 parent->mutex.unlock();
 
+                parent->taskHelper.saveTimepoint(currentTask,YCT_TIMEPT_DOWNLOAD_BEGIN,&parent->mutex);
+
                 if (!parent->cloud.downloadCase(currentTask, &transferInformation, &parent->mutex))
                 {
                     YTL->log("Error while downloading case "+currentTaskID,YTL_ERROR,YTL_HIGH);
-
                     // TODO: Error handling
+                }
+                else
+                {
+                    parent->taskHelper.saveTimepoint(currentTask,YCT_TIMEPT_DOWNLOAD_END,&parent->mutex);
                 }
 
                 parent->mutex.lock();
@@ -208,7 +220,7 @@ void ycaWorker::timerCall()
     YTL->log("(Now storing cases)",YTL_INFO,YTL_MID);
 
     // Retrieve storage location for each job and push downloaded jobs to destination
-    if (!parent->taskHelper.storeTasks(jobsToArchive,parent))
+    if (!parent->taskHelper.storeTasks(jobsToArchive,&parent->mutex,parent))
     {
         YTL->log("Error while storing cases",YTL_ERROR,YTL_HIGH);
         // TODO: Error handling
@@ -879,11 +891,7 @@ bool ycaMainWindow::checkForDCMTK()
         return false;
     }
 
-    if (   (!appDir.exists(YCT_DCMTK_COPYRIGHT))
-        || (!appDir.exists(YCT_DCMTK_SUPPORT1 ))
-        || (!appDir.exists(YCT_DCMTK_SUPPORT2 ))
-        || (!appDir.exists(YCT_DCMTK_SUPPORT3 ))
-        || (!appDir.exists(YCT_DCMTK_SUPPORT4 )))
+    if (!appDir.exists(YCT_DCMTK_COPYRIGHT))
     {
         return false;
     }

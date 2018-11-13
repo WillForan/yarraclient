@@ -78,6 +78,11 @@ protected:
 
 inline void ycaThreadLog::log(QString text, EntryType type, ImportanceLevel level)
 {
+    if (text.isEmpty())
+    {
+        return;
+    }
+
 #ifndef YTL_DISABLED
     QString line=formatLine(text,type,level);
     logMutex.lock();

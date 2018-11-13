@@ -28,7 +28,7 @@ yctTransferInformation::yctTransferInformation()
     inBucket="";
     outBucket="";
     region="";
-    userAllowed=false;
+    userAllowed=false;    
 }
 
 
@@ -49,6 +49,8 @@ yctAPI::yctAPI()
 {
     config=0;
     errorReason="";
+
+    loadCertificate();
 }
 
 
@@ -77,7 +79,7 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
         return false;
     }
 
-    //qDebug() << reply.replyData();
+    //qInfo() << reply.replyData();
 
     QJsonDocument jsonReply =QJsonDocument::fromJson(reply.replyData());
     QJsonObject   jsonObject=jsonReply.object();
@@ -110,7 +112,7 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
             }
             if (key=="out_bucket")
             {
-                transferInformation->outBucket=jsonObject[key].toString();
+                transferInformation->outBucket=jsonObject[key].toString();                
             }
             if (key=="region")
             {
@@ -120,6 +122,9 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
             transferInformation->userAllowed=canSubmit;
         }
     }
+
+    qInfo() << "in_bucket " << transferInformation->inBucket;
+    qInfo() << "region " << transferInformation->region;
 
     return canSubmit;
 }
@@ -961,5 +966,26 @@ bool yctAPI::pushToDrive(QString path, ycaTask* task, yctStorageInformation* des
     }
 
     return true;
+}
+
+
+bool yctAPI::loadCertificate()
+{
+    // Read certificate from external file
+    QFile certificateFile(qApp->applicationDirPath() + "/yarracloud.crt");
+
+    // Read the certificate if possible and then add it
+    if (certificateFile.open(QIODevice::ReadOnly))
+    {
+        const QByteArray certificateContent=certificateFile.readAll();
+
+        // Create a certificate object
+        const QSslCertificate certificate(certificateContent);
+
+        // Add this certificate to all SSL connections
+        QSslSocket::addDefaultCaCertificate(certificate);
+
+        qInfo() << "Loaded yarracloud certificate from file.";
+    }
 }
 

@@ -16,13 +16,21 @@
 #define YCT_DCMTK_DCMODIFY      "dcmtk/dcmodify.exe"
 #define YCT_DCMTK_STORESCU      "dcmtk/storescu.exe"
 #define YCT_DCMTK_COPYRIGHT     "dcmtk/COPYRIGHT"
-#define YCT_DCMTK_SUPPORT1      "dcmtk/dcmdata.dll"
-#define YCT_DCMTK_SUPPORT2      "dcmtk/dcmnet.dll"
-#define YCT_DCMTK_SUPPORT3      "dcmtk/oflog.dll"
-#define YCT_DCMTK_SUPPORT4      "dcmtk/ofstd.dll"
 #define YCT_HELPER_APP          "YCA_helper.exe"
 
 #define YCT_HELPER_TIMEOUT 300000
+
+#define YCT_TIMEPT_CREATED            "LOG/CREATED"
+#define YCT_TIMEPT_COMPLETED          "LOG/COMPLETED"
+#define YCT_TIMEPT_UPLOAD_BEGIN       "LOG/UPLOAD_BEGIN"
+#define YCT_TIMEPT_UPLOAD_END         "LOG/UPLOAD_END"
+#define YCT_TIMEPT_DOWNLOAD_BEGIN     "LOG/DOWNLOAD_BEGIN"
+#define YCT_TIMEPT_DOWNLOAD_END       "LOG/DOWNLOAD_END"
+#define YCT_TIMEPT_STORAGE_BEGIN      "LOG/STORAGE_BEGIN"
+#define YCT_TIMEPT_STORAGE_END        "LOG/STORAGE_END"
+#define YCT_TIMEPT_PROCESSING_CREATED "LOG/PROCESSING_CREATED"
+#define YCT_TIMEPT_PROCESSING_BEGIN   "LOG/PROCESSING_BEGIN"
+#define YCT_TIMEPT_PROCESSING_END     "LOG/PROCESSING_END"
 
 
 class yctAWSCommon

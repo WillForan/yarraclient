@@ -5,6 +5,7 @@
 
 #include "yct_twix_anonymizer.h"
 #include "yct_twix_header.h"
+#include "../yct_common.h"
 
 
 #define MAX_LINE_LENGTH 1024
@@ -31,9 +32,9 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
     bool result=false;
 
     // Clean the patient data - to be sure
-    patientInformation.name       ="MISSING";
-    patientInformation.mrn        ="MISSING";
-    patientInformation.dateOfBirth="MISSING";
+    patientInformation.name       ="";
+    patientInformation.mrn        ="";
+    patientInformation.dateOfBirth="";
 
     // Populate the externally provided information
     patientInformation.uuid       =uuid;
@@ -306,7 +307,7 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString twixFilename, QString p
     DBG("UUID:          " + patientInformation.uuid.toStdString());
     DBG("TaskID:        " + patientInformation.taskid.toStdString());
     DBG("Mode:          " + patientInformation.mode.toStdString());
-    DBG("");
+    DBG("");    
 
     QDir phiDir(phiPath);
     if (!phiDir.exists())
@@ -324,6 +325,20 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString twixFilename, QString p
         return false;
     }
 
+    // If patient information has not been found in the file, set it to a recognizable value
+    if (patientInformation.name.isEmpty())
+    {
+        patientInformation.name="MISSING";
+    }
+    if (patientInformation.mrn.isEmpty())
+    {
+        patientInformation.mrn="MISSING";
+    }
+    if (patientInformation.dateOfBirth.isEmpty())
+    {
+        patientInformation.dateOfBirth="MISSING";
+    }
+
     QSettings phiFile(phiFilename, QSettings::IniFormat);
     phiFile.setValue("PHI/NAME",   patientInformation.name);
     phiFile.setValue("PHI/DOB",    patientInformation.dateOfBirth);
@@ -333,7 +348,7 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString twixFilename, QString p
     phiFile.setValue("PHI/TASKID", patientInformation.taskid);
     phiFile.setValue("PHI/MODE",   patientInformation.mode);
 
-    phiFile.setValue("LOG/CREATED",QDateTime::currentDateTime().toString(Qt::ISODate));
+    phiFile.setValue(YCT_TIMEPT_CREATED,QDateTime::currentDateTime().toString(Qt::ISODate));
 
     return true;
 }

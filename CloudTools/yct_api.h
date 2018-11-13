@@ -80,6 +80,8 @@ public:
     bool    pushToPACS (QString path, ycaTask* task, yctStorageInformation* destination);
     bool    pushToDrive(QString path, ycaTask* task, yctStorageInformation* destination);
 
+    bool    loadCertificate();
+
     QString errorReason;
 
 protected:
