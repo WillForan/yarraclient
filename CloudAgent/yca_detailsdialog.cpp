@@ -79,7 +79,7 @@ void ycaDetailsDialog::setTaskDetails(ycaTask* task)
     YCA_ADDROW("", "Result",        task->getResult());
     YCA_ADDROW("", "Cost",          "$ "+QString::number(task->cost,'g',2));
 
-    YCA_ADDROW("Processing Information",  "", "");
+    YCA_ADDROW("Performance",  "", "");
     if ((task->timeptCreated.isValid()) && (task->timeptCompleted.isValid()))
     {
         YCA_ADDROW("", "Total",      getTimeDiff(&task->timeptCreated, &task->timeptCompleted));
@@ -101,7 +101,7 @@ void ycaDetailsDialog::setTaskDetails(ycaTask* task)
         YCA_ADDROW("", "Storage",    getTimeDiff(&task->timeptStorageBegin, &task->timeptStorageEnd));
     }
 
-    YCA_ADDROW("Log Information", "", "");
+    YCA_ADDROW("Task Log", "", "");
     if (task->timeptCreated.isValid())        { YCA_ADDROW("", "Created",        task->timeptCreated.toString());       }
     if (task->timeptUploadBegin.isValid())    { YCA_ADDROW("", "Upload Begin",   task->timeptUploadBegin.toString());   }
     if (task->timeptUploadEnd.isValid())      { YCA_ADDROW("", "Upload End",     task->timeptUploadEnd.toString());     }

@@ -120,6 +120,10 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
             {
                 iconWindow.showStartupCommandsOption();
             }
+            if (RTI_CONFIG->cloudSupportEnabled)
+            {
+                iconWindow.showCloudWindowOption();
+            }
 
             iconWindow.show();
 

@@ -55,6 +55,12 @@ void rdsIconWindow::showStartupCommandsOption()
 }
 
 
+void rdsIconWindow::showCloudWindowOption()
+{
+    showCloudWindowEntry=true;
+}
+
+
 rdsIconWindow::~rdsIconWindow()
 {
     delete ui;
@@ -76,10 +82,15 @@ void rdsIconWindow::mouseReleaseEvent(QMouseEvent *event)
         infoMenu.addAction("Yarra RDS Client - Ver " + QString(RDS_VERSION));
         infoMenu.addSeparator();
         infoMenu.addAction("Show Status Window...",this,SLOT(showStatusWindow()));
+        if (showCloudWindowEntry)
+        {
+            infoMenu.addAction("Show YarraCloud Agent...",this,SLOT(showCloudAgent()));
+        }
         if (showStartupCommandsEntry)
         {
             infoMenu.addAction("Run Startup Commands",this,SLOT(runStartupCommands()));
         }
+
         infoMenu.exec(this->mapToGlobal((event->pos())));
     }
 }
@@ -89,6 +100,13 @@ void rdsIconWindow::showStatusWindow()
 {
     RTI->showOperationWindow();
     clearError();
+}
+
+
+void rdsIconWindow::showCloudAgent()
+{
+    QString cmd=qApp->applicationDirPath() + "/YCA.exe show";
+    QProcess::startDetached(cmd);
 }
 
 

@@ -121,10 +121,10 @@ bool yctAPI::validateUser(yctTransferInformation* transferInformation)
 
             transferInformation->userAllowed=canSubmit;
         }
-    }
 
-    qInfo() << "in_bucket " << transferInformation->inBucket;
-    qInfo() << "region " << transferInformation->region;
+        //qInfo() << "in_bucket " << transferInformation->inBucket;
+        //qInfo() << "region " << transferInformation->region;
+    }
 
     return canSubmit;
 }

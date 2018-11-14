@@ -58,6 +58,7 @@ private slots:
 
     void showLogfile();
     void showConfiguration();
+    void showYCAWindow();
 
     void on_loadOlderButton_clicked();
     void on_manualAssignButton_clicked();

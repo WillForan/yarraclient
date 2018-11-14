@@ -15,6 +15,8 @@ rdsConfiguration::rdsConfiguration()
         // TODO: Find way to identify system type under NumarisX
         infoScannerType ="Vida";
     }
+
+    cloudSupportEnabled=false;
 }
 
 
@@ -39,7 +41,7 @@ void rdsConfiguration::loadConfiguration()
     QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
 
     // Used to test if the program has been configured once at all
-    infoValidityTest    =settings.value("General/ValidityTest",         false).toBool();
+    infoValidityTest      =settings.value("General/ValidityTest",         false).toBool();
 
     infoName              =settings.value("General/Name",               "Unnamed").toString();
     infoShowIcon          =settings.value("General/ShowIcon",           true).toBool();
@@ -112,6 +114,7 @@ void rdsConfiguration::loadConfiguration()
         infoUpdateTime3Jittered=infoUpdateTime3Jittered.addSecs(jitterSecs);
     }
 
+    loadCloudSettings();
 }
 
 
@@ -357,4 +360,11 @@ void rdsConfiguration::removeRemotelyDefinedProtocols()
             }
         }
     }
+}
+
+
+void rdsConfiguration::loadCloudSettings()
+{
+    QSettings ortSettings(RTI->getAppPath() + "/ort.ini", QSettings::IniFormat);
+    cloudSupportEnabled=ortSettings.value("ORT/CloudSupport",false).toBool();
 }

@@ -23,6 +23,7 @@ public:
     void setError();
 
     void showStartupCommandsOption();
+    void showCloudWindowOption();
 
 private:
     Ui::rdsIconWindow* ui;
@@ -34,9 +35,11 @@ private:
     bool    error;
     QMovie* anim;
     bool    showStartupCommandsEntry;
+    bool    showCloudWindowEntry;
 
 private slots:
     void showStatusWindow();
+    void showCloudAgent();
     void runStartupCommands();
 
 };

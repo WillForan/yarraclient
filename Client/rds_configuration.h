@@ -68,6 +68,7 @@ public:
 
     QStringList startCmds;
 
+    bool    cloudSupportEnabled;
 
     QList<rdsConfigurationProtocol*> protocols;
     int getProtocolCount();
@@ -105,6 +106,8 @@ public:
     bool isLogServerConfigured();
 
 protected:
+
+    void loadCloudSettings();
 
 };
 

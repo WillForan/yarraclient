@@ -663,6 +663,8 @@ void ortMainWindow::showCloudProblem(QString text)
         // Call configuration dialog
         ortConfigurationDialog::executeDialog();
     }
+
+    QTimer::singleShot(0, qApp, SLOT(quit()));
 }
 
 
@@ -684,6 +686,11 @@ void ortMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
     infoMenu.addSeparator();
     infoMenu.addAction("Configuration...", this, SLOT(showConfiguration()));
     infoMenu.addAction("Show log file...", this, SLOT(showLogfile()));
+
+    if (config.ortCloudSupportEnabled)
+    {
+        infoMenu.addAction("Show YarraCloud Agent...", this, SLOT(showYCAWindow()));
+    }
 
     if (network.netLogger.isConfigured())
     {
@@ -732,6 +739,13 @@ void ortMainWindow::showConfiguration()
     {
         show();
     }
+}
+
+
+void ortMainWindow::showYCAWindow()
+{
+    cloud.launchCloudAgent("show");
+    close();
 }
 
 

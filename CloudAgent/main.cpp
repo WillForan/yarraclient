@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(yca);
 
     bool triggerSubmission=false;
+    bool triggerShow=false;
 
     // If the application is already running, send a message instead of launching
     // another instance
@@ -75,6 +76,10 @@ int main(int argc, char *argv[])
             {
                 triggerSubmission=true;
             }
+            if (QString(argv[1])=="show")
+            {
+                triggerShow=true;
+            }
         }
 
     }
@@ -92,6 +97,10 @@ int main(int argc, char *argv[])
     if ((triggerSubmission) && (!w.shuttingDown))
     {
         QTimer::singleShot(0, &w, SLOT(callSubmit()));
+    }
+    if ((triggerShow) && (!w.shuttingDown))
+    {
+        QTimer::singleShot(0, &w, SLOT(showNormal()));
     }
     a.exec();
     a.setActivationWindow(0, false);
