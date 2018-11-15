@@ -455,7 +455,7 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
 
     // Execute the helper app to perform the multi-part upload
     YTL->log("Calling upload helper",YTL_INFO,YTL_LOW);
-    int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine);
+    int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine,YCT_HELPER_TIMEOUT_TRANSFER);
     YTL->log("Upload helper finished",YTL_INFO,YTL_LOW);
 
     YTL->log("(Helper output begin)",YTL_INFO,YTL_LOW);
@@ -564,7 +564,7 @@ bool yctAPI::downloadCase(ycaTask* task, yctTransferInformation* setup, QMutex* 
     // TODO: Check available disk space
 
     YTL->log("Calling download helper",YTL_INFO,YTL_LOW);
-    int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine);
+    int exitcode=callHelperApp(YCT_HELPER_APP,cmdLine,YCT_HELPER_TIMEOUT_TRANSFER);
     YTL->log("Download helper finished",YTL_INFO,YTL_LOW);
 
     YTL->log("(Helper output begin)",YTL_INFO,YTL_LOW);
@@ -614,7 +614,7 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
         return false;
     }
 
-    QString dicomPath=tarDir.absolutePath()+"/*.dcm ";
+    QString dicomPath=QDir::toNativeSeparators(tarDir.absolutePath()+"/*.dcm")+" ";
 
     QString cmd="";
     cmd += "-i \"(0010,0010)="+task->patientName+"\" ";
@@ -627,14 +627,7 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
 
     //qDebug() << "CMD: " << cmd;
 
-    if (callHelperApp(YCT_DCMTK_DCMODIFY,cmd)!=0)
-    {
-        // TODO: Error handling
-        YTL->log("Error executing dcmodify",YTL_ERROR,YTL_MID);
-        return false;
-    }
-
-    // TODO: Search helper output for error messages
+    bool helperSuccess=callHelperApp(YCT_DCMTK_DCMODIFY,cmd)==0;
 
     YTL->log("(Helper output begin)",YTL_INFO,YTL_LOW);
     for (int i=0; i<helperAppOutput.count(); i++)
@@ -642,6 +635,14 @@ bool yctAPI::insertPHI(QString path, ycaTask* task)
         YTL->log(helperAppOutput.at(i),YTL_INFO,YTL_LOW);
     }
     YTL->log("(Helper output end)",YTL_INFO,YTL_LOW);
+
+    if (!helperSuccess)
+    {
+        YTL->log("Error executing dcmodify",YTL_ERROR,YTL_MID);
+        return false;
+    }
+
+    // TODO: Search helper output for error messages
 
     return true;
 }
@@ -748,7 +749,7 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
             lineLength=myProcess->readLine(buf, sizeof(buf));
             if (lineLength != -1)
             {
-                helperAppOutput << QString(buf);
+                helperAppOutput << QString(buf).trimmed();
             }
         } while (lineLength!=-1);
 
@@ -888,7 +889,7 @@ bool yctAPI::pushToPACS (QString path, ycaTask* task, yctStorageInformation* des
 
     // TODO: Possibly change to file-by-file sending to ensure dicoms are sent in order
 
-    QString dicomPath=dcmDir.absolutePath()+"/*.dcm ";
+    QString dicomPath=QDir::toNativeSeparators(dcmDir.absolutePath()+"/*.dcm")+" ";
 
     QString cmd="--timeout 20 +sd ";
     cmd += "-aec "+destination->pacsAEC+" ";

@@ -691,7 +691,7 @@ bool ycaTaskHelper::archiveTasks(ycaTaskList& archiveList, QString& notification
             // TODO: Error handling
         }
 
-        YTL->log("Archived task "+currentTask->uuid+" with result "+currentTask->getResult(),YTL_ERROR,YTL_HIGH);
+        YTL->log("Archived task "+currentTask->uuid+" with result "+currentTask->getResult(),YTL_INFO,YTL_HIGH);
 
         currentTask->status=ycaTask::tsArchived;
     }
