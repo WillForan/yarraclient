@@ -557,8 +557,14 @@ void ycaMainWindow::on_statusRefreshButton_clicked()
         item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         ui->activeTasksTable->setItem(i,3,item);
 
-        item=new QTableWidgetItem(taskList.at(i)->uuid);
+        QString itemID=taskList.at(i)->uuid;
+        if (!taskList.at(i)->shortcode.isEmpty())
+        {
+            itemID=taskList.at(i)->shortcode;
+        }
+        item=new QTableWidgetItem(itemID);
         item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        item->setToolTip(taskList.at(i)->uuid);
         ui->activeTasksTable->setItem(i,4,item);
     }
 
@@ -749,7 +755,12 @@ void ycaMainWindow::on_refreshArchiveButton_clicked()
         item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         ui->archiveTasksTable->setItem(i,4,item);
 
-        item=new QTableWidgetItem(archiveList.at(i)->uuid);
+        QString itemID=archiveList.at(i)->uuid;
+        if (!archiveList.at(i)->shortcode.isEmpty())
+        {
+            itemID=archiveList.at(i)->shortcode;
+        }
+        item=new QTableWidgetItem(itemID);
         item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         item->setToolTip(archiveList.at(i)->uuid);
         ui->archiveTasksTable->setItem(i,5,item);
@@ -842,7 +853,12 @@ void ycaMainWindow::on_searchButton_clicked()
             item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
             ui->searchTable->setItem(i,3,item);
 
-            item=new QTableWidgetItem(taskList.at(i)->uuid);
+            QString itemID=taskList.at(i)->uuid;
+            if (!taskList.at(i)->shortcode.isEmpty())
+            {
+                itemID=taskList.at(i)->shortcode;
+            }
+            item=new QTableWidgetItem(itemID);
             item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
             ui->searchTable->setItem(i,4,item);
         }

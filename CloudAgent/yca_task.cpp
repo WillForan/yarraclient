@@ -482,6 +482,7 @@ bool ycaTaskHelper::readPHIData(QString filepath, ycaTask* task)
         task->downloadRetry=phiFile.value("STATUS/RETRY_DOWNLOAD",0).toInt();
         task->storageRetry =phiFile.value("STATUS/RETRY_STORAGE",0).toInt();
 
+        task->shortcode    =phiFile.value("STATS/SHORTCODE","").toString();
         task->cost         =phiFile.value("STATS/COST",0).toDouble();
 
         task->timeptCreated      =phiFile.value(YCT_TIMEPT_CREATED,QDateTime()).toDateTime();
@@ -545,6 +546,11 @@ bool ycaTaskHelper::saveCostsToPHI(ycaTaskList& taskList)
         }
 
         phiFile.setValue("STATS/COST",task->cost);
+
+        if (!task->shortcode.isEmpty())
+        {
+            phiFile.setValue("STATS/SHORTCODE",task->shortcode);
+        }
     }
 
     return true;

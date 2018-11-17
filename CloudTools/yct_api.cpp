@@ -424,6 +424,11 @@ bool yctAPI::getJobStatus(ycaTaskList* taskList)
         {
             taskList->at(i)->cost=taskInfo["cost"].toDouble();
         }
+
+        if (!taskInfo["id"].isUndefined())
+        {
+            taskList->at(i)->shortcode=taskInfo["id"].toString();
+        }
     }
 
     return true;

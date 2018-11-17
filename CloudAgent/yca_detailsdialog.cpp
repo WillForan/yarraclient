@@ -73,6 +73,10 @@ void ycaDetailsDialog::setTaskDetails(ycaTask* task)
     YCA_ADDROW("", "ACC #",         task->acc);
     YCA_ADDROW("Task Information",  "", "");
     YCA_ADDROW("", "Mode",          task->reconMode);
+    if (!task->shortcode.isEmpty())
+    {
+        YCA_ADDROW("", "ID",        task->shortcode);
+    }
     YCA_ADDROW("", "UUID",          task->uuid);
     YCA_ADDROW("", "TaskID",        task->taskID);
     YCA_ADDROW("", "Status",        task->getStatus());
@@ -103,12 +107,12 @@ void ycaDetailsDialog::setTaskDetails(ycaTask* task)
 
     YCA_ADDROW("Task Log", "", "");
     if (task->timeptCreated.isValid())        { YCA_ADDROW("", "Created",        task->timeptCreated.toString());       }
-    if (task->timeptUploadBegin.isValid())    { YCA_ADDROW("", "Upload Begin",   task->timeptUploadBegin.toString());   }
-    if (task->timeptUploadEnd.isValid())      { YCA_ADDROW("", "Upload End",     task->timeptUploadEnd.toString());     }
-    if (task->timeptDownloadBegin.isValid())  { YCA_ADDROW("", "Download Begin", task->timeptDownloadBegin.toString()); }
-    if (task->timeptDownloadEnd.isValid())    { YCA_ADDROW("", "Download End",   task->timeptDownloadEnd.toString());   }
-    if (task->timeptStorageBegin.isValid())   { YCA_ADDROW("", "Storage Begin",  task->timeptStorageBegin.toString());  }
-    if (task->timeptStorageEnd.isValid())     { YCA_ADDROW("", "Storage End",    task->timeptStorageEnd.toString());    }
+    if (task->timeptUploadBegin.isValid())    { YCA_ADDROW("", "UP Begin",   task->timeptUploadBegin.toString());   }
+    if (task->timeptUploadEnd.isValid())      { YCA_ADDROW("", "UP End",     task->timeptUploadEnd.toString());     }
+    if (task->timeptDownloadBegin.isValid())  { YCA_ADDROW("", "DOWN Begin", task->timeptDownloadBegin.toString()); }
+    if (task->timeptDownloadEnd.isValid())    { YCA_ADDROW("", "DOWN End",   task->timeptDownloadEnd.toString());   }
+    if (task->timeptStorageBegin.isValid())   { YCA_ADDROW("", "STORE Begin",  task->timeptStorageBegin.toString());  }
+    if (task->timeptStorageEnd.isValid())     { YCA_ADDROW("", "STORE End",    task->timeptStorageEnd.toString());    }
     if (task->timeptCompleted.isValid())      { YCA_ADDROW("", "Completed",      task->timeptCompleted.toString());     }
 }
 
