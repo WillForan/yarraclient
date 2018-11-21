@@ -454,7 +454,7 @@ bool yctAPI::uploadCase(ycaTask* task, yctTransferInformation* setup, QMutex* mu
     }
 
     cmdLine += path+task->taskFilename;    
-    //qInfo() << cmdLine;
+    qInfo() << cmdLine;
 
     // TODO: Batch call if commandline is too long
 
@@ -662,6 +662,7 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
 
     QProcess *myProcess = new QProcess(0);
     myProcess->setReadChannel(QProcess::StandardOutput);
+    myProcess->setProcessChannelMode(QProcess::MergedChannels);
     QString helperCmd=qApp->applicationDirPath()+"/"+binary+" "+parameters;
 
     //qDebug() << "Calling helper tool: " + helperCmd;
