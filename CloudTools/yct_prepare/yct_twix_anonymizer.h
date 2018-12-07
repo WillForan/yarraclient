@@ -20,6 +20,7 @@ public:
         acc="";
         uuid="";
         taskid="";
+        fillStr="";
     }
 
     // Information extracted from TWIX file
@@ -31,7 +32,8 @@ public:
     QString acc;
     QString uuid;
     QString taskid;
-    QString mode;
+    QString mode;    
+    QString fillStr;
 };
 
 
