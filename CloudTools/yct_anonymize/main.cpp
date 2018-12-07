@@ -5,7 +5,7 @@
 
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_ANONYMIZER_VER "0.1a"
+#define YCT_ANONYMIZER_VER "0.1b"
 
 
 class phiEntry
@@ -49,7 +49,13 @@ int main(int argc, char *argv[])
 
     if (argc < 3)
     {
-        printf("Usage:   yct_anonymizer [input path] [output path] [optional: patient-name replacement]\n\n");
+        printf("Usage:    yct_anonymizer [input path] [output path] [optional: patient-name replacement]\n\n");
+        printf("Purpose:  Anonymizes all files located in [input path]. The anonymized files will be written\n");
+        printf("          into [output path]. Each anonymized file will be named by a unique ID (UUID). The\n");
+        printf("          patient name will be replaced by the UUID (while keeping the original length).\n");
+        printf("          If a name is provided as 3rd parameter, this name will be used instead to replace\n");
+        printf("          the patient name. A file in CSV format will be created (files.csv) that lists the\n");
+        printf("          original and anonymized file names, as well as the removed PHI.\n");
         return 0;
     }
     else
@@ -79,6 +85,7 @@ int main(int argc, char *argv[])
             return 0;
         }
 
+        // Open or create the CSV file and add the header to it
         QFile tableFile;
         tableFile.setFileName("files.csv");
         tableFile.open(QIODevice::Append | QIODevice::Text);
@@ -131,6 +138,7 @@ int main(int argc, char *argv[])
                 break;
             }
 
+            // Store the phi information in a text file in CSV format
             phiEntry entry;
             entry.originalFilename=fileInfo.fileName();
             entry.anonymizedFilename=destFilename;

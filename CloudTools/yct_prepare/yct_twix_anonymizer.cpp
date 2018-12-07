@@ -521,9 +521,31 @@ int yctTWIXAnonymizer::analyzeFollowLine(QByteArray* line)
         {
         case CONTENT_NAME:
         default:
-            for (int i=startPos+1; i<endPos; i++)
+            // If a fill string has been provided, overwrite the patient name with that;
+            // otherwise, insert "Y" characters.
+            if (patientInformation.fillStr.isEmpty())
             {
-                line->replace(i,1,"Y");
+                for (int i=startPos+1; i<endPos; i++)
+                {
+                    line->replace(i,1,"Y");
+                }
+            }
+            else
+            {
+                int j=0;
+                for (int i=startPos+1; i<endPos; i++)
+                {
+                    if (j<patientInformation.fillStr.length())
+                    {
+                        const char chr=patientInformation.fillStr.at(j).toLatin1();
+                        line->replace(i,1,&chr,1);
+                    }
+                    else
+                    {
+                        line->replace(i,1," ");
+                    }
+                    j++;
+                }
             }
             break;
 
