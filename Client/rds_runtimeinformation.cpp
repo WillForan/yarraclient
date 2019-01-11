@@ -229,6 +229,7 @@ void rdsRuntimeInformation::determineSyngoVersion()
         RDS_SYNGODETECT(RDS_VE11C,RDS_SYNGODETECT_VE11C);
         RDS_SYNGODETECT(RDS_VE11U,RDS_SYNGODETECT_VE11U);
         RDS_SYNGODETECT(RDS_VE11P,RDS_SYNGODETECT_VE11P);
+        RDS_SYNGODETECT(RDS_VE12U,RDS_SYNGODETECT_VE12U);
     }
 
     syngoMRLine=getSyngoMRLine();
@@ -264,6 +265,12 @@ int rdsRuntimeInformation::determineNumarisXVersion()
             if (buffer=="VA10A")
             {
                 detectedVersion=RDS_XA10A;
+                break;
+            }
+
+            if (buffer=="VA11A")
+            {
+                detectedVersion=RDS_XA11A;
                 break;
             }
         }

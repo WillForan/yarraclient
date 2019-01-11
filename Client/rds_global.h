@@ -5,7 +5,7 @@
 #include "rds_runtimeinformation.h"
 
 // Definitions
-#define RDS_VERSION     "0.53b3"
+#define RDS_VERSION     "0.53b4"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -31,7 +31,6 @@
 #define RDS_RAIDTOOL_NAME      "RaidTool.exe"
 #define RDS_RAIDSIMULATOR_NAME "RaidSimulator.exe"
 
-
 #define RDS_SYNGODETECT_VB13A "C:/MedCom/MriProduct/inst/build_VB13A_label.txt"
 #define RDS_SYNGODETECT_VB15A "C:/MedCom/MriProduct/inst/build_VB15A_label.txt"
 #define RDS_SYNGODETECT_VB17A "C:/MedCom/MriProduct/inst/build_VB17A_label.txt"
@@ -50,6 +49,7 @@
 #define RDS_SYNGODETECT_VE11C "C:/MedCom/MriProduct/inst/build_VE11C_label.txt"
 #define RDS_SYNGODETECT_VE11U "C:/MedCom/MriProduct/inst/build_VE11U_label.txt"
 #define RDS_SYNGODETECT_VE11P "C:/MedCom/MriProduct/inst/build_VE11P_label.txt"
+#define RDS_SYNGODETECT_VE12U "C:/MedCom/MriProduct/inst/build_VE12U_label.txt"
 
 #define RDS_IMAGER_IP_3 "192.168.2.3"
 #define RDS_IMAGER_IP_2 "192.168.2.2"
