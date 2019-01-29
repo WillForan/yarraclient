@@ -23,7 +23,7 @@ public:
         RDS_OPERATION
     };
 
-    #define RDS_SYNGOVERSIONS_COUNT 18
+    #define RDS_SYNGOVERSIONS_COUNT 22
 
     enum rdsSyngoVersions
     {
@@ -48,7 +48,8 @@ public:
         RDS_XA10A   =  17,
         RDS_VB19B   =  18,
         RDS_XA11A   =  19,
-        RDS_VE12U   =  20
+        RDS_VE12U   =  20,
+        RDS_XA11B   =  21
     };
 
     enum rdsSyngoLines
@@ -429,6 +430,10 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString(int syngoVersionEn
         versionString="VE12U";
         break;
 
+    case RDS_XA11B:
+        versionString="XA11B";
+        break;
+
     default:
         versionString="Unknown - Use with care!";
         break;
@@ -526,6 +531,7 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     case RDS_XA10A:
     case RDS_XA11A:
     case RDS_VE12U:
+    case RDS_XA11B:
         return RDS_RAIDTOOL_VE;
         break;
     case RDS_VB15A:
@@ -570,6 +576,7 @@ inline int rdsRuntimeInformation::getSyngoMRLine()
         break;
     case RDS_XA10A:
     case RDS_XA11A:
+    case RDS_XA11B:
         return RDS_XA;
         break;
     }
