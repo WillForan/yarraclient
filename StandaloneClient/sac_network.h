@@ -33,9 +33,9 @@ public:
 
     bool openConnection(bool isConsole);
     void closeConnection();
+    bool checkConnection();
 
     bool copyMeasurementFile(QString sourceFile, QString targetFile);
-
     bool fileExistsOnServer(QString filename);
 
 };

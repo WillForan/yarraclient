@@ -130,6 +130,21 @@ bool sacNetwork::openConnection(bool isConsole)
 }
 
 
+bool sacNetwork::checkConnection()
+{
+    serverDir.refresh();
+
+    if (!serverDir.exists(ORT_MODEFILE) || !serverDir.exists(ORT_SERVERFILE))
+    {
+        RTI->log("ERROR: ORT Mode file not found during connection check.");
+        RTI->setSevereErrors(true);
+        return false;
+    }
+
+    return true;
+}
+
+
 void sacNetwork::closeConnection()
 {
     if (disconnectCmd!="")

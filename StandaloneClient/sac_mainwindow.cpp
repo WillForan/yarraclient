@@ -396,6 +396,16 @@ void sacMainWindow::on_sendButton_clicked()
         return;
     }
 
+    if (!task.cloudReconstruction)
+    {
+        if (!network.checkConnection())
+        {
+            QMessageBox::critical(this,"Error: Server connection lost","The server connection has been lost. Please restart the client.");
+            RTI->log("Error: Server connection lost prior to submission.");
+            return;
+        }
+    }
+
     this->hide();    
     RTI->processEvents();
     sacCopyDialog copyDialog;
