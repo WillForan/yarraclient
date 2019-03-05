@@ -41,9 +41,9 @@ void rdsConfiguration::loadConfiguration()
     QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
 
     // Used to test if the program has been configured once at all
-    infoValidityTest      =settings.value("General/ValidityTest",         false).toBool();
+    infoValidityTest      =settings.value("General/ValidityTest",       false).toBool();
 
-    infoName              =settings.value("General/Name",               "Unnamed").toString();
+    infoName              =settings.value("General/Name",               "").toString();
     infoShowIcon          =settings.value("General/ShowIcon",           true).toBool();
 
     infoUpdateMode        =settings.value("General/UpdateMode",         UPDATEMODE_STARTUP_FIXEDTIME).toInt();
@@ -112,6 +112,12 @@ void rdsConfiguration::loadConfiguration()
         infoUpdateTime1Jittered=infoUpdateTime1Jittered.addSecs(jitterSecs);
         infoUpdateTime2Jittered=infoUpdateTime2Jittered.addSecs(jitterSecs);
         infoUpdateTime3Jittered=infoUpdateTime3Jittered.addSecs(jitterSecs);
+    }
+
+    bool remotelyDefinedNameLoaded=loadRemotelyDefinedName();
+    if ((!remotelyDefinedNameLoaded) || infoName.isEmpty())
+    {
+        infoName = infoScannerType+"-"+infoSerialNumber;
     }
 
     loadCloudSettings();
@@ -360,6 +366,33 @@ void rdsConfiguration::removeRemotelyDefinedProtocols()
             }
         }
     }
+}
+
+
+bool rdsConfiguration::loadRemotelyDefinedName()
+{
+    if (netRemoteConfigFile.isEmpty())
+    {
+        return true;
+    }
+
+    if (!QFile::exists(netRemoteConfigFile))
+    {
+        RTI->log("ERROR: Unable to find remote configuration file.");
+        return false;
+    }
+
+    QSettings settings(netRemoteConfigFile, QSettings::IniFormat);
+
+    QString name=settings.value("ScannerNames/"+infoSerialNumber).toString();
+    if (name.isEmpty())
+    {
+        return false;
+    }
+
+    infoName=name;
+
+    return true;
 }
 
 
