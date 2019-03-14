@@ -1,7 +1,7 @@
 #ifndef YCA_GLOBAL_H
 #define YCA_GLOBAL_H
 
-#define YCA_VERSION "0.1b1"
+#define YCA_VERSION "0.1b2"
 #define YCA_ICON QIcon(":/images/ycaicon_256.png")
 
 

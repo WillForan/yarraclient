@@ -17,8 +17,6 @@ ycaThreadLog* ycaThreadLog::getInstance()
 ycaThreadLog::ycaThreadLog()
 {
 #ifndef YTL_DISABLED
-    logMutex.lock();
-
     QDir appDir(qApp->applicationDirPath());
     if (!appDir.exists("/log"))
     {
@@ -36,7 +34,7 @@ ycaThreadLog::ycaThreadLog()
         log("Renaming file and creating empty file.");
         logfile.flush();
 
-        if (!logfile.rename(logFilename + "_" + QDate::currentDate().toString("ddMMyyHHmmss")))
+        if (!logfile.rename(logFilename + "_" + QDateTime::currentDateTime().toString("ddMMyyHHmmss")))
         {
             // TODO: Error handling
         }
@@ -50,8 +48,6 @@ ycaThreadLog::ycaThreadLog()
     QString startEntry=formatLine("Yarra Cloud Agent started (V "+QString(YCA_VERSION)+")", YTL_INFO, YTL_HIGH);
     logfile.write(startEntry.toLatin1());
     logfile.flush();
-
-    logMutex.unlock();
 #endif
 }
 

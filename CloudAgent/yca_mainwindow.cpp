@@ -10,6 +10,8 @@
 #include "../CloudTools/yct_aws/qtaws.h"
 #include "yca_detailsdialog.h"
 
+#include <iostream>
+
 
 ycaWorker::ycaWorker()
 {
@@ -292,10 +294,16 @@ ycaMainWindow::ycaMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ycaMainWindow)
 {
+    std::cout << "-- Entering constructor" << std::endl;
+
     YTL->getInstance();
+
+    std::cout << "-- After logging instance" << std::endl;
 
     ui->setupUi(this);
     shuttingDown=false;
+
+    std::cout << "-- After logging instance" << std::endl;
 
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;

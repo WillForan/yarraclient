@@ -1,10 +1,13 @@
 #include "yca_mainwindow.h"
 #include "main.h"
+#include "yca_global.h"
 
 #include <QApplication>
 #include <QWidget>
 #include <QMessageBox>
 #include <QStyleFactory>
+
+#include <iostream>
 
 
 ycaApplication::ycaApplication(int &argc, char **argv, bool GUIenabled)
@@ -52,10 +55,13 @@ int main(int argc, char *argv[])
     bool triggerSubmission=false;
     bool triggerShow=false;
 
+    std::cout << "YarraCloud Agent v" << YCA_VERSION << std::endl;
+
     // If the application is already running, send a message instead of launching
     // another instance
     if (a.isRunning())
     {
+        std::cout << "Running YCA instance found" << std::endl;
         QString msg="";
 
         if (argc>1)
@@ -70,14 +76,18 @@ int main(int argc, char *argv[])
     }
     else
     {
+        std::cout << "Starting new instance" << std::endl;
+
         if (argc>1)
         {
             if (QString(argv[1])=="submit")
             {
+                std::cout << "Triggering job submission" << std::endl;
                 triggerSubmission=true;
             }
             if (QString(argv[1])=="show")
             {
+                std::cout << "Triggering window display" << std::endl;
                 triggerShow=true;
             }
         }
@@ -102,6 +112,8 @@ int main(int argc, char *argv[])
     {
         QTimer::singleShot(0, &w, SLOT(showNormal()));
     }
+
+    std::cout << "After constructor, prior to window execution" << std::endl;
     a.exec();
     a.setActivationWindow(0, false);
 
