@@ -79,9 +79,16 @@ void ycaDetailsDialog::setTaskDetails(ycaTask* task)
     }
     YCA_ADDROW("", "UUID",          task->uuid);
     YCA_ADDROW("", "TaskID",        task->taskID);
+    if (task->datasize!=0)
+    {
+        YCA_ADDROW("", "Size",          QString::number(task->datasize)+" MB");
+    }
     YCA_ADDROW("", "Status",        task->getStatus());
     YCA_ADDROW("", "Result",        task->getResult());
-    YCA_ADDROW("", "Cost",          "$ "+QString::number(task->cost,'g',2));
+    if (task->cost!=0)
+    {
+        YCA_ADDROW("", "Cost",          "$ "+QString::number(task->cost,'g',2));
+    }
 
     YCA_ADDROW("Performance",  "", "");
     if ((task->timeptCreated.isValid()) && (task->timeptCompleted.isValid()))
@@ -91,6 +98,17 @@ void ycaDetailsDialog::setTaskDetails(ycaTask* task)
     if ((task->timeptUploadBegin.isValid()) && (task->timeptUploadEnd.isValid()))
     {
         YCA_ADDROW("", "Upload",     getTimeDiff(&task->timeptUploadBegin, &task->timeptUploadEnd));
+    }
+    if ((task->timeptUploadBegin.isValid()) && (task->timeptUploadEnd.isValid()) && (task->datasize!=0))
+    {
+        double uploadSecs=task->timeptUploadBegin.msecsTo(task->timeptUploadEnd)/1000.;
+        if (uploadSecs==0)
+        {
+            // Avoid division by zero
+            uploadSecs=.001;
+        }
+        double uploadSpeed=task->datasize/uploadSecs;
+        YCA_ADDROW("", "Upload Speed", QString::number(uploadSpeed,'g',2)+" MB/sec");
     }
     if ((task->timeptProcessingCreated.isValid()) && (task->timeptProcessingEnd.isValid()))
     {
@@ -106,14 +124,14 @@ void ycaDetailsDialog::setTaskDetails(ycaTask* task)
     }
 
     YCA_ADDROW("Task Log", "", "");
-    if (task->timeptCreated.isValid())        { YCA_ADDROW("", "Created",        task->timeptCreated.toString());       }
-    if (task->timeptUploadBegin.isValid())    { YCA_ADDROW("", "UP Begin",   task->timeptUploadBegin.toString());   }
-    if (task->timeptUploadEnd.isValid())      { YCA_ADDROW("", "UP End",     task->timeptUploadEnd.toString());     }
-    if (task->timeptDownloadBegin.isValid())  { YCA_ADDROW("", "DOWN Begin", task->timeptDownloadBegin.toString()); }
-    if (task->timeptDownloadEnd.isValid())    { YCA_ADDROW("", "DOWN End",   task->timeptDownloadEnd.toString());   }
-    if (task->timeptStorageBegin.isValid())   { YCA_ADDROW("", "STORE Begin",  task->timeptStorageBegin.toString());  }
-    if (task->timeptStorageEnd.isValid())     { YCA_ADDROW("", "STORE End",    task->timeptStorageEnd.toString());    }
-    if (task->timeptCompleted.isValid())      { YCA_ADDROW("", "Completed",      task->timeptCompleted.toString());     }
+    if (task->timeptCreated.isValid())        { YCA_ADDROW("", "Created",     task->timeptCreated.toString());       }
+    if (task->timeptUploadBegin.isValid())    { YCA_ADDROW("", "UP Begin",    task->timeptUploadBegin.toString());   }
+    if (task->timeptUploadEnd.isValid())      { YCA_ADDROW("", "UP End",      task->timeptUploadEnd.toString());     }
+    if (task->timeptDownloadBegin.isValid())  { YCA_ADDROW("", "DOWN Begin",  task->timeptDownloadBegin.toString()); }
+    if (task->timeptDownloadEnd.isValid())    { YCA_ADDROW("", "DOWN End",    task->timeptDownloadEnd.toString());   }
+    if (task->timeptStorageBegin.isValid())   { YCA_ADDROW("", "STORE Begin", task->timeptStorageBegin.toString());  }
+    if (task->timeptStorageEnd.isValid())     { YCA_ADDROW("", "STORE End",   task->timeptStorageEnd.toString());    }
+    if (task->timeptCompleted.isValid())      { YCA_ADDROW("", "Completed",   task->timeptCompleted.toString());     }
 }
 
 

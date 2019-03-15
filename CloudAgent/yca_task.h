@@ -73,6 +73,7 @@ public:
     int         storageRetry;
 
     double      cost;
+    int         datasize;
 
     QDateTime   timeptCreated;
     QDateTime   timeptCompleted;

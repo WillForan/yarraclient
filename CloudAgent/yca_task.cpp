@@ -437,6 +437,8 @@ bool ycaTaskHelper::checkScanfiles(QString taskID, ycaTask* task)
     QString outPath=cloud->getCloudPath(YCT_CLOUDFOLDER_OUT);
     QDir outDir(outPath);
 
+    qint64 totalDatasize=0;
+
     bool fileMissing=false;
     for (int j=0; j<task->twixFilenames.count(); j++)
     {
@@ -444,7 +446,15 @@ bool ycaTaskHelper::checkScanfiles(QString taskID, ycaTask* task)
         {
             fileMissing=true;
         }
+        else
+        {
+            QFileInfo fileinfo(outDir.absoluteFilePath(task->twixFilenames.at(j)));
+            totalDatasize+=fileinfo.size();
+        }
     }
+
+    // Convert datasize to MB to avoid usage of qint64 type
+    task->datasize=totalDatasize/(1000*1000);
 
     if (fileMissing)
     {
@@ -484,6 +494,7 @@ bool ycaTaskHelper::readPHIData(QString filepath, ycaTask* task)
 
         task->shortcode    =phiFile.value("STATS/SHORTCODE","").toString();
         task->cost         =phiFile.value("STATS/COST",0).toDouble();
+        task->datasize     =phiFile.value("STATS/DATASIZE_MB",0).toInt();
 
         task->timeptCreated      =phiFile.value(YCT_TIMEPT_CREATED,QDateTime()).toDateTime();
         task->timeptCompleted    =phiFile.value(YCT_TIMEPT_COMPLETED,QDateTime()).toDateTime();
@@ -583,6 +594,13 @@ bool ycaTaskHelper::saveTimepoint(ycaTask* task, QString timepointID, QMutex* mu
         }
 
         phiFile.setValue(timepointID,QDateTime::currentDateTime().toString(Qt::ISODate));
+
+        // When saving the UPLOAD_BEGIN timepoint, also store the size of the data files.
+        // This has been calculated when checking the task for existance of all files.
+        if (timepointID==YCT_TIMEPT_UPLOAD_BEGIN)
+        {
+            phiFile.setValue("STATS/DATASIZE_MB",task->datasize);
+        }
 
         if (mutex!=0)
         {
