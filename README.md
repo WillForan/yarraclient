@@ -1,6 +1,6 @@
 # Yarra Client Package
 
-This repository contains the source code for the Yarra clients ORT, SAC, and RDS, which are part of the Yarra framework. The Yarra clients have been developed using the QT library (http://qt-project.org/). The current version used is 5.1.1. Please refer to the installation instructions provided on the QT homepage.
+This repository contains the source code for the Yarra clients ORT, SAC, RDS and Yarra Cloud Agent, which are all part of the Yarra framework. The Yarra clients have been developed using the Qt library (http://www.qt.io). The current version used is 5.6.3. Please refer to the installation instructions provided on the Qt homepage.
 
 ##License Information
 The Yarra framework is provided free of charge for use in research applications. It must not be used for diagnostic applications. The author takes no responsibility of any kind for the accuracy or integrity of the created data sets. No data created using the framework should be used to make diagnostic decisions. 
