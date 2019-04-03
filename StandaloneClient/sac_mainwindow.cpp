@@ -358,6 +358,26 @@ void sacMainWindow::on_sendButton_clicked()
         return;
     }
 
+    if (paramVisible)
+    {
+        int paramValue=ui->paramEdit->text().toInt();
+
+        if (paramValue>modeList.modes.at(selectedIndex)->paramMax)
+        {
+            QMessageBox::information(this, "Value out of range", "Parameter outside of allowed range (max value = "+
+                                     QString::number(modeList.modes.at(selectedIndex)->paramMax) +")." );
+            ui->paramEdit->setFocus();
+            return;
+        }
+        if (paramValue<modeList.modes.at(selectedIndex)->paramMin)
+        {
+            QMessageBox::information(this, "Value out of range", "Parameter outside of allowed range (min value = "+
+                                     QString::number(modeList.modes.at(selectedIndex)->paramMin) +")." );
+            ui->paramEdit->setFocus();
+            return;
+        }
+    }
+
     // TODO: For elastic modes, decide where the reconstruction should be done
 
     if (modeList.modes.at(selectedIndex)->computeMode!=ortModeEntry::OnPremise)
@@ -436,16 +456,6 @@ void sacMainWindow::on_sendButton_clicked()
     if (paramVisible)
     {
         task.paramValue=ui->paramEdit->text().toInt();
-
-        if (task.paramValue>modeList.modes.at(selectedIndex)->paramMax)
-        {
-            task.paramValue=modeList.modes.at(selectedIndex)->paramMax;
-        }
-        if (task.paramValue<modeList.modes.at(selectedIndex)->paramMin)
-        {
-            task.paramValue=modeList.modes.at(selectedIndex)->paramMin;
-        }
-
         task.scanFilename+=QString(RTI_SEPT_CHAR)+"P"+QString::number(task.paramValue);
     }
     else

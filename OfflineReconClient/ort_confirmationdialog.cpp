@@ -172,6 +172,24 @@ int ortConfirmationDialog::getEnteredParam()
 
 void ortConfirmationDialog::on_confirmButton_clicked()
 {
+    if (ui->paramEdit->text()!="")
+    {
+        int enteredValue=ui->paramEdit->text().toInt();
+
+        if (enteredValue>paramMax)
+        {
+            QMessageBox::information(this, "Value out of range", "Parameter outside of allowed range (max value = " + QString::number(paramMax) +")." );
+            ui->paramEdit->setFocus();
+            return;
+        }
+        if (enteredValue<paramMin)
+        {
+            QMessageBox::information(this, "Value out of range", "Parameter outside of allowed range (min value = " + QString::number(paramMin) +")." );
+            ui->paramEdit->setFocus();
+            return;
+        }
+    }
+
     confirmed=true;
     close();
 }
