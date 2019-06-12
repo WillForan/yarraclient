@@ -5,7 +5,7 @@
 #include "rds_runtimeinformation.h"
 
 // Definitions
-#define RDS_VERSION     "0.53b4"
+#define RDS_VERSION     "0.53b6"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -50,6 +50,8 @@
 #define RDS_SYNGODETECT_VE11U "C:/MedCom/MriProduct/inst/build_VE11U_label.txt"
 #define RDS_SYNGODETECT_VE11P "C:/MedCom/MriProduct/inst/build_VE11P_label.txt"
 #define RDS_SYNGODETECT_VE12U "C:/MedCom/MriProduct/inst/build_VE12U_label.txt"
+#define RDS_SYNGODETECT_VE11D "C:/MedCom/MriProduct/inst/build_VE11D_label.txt"
+#define RDS_SYNGODETECT_VE11E "C:/MedCom/MriProduct/inst/build_VE11E_label.txt"
 
 #define RDS_IMAGER_IP_3 "192.168.2.3"
 #define RDS_IMAGER_IP_2 "192.168.2.2"
