@@ -2,12 +2,37 @@
 #define RDS_ICONWINDOW_H
 
 #include <QDialog>
-
+#include <QProxyStyle>
 
 namespace Ui
 {
     class rdsIconWindow;
 }
+
+
+class rdsIconProxyStyle: public QProxyStyle
+{
+    Q_OBJECT
+public:
+    rdsIconProxyStyle(QStyle* style=0) : QProxyStyle(style)
+    {
+    }
+
+    rdsIconProxyStyle(const QString& key) : QProxyStyle(key)
+    {
+    }
+
+    virtual int pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option = 0, const QWidget* widget = 0 ) const
+    {
+        switch ( metric )
+        {
+        case QStyle::PM_SmallIconSize:
+            return 32;
+          default:
+            return QProxyStyle::pixelMetric( metric, option, widget );
+        }
+    }
+};
 
 
 class rdsIconWindow : public QDialog
@@ -23,6 +48,7 @@ public:
     void setError();
 
     void showStartupCommandsOption();
+    void showORTOption();
     void showCloudWindowOption();
 
 private:
@@ -36,11 +62,14 @@ private:
     QMovie* anim;
     bool    showStartupCommandsEntry;
     bool    showCloudWindowEntry;
+    bool    showORTEntry;
 
 private slots:
     void showStatusWindow();
     void showCloudAgent();
+    void startORTClient();
     void runStartupCommands();
+    void triggerTransferNow();
 
 };
 

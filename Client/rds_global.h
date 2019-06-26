@@ -5,7 +5,7 @@
 #include "rds_runtimeinformation.h"
 
 // Definitions
-#define RDS_VERSION     "0.53b6"
+#define RDS_VERSION     "0.54b1"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -78,7 +78,10 @@
 #define RDS_RETONERR(x) if (!x) return false;
 #define RDS_RETONERR_LOG(x,y) if (!x) { RTI->log(y); return false; };
 
-#define RDS_ICON QIcon(":/images/yarraicon.png")
+#define RDS_ICON      QIcon(":/images/yarraicon.png")
+#define ORT_ICON_MENU QIcon(":/images/orticon.png")
+#define YCA_ICON_MENU QIcon(":/images/ycaicon.png")
+#define CMD_ICON_MENU QIcon(":/images/startupicon.png")
 
 #define RTI rdsRuntimeInformation::getInstance()
 #define RTI_CONFIG  rdsRuntimeInformation::getInstance()->getConfigInstance()

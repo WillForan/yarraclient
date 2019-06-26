@@ -45,6 +45,8 @@ rdsIconWindow::rdsIconWindow(QWidget *parent) :
     }
 
     showStartupCommandsEntry=false;
+    showCloudWindowEntry=false;
+    showORTEntry=false;
     error=false;
 }
 
@@ -79,16 +81,37 @@ void rdsIconWindow::mouseReleaseEvent(QMouseEvent *event)
     if (event->button()==Qt::RightButton)
     {
         QMenu infoMenu(this);
-        infoMenu.addAction("Yarra RDS Client - Ver " + QString(RDS_VERSION));
+        infoMenu.setStyle(new rdsIconProxyStyle());
+        infoMenu.addAction("Yarra RDS Client - Version " + QString(RDS_VERSION));
         infoMenu.addSeparator();
-        infoMenu.addAction("Show Status Window...",this,SLOT(showStatusWindow()));
-        if (showCloudWindowEntry)
-        {
-            infoMenu.addAction("Show YarraCloud Agent...",this,SLOT(showCloudAgent()));
-        }
+
         if (showStartupCommandsEntry)
         {
-            infoMenu.addAction("Run Startup Commands",this,SLOT(runStartupCommands()));
+            QIcon icon = CMD_ICON_MENU;
+            infoMenu.addAction(icon,"Run Startup Commands",this,SLOT(runStartupCommands()));
+        }
+
+        {
+            QIcon icon = RDS_ICON;
+            infoMenu.addAction(icon,"Transfer Data Now",this,SLOT(triggerTransferNow()));
+        }
+
+        {
+            QIcon icon = RDS_ICON;
+            infoMenu.addAction(icon,"Show Status Window...",this,SLOT(showStatusWindow()));
+        }
+
+        if (showCloudWindowEntry)
+        {
+            QIcon icon = YCA_ICON_MENU;
+            infoMenu.addAction(icon,"Show YarraCloud Agent...",this,SLOT(showCloudAgent()));
+        }
+        infoMenu.addSeparator();
+
+        if (showORTEntry)
+        {
+            QIcon icon = ORT_ICON_MENU;
+            infoMenu.addAction(icon,"Offline Reconstruction Task...",this,SLOT(startORTClient()));
         }
 
         infoMenu.exec(this->mapToGlobal((event->pos())));
@@ -106,6 +129,13 @@ void rdsIconWindow::showStatusWindow()
 void rdsIconWindow::showCloudAgent()
 {
     QString cmd=qApp->applicationDirPath() + "/YCA.exe show";
+    QProcess::startDetached(cmd);
+}
+
+
+void rdsIconWindow::startORTClient()
+{
+    QString cmd=qApp->applicationDirPath() + "/ORT.exe";
     QProcess::startDetached(cmd);
 }
 
@@ -173,3 +203,13 @@ void rdsIconWindow::setError()
 }
 
 
+void rdsIconWindow::showORTOption()
+{
+    showORTEntry=true;
+}
+
+
+void rdsIconWindow::triggerTransferNow()
+{
+    RTI->getWindowInstance()->triggerManualUpdate();
+}

@@ -6,13 +6,15 @@ rdsConfiguration::rdsConfiguration()
 {
     // Read information about the system from the environment variables
     infoSerialNumber   =QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER",  "0");
-    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unknown");
+    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",   "Unknown");
 
     // Read information specifically for NumarisX
     if (QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME","")=="Numaris/X")
     {
         infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SerialNumber",  "0");
+
         // TODO: Find way to identify system type under NumarisX
+        // TODO: Call IDEA command to read system configuration on first run
         infoScannerType ="Vida";
     }
 

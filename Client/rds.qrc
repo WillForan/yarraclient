@@ -5,6 +5,9 @@
         <file>images/cai2rlogo.png</file>
         <file>images/topIcon.png</file>
         <file>images/topIcon_error.png</file>
-        <file>images/topIcon_run.gif</file>        
+        <file>images/topIcon_run.gif</file>
+        <file>images/orticon.png</file>
+        <file>images/ycaicon.png</file>
+        <file>images/startupicon.png</file>
     </qresource>
 </RCC>

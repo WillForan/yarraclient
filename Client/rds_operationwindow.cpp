@@ -117,12 +117,18 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         if (RTI_CONFIG->infoShowIcon)
         {
             if (!RTI_CONFIG->startCmds.isEmpty())
-            {
+            {                
                 iconWindow.showStartupCommandsOption();
             }
             if (RTI_CONFIG->cloudSupportEnabled)
             {
                 iconWindow.showCloudWindowOption();
+            }
+
+            // Only show the ORT launcher if the ORT client has been configured
+            if (QFile::exists(RTI->getAppPath() + "/ort.ini"))
+            {
+                iconWindow.showORTOption();
             }
 
             iconWindow.show();
@@ -335,6 +341,12 @@ void rdsOperationWindow::callManualUpdate()
 
         controlTimer.start();
     }
+}
+
+
+void rdsOperationWindow::triggerManualUpdate()
+{
+    QMetaObject::invokeMethod(this, "callManualUpdate", Qt::QueuedConnection);
 }
 
 

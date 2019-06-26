@@ -30,7 +30,9 @@ public:
 
     rdsIconWindow  iconWindow;
 
-public slots:
+    void triggerManualUpdate();
+
+public slots:    
     void callShutDown();
     void callImmediateShutdown();
     void callConfiguration();
