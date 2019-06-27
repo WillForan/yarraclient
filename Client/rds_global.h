@@ -5,7 +5,7 @@
 #include "rds_runtimeinformation.h"
 
 // Definitions
-#define RDS_VERSION     "0.54b1"
+#define RDS_VERSION     "0.54"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
