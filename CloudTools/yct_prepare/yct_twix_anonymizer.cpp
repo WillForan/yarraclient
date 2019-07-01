@@ -10,7 +10,7 @@
 #include "../yct_common.h"
 
 
-#define MAX_LINE_LENGTH 1024
+#define MAX_LINE_LENGTH 65536
 
 #define LOG(x) {std::cout << x << std::endl;}
 #define DBG(x) if (debug) {std::cout << x << std::endl;}
@@ -69,10 +69,12 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
 
     if (dumpProtocol)
     {
-        dumpFile.setFileName("protocol.dmp");
+        QString dumpFilename=twixFilename+".prot";
+
+        dumpFile.setFileName(dumpFilename);
         if (!dumpFile.open(QIODevice::ReadWrite | QIODevice::Text))
         {
-            LOG("ERROR: Unable to create dump file protocol.dmp");
+            LOG("ERROR: Unable to create dump file " << dumpFilename.toStdString());
             return false;
         }
     }
@@ -207,35 +209,53 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
     bool       waitingForSensitiveData=false;
     bool       terminateParsing=false;
     int        charsToRead=0;
+    //int      maxRead=0;
 
     while ((!file->atEnd()) && (file->pos()<headerEnd) && (!terminateParsing))
     {        
-        if (dumpProtocol)
-        {
-            dumpFile.write(line);
-        }
-
         isLineValid=false;
         lineStart=file->pos();
         charsToRead=MAX_LINE_LENGTH;
-        if ((uint32_t) lineStart+charsToRead>headerLength)
+        if (lineStart+charsToRead>=headerEnd)
         {
-            charsToRead=headerLength-lineStart;
+            charsToRead=headerEnd-lineStart;
         }
 
-        if (charsToRead>2)
+        if (charsToRead>0)
         {
-            line=file->readLine(charsToRead);
+            line=file->readLine(charsToRead+1);
 
-            if (line.size()<charsToRead)
+            if (dumpProtocol)
+            {
+                dumpFile.write(line);
+            }
+
+            //LOG("READ: " << line.size());
+
+            if (line.size()<MAX_LINE_LENGTH)
             {
                 isLineValid=true;
+
+                /*
+                if (line.size()>maxRead)
+                {
+                    maxRead=line.size();
+                }
+                */
+            }
+            else
+            {
+                LOG("ERROR: Incomplete line read (exceeds buffer size)");
+                LOG("ERROR: Anonymization not possible. Report error to Yarra team.");
+                //LOG("Chopped line: charsToRead=" << charsToRead << " actual: " << line.size());
+                //LOG(line.data())
+
+                return false;
             }
         }
         else
         {
             terminateParsing=true;
-
             //DBG("Stopped at position " + QString::number(lineEnd));
         }
         lineEnd=file->pos();
@@ -286,7 +306,7 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
             }
         }
 
-        if (((uint32_t) lineEnd>=headerLength) || (file->atEnd()))
+        if ((lineEnd>=headerEnd) || (file->atEnd()))
         {
             terminateParsing=true;
 
@@ -294,6 +314,8 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
             //DBG("Line start is " + QString::number(lineStart));
         }
     }
+
+    //LOG("INFO: Max line size = " << maxRead);
 
     return true;
 }
