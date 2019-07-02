@@ -5,7 +5,7 @@
 
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_ANONYMIZER_VER "0.2a"
+#define YCT_ANONYMIZER_VER "0.2b"
 
 
 class phiEntry
@@ -25,7 +25,8 @@ public:
 
     static QString getCSVHeader()
     {
-        return "Anonymized File, Original File, UUID, Patient Name, DOB, MRN, Processing Time\n";
+        // Create header with separator information, so that Excel is able to display the CSV correctly
+        return "sep=,\n\"Anonymized File\",\"Original File\",\"UUID\",\"Patient Name\",\"DOB\",\"MRN\",\"Processing Time\"\n";
     }
 
     QString getCSVLine()
