@@ -2,10 +2,9 @@
 #include <QDir>
 #include <QString>
 
-
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_ANONYMIZER_VER "0.2b"
+#define YCT_ANONYMIZER_VER "0.2b1"
 
 
 class phiEntry
@@ -45,18 +44,22 @@ public:
 
 int main(int argc, char *argv[])
 {
-    printf("\nYarra CloudTools - Batch Anonymizer %s\n", YCT_ANONYMIZER_VER);
-    printf("-----------------------------------------\n\n");
+    printf("\nYarra Client Tools - Batch Anonymizer %s\n", YCT_ANONYMIZER_VER);
+    printf("-------------------------------------------\n\n");
 
     if (argc < 3)
     {
         printf("Usage:    yct_anonymizer [input path] [output path] [optional: patient-name replacement]\n\n");
-        printf("Purpose:  Anonymizes all files located in [input path]. The anonymized files will be written\n");
-        printf("          into [output path]. Each anonymized file will be named by a unique ID (UUID). The\n");
-        printf("          patient name will be replaced by the UUID (while keeping the original length).\n");
+        printf("Purpose:  Anonymizes all Twix files located in [input path]. The anonymized files will be \n");
+        printf("          written into [output path]. Each anonymized file will be named by a unique ID (UUID).\n");
+        printf("          The patient name will be replaced by the UUID (while keeping the original length).\n");
         printf("          If a name is provided as 3rd parameter, this name will be used instead to replace\n");
         printf("          the patient name. A file in CSV format will be created (files.csv) that lists the\n");
         printf("          original and anonymized file names, as well as the removed PHI.\n");
+        printf("\n");
+        printf("Note:     Please use this tool with caution. Operation of the software is at the user's\n");
+        printf("          own risk. The authors take no responsibility of any kind.\n");
+
         return 0;
     }
     else
@@ -157,6 +160,10 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
+
+    printf("\n");
+    printf("Please use the data with caution!\n");
+    printf("The authors of this tool take no responsibility of any kind.\n");
 
     return 0;
 }

@@ -2,20 +2,20 @@
 #include <QDir>
 #include <QString>
 
-
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
+#define YCT_DUMPPROT_VER "0.1b1"
 
 
 int main(int argc, char *argv[])
 {
-    printf("\nYarra CloudTools - Dump Protocol\n");
-    printf("----------------------------------\n\n");
+    printf("\nYarra Client Tools - Dump Protocol %s\n",YCT_DUMPPROT_VER);
+    printf("----------------------------------------\n\n");
 
     if (argc < 2)
     {
         printf("Usage:    yct_dumpprot [twixfile]\n\n");
-        printf("Purpose:  Write the protocol from the Twix file into a text file (with extension .prot)\n");
+        printf("Purpose:  Extract the scan protocol from a Twix file into a text file (with extension .prot)\n");
         return 0;
     }
     else
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("Wrote protocol to .prot file.\n");
+    printf("Protocol written to .prot file.\n");
 
     return 0;
 }
