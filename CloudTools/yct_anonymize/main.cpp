@@ -4,7 +4,7 @@
 
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_ANONYMIZER_VER "0.2b1"
+#define YCT_ANONYMIZER_VER "0.2b3"
 
 
 class phiEntry
@@ -121,7 +121,6 @@ int main(int argc, char *argv[])
             qInfo() << fileInfo.fileName() << " --> " << destFilename;
 
             yctTWIXAnonymizer anonymizer;
-
             anonymizer.patientInformation.fillStr=uuidChars;
             if (!replaceName.isEmpty())
             {
@@ -138,6 +137,12 @@ int main(int argc, char *argv[])
             if (!anonymizer.processFile(outDir.absoluteFilePath(destFilename),"none.phi","","","","",false))
             {
                 qInfo() << "Error! Unable to anonymize file " << destFilename;
+
+                if (!QFile::remove(outDir.absoluteFilePath(destFilename)))
+                {
+                    qInfo() << "Error! Unable to remove file " << destFilename;
+                }
+
                 error=true;
                 break;
             }

@@ -24,6 +24,8 @@ yctTWIXAnonymizer::yctTWIXAnonymizer()
     dumpProtocol=false;
 
     fileVersion=UNKNOWN;
+    strictVersionChecking=true;
+    versionStringSeen=false;
 }
 
 
@@ -32,6 +34,7 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
                                     bool storePHI)
 {
     bool result=false;
+    versionStringSeen=false;
 
     // Clean the patient data - to be sure
     patientInformation.name       ="";
@@ -160,6 +163,12 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
         dumpFile.close();
     }
 
+    if (strictVersionChecking && !versionStringSeen)
+    {
+        LOG("ERROR: Version string not found. File invalid.");
+        return false;
+    }
+
     if (storePHI)
     {
         if (!checkAndStorePatientData(twixFilename, phiPath))
@@ -270,6 +279,14 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
                 // after a line break
                 result=analyzeFollowLine(&line);
 
+                if (result==PROCESSING_ERROR)
+                {
+                    LOG("Error while processing follow line:");
+                    LOG(line.data());
+
+                    return false;
+                }
+
                 if ((result==SENSITIVE_INFORMATION_CLEARED) || (result==NO_SENSITIVE_INFORMATION))
                 {
                     // Sensitive information found, continue normally for next line
@@ -280,6 +297,14 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
             {
                 // Process line
                 result=analyzeLine(&line);
+
+                if (result==PROCESSING_ERROR)
+                {
+                    LOG("Error while processing line:");
+                    LOG(line.data());
+
+                    return false;
+                }
 
                 if (result==SENSITIVE_INFORMATION_FOLLOWS)
                 {
@@ -316,7 +341,6 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
     }
 
     //LOG("INFO: Max line size = " << maxRead);
-
     return true;
 }
 
@@ -412,8 +436,32 @@ int yctTWIXAnonymizer::analyzeLine(QByteArray* line)
 
     if (line->indexOf("<ParamString.\"tPerfPhysiciansName\">", 0) > 0)
     {
-        expectedContent=CONTENT_NAME;
+        expectedContent=CONTENT_REFPHYSICIAN;
         return clearLine(line);
+    }
+
+    if (line->indexOf("<ParamString.\"SoftwareVersions\">", 0) > 0)
+    {
+        expectedContent=CONTENT_VERSIONSTRING;
+        return clearLine(line);
+    }
+
+    if (   (line->indexOf("HEADER.tPatientName")            > 0)
+        || (line->indexOf("IRIS.RECOMPOSE.tPatientName")    > 0)
+        || (line->indexOf("IRIS.RECOMPOSE.PatientBirthDay") > 0)
+        || (line->indexOf("IRIS.RECOMPOSE.PatientID")))
+    {
+        // These two entries don't contain the PHI
+        return NO_SENSITIVE_INFORMATION;
+    }
+
+    if (   (line->indexOf("PatientName")  > 0)
+        || (line->indexOf("PatientsName") > 0)
+        || (line->indexOf("BirthDay")     > 0)
+        || (line->indexOf("PatientID")    > 0))
+    {
+        // If unexpected fields with the patient name occur, raise an error
+        return PROCESSING_ERROR;
     }
 
     return NO_SENSITIVE_INFORMATION;
@@ -424,6 +472,18 @@ int yctTWIXAnonymizer::clearLine(QByteArray* line)
 {
     int startPos=line->indexOf("{ \"", 0);
     int endPos=line->indexOf("\"  }", 0);
+
+    if (endPos<0)
+    {
+        // For XA software, they removed one space char at the end
+        endPos=line->indexOf("\" }", 0);
+    }
+
+    if ((startPos < 0) && (endPos < 0) && (line->indexOf("{ }", 0) >= 0))
+    {
+        // Entry is empty with no value, i.e. { }
+        return SENSITIVE_INFORMATION_CLEARED;
+    }
 
     if (startPos < 0)
     {
@@ -471,6 +531,15 @@ int yctTWIXAnonymizer::clearLine(QByteArray* line)
         }
         break;
 
+    case CONTENT_REFPHYSICIAN:
+        DBG("Found ref physician: " + line->toStdString());
+
+        for (int i=startPos+3; i<endPos; i++)
+        {
+            line->replace(i,1,"Y");
+        }
+        break;
+
     case CONTENT_BIRTHDAY:
         DBG("Found birthday: " + line->toStdString());
 
@@ -493,6 +562,19 @@ int yctTWIXAnonymizer::clearLine(QByteArray* line)
         for (int i=startPos+3; i<endPos; i++)
         {
             line->replace(i,1,"0");
+        }
+        break;
+
+    case CONTENT_VERSIONSTRING:
+        DBG("Found VersionString: " + line->toStdString());
+        versionStringSeen=true;
+
+        if (strictVersionChecking)
+        {
+            if (!checkVersionString(QString(line->mid(startPos+3,endPos-(startPos+3)))))
+            {
+                return PROCESSING_ERROR;
+            }
         }
         break;
     }
@@ -571,6 +653,13 @@ int yctTWIXAnonymizer::analyzeFollowLine(QByteArray* line)
             }
             break;
 
+        case CONTENT_REFPHYSICIAN:
+            for (int i=startPos+1; i<endPos; i++)
+            {
+                line->replace(i,1,"Y");
+            }
+            break;
+
         case CONTENT_ID:
             for (int i=startPos+1; i<endPos; i++)
             {
@@ -581,6 +670,19 @@ int yctTWIXAnonymizer::analyzeFollowLine(QByteArray* line)
         case CONTENT_BIRTHDAY:
             line->replace(startPos+1,8,"20120101");
             break;
+
+        case CONTENT_VERSIONSTRING:
+            DBG("Found VersionString: " + line->toStdString());
+            versionStringSeen=true;
+
+            if (strictVersionChecking)
+            {
+                if (!checkVersionString(QString(line->mid(startPos+1,endPos-(startPos+1)))))
+                {
+                    return PROCESSING_ERROR;
+                }
+            }
+            break;
         }
 
         return SENSITIVE_INFORMATION_CLEARED;
@@ -588,4 +690,28 @@ int yctTWIXAnonymizer::analyzeFollowLine(QByteArray* line)
 
     // Senstive information still not found in this line
     return SENSITIVE_INFORMATION_FOLLOWS;
+}
+
+
+bool yctTWIXAnonymizer::checkVersionString(QString versionString)
+{
+    // Prevent processing of raw-data files from software versions that have
+    // not been validated (to ensure that Siemens didn't change anything in
+    // the header format that might be relevant for the anonymization)
+    // Unfortunately, there is no consistent way to test for the subversion
+    // as the baseline string is not included in the XA versions anymore.
+
+    if (versionString.contains("syngo MR XA10")) { return true; }
+    if (versionString.contains("syngo MR E11"))  { return true; }
+    if (versionString.contains("syngo MR D13"))  { return true; }
+    if (versionString.contains("syngo MR D11"))  { return true; }
+    if (versionString.contains("syngo MR B19"))  { return true; }
+    if (versionString.contains("syngo MR B17"))  { return true; }
+
+    // Special software versions of the Biograph mMR (for E11, the P has been dropped)
+    if (versionString.contains("syngo MR B20P")) { return true; }
+    if (versionString.contains("syngo MR B18P")) { return true; }
+
+    LOG("ERROR: Unknown software version '" << versionString.toStdString() << "'");
+    return false;
 }

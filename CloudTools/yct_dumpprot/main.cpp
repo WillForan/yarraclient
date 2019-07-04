@@ -4,7 +4,7 @@
 
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_DUMPPROT_VER "0.1b1"
+#define YCT_DUMPPROT_VER "0.1b3"
 
 
 int main(int argc, char *argv[])
@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
         yctTWIXAnonymizer anonymizer;
         anonymizer.testing=true;
         anonymizer.dumpProtocol=true;
+        anonymizer.setStrictVersionChecking(false);
 
         if (!anonymizer.processFile(filename,"","","","","",false))
         {

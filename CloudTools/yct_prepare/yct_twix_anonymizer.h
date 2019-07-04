@@ -58,9 +58,11 @@ public:
 
     enum ContentType
     {
-        CONTENT_NAME     = 0,
-        CONTENT_BIRTHDAY = 1,
-        CONTENT_ID       = 2
+        CONTENT_NAME          = 0,
+        CONTENT_BIRTHDAY      = 1,
+        CONTENT_ID            = 2,
+        CONTENT_VERSIONSTRING = 3,
+        CONTENT_REFPHYSICIAN  = 4
     };
 
     yctTWIXAnonymizer();
@@ -81,10 +83,22 @@ public:
     bool    testing;
     bool    dumpProtocol;
 
+    bool    strictVersionChecking;
+    void    setStrictVersionChecking(bool useStrictChecking);
+    bool    checkVersionString(QString versionString);
+    bool    versionStringSeen;
+
     QFile   dumpFile;
 
     yctPatientInformation patientInformation;
 
 };
+
+
+inline void yctTWIXAnonymizer::setStrictVersionChecking(bool useStrictChecking)
+{
+    strictVersionChecking=useStrictChecking;
+}
+
 
 #endif // YCTTWIXANONYMIZER_H
