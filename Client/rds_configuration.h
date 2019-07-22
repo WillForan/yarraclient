@@ -52,6 +52,9 @@ public:
     QTime   infoUpdateTime2Jittered;
     QTime   infoUpdateTime3Jittered;
 
+    int     infoRAIDTimeout;
+    int     infoCopyTimeout;
+
     int     netMode;
     QString netDriveBasepath;
     QString netDriveReconnectCmd;

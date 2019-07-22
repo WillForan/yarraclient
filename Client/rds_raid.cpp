@@ -148,7 +148,7 @@ rdsRaid::~rdsRaid()
 }
 
 
-bool rdsRaid::callRaidTool(QStringList command, QStringList options)
+bool rdsRaid::callRaidTool(QStringList command, QStringList options, int timeout)
 {
     // Clear the output buffer
     raidToolOutput.clear();
@@ -173,7 +173,7 @@ bool rdsRaid::callRaidTool(QStringList command, QStringList options)
 
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
-    timeoutTimer.setInterval(RDS_PROC_TIMEOUT);
+    timeoutTimer.setInterval(timeout);
     QEventLoop q;
     connect(myProcess, SIGNAL(finished(int , QProcess::ExitStatus)), &q, SLOT(quit()));
     connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
@@ -191,7 +191,7 @@ bool rdsRaid::callRaidTool(QStringList command, QStringList options)
     {
         timeoutTimer.stop();
         RTI->log("Warning: QEventLoop returned too early. Starting secondary loop.");
-        while ((myProcess->state()==QProcess::Running) && (ti.elapsed()<RDS_PROC_TIMEOUT))
+        while ((myProcess->state()==QProcess::Running) && (ti.elapsed()<timeout))
         {
             RTI->processEvents();
             Sleep(RDS_SLEEP_INTERVAL);
@@ -322,8 +322,16 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
         }
     }
 
+    int timeout=RDS_RAIDSTORE_TIMEOUT;
+
+#ifdef YARRA_APP_RDS
+    // The RDS tool allows overwriting the default process timeout for store events
+    // because writing the files can take a long time for very large scans
+    timeout=RTI_CONFIG->infoRAIDTimeout;
+#endif
+
     // Call Raidtool to safe the file
-    if (!callRaidTool(cmd, opt))
+    if (!callRaidTool(cmd, opt,timeout))
     {
         // If it fails (e.g. due to timeout), check if a partially written file exist
         // This file needs to be deleted because it would be copied to the directory

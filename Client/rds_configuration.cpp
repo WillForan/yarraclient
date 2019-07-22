@@ -62,6 +62,9 @@ void rdsConfiguration::loadConfiguration()
     infoJitterTimes       =settings.value("General/JitterTimes",        false).toBool();
     infoJitterWindow      =settings.value("General/JitterWindow",       1).toInt();
 
+    infoRAIDTimeout       =settings.value("General/RAIDTimeout",        RDS_RAIDSTORE_TIMEOUT).toInt();
+    infoCopyTimeout       =settings.value("General/CopyTimeout",        RDS_COPY_TIMEOUT).toInt();
+
     netMode               =settings.value("Network/Mode",               NETWORKMODE_DRIVE).toInt();
     netDriveBasepath      =settings.value("Network/DriveBasepath",      "").toString();
     netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd",  "").toString();

@@ -5,11 +5,12 @@
 #include "rds_runtimeinformation.h"
 
 // Definitions
-#define RDS_VERSION     "0.55b1"
+#define RDS_VERSION     "0.55b2"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
-#define RDS_PROC_TIMEOUT         1800000
+#define RDS_PROC_TIMEOUT         600000
+#define RDS_RAIDSTORE_TIMEOUT    3600000
 #define RDS_COPY_TIMEOUT         3600000
 #define RDS_TIMERINTERVAL        60000
 #define RDS_SLEEP_INTERVAL       10

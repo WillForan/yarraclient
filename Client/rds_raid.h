@@ -115,7 +115,7 @@ protected:
     int  getLPFI();
     void setLPFI(int value);
 
-    bool callRaidTool(QStringList command, QStringList options);
+    bool callRaidTool(QStringList command, QStringList options, int timeout=RDS_PROC_TIMEOUT);
 
     QStringList raidToolOutput;
 

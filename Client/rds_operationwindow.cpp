@@ -88,7 +88,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         control.setStartTime();
         updateInfoUI();
 
-        log.log("System "+config.infoName+" / Serial # "+config.infoSerialNumber);        
+        log.log("System "+config.infoName+" / Serial # "+config.infoSerialNumber);
 
         // Send the version number and name along with the boot notification
         QString dataString="<data>";
@@ -137,6 +137,16 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
             {
                 iconWindow.setError();
             }
+        }
+
+        // Indicate usage of custom timeouts
+        if (RTI_CONFIG->infoRAIDTimeout!=RDS_RAIDSTORE_TIMEOUT)
+        {
+            log.log("Using custom timeout for RAID store: "+QString::number(RTI_CONFIG->infoRAIDTimeout)+" ms");
+        }
+        if (RTI_CONFIG->infoCopyTimeout!=RDS_COPY_TIMEOUT)
+        {
+            log.log("Using custom timeout for network copy: "+QString::number(RTI_CONFIG->infoCopyTimeout)+" ms");
         }
 
         if ((isFirstRun) && (!RTI_CONFIG->startCmds.isEmpty()))

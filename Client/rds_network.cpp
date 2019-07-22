@@ -293,6 +293,7 @@ bool rdsNetwork::copyFile()
             RTI->log("Appending time stamp to filename: " + destName);
         }
 
+        int timeout=RDS_COPY_TIMEOUT;
 
 #ifdef YARRA_APP_RDS
         // Calculate the MD5 checksum prior to copying to diagnose sporadic file corruptions.
@@ -301,6 +302,10 @@ bool rdsNetwork::copyFile()
             QString checksum=rdsChecksum::getChecksum(sourceName);
             RTI->log("Local MD5 checksum is " + checksum);
         }
+
+        // Overwrite the default timeout for the copy operation with a user setting (if not defined,
+        // it will just use the default value)
+        timeout=RTI_CONFIG->infoCopyTimeout;
 #endif
 
         bool copyError=false;
@@ -330,7 +335,7 @@ bool rdsNetwork::copyFile()
                 RTI->log("Warning: QEventLoop returned too early during copy. Starting secondary loop.");
 
                 // Wait until copying has finished, but restrict the waiting to 1 hour max
-                while ((!copyThread.isFinished()) && (ti.elapsed()<RDS_COPY_TIMEOUT))
+                while ((!copyThread.isFinished()) && (ti.elapsed()<timeout))
                 {
                     RTI->processEvents();
                     Sleep(RDS_SLEEP_INTERVAL);
