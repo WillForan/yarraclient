@@ -234,6 +234,7 @@ bool rdsRaid::callRaidTool(QStringList command, QStringList options, int timeout
     {
         // The process timeed out. Probably some error occured.
         RTI->log("ERROR: Timeout during call of RaidTool!");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Process timeout during RaidTool call");
     }
     else
     {
@@ -287,9 +288,11 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
     {
         RTI->log("Export file name already exists in queue directory: " + filename);
         RTI->log("Overwriting file.");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Warning, "File already exists in queue dir");
 
         if (!queueDir.remove(filename))
         {
+            RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Unable to overwrite file in queue dir");
             RTI->log("Error overwriting file! Files seems locked. Canceling.");
             return false;
         }
@@ -353,7 +356,8 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
     if (!parseOutputFileExport())
     {
         RTI->log("ERROR: File transfer from RAID was not successful. Retrying in 2 minutes.");
-        RTI_CONTROL->setExplicitUpdate(RDS_UPDATETIME_RAIDRETRY);
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Transfer from RAID not successful. Retry in 2min.");
+        RTI_CONTROL->setExplicitUpdate(RDS_UPDATETIME_RAIDRETRY);        
         return false;
     }
 
@@ -361,6 +365,7 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
     if (!queueDir.exists())
     {
         RTI->log("Error: Saved RAID file not found: " + filename);
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Saved RAID file not found");
         return false;
     }
 
@@ -388,6 +393,7 @@ bool rdsRaid::parseOutputFileExport()
         if (raidToolOutput.at(i).contains(RDS_RAID_ERROR_INIT))
         {
             RTI->log("Error initializing RAID access.");
+            RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Error initializing RAID access");
             isSuccess=false;
             break;
         }
@@ -395,6 +401,7 @@ bool rdsRaid::parseOutputFileExport()
         if (raidToolOutput.at(i).contains(RDS_RAID_ERROR_FILE))
         {
             RTI->log("Error finding file on RAID.");
+            RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Error finding file on RAID");
             isSuccess=false;
             break;
         }
@@ -402,6 +409,7 @@ bool rdsRaid::parseOutputFileExport()
         if (raidToolOutput.at(i).contains(RDS_RAID_ERROR_DIR))
         {
             RTI->log("Error reading RAID directory.");
+            RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Error reading RAID directory");
             isSuccess=false;
             break;
         }
@@ -409,6 +417,7 @@ bool rdsRaid::parseOutputFileExport()
         if (raidToolOutput.at(i).contains(RDS_RAID_ERROR_COPY))
         {
             RTI->log("Error copying RAID file.");
+            RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Error copying RAID file");
             isSuccess=false;
             break;
         }
@@ -451,13 +460,18 @@ bool rdsRaid::readRaidList()
         opt << "-v";
     }
 
-    RDS_RETONERR_LOG( callRaidTool(cmd, opt), "Reading RAID directory failed. Canceling." );
+    if (!callRaidTool(cmd, opt))
+    {
+        RTI->log("Reading RAID directory failed. Canceling.");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Reading RAID failed");
+        return false;
+    };
 
     // Parse the raid output
     if (!parseOutputDirectory())
     {
         RTI->log("Reading the RAID directory failed.  Retrying in 2 minutes.");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Parser error");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Parser error. Retry in 2min");
         RTI_CONTROL->setExplicitUpdate(RDS_UPDATETIME_RAIDRETRY);
         return false;
     }
@@ -506,6 +520,7 @@ bool rdsRaid::parseOutputDirectory()
         if (raidToolOutput.at(i).contains(RDS_RAID_ERROR_INIT))
         {
             RTI->log("Error initializing RAID access.");
+            RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Error initializing RAID access");
             isSuccess=false;
             break;
         }
@@ -513,6 +528,7 @@ bool rdsRaid::parseOutputDirectory()
         if (raidToolOutput.at(i).contains(RDS_RAID_ERROR_DIR))
         {
             RTI->log("Error reading RAID directory.");
+            RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Error reading RAID directory");
             isSuccess=false;
             break;
         }
@@ -525,6 +541,7 @@ bool rdsRaid::parseOutputDirectory()
             {
                 RTI->log("ERROR: RAID header found twice. Something is wrong with the RAID directory.");
                 RTI->log("ERROR: Canceling.");
+                RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "RAID header found twice");
                 return false;
             }
 
@@ -601,6 +618,7 @@ bool rdsRaid::parseOutputDirectory()
                 RTI->log("ERROR: Parsing the RAID directory was not successful.");
                 RTI->log("ERROR: Conversion error for fileID: " + temp);
                 RTI->log("ERROR: Original line: " + origLine);
+                RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Unable to parse RAID succesfully");
                 return false;
             }
 
@@ -646,6 +664,7 @@ bool rdsRaid::parseOutputDirectory()
             {
                 RTI->log("ERROR: Parsing the RAID directory was not successful.");
                 RTI->log("ERROR: Conversion error for measID: " + temp);
+                RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Unable to parse RAID (conv error measID)");
                 return false;
             }
 
@@ -862,7 +881,7 @@ bool rdsRaid::createExportList()
 
 bool rdsRaid::anonymizeCurrentFile()
 {
-    // NOTE: On VD11+, RaidTool does the job for us
+    // NOTE: On VD11 and newer, the RaidTool does the job for us
     if ((RTI->isSyngoVDLine()) || (RTI->isSyngoVELine()) || (RTI->isSyngoXALine()))
     {
         return true;
@@ -932,6 +951,7 @@ bool rdsRaid::processTotalExportList()
         if (RTI->isPostponementRequested())
         {
             RTI->log("Received postponement request. Stopping update.");
+            RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Success, "Postpone requested");
             break;
         }
     }
@@ -972,6 +992,7 @@ bool rdsRaid::exportScanFromList()
         RTI->log("ERROR: Needed    = " + QString::number(getRaidEntry(currentRaidIndex)->size));
         RTI->log("ERROR: Available = " + QString::number(RTI->getFreeDiskSpace()));
         RTI->showOperationWindow();
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::FatalError, "Not enough disk space");
         return false;
     }
 

@@ -5,13 +5,13 @@
 rdsConfiguration::rdsConfiguration()
 {
     // Read information about the system from the environment variables
-    infoSerialNumber   =QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER",  "0");
-    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",   "Unknown");
+    infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER", "0");
+    infoScannerType =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",  "Unknown");
 
     // Read information specifically for NumarisX
     if (QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME","")=="Numaris/X")
     {
-        infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SerialNumber",  "0");
+        infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SerialNumber", "0");
 
         // TODO: Find way to identify system type under NumarisX
         // TODO: Call IDEA command to read system configuration on first run
@@ -119,8 +119,14 @@ void rdsConfiguration::loadConfiguration()
         infoUpdateTime3Jittered=infoUpdateTime3Jittered.addSecs(jitterSecs);
     }
 
-    bool remotelyDefinedNameLoaded=loadRemotelyDefinedName();
-    if ((!remotelyDefinedNameLoaded) || infoName.isEmpty())
+    // Loads the remotely defined name and overwrites the locally defined name
+    // if a name has been defined for the serial number of the system (if not,
+    // the local name will be kept).
+    loadRemotelyDefinedName();
+
+    // Make sure that the name is never empty (this would be the case if no
+    // remote name has been defined and no local name has been defined).
+    if (infoName.isEmpty())
     {
         infoName = infoScannerType+"-"+infoSerialNumber;
     }
@@ -389,14 +395,13 @@ bool rdsConfiguration::loadRemotelyDefinedName()
 
     QSettings settings(netRemoteConfigFile, QSettings::IniFormat);
 
-    QString name=settings.value("ScannerNames/"+infoSerialNumber).toString();
+    QString name=settings.value("ScannerNames/"+infoSerialNumber,"").toString();
     if (name.isEmpty())
     {
         return false;
     }
 
     infoName=name;
-
     return true;
 }
 

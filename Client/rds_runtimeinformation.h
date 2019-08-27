@@ -23,35 +23,34 @@ public:
         RDS_OPERATION
     };
 
-    #define RDS_SYNGOVERSIONS_COUNT 22
-
     enum rdsSyngoVersions
     {
         RDS_INVALID = -1,
-        RDS_VB13A   =  0,
-        RDS_VB15A   =  1,
-        RDS_VB17A   =  2,
-        RDS_VD11A   =  3,
-        RDS_VD11D   =  4,
-        RDS_VD13A   =  5,
-        RDS_VD13C   =  6,
-        RDS_VB18P   =  7,
-        RDS_VB19A   =  8,
-        RDS_VB20P   =  9,
-        RDS_VD13D   =  10,
-        RDS_VE11A   =  11,
-        RDS_VD13B   =  12,
-        RDS_VE11B   =  13,
-        RDS_VE11C   =  14,
-        RDS_VE11U   =  15,
-        RDS_VE11P   =  16,
-        RDS_XA10A   =  17,
-        RDS_VB19B   =  18,
-        RDS_XA11A   =  19,
-        RDS_VE12U   =  20,
-        RDS_XA11B   =  21,
-        RDS_VE11D   =  22,
-        RDS_VE11E   =  23
+        RDS_VB13A,
+        RDS_VB15A,
+        RDS_VB17A,
+        RDS_VD11A,
+        RDS_VD11D,
+        RDS_VD13A,
+        RDS_VD13C,
+        RDS_VB18P,
+        RDS_VB19A,
+        RDS_VB20P,
+        RDS_VD13D,
+        RDS_VE11A,
+        RDS_VD13B,
+        RDS_VE11B,
+        RDS_VE11C,
+        RDS_VE11U,
+        RDS_VE11P,
+        RDS_XA10A,
+        RDS_VB19B,
+        RDS_XA11A,
+        RDS_VE12U,
+        RDS_XA11B,
+        RDS_VE11D,
+        RDS_VE11E,
+        RDS_SYNGOVERSIONS_COUNT
     };
 
     enum rdsSyngoLines

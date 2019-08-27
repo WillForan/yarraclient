@@ -15,12 +15,12 @@ rdsDebugWindow::rdsDebugWindow(QWidget *parent) :
 
     setWindowIcon(RDS_ICON);
 
-    for (int i=0; i<RDS_SYNGOVERSIONS_COUNT; i++)
+    for (int i=0; i<int(rdsRuntimeInformation::RDS_SYNGOVERSIONS_COUNT); i++)
     {
         ui->syngoBox->addItem(RTI->getSyngoMRVersionString(i));
     }
 
-    ui->syngoBox->setCurrentIndex(RDS_SYNGOVERSIONS_COUNT-4);
+    ui->syngoBox->setCurrentIndex(int(rdsRuntimeInformation::RDS_VE11C));
 }
 
 

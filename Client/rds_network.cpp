@@ -38,8 +38,7 @@ bool rdsNetwork::openConnection()
 {
     queueDir.refresh();
 
-    // Either open FTP connection or check connection to network drive
-
+    // Open connection to network drive
     if (RTI_CONFIG->isNetworkModeDrive())
     {
         // Call reconnect cmd entered into configuration
