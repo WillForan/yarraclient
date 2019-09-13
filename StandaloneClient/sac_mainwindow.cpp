@@ -36,6 +36,7 @@ sacMainWindow::sacMainWindow(QWidget *parent, bool isConsole) :
     task.taskCreationTime=QDateTime::currentDateTime();
     task.paramValue=0;
     paramVisible=false;
+    additionalFilesVisible=false;
 
     ui->setupUi(this);
 
@@ -255,7 +256,7 @@ bool sacMainWindow::showCloudProblem(QString text)
 
 void sacMainWindow::on_selectFileButton_clicked()
 {
-    QString newFilename=QFileDialog::getOpenFileName(this, "Select Measurement File...", QString(), "TWIX rawdata (*.dat)");
+    QString newFilename=QFileDialog::getOpenFileName(this, "Select Measurement File...", QString(), "Twix Raw Data (*.dat)");
     QFileInfo fileInfo = QFileInfo(newFilename);
 
     if (newFilename.length()==0)
@@ -712,6 +713,7 @@ void sacMainWindow::on_modeCombobox_currentIndexChanged(int index)
     {
         ui->paramEdit->setVisible(false);
         ui->paramLabel->setVisible(false);
+        ui->additionalFilesGroupbox->setVisible(false);
 
         QFont accFont=ui->accLabel->font();
         accFont.setBold(false);
@@ -726,14 +728,23 @@ void sacMainWindow::on_modeCombobox_currentIndexChanged(int index)
         ui->paramLabel->setText(modeList.modes.at(index)->paramLabel+":");
         ui->paramEdit->setText(QString::number(modeList.modes.at(index)->paramDefault));
         paramVisible=true;
-        updateDialogHeight();
     }
     else
     {
         ui->paramEdit->setVisible(false);
         ui->paramLabel->setVisible(false);
         paramVisible=false;
-        updateDialogHeight();
+    }
+
+    if (modeList.modes.at(index)->requestAdditionalFiles)
+    {
+        ui->additionalFilesGroupbox->setVisible(true);
+        additionalFilesVisible=true;
+    }
+    else
+    {
+        ui->additionalFilesGroupbox->setVisible(false);
+        additionalFilesVisible=false;
     }
 
     if (modeList.modes.at(index)->computeMode==ortModeEntry::OnPremise)
@@ -750,6 +761,8 @@ void sacMainWindow::on_modeCombobox_currentIndexChanged(int index)
     QFont accFont=ui->accLabel->font();
     accFont.setBold(modeList.modes.at(index)->requiresACC);
     ui->accLabel->setFont(accFont);
+
+    updateDialogHeight();
 }
 
 
@@ -986,11 +999,16 @@ void sacMainWindow::analyzeDatFile(QString filename, QString& detectedPatname, Q
 
 void sacMainWindow::updateDialogHeight()
 {
-    int newHeight=432;
+    int newHeight=562;
 
     if (!paramVisible)
     {
-        newHeight=402;
+        newHeight-=30;
+    }
+
+    if (!additionalFilesVisible)
+    {
+        newHeight-=130;
     }
 
     setMaximumHeight(newHeight);
@@ -1324,4 +1342,18 @@ bool sacMainWindow::readBatchFile(QString fileName, QStringList& files, QStringL
     }
 
     return true;
+}
+
+
+void sacMainWindow::on_clearAdditionalFilesButton_clicked()
+{
+    task.additionalFiles.clear();
+    ui->additonalFilesListwidget->clear();
+}
+
+
+void sacMainWindow::on_selectAdditionalFilesButton_clicked()
+{
+    QStringList filenames=QFileDialog::getOpenFileNames(this, "Select Additional Files...", QString(), "Twix Raw Data (*.dat)");
+    ui->additonalFilesListwidget->addItems(filenames);
 }

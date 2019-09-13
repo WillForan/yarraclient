@@ -2,6 +2,7 @@
 #define SAC_MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStringList>
 #include "sac_network.h"
 #include "../OfflineReconClient/ort_modelist.h"
 #include "../Client/rds_log.h"
@@ -20,23 +21,24 @@ namespace Ui
 
 struct Task
 {
-    QString   taskID;
-    QString   scanFilename;
-    int       paramValue;
-    QString   patientName;
-    QString   accNumber;
-    QString   mode;
-    QString   modeReadable;
-    QString   notification;
-    QString   taskFilename;
-    QString   lockFilename;
-    QString   protocolName;
-    QDateTime taskCreationTime;
-    qint64    scanFileSize;
+    QString     taskID;
+    QString     scanFilename;
+    int         paramValue;
+    QString     patientName;
+    QString     accNumber;
+    QString     mode;
+    QString     modeReadable;
+    QString     notification;
+    QString     taskFilename;
+    QString     lockFilename;
+    QString     protocolName;
+    QDateTime   taskCreationTime;
+    qint64      scanFileSize;
 
-    QString   uuid;
-    bool      cloudReconstruction;
+    QString     uuid;
+    bool        cloudReconstruction;
 
+    QStringList additionalFiles;
 };
 
 
@@ -70,6 +72,7 @@ public:
     int defaultMode;
 
     bool paramVisible;
+    bool additionalFilesVisible;
 
     QString filename;
 
@@ -103,6 +106,10 @@ private slots:
     void showConfiguration();
     void showBatchDialog();
     void showFirstConfiguration();
+
+    void on_clearAdditionalFilesButton_clicked();
+
+    void on_selectAdditionalFilesButton_clicked();
 
 private:
     Ui::sacMainWindow *ui;

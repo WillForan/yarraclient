@@ -23,6 +23,7 @@ ortModeEntry::ortModeEntry()
     minimumSizeMB=1024;
     requiredServerType="";
     computeMode=OnPremise;
+    requestAdditionalFiles=false;
 
     paramLabel="";
     paramDescription="";
@@ -147,11 +148,12 @@ bool ortModeList::readModeList()
             QStringList tempList=modeFileIni.value(modeName+"/ConfirmationMail", "").toStringList();
             modes.at(i)->mailConfirmation=tempList.join(",");
 
-            modes.at(i)->requiresACC       =modeFileIni.value(modeName+"/RequiresACC",        true).toBool();
-            modes.at(i)->requiresAdjScans  =modeFileIni.value(modeName+"/RequiresAdjScans",   false).toBool();
-            modes.at(i)->minimumSizeMB     =modeFileIni.value(modeName+"/MinimumSizeMB",      ORT_MINSIZEMB).toDouble();
-            modes.at(i)->requiredServerType=modeFileIni.value(modeName+"/RequiredServerType", "").toString();
-            modes.at(i)->computeMode       =ortModeEntry::OnPremise;
+            modes.at(i)->requiresACC           =modeFileIni.value(modeName+"/RequiresACC",        true).toBool();
+            modes.at(i)->requiresAdjScans      =modeFileIni.value(modeName+"/RequiresAdjScans",   false).toBool();
+            modes.at(i)->minimumSizeMB         =modeFileIni.value(modeName+"/MinimumSizeMB",      ORT_MINSIZEMB).toDouble();
+            modes.at(i)->requiredServerType    =modeFileIni.value(modeName+"/RequiredServerType", "").toString();
+            modes.at(i)->requestAdditionalFiles=modeFileIni.value(modeName+"/RequestAdditionalFiles", false).toBool();
+            modes.at(i)->computeMode           =ortModeEntry::OnPremise;
 
             // Read first user parameter
             modes.at(i)->paramLabel      =modeFileIni.value(modeName+"/ParamLabel",       "").toString();

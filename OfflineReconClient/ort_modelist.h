@@ -25,7 +25,8 @@ public:
     bool        requiresAdjScans;
     double      minimumSizeMB;
     QString     requiredServerType;
-    ComputeMode computeMode;
+    ComputeMode computeMode; 
+    bool        requestAdditionalFiles;
 
     // User selectable parameter 1
     QString     paramLabel;
