@@ -39,6 +39,7 @@ struct Task
     bool        cloudReconstruction;
 
     QStringList additionalFiles;
+    QStringList additionalFilesOriginalName;
 };
 
 
@@ -91,6 +92,7 @@ public:
     bool submitBatch(QStringList files, QStringList modes, QString notify, TaskPriority priority);
     void updateDialogHeight();
     bool readBatchFile(QString fileName, QStringList& files, QStringList& modes, QString& notify, TaskPriority& priority);
+    bool copyAdditionalFiles(QString taskID);
 
     bool processCloudRecon();
     bool showCloudProblem(QString text);
@@ -113,8 +115,8 @@ private slots:
 
 private:
     Ui::sacMainWindow *ui;
-
     ortReturnOnFocus returnFocusHelper;
+    QString additionalFilesError;
 };
 
 

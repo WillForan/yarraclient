@@ -161,9 +161,14 @@ int yctAPI::readModeList(ortModeList* modeList)
     for (int i=0; i<jsonReply.array().count(); i++)
     {
         QJsonObject jsonObject=jsonReply.array()[i].toObject();
-        QStringList keys = jsonObject.keys();
+        QStringList keys=jsonObject.keys();
 
         ortModeEntry* newEntry=new ortModeEntry();
+
+        // Requestion additional files is not supported for cloud recons at the moment,
+        // because we cannot guarantee that these files do not contain PHI (if non-Twix
+        // files are selected)
+        newEntry->requestAdditionalFiles=false;
 
         foreach(QString key, keys)
         {

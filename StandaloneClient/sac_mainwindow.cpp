@@ -2,6 +2,7 @@
 
 #include <QtWidgets>
 #include <QtCore>
+#include <QFileInfo>
 
 #include "sac_mainwindow.h"
 #include "sac_global.h"
@@ -535,14 +536,14 @@ void sacMainWindow::on_sendButton_clicked()
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.exec();
-        }
-        else
-        {
-            if (!generateTaskFile(task))
-            {
-                // Task-file creation failed, so remove scan file
-                QFile::remove(network.serverDir.absoluteFilePath(task.scanFilename));
 
+            return;
+        }
+
+        if (modeList.modes.at(selectedIndex)->requestAdditionalFiles)
+        {
+            if (!copyAdditionalFiles(task.taskID))
+            {
                 copyDialog.close();
                 this->show();
                 this->activateWindow();
@@ -550,26 +551,87 @@ void sacMainWindow::on_sendButton_clicked()
 
                 QMessageBox msgBox(this);
                 msgBox.setWindowTitle("Transfer Error");
-                msgBox.setText("The task file could not be created on the server. Refer to the log file for further information.\n\nThe reconstruction task will not be performed.");
+                msgBox.setText("The following problem occurred while preparing the data:\n\n" + additionalFilesError + "\n\nThe reconstruction task will not be performed.");
                 msgBox.setIcon(QMessageBox::Critical);
                 msgBox.setStandardButtons(QMessageBox::Ok);
                 msgBox.exec();
-            }
-            else
-            {
-                copyDialog.close();
-                this->show();
-                this->activateWindow();
-                RTI->processEvents();
 
-                QMessageBox msgBox(this);
-                msgBox.setWindowTitle("Task Submitted");
-                msgBox.setText("The reconstruction task has successfully been sent to the Yarra server.");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.exec();
+                return;
             }
         }
+
+        if (!generateTaskFile(task))
+        {
+            // Task-file creation failed, so remove scan file
+            QFile::remove(network.serverDir.absoluteFilePath(task.scanFilename));
+
+            copyDialog.close();
+            this->show();
+            this->activateWindow();
+            RTI->processEvents();
+
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("Transfer Error");
+            msgBox.setText("The task file could not be created on the server. Refer to the log file for further information.\n\nThe reconstruction task will not be performed.");
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.exec();
+        }
+        else
+        {
+            copyDialog.close();
+            this->show();
+            this->activateWindow();
+            RTI->processEvents();
+
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("Task Submitted");
+            msgBox.setText("The reconstruction task has successfully been sent to the Yarra server.");
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.exec();
+        }
     }
+}
+
+
+bool sacMainWindow::copyAdditionalFiles(QString taskID)
+{
+    additionalFilesError="";
+
+    QStringList fullList;
+    for (int i=0; i<ui->additionalFilesListwidget->count(); i++)
+    {
+        fullList.append(ui->additionalFilesListwidget->item(i)->text());
+    }
+    fullList.removeDuplicates();
+
+    // First check if all source files can be found
+    for (int i=0; i<fullList.count(); i++)
+    {
+        QFileInfo info(fullList.at(i));
+        if (!info.exists())
+        {
+            additionalFilesError="File not found "+fullList.at(i);
+            return false;
+        }
+    }
+
+    // Now copy the file (using a new filename based on the task ID)
+    for (int i=0; i<fullList.count(); i++)
+    {
+        QFileInfo info(fullList.at(i));
+        QString targetFilename=taskID+"_"+QString::number(i)+".dat";
+        task.additionalFilesOriginalName.append(info.fileName());
+        task.additionalFiles.append(targetFilename);
+
+        if (!network.copyMeasurementFile(fullList.at(i), targetFilename))
+        {
+            additionalFilesError="Unable to copy file "+fullList.at(i);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
@@ -667,6 +729,16 @@ bool sacMainWindow::generateTaskFile(Task &a_task, bool cloudRecon)
             {
                 taskFile.setValue("Task/UUID", a_task.uuid);
             }
+
+            // Write the list of adjustment files as strings
+            for (int i=0; i<task.additionalFiles.count(); i++)
+            {
+                // Note: The code below writes the counter as ascii code rather than string.
+                //       But it still works and will not be changed now for consistency.
+                taskFile.setValue("AdjustmentFiles/"+QString(i), task.additionalFiles.at(i));
+                taskFile.setValue("AdjustmentFiles/OriginalName_"+QString::number(i), task.additionalFilesOriginalName.at(i));
+            }
+            taskFile.setValue("Task/AdjustmentFilesCount", task.additionalFiles.count());
 
             // Flush the entries into the file
             taskFile.sync();
@@ -1347,13 +1419,23 @@ bool sacMainWindow::readBatchFile(QString fileName, QStringList& files, QStringL
 
 void sacMainWindow::on_clearAdditionalFilesButton_clicked()
 {
-    task.additionalFiles.clear();
-    ui->additonalFilesListwidget->clear();
+    ui->additionalFilesListwidget->clear();
 }
 
 
 void sacMainWindow::on_selectAdditionalFilesButton_clicked()
 {
     QStringList filenames=QFileDialog::getOpenFileNames(this, "Select Additional Files...", QString(), "Twix Raw Data (*.dat)");
-    ui->additonalFilesListwidget->addItems(filenames);
+    ui->additionalFilesListwidget->addItems(filenames);
+
+    // Convert into QStringList to remove possible duplicates
+    QStringList tempList;
+    tempList.clear();
+    for (int i=0; i< ui->additionalFilesListwidget->count(); i++)
+    {
+        tempList.append(ui->additionalFilesListwidget->item(i)->text());
+    }
+    tempList.removeDuplicates();
+    ui->additionalFilesListwidget->clear();
+    ui->additionalFilesListwidget->addItems(tempList);
 }
