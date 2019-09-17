@@ -324,6 +324,7 @@ void sacMainWindow::on_selectFileButton_clicked()
     // Clear the old ACC to avoid that an old ACC is used by mistake
     ui->accEdit->setText("");
     ui->priorityCombobox->setCurrentIndex(0);
+    ui->additionalFilesListwidget->clear();
     checkValues();
     firstFileDialog=false;
 }
@@ -559,6 +560,11 @@ void sacMainWindow::on_sendButton_clicked()
                 return;
             }
         }
+        else
+        {
+            task.additionalFiles.clear();
+            task.additionalFilesOriginalName.clear();
+        }
 
         if (!generateTaskFile(task))
         {
@@ -596,6 +602,8 @@ void sacMainWindow::on_sendButton_clicked()
 
 bool sacMainWindow::copyAdditionalFiles(QString taskID)
 {
+    task.additionalFiles.clear();
+    task.additionalFilesOriginalName.clear();
     additionalFilesError="";
 
     QStringList fullList;
@@ -1425,7 +1433,7 @@ void sacMainWindow::on_clearAdditionalFilesButton_clicked()
 
 void sacMainWindow::on_selectAdditionalFilesButton_clicked()
 {
-    QStringList filenames=QFileDialog::getOpenFileNames(this, "Select Additional Files...", QString(), "Twix Raw Data (*.dat)");
+    QStringList filenames=QFileDialog::getOpenFileNames(this, "Select Additional Files...", QString(), "Additional Files (*.*)");
     ui->additionalFilesListwidget->addItems(filenames);
 
     // Convert into QStringList to remove possible duplicates
