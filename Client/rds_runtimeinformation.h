@@ -50,6 +50,7 @@ public:
         RDS_XA11B,
         RDS_VE11D,
         RDS_VE11E,
+        RDS_VE11S,
         RDS_SYNGOVERSIONS_COUNT
     };
 
@@ -442,6 +443,10 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString(int syngoVersionEn
         versionString="VE11E";
         break;
 
+    case RDS_VE11S:
+        versionString="VE11S";
+        break;
+
     default:
         versionString="Unknown - Use with care!";
         break;
@@ -542,6 +547,7 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     case RDS_XA11B:
     case RDS_VE11D:
     case RDS_VE11E:
+    case RDS_VE11S:
         return RDS_RAIDTOOL_VE;
         break;
     case RDS_VB15A:
@@ -584,6 +590,7 @@ inline int rdsRuntimeInformation::getSyngoMRLine()
     case RDS_VE12U:
     case RDS_VE11D:
     case RDS_VE11E:
+    case RDS_VE11S:
         return RDS_VE;
         break;
     case RDS_XA10A:
