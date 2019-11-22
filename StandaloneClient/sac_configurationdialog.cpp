@@ -60,6 +60,7 @@ void sacConfigurationDialog::prepare(sacMainWindow* mainWindowPtr)
     ui->cloudCheckbox->setChecked(mainWindow->network.cloudSupportEnabled);
     this->on_cloudCheckbox_clicked(mainWindow->network.cloudSupportEnabled);
     this->updateCloudCredentialStatus();
+    this->updateProxyStatus();
 }
 
 
@@ -109,6 +110,9 @@ void sacConfigurationDialog::on_cloudCheckbox_clicked(bool checked)
     ui->cloudCredetialsEdit   ->setEnabled(checked);
     ui->cloudCredentialsButton->setEnabled(checked);
     ui->cloudCredetialsLabel  ->setEnabled(checked);
+    ui->cloudProxyButton      ->setEnabled(checked);
+    ui->cloudProxyEdit        ->setEnabled(checked);
+    ui->cloudProxyLabel       ->setEnabled(checked);
 }
 
 
@@ -143,7 +147,19 @@ void sacConfigurationDialog::updateCloudCredentialStatus()
     {
         ui->cloudCredetialsEdit->setText("-- Missing --");
     }
+}
 
+
+void sacConfigurationDialog::updateProxyStatus()
+{
+    if (mainWindow->cloudConfig.proxyIP.isEmpty())
+    {
+        ui->cloudProxyEdit->setText("-- Direct Connection --");
+    }
+    else
+    {
+        ui->cloudProxyEdit->setText(mainWindow->cloudConfig.proxyIP+":"+QString::number(mainWindow->cloudConfig.proxyPort));
+    }
 }
 
 
@@ -220,4 +236,45 @@ void sacConfigurationDialog::on_cloudConnectionButton_clicked()
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.exec();
     }
+}
+
+void sacConfigurationDialog::on_cloudProxyButton_clicked()
+{
+    QString proxyServer=QInputDialog::getText(this, "Proxy Server Address",
+                                              "If your system does not have internet access, connecting to YarraCloud is possible via a proxy server.\n\nPlease enter the proxy's IP address below. Leave empty if no proxy server should be used.",
+                                               QLineEdit::Normal, mainWindow->cloudConfig.proxyIP);
+    if (proxyServer.isEmpty())
+    {
+        mainWindow->cloudConfig.proxyIP="";
+    }
+    else
+    {
+        bool ok;
+        int proxyPort=QInputDialog::getInt(this, "Proxy Port", "Please select the port of the proxy server.", mainWindow->cloudConfig.proxyPort, 1, 99000, 1, &ok);
+
+        if (ok)
+        {
+            mainWindow->cloudConfig.proxyPort=proxyPort;
+            mainWindow->cloudConfig.proxyIP=proxyServer;
+
+            QString proxyUser=QInputDialog::getText(this, "Proxy Username",
+                                                    "If the proxy server requires authorization, please enter the username below (otherwise leave empty).",
+                                                    QLineEdit::Normal, mainWindow->cloudConfig.proxyUsername);
+            if (proxyUser.isEmpty())
+            {
+                mainWindow->cloudConfig.proxyUsername="";
+                mainWindow->cloudConfig.proxyPassword="";
+            }
+            else
+            {
+                QString proxyPassword=QInputDialog::getText(this, "Proxy Password",
+                                                           "Please enter the password for the proxy.",
+                                                           QLineEdit::Normal, mainWindow->cloudConfig.proxyPassword);
+                mainWindow->cloudConfig.proxyUsername=proxyUser;
+                mainWindow->cloudConfig.proxyPassword=proxyPassword;
+            }
+        }
+    }
+
+    updateProxyStatus();
 }

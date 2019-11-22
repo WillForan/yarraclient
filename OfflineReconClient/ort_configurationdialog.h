@@ -41,10 +41,13 @@ private slots:
     void on_cloudCredentialsButton_clicked();
     void on_cloudCheckbox_clicked(bool checked);
 
+    void on_cloudProxyButton_clicked();
+
 private:
     Ui::ortConfigurationDialog *ui;
 
     void updateCloudCredentialStatus();
+    void updateProxyStatus();
 
 };
 

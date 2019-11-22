@@ -14,6 +14,11 @@ public:
     QString secret;
     bool    showNotifications;
 
+    QString proxyIP;
+    int     proxyPort;
+    QString proxyUsername;
+    QString proxyPassword;
+
     bool loadConfiguration();
     bool saveConfiguration();
 

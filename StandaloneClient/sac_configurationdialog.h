@@ -29,12 +29,15 @@ private slots:
 
     void on_cloudConnectionButton_clicked();
 
+    void on_cloudProxyButton_clicked();
+
 private:
     Ui::sacConfigurationDialog *ui;
 
     sacMainWindow* mainWindow;
 
     void updateCloudCredentialStatus();
+    void updateProxyStatus();
 
 };
 

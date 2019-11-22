@@ -670,6 +670,25 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
     myProcess->setProcessChannelMode(QProcess::MergedChannels);
     QString helperCmd=qApp->applicationDirPath()+"/"+binary+" "+parameters;
 
+    // If a proxy has been configured for YarraCloud, set environment variables
+    // so that the Go-based uploader will route the traffic
+    if (!config->proxyIP.isEmpty())
+    {
+        QString proxyString=config->proxyIP+":"+config->proxyPort;
+
+        // Add authentication information if required by the proxy server
+        if (!config->proxyUsername.isEmpty())
+        {
+            proxyString=config->proxyUsername+":"+config->proxyPassword+"@"+proxyString;
+        }
+        proxyString="http://"+proxyString;
+
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        env.insert("HTTP_PROXY",  proxyString);
+        env.insert("HTTPS_PROXY", proxyString);
+        myProcess->setProcessEnvironment(env);
+    }
+
     //qDebug() << "Calling helper tool: " + helperCmd;
 
     QTimer timeoutTimer;

@@ -5,6 +5,7 @@
 #include <QTimer>
 
 
+/*
 BlockingNetworkAccessManager::BlockingNetworkAccessManager(QObject *parent)
     :QNetworkAccessManager(parent)
 {
@@ -21,6 +22,7 @@ QNetworkReply *BlockingNetworkAccessManager::syncGet(const QNetworkRequest &requ
 
     return reply;
 }
+*/
 
 
 QNetworkReply *SlottetNetworkAccessManager::sendCustomRequest_slot(const QNetworkRequest &request,

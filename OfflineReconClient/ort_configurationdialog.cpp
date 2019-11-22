@@ -172,6 +172,7 @@ void ortConfigurationDialog::readSettings()
 
     cloudConfig.loadConfiguration();
     updateCloudCredentialStatus();
+    updateProxyStatus();
     on_cloudCheckbox_clicked(ui->cloudCheckbox->isChecked());
 }
 
@@ -516,5 +517,63 @@ void ortConfigurationDialog::on_cloudCheckbox_clicked(bool checked)
     ui->cloudConnectionButton ->setEnabled(checked);
     ui->cloudCredetialsEdit   ->setEnabled(checked);
     ui->cloudCredentialsButton->setEnabled(checked);
-    ui->cloudCredetialsLabel  ->setEnabled(checked);
+    ui->cloudCredetialsLabel  ->setEnabled(checked);    
+    ui->cloudProxyButton      ->setEnabled(checked);
+    ui->cloudProxyEdit        ->setEnabled(checked);
+    ui->cloudProxyLabel       ->setEnabled(checked);
+}
+
+
+void ortConfigurationDialog::updateProxyStatus()
+{
+    if (cloudConfig.proxyIP.isEmpty())
+    {
+        ui->cloudProxyEdit->setText("-- Direct Connection --");
+    }
+    else
+    {
+        ui->cloudProxyEdit->setText(cloudConfig.proxyIP+":"+QString::number(cloudConfig.proxyPort));
+    }
+}
+
+
+void ortConfigurationDialog::on_cloudProxyButton_clicked()
+{
+    QString proxyServer=QInputDialog::getText(this, "Proxy Server Address",
+                                              "If your MRI scanner does not have internet access, connecting to YarraCloud is possible via a proxy server.\n\nPlease enter the proxy's IP address below. Leave empty if no proxy server should be used.",
+                                               QLineEdit::Normal, cloudConfig.proxyIP);
+    if (proxyServer.isEmpty())
+    {
+        cloudConfig.proxyIP="";
+    }
+    else
+    {
+        bool ok;
+        int proxyPort=QInputDialog::getInt(this, "Proxy Port", "Please select the port of the proxy server.", cloudConfig.proxyPort, 1, 99000, 1, &ok);
+
+        if (ok)
+        {
+            cloudConfig.proxyPort=proxyPort;
+            cloudConfig.proxyIP=proxyServer;
+
+            QString proxyUser=QInputDialog::getText(this, "Proxy Username",
+                                                    "If the proxy server requires authorization, please enter the username below (otherwise leave empty).",
+                                                    QLineEdit::Normal, cloudConfig.proxyUsername);
+            if (proxyUser.isEmpty())
+            {
+                cloudConfig.proxyUsername="";
+                cloudConfig.proxyPassword="";
+            }
+            else
+            {
+                QString proxyPassword=QInputDialog::getText(this, "Proxy Password",
+                                                           "Please enter the password below.",
+                                                           QLineEdit::Normal, cloudConfig.proxyPassword);
+                cloudConfig.proxyUsername=proxyUser;
+                cloudConfig.proxyPassword=proxyPassword;
+            }
+        }
+    }
+
+    updateProxyStatus();
 }
