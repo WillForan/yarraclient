@@ -23,6 +23,8 @@ public:
     bool saveConfiguration();
 
     bool isConfigurationValid();
+
+    void configureProxy();
 };
 
 

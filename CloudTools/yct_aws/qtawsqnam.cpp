@@ -5,26 +5,6 @@
 #include <QTimer>
 
 
-/*
-BlockingNetworkAccessManager::BlockingNetworkAccessManager(QObject *parent)
-    :QNetworkAccessManager(parent)
-{
-}
-
-
-QNetworkReply *BlockingNetworkAccessManager::syncGet(const QNetworkRequest &request)
-{
-    QNetworkReply *reply = get(request);
-
-    QEventLoop loop;
-    QObject::connect(this, SIGNAL(finished(QNetworkReply*)), &loop, SLOT(quit()));
-    loop.exec();
-
-    return reply;
-}
-*/
-
-
 QNetworkReply *SlottetNetworkAccessManager::sendCustomRequest_slot(const QNetworkRequest &request,
                                                                    const QByteArray &verb,
                                                                    QIODevice *data)

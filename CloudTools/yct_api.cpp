@@ -1018,5 +1018,7 @@ bool yctAPI::loadCertificate()
 
         qInfo() << "Loaded yarracloud certificate from file.";
     }
+
+    return true;
 }
 

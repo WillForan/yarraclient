@@ -19,6 +19,7 @@
 
 #include <functional>
 
+
 class QtAWSReply;
 class QtAWSReplyPrivate;
 
@@ -88,7 +89,7 @@ class QtAWSPrivate
 public:
     QtAWSPrivate();
     ~QtAWSPrivate();
-    QtAWSPrivate(QByteArray accessKeyId, QByteArray secretAccessKey, QByteArray service);
+    QtAWSPrivate(QByteArray accessKeyId, QByteArray secretAccessKey);
     QtAWSPrivate(std::function<QByteArray()> accessKeyIdProvider,
                  std::function<QByteArray()> secretAccessKeyProvider);
 
@@ -198,8 +199,7 @@ public:
 class QtAWSRequest
 {
 public:
-    QtAWSRequest(const QString &accessKeyId, const QString &secretAccessKey,
-                 const QString &service="");
+    QtAWSRequest(const QString &accessKeyId, const QString &secretAccessKey);
     QtAWSRequest(std::function<QByteArray()> accessKeyIdProvider,
                  std::function<QByteArray()> secretAccessKeyProvider);
 

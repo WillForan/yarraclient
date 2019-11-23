@@ -1,5 +1,7 @@
 #include "yct_configuration.h"
 
+#include <QNetworkProxy>
+
 
 yctConfiguration::yctConfiguration()
 {
@@ -30,6 +32,8 @@ bool yctConfiguration::loadConfiguration()
     proxyUsername=settings.value("Proxy/Username","").toString();
     proxyPassword=settings.value("Proxy/Password","").toString();
 
+    configureProxy();
+
     return true;
 }
 
@@ -50,6 +54,8 @@ bool yctConfiguration::saveConfiguration()
     settings.setValue("Proxy/Username", proxyUsername);
     settings.setValue("Proxy/Password", proxyPassword);
 
+    configureProxy();
+
     return true;
 }
 
@@ -57,4 +63,27 @@ bool yctConfiguration::saveConfiguration()
 bool yctConfiguration::isConfigurationValid()
 {
     return ((!key.isEmpty()) && (!secret.isEmpty()));
+}
+
+
+void yctConfiguration::configureProxy()
+{
+    QNetworkProxy proxy;
+
+    if (proxyIP.isEmpty())
+    {
+        proxy.setType(QNetworkProxy::NoProxy);
+    }
+    else
+    {
+        proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setHostName(proxyIP);
+        proxy.setPort(proxyPort);
+        if (!proxyUsername.isEmpty())
+        {
+            proxy.setUser(proxyUsername);
+            proxy.setPassword(proxyPassword);
+        }
+    }
+    QNetworkProxy::setApplicationProxy(proxy);
 }

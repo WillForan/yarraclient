@@ -281,6 +281,7 @@ void ortConfigurationDialog::on_logServerTestButton_clicked()
     // Open socket connection to see if the server is active and to
     // determine the local IP address used for routing to the server.
     QTcpSocket socket;
+    socket.setProxy(QNetworkProxy::NoProxy);
     socket.connectToHost(serverPath, serverPort);
 
     if (socket.waitForConnected(10000))
@@ -416,6 +417,8 @@ void ortConfigurationDialog::on_cloudConnectionButton_clicked()
     bool success=true;
     QString errorReason="";
     QString userRegion="";
+
+    cloudConfig.configureProxy();
 
     QtAWSRequest awsRequest(cloudConfig.key, cloudConfig.secret);
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/user_status",

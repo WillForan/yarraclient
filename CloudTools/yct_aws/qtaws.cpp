@@ -33,11 +33,9 @@
 //      formatAuthorizationHeader
 
 
-QtAWSRequest::QtAWSRequest(const QString &accessKeyId, const QString &secretAccessKey,
-                           const QString &service)
+QtAWSRequest::QtAWSRequest(const QString &accessKeyId, const QString &secretAccessKey)
     : d(new QtAWSPrivate(accessKeyId.toLatin1(),
-                         secretAccessKey.toLatin1(),
-                         service.toLatin1()))
+                         secretAccessKey.toLatin1()))
 {
 }
 
@@ -84,11 +82,11 @@ QtAWSPrivate::QtAWSPrivate()
 }
 
 
-QtAWSPrivate::QtAWSPrivate(QByteArray accessKeyId, QByteArray secretAccessKey, QByteArray service)
+QtAWSPrivate::QtAWSPrivate(QByteArray accessKeyId, QByteArray secretAccessKey)
 {
     m_accessKeyIdProvider = [accessKeyId](){ return accessKeyId; };
     m_secretAccessKeyProvider = [secretAccessKey](){ return secretAccessKey; };
-    m_service=service;
+    m_service=QByteArray("");
 
     init();
 }

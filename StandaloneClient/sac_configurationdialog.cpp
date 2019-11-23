@@ -166,6 +166,7 @@ void sacConfigurationDialog::updateProxyStatus()
 void sacConfigurationDialog::on_cloudConnectionButton_clicked()
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
+    mainWindow->cloudConfig.configureProxy();
     QtAWSRequest awsRequest(mainWindow->cloudConfig.key, mainWindow->cloudConfig.secret);
     QtAWSReply reply=awsRequest.sendRequest("POST", "api.yarracloud.com", "v1/user_status",
                                             QByteArray(), YCT_API_REGION, QByteArray(), QStringList());

@@ -6,17 +6,6 @@
 #include <QtCore/QWaitCondition>
 
 
-/*
-class BlockingNetworkAccessManager : public QNetworkAccessManager
-{
-public:
-    BlockingNetworkAccessManager(QObject *parent = 0);
-
-    QNetworkReply *syncGet(const QNetworkRequest &request);
-};
-*/
-
-
 class SlottetNetworkAccessManager : public QNetworkAccessManager
 {
     Q_OBJECT

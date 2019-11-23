@@ -41,6 +41,7 @@ NetLogger::NetLogger()
     }
 
     networkManager=new QNetworkAccessManager();
+    networkManager->setProxy(QNetworkProxy::NoProxy);
 }
 
 
@@ -107,6 +108,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
         // Open socket connection to see if the server is active and to
         // determine the local IP address used for routing to the server.
         QTcpSocket socket;
+        socket.setProxy(QNetworkProxy::NoProxy);
         socket.connectToHost(serverPath, serverPort);
 
         if (socket.waitForConnected(10000))
