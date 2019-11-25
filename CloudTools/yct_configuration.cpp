@@ -77,6 +77,7 @@ void yctConfiguration::configureProxy()
     else
     {
         proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setCapabilities(QNetworkProxy::HostNameLookupCapability | proxy.capabilities());
         proxy.setHostName(proxyIP);
         proxy.setPort(proxyPort);
         if (!proxyUsername.isEmpty())

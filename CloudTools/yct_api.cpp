@@ -674,7 +674,7 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
     // so that the Go-based uploader will route the traffic
     if (!config->proxyIP.isEmpty())
     {
-        QString proxyString=config->proxyIP+":"+config->proxyPort;
+        QString proxyString=config->proxyIP+":"+QString::number(config->proxyPort);
 
         // Add authentication information if required by the proxy server
         if (!config->proxyUsername.isEmpty())
@@ -687,6 +687,7 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
         env.insert("HTTP_PROXY",  proxyString);
         env.insert("HTTPS_PROXY", proxyString);
         myProcess->setProcessEnvironment(env);
+        YTL->log("Using Proxy "+proxyString,YTL_INFO,YTL_LOW);
     }
 
     //qDebug() << "Calling helper tool: " + helperCmd;
