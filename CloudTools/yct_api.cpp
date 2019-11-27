@@ -670,6 +670,13 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
     myProcess->setProcessChannelMode(QProcess::MergedChannels);
     QString helperCmd=qApp->applicationDirPath()+"/"+binary+" "+parameters;
 
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+
+    // Tell the helper app to load a custom root certificate because Siemens deletes all CA
+    // certificates on the scanner hosts
+    QString caCertificate=QDir::toNativeSeparators(qApp->applicationDirPath() + "/yarracloud.pem");
+    env.insert("AWS_CA_BUNDLE", caCertificate);
+
     // If a proxy has been configured for YarraCloud, set environment variables
     // so that the Go-based uploader will route the traffic
     if (!config->proxyIP.isEmpty())
@@ -683,12 +690,12 @@ int yctAPI::callHelperApp(QString binary, QString parameters, int execTimeout)
         }
         proxyString="http://"+proxyString;
 
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
         env.insert("HTTP_PROXY",  proxyString);
         env.insert("HTTPS_PROXY", proxyString);
-        myProcess->setProcessEnvironment(env);
         YTL->log("Using Proxy "+proxyString,YTL_INFO,YTL_LOW);
     }
+
+    myProcess->setProcessEnvironment(env);
 
     //qDebug() << "Calling helper tool: " + helperCmd;
 
