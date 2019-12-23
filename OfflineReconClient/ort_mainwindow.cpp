@@ -90,6 +90,17 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         return;
     }
 
+    // Send the version number and name along with the boot notification
+    QString dataString="<data>";
+    dataString+="<version>"       +QString(ORT_VERSION)                   +"</version>";
+    dataString+="<name>"          +QString(config.ortSystemName)          +"</name>";
+    dataString+="<system_model>"  +QString(config.infoScannerType)        +"</system_model>";
+    dataString+="<system_version>"+QString(RTI->getSyngoMRVersionString())+"</system_version>";
+    dataString+="<system_vendor>Siemens</system_vendor>";
+    dataString+="<time>"          +QDateTime::currentDateTime().toString()+"</time>";
+    dataString+="</data>";
+    network.netLogger.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"Ver "+QString(ORT_VERSION),dataString);
+
     // Connect to the on-premise server if a server path has been defined. If not and
     // cloud support is disabled, also call it so that an error message appears. Do not
     // call it if no server path has been defined but cloud support is enabled (because
@@ -615,7 +626,8 @@ void ortMainWindow::on_sendButton_clicked()
     if (reconTask.isSubmissionSuccessful())
     {
         //RTI->log(getTaskInfo(reconTask));
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,getTaskInfo(reconTask));
+        QString taskInfo=getTaskInfo(reconTask);
+        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,taskInfo);
         this->close();
     }
     else

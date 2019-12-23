@@ -156,6 +156,19 @@ bool ortNetwork::openConnection(bool fallback)
         return false;
     }
 
+    if ((!serverPath.isEmpty()) && (!connectCmd.isEmpty()) && (!disconnectCmd.isEmpty()))
+    {
+        // Check if the network drive is already connected (e.g. from a previously
+        // crashed instance). If so, run the disconnect command.
+        if ((serverDir.exists(serverPath)))
+        {
+            RTI->log("WARNING: Existing network path found at desired mapping location");
+            RTI->log("WARNING: Possibly from crashed prior instance");
+            RTI->log("Running disconnect command to free mapping location.");
+            closeConnection();
+        }
+    }
+
     // Execute the network connect command
     if (connectCmd!="")
     {
