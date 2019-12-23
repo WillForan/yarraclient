@@ -364,7 +364,7 @@ void rdsConfigurationWindow::on_networkFilePathButton_clicked()
         msgBox.setWindowIcon(RDS_ICON);
         msgBox.setWindowTitle("Network Drive Path");
         msgBox.setText("<b>NOTE:</b> Ensure that the network drive will be <b>reconnected automatically</b> after restart of the system. "\
-                       "Otherwise transfering the raw data will not be possible. If this cannot be ensured, use FTP server connection instead.");
+                       "Otherwise transfering the raw data will not be possible.");
         msgBox.exec();
     }
 }

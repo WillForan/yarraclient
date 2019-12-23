@@ -493,7 +493,17 @@ void ortMainWindow::on_sendButton_clicked()
     reconTask.setCloudPaths(cloud.getCloudPath(YCT_CLOUDFOLDER_OUT), cloud.getCloudPath(YCT_CLOUDFOLDER_PHI));
     reconTask.reconMode       =modeList.modes.at(selectedMode)->idName;
     reconTask.reconName       =modeList.modes.at(selectedMode)->readableName;
-    reconTask.systemName      =config.ortSystemName;
+
+    if ((config.ortSystemName.isEmpty()) || (config.ortSystemName=="NotGiven"))
+    {
+        // If no scanner name has been defined, then construct one from the system type and
+        // serial number, which will make it easier to identify the sender
+        reconTask.systemName  =config.infoScannerType+config.infoSerialNumber;
+    }
+    else
+    {
+        reconTask.systemName  =config.ortSystemName;
+    }
     reconTask.patientName     =selectedPatient;
     reconTask.scanProtocol    =selectedProtocol;
     reconTask.raidCreationTime=selectedScantime;

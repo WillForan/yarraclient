@@ -10,6 +10,16 @@ ortConfiguration::ortConfiguration()
     infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unkown");
     infoSoftwareVersion=QProcessEnvironment::systemEnvironment().value("SOFTWARE_VERSION","Unkown");
 
+    // Read information specifically for NumarisX
+    if (infoScannerType=="Numaris/X")
+    {
+        infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SerialNumber", "0");
+
+        // TODO: Find way to identify system type under NumarisX
+        // TODO: Call IDEA command to read system configuration on first run
+        infoScannerType ="VidaSola";
+    }
+
     ortCloudSupportEnabled=false;
 }
 

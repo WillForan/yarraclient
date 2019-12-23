@@ -15,7 +15,7 @@ rdsConfiguration::rdsConfiguration()
 
         // TODO: Find way to identify system type under NumarisX
         // TODO: Call IDEA command to read system configuration on first run
-        infoScannerType ="Vida";
+        infoScannerType ="VidaSola";
     }
 
     cloudSupportEnabled=false;
@@ -128,7 +128,7 @@ void rdsConfiguration::loadConfiguration()
     // remote name has been defined and no local name has been defined).
     if (infoName.isEmpty())
     {
-        infoName = infoScannerType+"-"+infoSerialNumber;
+        infoName = infoScannerType+infoSerialNumber;
     }
 
     loadCloudSettings();
