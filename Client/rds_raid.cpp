@@ -490,6 +490,8 @@ bool rdsRaid::parseOutputDirectory()
     bool lineProcessed=false;
     missingVerboseData=false;
 
+    QString unknownVerboseAttributeFound="";
+
     RTI->debug("Received " + QString::number(raidToolOutput.count()) + " lines from the RAID tool.");
 
     QString dirHead=RDS_RAID_DIRHEAD;
@@ -586,7 +588,7 @@ bool rdsRaid::parseOutputDirectory()
 
             if (useVerboseMode)
             {
-                chopDependingIDsVerbose(raidLine, raidEntry.attribute);
+                chopDependingIDsVerbose(raidLine, raidEntry.attribute, unknownVerboseAttributeFound);
             }
             else
             {
@@ -777,6 +779,12 @@ bool rdsRaid::parseOutputDirectory()
     if (useVerboseMode && missingVerboseData)
     {
         RTI->log("WARNING: Missing verbose information!");
+    }
+
+    if (useVerboseMode && (!unknownVerboseAttributeFound.isEmpty()))
+    {
+        RTI->log("WARNING: Unknown attributes in verbose information found!");
+        RTI->log("WARNING: Attribute = "+unknownVerboseAttributeFound);
     }
 
     return isSuccess;

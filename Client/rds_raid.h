@@ -6,9 +6,11 @@
 #include "rds_global.h"
 
 
+#define RDS_SCANATTRIBUTE_UNKNOWN      -1
 #define RDS_SCANATTRIBUTE_ERROR         0
 #define RDS_SCANATTRIBUTE_OK            1
 #define RDS_SCANATTRIBUTE_USERCANCEL    3
+
 
 #define RDS_VERBOSEATTRIBUTE_ERROR      "0000000000000000"
 #define RDS_VERBOSEATTRIBUTE_OK         "0000000000000001"
@@ -60,7 +62,7 @@ public:
     void dumpRaidToolOutput();
 
     void chopDependingIDs(QString& text);
-    void chopDependingIDsVerbose(QString& text, int& scanAttribute);
+    void chopDependingIDsVerbose(QString& text, int& scanAttribute, QString& unknownAttribute);
 
     bool isPatchedRaidToolMissing();
 
@@ -313,7 +315,7 @@ inline void rdsRaid::chopDependingIDs(QString& text)
 }
 
 
-inline void rdsRaid::chopDependingIDsVerbose(QString& text, int& scanAttribute)
+inline void rdsRaid::chopDependingIDsVerbose(QString& text, int& scanAttribute, QString& unknownAttribute)
 {
     scanAttribute=RDS_SCANATTRIBUTE_OK;
 
@@ -351,7 +353,8 @@ inline void rdsRaid::chopDependingIDsVerbose(QString& text, int& scanAttribute)
                 }
                 else
                 {
-                    missingVerboseData=true;
+                    scanAttribute=RDS_SCANATTRIBUTE_UNKNOWN;
+                    unknownAttribute=attrSubString;
                 }
             }
         }
