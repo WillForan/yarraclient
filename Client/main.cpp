@@ -80,6 +80,9 @@ int main(int argc, char *argv[])
     newPalette.setColor(QPalette::Highlight, QColor(88,15,139));
     qApp->setPalette(newPalette);
 
+    // Prevent termination of the application if no window is visible
+    qApp->setQuitOnLastWindowClosed(false);
+
     /*
     // Looks also nice.
     QPalette darkPalette;

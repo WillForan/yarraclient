@@ -12,9 +12,9 @@
 #define RDS_SCANATTRIBUTE_USERCANCEL    3
 
 
-#define RDS_VERBOSEATTRIBUTE_ERROR      "0000000000000000"
-#define RDS_VERBOSEATTRIBUTE_OK         "0000000000000001"
-#define RDS_VERBOSEATTRIBUTE_USERCANCEL "0000000000000003"
+#define RDS_VERBOSEATTRIBUTE_ERROR      "0000"
+#define RDS_VERBOSEATTRIBUTE_OK         "0001"
+#define RDS_VERBOSEATTRIBUTE_USERCANCEL "0003"
 
 
 class rdsRaidEntry
@@ -335,19 +335,19 @@ inline void rdsRaid::chopDependingIDsVerbose(QString& text, int& scanAttribute, 
 
         // Check for OK first. This will apply to most entry and avoids
         // running two compares.
-        if (attrSubString==RDS_VERBOSEATTRIBUTE_OK)
+        if (attrSubString.endsWith(RDS_VERBOSEATTRIBUTE_OK))
         {
             scanAttribute=RDS_SCANATTRIBUTE_OK;
         }
         else
         {
-            if (attrSubString==RDS_VERBOSEATTRIBUTE_ERROR)
+            if (attrSubString.endsWith(RDS_VERBOSEATTRIBUTE_ERROR))
             {
                 scanAttribute=RDS_SCANATTRIBUTE_ERROR;
             }
             else
             {
-                if (attrSubString==RDS_VERBOSEATTRIBUTE_USERCANCEL)
+                if (attrSubString.endsWith(RDS_VERBOSEATTRIBUTE_USERCANCEL))
                 {
                     scanAttribute=RDS_SCANATTRIBUTE_USERCANCEL;
                 }
