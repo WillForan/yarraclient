@@ -66,6 +66,7 @@ rdsConfigurationWindow::~rdsConfigurationWindow()
 void rdsConfigurationWindow::closeEvent(QCloseEvent *event)
 {
     RTI->setMode(rdsRuntimeInformation::RDS_OPERATION);
+    qApp->quit();
 }
 
 
@@ -216,10 +217,12 @@ void rdsConfigurationWindow::storeConfiguration()
     config.infoUpdatePeriodUnit=ui->updatePeriodCombobox->currentIndex();
     config.infoUpdatePeriod=ui->updatePeriodSpinbox->value();
 
-    config.startCmds=ui->startCmdEdit->toPlainText().split('\n');
+    config.startCmds=ui->startCmdEdit->toPlainText().split('\n');       
 
     // Write the configuration to the ini file
-    config.saveConfiguration();
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    config.saveConfiguration();  
+    QApplication::restoreOverrideCursor();
 }
 
 

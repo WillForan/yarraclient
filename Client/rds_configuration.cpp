@@ -136,7 +136,7 @@ void rdsConfiguration::loadConfiguration()
 
 
 void rdsConfiguration::saveConfiguration()
-{
+{    
     QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
 
     // Set the configuration validity flag to true to indicate that
@@ -203,7 +203,6 @@ void rdsConfiguration::saveConfiguration()
             settings.setValue("Protocol" + QString::number(i) + "/SmallFiles",     smallFiles);
         }
     }
-
 }
 
 
