@@ -347,6 +347,11 @@ bool rdsNetwork::copyFile()
                 }
             }
 
+            if (copyThread.lockError)
+            {
+                RTI->log("Warning: Problems while creating/removing lock file for "+destName);
+            }
+
             copyError=!copyThread.success;
         }
 
@@ -540,7 +545,34 @@ rdsCopyThread::rdsCopyThread()
 void rdsCopyThread::run()
 {
     finishedCopy=false;
+    lockError=false;
+
+    // Generate name for lockfile
+    QString lockFilename=destName;
+    lockFilename.truncate(lockFilename.lastIndexOf("."));
+    lockFilename+=".lock";
+
+    // Create lock file
+    QFile lockFile(lockFilename);
+    if (!lockFile.open(QIODevice::ReadWrite))
+    {
+        lockError=true;
+    }
+    else
+    {
+        lockFile.flush();
+        lockFile.close();
+    }
+
+    // Copy file
     success=QFile::copy(sourceName,destName);
+
+    // Remove lock file
+    if (!lockFile.remove())
+    {
+        lockError=true;
+    }
+
     finishedCopy=true;
     return;
 }

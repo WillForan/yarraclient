@@ -73,6 +73,7 @@ public:
     QString sourceName;
     QString destName;
     bool success;
+    bool lockError;
 
     bool finishedCopy;
 };
