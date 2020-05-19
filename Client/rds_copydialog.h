@@ -2,6 +2,7 @@
 #define RDS_COPYDIALOG_H
 
 #include <QDialog>
+#include <QtWidgets>
 
 namespace Ui {
 class rdsCopyDialog;

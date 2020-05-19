@@ -2,3 +2,4 @@ build-*
 *.user
 *.autosave
 *.orig
+Client/RDS.pro.user.*

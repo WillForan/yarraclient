@@ -5,7 +5,7 @@
 #include "rds_runtimeinformation.h"
 
 // Definitions
-#define RDS_VERSION     "0.57b4"
+#define RDS_VERSION     "0.57b5"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -117,6 +117,12 @@
 // Names of the adjustment scans which should be saved together with the scan data
 #define RDS_ADJUSTSCANVB17_COILSENS "AdjCoilSens"
 
+// Allow building a Linux version for development and debugging
+#if (defined (LINUX) || defined (__linux__) || defined(Q_OS_UNIX))
+    #include <unistd.h>
+    #define Sleep(x) usleep((x)*1000)
+    typedef unsigned int DWORD;
+#endif
 
 #endif // RDS_GLOBAL_H
 

@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <QWidget>
 #include <QMessageBox>
-#include "QtSingleApplication.h"
 
 #include "rds_global.h"
 #include "rds_configurationwindow.h"

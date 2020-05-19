@@ -2,7 +2,7 @@
 #include "ui_ort_copydialog.h"
 
 #include <QDesktopWidget>
-
+#include <QStyle>
 
 ortCopyDialog::ortCopyDialog(QWidget *parent) :
     QDialog(parent),

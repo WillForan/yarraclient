@@ -2,7 +2,7 @@
 #define MAIN_H
 
 #include <QApplication>
-#include "QtSingleApplication.h"
+#include "qtsingleapplication.h"
 
 class QT_QTSINGLEAPPLICATION_EXPORT rdsApplication : public QtSingleApplication
 {

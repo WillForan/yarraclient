@@ -4,7 +4,9 @@
 #include "rds_global.h"
 #include "rds_operationwindow.h"
 
-#include <windows.h>
+#if (defined (WINDOWS) || defined (__windows__) || defined(Q_OS_WIN))
+    #include <windows.h>
+#endif
 
 rdsRuntimeInformation* rdsRuntimeInformation::pSingleton=0;
 
@@ -318,16 +320,22 @@ qint64 rdsRuntimeInformation::getFreeDiskSpace(QString path)
     QString oldDir = QDir::current().absolutePath();
     QDir::setCurrent(path);
 
+#if (defined (WINDOWS) || defined (__windows__) || defined(Q_OS_WIN))
     ULARGE_INTEGER freeSpace,totalSpace;
     bool bRes = ::GetDiskFreeSpaceExA( 0 , &freeSpace , &totalSpace , NULL );
     if ( !bRes )
     {
         return 0;
     }
-
+#endif
     QDir::setCurrent( oldDir );
-
+#if (defined (WINDOWS) || defined (__windows__) || defined(Q_OS_WIN))
     return static_cast<__int64>(freeSpace.QuadPart);
+#else
+    #warning "Warning: Free disk space check omitted!"
+    RTI->log("Running on Linux. Skipping check for free disk space.");
+    return(RDS_DISKLIMIT_ALTERNATING);
+#endif
 }
 
 

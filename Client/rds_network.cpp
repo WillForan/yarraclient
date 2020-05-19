@@ -1,4 +1,3 @@
-#include <QtCore/qt_windows.h>
 #if defined(Q_OS_WIN)
     #include <QtCore/QLibrary>
     #include <QtCore/qt_windows.h>

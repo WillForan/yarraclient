@@ -1,7 +1,7 @@
 #ifndef RDS_CONFIGURATION_H
 #define RDS_CONFIGURATION_H
 
-#include <Qtgui>
+#include <QtGui>
 
 
 class rdsConfigurationProtocol

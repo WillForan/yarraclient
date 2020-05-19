@@ -4,10 +4,15 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 
 static char fileHeadLine[]     = {"\n%7s%11s%32s%32s%9s%13s%13s%22s%22s"};
-static char fileLine[]       = {"%7u%11u%32s%32s%9s%13I64u%13I64u%22s%22s"};
+#if (defined (WINDOWS) || defined (__windows__) || defined(Q_OS_WIN))
+    static char fileLine[]       = {"%7u%11u%32s%32s%9s%13I64u%13I64u%22s%22s"};
+#else
+    static char fileLine[]       = {"%7u%11u%32s%32s%9s%13" PRIu64 "%13" PRIu64 "%22s%22s"};
+#endif
 static char protName[40] = {""};
 static char patName[40] = {""};
 static char status[10] = {""};
