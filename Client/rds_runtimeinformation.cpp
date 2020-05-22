@@ -284,7 +284,21 @@ int rdsRuntimeInformation::determineNumarisXVersion()
                 detectedVersion=RDS_XA11B;
                 break;
             }
-        }
+
+            // TODO: Validate that this is still true for XA20 versions
+
+            if (buffer=="VA20A")
+            {
+                detectedVersion=RDS_XA20A;
+                break;
+            }
+
+            if (buffer=="VA20B")
+            {
+                detectedVersion=RDS_XA20B;
+                break;
+            }
+        }        
     }
 
     stateFile.close();

@@ -1150,10 +1150,10 @@ bool rdsRaid::setCurrentFileID()
 }
 
 
-void rdsRaid::dumpRaidList()
+void rdsRaid::dumpRaidList(QString filename)
 {
     QFile dumpFile;
-    dumpFile.setFileName(RTI->getAppPath()+"/debug.txt");
+    dumpFile.setFileName(RTI->getAppPath()+"/"+filename);
     if (dumpFile.exists())
     {
         dumpFile.remove();
@@ -1173,23 +1173,23 @@ void rdsRaid::dumpRaidList()
         dumpFile.write(line.toLatin1());
     }
 
-    line="## End\n";
+    line=QString(RDS_RAID_DEBUG_FOOTER)+"\n";
     dumpFile.write(line.toLatin1());
     dumpFile.close();
 }
 
 
-void rdsRaid::dumpRaidToolOutput()
+void rdsRaid::dumpRaidToolOutput(QString filename)
 {
     QFile dumpFile;
-    dumpFile.setFileName(RTI->getAppPath()+"/debug.txt");
+    dumpFile.setFileName(RTI->getAppPath()+"/"+filename);
     if (dumpFile.exists())
     {
         dumpFile.remove();
     }
     dumpFile.open(QIODevice::ReadWrite | QIODevice::Text);
 
-    QString line="## Output lines from RaidTool = " + QString::number(raidToolOutput.count());
+    QString line = QString(RDS_RAID_DEBUG_HEADER) + QString::number(raidToolOutput.count());
     dumpFile.write(line.toLatin1());
     line="\n";
     dumpFile.write(line.toLatin1());
@@ -1200,7 +1200,7 @@ void rdsRaid::dumpRaidToolOutput()
         dumpFile.write(line.toLatin1());
     }
 
-    line="## End\n";
+    line=QString(RDS_RAID_DEBUG_FOOTER)+"\n";
     dumpFile.write(line.toLatin1());
     dumpFile.close();
 }
@@ -1376,10 +1376,17 @@ bool rdsRaid::debugReadTestFile(QString filename)
     raidToolOutput.clear();
     QTextStream in(&testFile);
 
+    QString input="";
     int i=0;
     while (!in.atEnd())
     {
-        raidToolOutput.append(in.readLine());
+        input=in.readLine();
+        // Skip the header line for files safed from the debug dialog
+        if ((input.contains(RDS_RAID_DEBUG_HEADER)) || (input.contains(RDS_RAID_DEBUG_FOOTER)))
+        {
+            continue;
+        }
+        raidToolOutput.append(input);
         i++;
     }
     RTI->debug("Lines read from test file: "+QString::number(i));

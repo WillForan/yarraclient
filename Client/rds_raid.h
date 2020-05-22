@@ -58,8 +58,8 @@ public:
     bool processExportListEntry();
     bool exportsAvailable();
 
-    void dumpRaidList();
-    void dumpRaidToolOutput();
+    void dumpRaidList(QString filename);
+    void dumpRaidToolOutput(QString filename);
 
     void chopDependingIDs(QString& text);
     void chopDependingIDsVerbose(QString& text, int& scanAttribute, QString& unknownAttribute);

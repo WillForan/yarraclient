@@ -5,7 +5,7 @@
 #include "rds_runtimeinformation.h"
 
 // Definitions
-#define RDS_VERSION     "0.57b5"
+#define RDS_VERSION     "0.58b1"
 #define RDS_PASSWORD    "nyc2012"
 #define RDS_DBGPASSWORD "pastrami"
 
@@ -98,11 +98,11 @@
 
 
 // RaidTool output codes
-#define RDS_RAID_ERROR_INIT  "Could not initialize tool instance for remote access"
-#define RDS_RAID_ERROR_DIR   "Could not retrieve directory information"
-#define RDS_RAID_ERROR_FILE  "Could not find file ID"
-#define RDS_RAID_ERROR_COPY  "Could not copy measurement data"
-#define RDS_RAID_SUCCESS     "Copied measurement data to file"
+#define RDS_RAID_ERROR_INIT    "Could not initialize tool instance for remote access"
+#define RDS_RAID_ERROR_DIR     "Could not retrieve directory information"
+#define RDS_RAID_ERROR_FILE    "Could not find file ID"
+#define RDS_RAID_ERROR_COPY    "Could not copy measurement data"
+#define RDS_RAID_SUCCESS       "Copied measurement data to file"
 #define RDS_RAID_DIRHEAD       " FileID     MeasID                        ProtName                         PatName   Status         Size   SizeOnDisk          CreationTime             CloseTime"
 #define RDS_RAID_DIRHEAD_VD13C " FileID     MeasID                        ProtName                         PatName   Status         Size   SizeOnDisk          CreationTime             CloseTime"
 #define RDS_RAID_DIRHEAD_VB15  " FileID     MeasID                        ProtName   Status         Size   SizeOnDisk          CreationTime             CloseTime"
@@ -110,9 +110,11 @@
 
 
 // Note: It can be either "1 dependent file:" or "n dependent files:"
-#define RDS_RAID_VD_IGNORE1  "dependent file"
-#define RDS_RAID_VD_IGNORE2  "measID:"
+#define RDS_RAID_VD_IGNORE1    "dependent file"
+#define RDS_RAID_VD_IGNORE2    "measID:"
 
+#define RDS_RAID_DEBUG_HEADER  "## Output lines from RaidTool = "
+#define RDS_RAID_DEBUG_FOOTER  "## End"
 
 // Names of the adjustment scans which should be saved together with the scan data
 #define RDS_ADJUSTSCANVB17_COILSENS "AdjCoilSens"

@@ -193,6 +193,11 @@ void rdsOperationWindow::keyPressEvent(QKeyEvent* event)
         dbgDialog.setLabelText("Debug Password:");
         dbgDialog.setTextEchoMode(QLineEdit::Password);
 
+        Qt::WindowFlags flags = dbgDialog.windowFlags();
+        flags |= Qt::MSWindowsFixedSizeDialogHint;
+        flags &= ~Qt::WindowContextHelpButtonHint;
+        dbgDialog.setWindowFlags(flags);
+
         if ((dbgDialog.exec()!=QDialog::Rejected) && (dbgDialog.textValue()==RDS_DBGPASSWORD))
         {
             debugWindow.show();
