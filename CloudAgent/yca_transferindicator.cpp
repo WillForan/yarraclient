@@ -1,6 +1,7 @@
 #include <QDesktopWidget>
 #include <QMenu>
 #include <QMovie>
+#include <QStyle>
 
 #include "yca_global.h"
 #include "yca_transferindicator.h"
