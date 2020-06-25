@@ -46,6 +46,7 @@ rdsIconWindow::rdsIconWindow(QWidget *parent) :
 
     showStartupCommandsEntry=false;
     showCloudWindowEntry=false;
+    showFileExplorerEntry=false;
     showORTEntry=false;
     error=false;
 }
@@ -60,6 +61,12 @@ void rdsIconWindow::showStartupCommandsOption()
 void rdsIconWindow::showCloudWindowOption()
 {
     showCloudWindowEntry=true;
+}
+
+
+void rdsIconWindow::showFileExplorerOption()
+{
+    showFileExplorerEntry=true;
 }
 
 
@@ -106,7 +113,14 @@ void rdsIconWindow::mouseReleaseEvent(QMouseEvent *event)
             QIcon icon = YCA_ICON_MENU;
             infoMenu.addAction(icon,"Show YarraCloud Agent...",this,SLOT(showCloudAgent()));
         }
+
         infoMenu.addSeparator();
+
+        if (showFileExplorerEntry)
+        {
+            QIcon icon = QApplication::style()->standardIcon(QStyle::SP_DialogOpenButton);
+            infoMenu.addAction(icon,"Show File Explorer...",this,SLOT(showFileExplorer()));
+        }
 
         if (showORTEntry)
         {
@@ -129,6 +143,13 @@ void rdsIconWindow::showStatusWindow()
 void rdsIconWindow::showCloudAgent()
 {
     QString cmd=qApp->applicationDirPath() + "/YCA.exe show";
+    QProcess::startDetached(cmd);
+}
+
+
+void rdsIconWindow::showFileExplorer()
+{
+    QString cmd="explorer";
     QProcess::startDetached(cmd);
 }
 

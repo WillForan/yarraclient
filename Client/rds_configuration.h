@@ -32,6 +32,7 @@ public:
     QString infoName;
     QString infoSerialNumber;
     bool    infoShowIcon;
+    bool    infoFileExplorerItem;
     QString infoScannerType;
 
     int     infoUpdateMode;

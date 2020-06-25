@@ -124,6 +124,10 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
             {
                 iconWindow.showCloudWindowOption();
             }
+            if (RTI_CONFIG->infoFileExplorerItem)
+            {
+                iconWindow.showFileExplorerOption();
+            }
 
             // Only show the ORT launcher if the ORT client has been configured
             if (QFile::exists(RTI->getAppPath() + "/ort.ini"))

@@ -47,6 +47,7 @@ void rdsConfiguration::loadConfiguration()
 
     infoName              =settings.value("General/Name",               "").toString();
     infoShowIcon          =settings.value("General/ShowIcon",           true).toBool();
+    infoFileExplorerItem  =settings.value("General/FileExplorerItem",   false).toBool();
 
     infoUpdateMode        =settings.value("General/UpdateMode",         UPDATEMODE_STARTUP_FIXEDTIME).toInt();
     infoUpdatePeriod      =settings.value("General/UpdatePeriod",       6).toInt();
@@ -145,6 +146,7 @@ void rdsConfiguration::saveConfiguration()
 
     settings.setValue("General/Name",               infoName);
     settings.setValue("General/ShowIcon",           infoShowIcon);
+    settings.setValue("General/FileExplorerItem",   infoFileExplorerItem);
 
     settings.setValue("General/UpdateMode",         infoUpdateMode);
     settings.setValue("General/UpdatePeriod",       infoUpdatePeriod);

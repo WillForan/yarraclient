@@ -50,6 +50,7 @@ public:
     void showStartupCommandsOption();
     void showORTOption();
     void showCloudWindowOption();
+    void showFileExplorerOption();
 
 private:
     Ui::rdsIconWindow* ui;
@@ -63,10 +64,12 @@ private:
     bool    showStartupCommandsEntry;
     bool    showCloudWindowEntry;
     bool    showORTEntry;
+    bool    showFileExplorerEntry;
 
 private slots:
     void showStatusWindow();
     void showCloudAgent();
+    void showFileExplorer();
     void startORTClient();
     void runStartupCommands();
     void triggerTransferNow();
