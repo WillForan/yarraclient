@@ -701,6 +701,8 @@ bool yctTWIXAnonymizer::checkVersionString(QString versionString)
     // Unfortunately, there is no consistent way to test for the subversion
     // as the baseline string is not included in the XA versions anymore.
 
+    if (versionString.contains("syngo MR XA20")) { return true; }
+    if (versionString.contains("syngo MR XA11")) { return true; }
     if (versionString.contains("syngo MR XA10")) { return true; }
     if (versionString.contains("syngo MR E11"))  { return true; }
     if (versionString.contains("syngo MR D13"))  { return true; }

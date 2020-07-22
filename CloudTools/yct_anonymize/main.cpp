@@ -4,7 +4,7 @@
 
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_ANONYMIZER_VER "0.2b3"
+#define YCT_ANONYMIZER_VER "0.2b4"
 
 
 class phiEntry
