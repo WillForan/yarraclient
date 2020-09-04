@@ -272,14 +272,13 @@ void rdsProcessControl::performUpdate()
                 RTI->log("WARNING: Errors occured during export.");
                 RTI->log("WARNING: Data transfer has been terminated.");
                 RTI->setSevereErrors(true);
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Error, "Error during export");
 
                 // Indicate the error in the top icon
                 if (!RTI->getWindowInstance()->isVisible())
                 {
                     RTI->getWindowInstance()->iconWindow.setError();
                 }
-
-                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Error, "Error during export");
             }
 
             // Close activity window if visible
@@ -302,12 +301,17 @@ void rdsProcessControl::performUpdate()
             RTI->processEvents();
 
             // Again, clean up the queue directoy
+            bool was_error = RTI->isSevereErrors();
             RTI_NETWORK->transferFiles();
+            if (!was_error && RTI->isSevereErrors())
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error, "File transfer generated error(s).");
 
             RTI->log("Update finished.");
 
             // Copy the local logfile to the network drive for remote diagnosis
-            RTI_NETWORK->copyLogFile();
+            if (!RTI_NETWORK->copyLogFile())
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error, "Log file transfer failed.");
+
 
             // Close connection to FTP server
             RTI_NETWORK->closeConnection();

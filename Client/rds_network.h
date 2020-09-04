@@ -35,7 +35,7 @@ public:
     bool removeFile();
     void releaseFile();
 
-    void copyLogFile();
+    bool copyLogFile();
     void runReconnectCmd();
 
     NetLogger netLogger;
@@ -76,6 +76,8 @@ public:
     bool lockError;
 
     bool finishedCopy;
+    QFile::FileError fileError;
+    QString fileErrorString;
 };
 
 
