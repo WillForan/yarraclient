@@ -35,6 +35,8 @@ public:
     bool removeFile();
     void releaseFile();
 
+    QString getConfigFileData();
+    QString getLogFileData(int lines);
     bool copyLogFile();
     void runReconnectCmd();
 

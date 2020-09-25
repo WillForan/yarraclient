@@ -123,7 +123,10 @@ void rdsConfiguration::loadConfiguration()
     // Loads the remotely defined name and overwrites the locally defined name
     // if a name has been defined for the serial number of the system (if not,
     // the local name will be kept).
-    loadRemotelyDefinedName();
+    if (loadRemotelyDefinedName()){
+        QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
+        settings.setValue("General/Name",               infoName);
+    }
 
     // Make sure that the name is never empty (this would be the case if no
     // remote name has been defined and no local name has been defined).
@@ -239,7 +242,7 @@ void rdsConfiguration::updateProtocol(int index, QString name, QString filter, b
 }
 
 
-void rdsConfiguration::readProtocol(int index, QString& name, QString& filter, bool& saveAdjustData, bool& anonymizeData, bool &smallFiles, bool remotelyDefined)
+void rdsConfiguration::readProtocol(int index, QString& name, QString& filter, bool& saveAdjustData, bool& anonymizeData, bool &smallFiles, bool &remotelyDefined)
 {
     rdsConfigurationProtocol* item=protocols.at(index);
 
@@ -350,11 +353,12 @@ bool rdsConfiguration::loadRemotelyDefinedProtocols()
         }        
     }
 
+    RTI->log("Remote protocols parsed.");
+
     if (addedProtocols>0)
     {
         RTI->log(QString::number(addedProtocols)+" remote protocols added.");
     }
-
     return true;
 }
 
@@ -401,7 +405,6 @@ bool rdsConfiguration::loadRemotelyDefinedName()
     {
         return false;
     }
-
     infoName=name;
     return true;
 }

@@ -303,20 +303,39 @@ void rdsProcessControl::performUpdate()
             // Again, clean up the queue directoy
             bool was_error = RTI->isSevereErrors();
             RTI_NETWORK->transferFiles();
-            if (!was_error && RTI->isSevereErrors())
-                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error, "File transfer generated error(s).");
+
+            if (!was_error && RTI->isSevereErrors()) {
+                QString configFileData;
+                QString logFileData;
+                try {
+                    logFileData = RTI_NETWORK->getLogFileData(50);
+                    configFileData = RTI_NETWORK->getConfigFileData();
+                } catch (...) {
+                    logFileData = "";
+                    configFileData = "";
+                }
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error, "File transfer generated error(s).", logFileData);
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error, "Config file", configFileData);
+
+            }
 
             RTI->log("Update finished.");
 
             // Copy the local logfile to the network drive for remote diagnosis
-            if (!RTI_NETWORK->copyLogFile())
-                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error, "Log file transfer failed.");
-
+            if (!RTI_NETWORK->copyLogFile()) {
+                QString logFileData;
+                try {
+                    logFileData = RTI_NETWORK->getLogFileData(100);
+                } catch (...) {
+                    logFileData = "";
+                }
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error, "Log file transfer failed.", logFileData);
+            }
 
             // Close connection to FTP server
             RTI_NETWORK->closeConnection();
 
-            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Success,"Raw data sent");
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Success,"Data transfer ended");
         }
         else
         {
@@ -325,7 +344,12 @@ void rdsProcessControl::performUpdate()
             setExplicitUpdate(RDS_UPDATETIME_RETRY);
 
             connectionFailureCount++;
-
+            QString logFileData;
+            try {
+                logFileData = RTI_NETWORK->getLogFileData(10);
+            } catch (...) {
+                logFileData = "";
+            }
             if (connectionFailureCount > RDS_CONNECTIONFAILURE_COUNT)
             {
                 RTI->log("");
@@ -341,11 +365,12 @@ void rdsProcessControl::performUpdate()
                     RTI->getWindowInstance()->iconWindow.setError();
                 }
 
-                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Opening connection failed repeatedly");
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Opening connection failed repeatedly",logFileData);
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::FatalError, "RDS configuration",RTI_NETWORK->getConfigFileData());
             }
             else
             {
-                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Error, "Opening connection failed");
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::Error, "Opening connection failed",logFileData);
 
                 // Rerun the startup commands if reconnecting failed for three times. Maybe this will
                 // resolve the connection problem.
@@ -355,6 +380,7 @@ void rdsProcessControl::performUpdate()
                     RTI->getWindowInstance()->runStartCmds();
                 }
             }
+
         }
 
         lastUpdate=QDateTime::currentDateTime();

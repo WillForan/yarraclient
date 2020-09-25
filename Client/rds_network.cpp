@@ -52,7 +52,7 @@ bool rdsNetwork::openConnection()
                 RTI->log("Error: Could not access network drive path: " + RTI_CONFIG->netDriveBasepath);
                 RTI->log("Error: Check if network drive has been mounted. Or check configuration.");
                 RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::FatalError,
-                             "Error: Could not access network drive path: " + RTI_CONFIG->netDriveBasepath);
+                             "Error: Could not access network drive path", RTI_CONFIG->netDriveBasepath);
                 return false;
             }
             else
@@ -62,8 +62,8 @@ bool rdsNetwork::openConnection()
                 {
                     RTI->log("Error: Unable to create network drive path: " + RTI_CONFIG->netDriveBasepath);
                     RTI->log("Error: Check configuration and network permissions.");
-                    RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::FatalError,
-                                 "Error: Unable to create network drive path: " + RTI_CONFIG->netDriveBasepath);
+                    RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::FatalError,
+                                 "Error: Unable to create network drive path", RTI_CONFIG->netDriveBasepath);
 
                     return false;
                 }
@@ -74,7 +74,7 @@ bool rdsNetwork::openConnection()
                         RTI->log("Error: Creating the network drive path was not successful: " + RTI_CONFIG->netDriveBasepath);
                         RTI->log("Error: Check configuration and network permissions.");
                         RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::FatalError,
-                                     "Error: Creating the network drive path was not successful: " + RTI_CONFIG->netDriveBasepath);
+                                     "Error: Creating the network drive path was not successful", RTI_CONFIG->netDriveBasepath);
 
                         return false;
                     }
@@ -173,7 +173,7 @@ bool rdsNetwork::transferFiles()
         }
 
         //RTI->log("DBG: Deleted file");
-
+        QString temp_filename = currentFilename;
         releaseFile();
 
         //RTI->log("DBG: Released file");
@@ -181,8 +181,8 @@ bool rdsNetwork::transferFiles()
         RTI->processEvents();
 
         if (!success) {
-            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                         "Error transferring file "+ currentFilename);
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                         "Error transferring a file", temp_filename);
         }
         //RTI->log("DBG: Processed events");
     }
@@ -217,7 +217,7 @@ bool rdsNetwork::getFileToProcess(int index)
     if ((index<0) || (index>=fileList.count()))
     {
         RTI->log("Error: File transfer list is invalid!");
-        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
+        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
                      "File transfer list is invalid");
 
         return false;
@@ -229,8 +229,8 @@ bool rdsNetwork::getFileToProcess(int index)
     if (!queueDir.exists(currentFilename))
     {
         RTI->log("Error: File could not be found: " + currentFilename);
-        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                     "File could not be found: " + currentFilename);
+        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                     "File could not be found", currentFilename);
         return false;
     }
 
@@ -239,8 +239,8 @@ bool rdsNetwork::getFileToProcess(int index)
     if (sepPos==-1)
     {
         RTI->log("Error: File name does not contain protocol name: " + currentFilename);
-        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                     "File name does not contain protocol name: " + currentFilename);
+        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                     "File name does not contain protocol name", currentFilename);
         return false;
     }
 
@@ -264,8 +264,8 @@ bool rdsNetwork::copyFile()
             {
                 RTI->log("Error: Creating protocol directory not possible: " + currentProt);
                 RTI->setSevereErrors(true);
-                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                             "Creating protocol directory not possible: " + currentProt);
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                             "Creating protocol directory not possible", currentProt);
                 return false;
             }
         }
@@ -310,8 +310,8 @@ bool rdsNetwork::copyFile()
             {
                 RTI->log("ERROR: Unable to create unique filename: " + destName);
                 RTI->log("Something must be wrong with the file system.");
-                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::FatalError,
-                             "Unable to create unique filename: " + destName);
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::FatalError,
+                             "Unable to create unique filename",destName);
 
                 return false;
             }
@@ -379,6 +379,8 @@ bool rdsNetwork::copyFile()
             if (copyThread.lockError)
             {
                 RTI->log("Warning: Problems while creating/removing lock file for "+destName);
+                RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Warning,
+                             "Problems while creating/removing lock file for", destName);
             }
 
             copyError=!copyThread.success;
@@ -393,10 +395,20 @@ bool rdsNetwork::copyFile()
             RTI->log("Error: Source = " + sourceName);
             RTI->log("Error: Destination = " + destName);
             RTI->setSevereErrors(true);
-            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                         "Error transferring file "+ sourceName + " to " + destName + ": " + fileError);
+
+            QString dataString=QString("<data>") + \
+                 "<filename>"  + currentFilename+"</filename>" +
+                 "<sourceName>"+ sourceName+"</sourceName>" +
+                 "<destName>"  + destName  +"</destName>" +
+                 "<fileError>" + fileError +"</fileError>" +
+                 "</data>";
+
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                         "Error copying file", dataString);
             return false;
         }
+        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Success,
+                     currentFilename);
     }
 
     return true;
@@ -416,8 +428,8 @@ bool rdsNetwork::verifyTransfer()
             RTI->log("Error: Copied file does not exist at target position: " + destName);
             RTI->log("Error: Transferring the file was not successful.");
             RTI->setSevereErrors(true);
-            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                         "Error verifying file at "+ destName+" : does not exist at destination");
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                         "Error verifying file: does not exist at destination", destName);
             return false;
         }
 
@@ -427,8 +439,8 @@ bool rdsNetwork::verifyTransfer()
             RTI->log("Error: Original size = " + QString::number(currentFilesize));
             RTI->log("Error: Copy size = " + QString::number(fileInfo.size()));
             RTI->setSevereErrors(true);
-            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                         "Error verifying file at "+ destName+" : file size does not match.");
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                         "Error verifying file: file size does not match.", destName);
             return false;
         }
         else
@@ -454,8 +466,8 @@ bool rdsNetwork::removeFile()
         if (!queueDir.remove(currentFilename))
         {
             RTI->log("Error: Deleting file was not successful. File might be locked: " + currentFilename);
-            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                         "Error deleting file at "+ currentFilename);
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                         "Error deleting file", currentFilename);
         }
     }
 
@@ -479,8 +491,8 @@ bool rdsNetwork::checkExistance(QString filename)
     if (sepPos==-1)
     {
         RTI->log("Error: File name does not contain protocol name: " + filename);
-        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                     "File name does not contain protocol name: " + filename);
+        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::FileTransfer,EventInfo::Severity::Error,
+                     "File name does not contain protocol name", filename);
 
         return false;
     }
@@ -497,6 +509,58 @@ bool rdsNetwork::checkExistance(QString filename)
     return false;
 }
 
+
+
+QString rdsNetwork::getConfigFileData() {
+    QFile configFile(RTI->getAppPath() + RDS_INI_NAME);
+    QString  result = "";
+    try {
+        if(configFile.open(QIODevice::ReadOnly)) {
+            QByteArray lines = configFile.readAll();
+            QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+            result =  codec->toUnicode(lines);
+            configFile.close();
+        }
+    } catch (...) {
+    }
+    return result;
+}
+
+QString rdsNetwork::getLogFileData(int lines) {
+    QString logName="rds.log";
+    QString logPath=RTI->getLogInstance()->getLocalLogPath();
+    QFile logFile(logPath+logName);
+    RTI->getLogInstance()->pauseLogfile();
+
+    QString result = "";
+
+    try {
+        if(logFile.open(QIODevice::ReadOnly))
+        {
+            try {
+                logFile.seek(logFile.size()-1);
+                int count = 0;
+                while ( (count < lines) && (logFile.pos() > 0) )
+                {
+                    QString ch = logFile.read(1);
+                    logFile.seek(logFile.pos()-2);
+                    if (ch == "\n")
+                        count++;
+                }
+                QByteArray lines = logFile.readAll();
+                QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+                result =  codec->toUnicode(lines);
+                logFile.close();
+            } catch(...) {
+                logFile.close();
+            }
+        }
+    } catch (...) {
+        RTI->getLogInstance()->resumeLogfile();
+    }
+    RTI->getLogInstance()->resumeLogfile();
+    return result;
+}
 
 bool rdsNetwork::copyLogFile()
 {
@@ -531,7 +595,7 @@ bool rdsNetwork::copyLogFile()
     {
         RTI->log("WARNING: Copying the log file did not succeed! "+logFile.errorString());
         RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
-                     "Copying the log file did not succeed! "+logFile.errorString());
+                     "Copying the log file did not succeed", logFile.errorString());
     }
     return logCopySuccess;
 }

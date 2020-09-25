@@ -55,7 +55,8 @@ namespace EventInfo
         LowDiskSpace,
         Diagnostics,
         Inventory,
-        Push
+        Push,
+        FileTransfer
     };
 
     inline std::ostream& operator<< (std::ostream& o, const Detail& c)
@@ -69,6 +70,7 @@ namespace EventInfo
         case Detail::Diagnostics:   return o << "Diagnostics";
         case Detail::Inventory:     return o << "Inventory";
         case Detail::Push:          return o << "Push";
+        case Detail::FileTransfer:  return o << "FileTransfer";
         }
         return o << static_cast<std::uint16_t>(c);
     }
