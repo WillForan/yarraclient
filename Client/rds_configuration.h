@@ -70,6 +70,9 @@ public:
     int     logUpdateFrequency;
     int     logUpdateFrequencyUnit;
 
+    QString rdsUpdatePath;
+
+
     QStringList startCmds;
 
     bool    cloudSupportEnabled;

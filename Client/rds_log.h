@@ -20,6 +20,7 @@ public:
 
     void setLogWidget(QTextEdit* widget);
     void clearLogWidget();
+    void bootInfo();
 
     QString getLogFilename();
     QString getLocalLogPath();

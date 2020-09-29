@@ -5,7 +5,7 @@
 rdsConfiguration::rdsConfiguration()
 {
     // Read information about the system from the environment variables
-    infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER", "0");
+    infoSerialNumber=QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER", "999999999");
     infoScannerType =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",  "Unknown");
 
     // Read information specifically for NumarisX
@@ -41,6 +41,8 @@ bool rdsConfiguration::isConfigurationValid()
 void rdsConfiguration::loadConfiguration()
 {
     QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
+
+    rdsUpdatePath = settings.value("General/UpdatePath",               "").toString();
 
     // Used to test if the program has been configured once at all
     infoValidityTest      =settings.value("General/ValidityTest",       false).toBool();

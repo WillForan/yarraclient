@@ -34,7 +34,9 @@ void rdsLog::start()
         logfile.setFileName(logFilename);
         logfile.open(QIODevice::Append | QIODevice::Text);
     }
+}
 
+void rdsLog::bootInfo(){
     #ifdef YARRA_APP_RDS
         log("Service started (V "+QString(RDS_VERSION)+")");
     #endif

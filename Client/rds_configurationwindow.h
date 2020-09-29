@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include "rds_configuration.h"
+#include "rds_log.h"
 
 
 namespace Ui {
@@ -56,11 +57,20 @@ private slots:
 
     void on_protSmallFilesCheckbox_toggled(bool checked);
 
+    void on_doUpdateButton_clicked();
+
+    void on_updateVersionsWidget_currentRowChanged(int currentRow);
+
+    void on_updateModeSet_stateChanged(int arg1);
+
 private:
     Ui::rdsConfigurationWindow *ui;
 
     rdsConfiguration config;
+    rdsLog log;
 
+    void copyPath(QString src, QString dst);
+    QString rot13( const QString & input );
 };
 
 #endif // RDSCONFIGURATIONWINDOW_H

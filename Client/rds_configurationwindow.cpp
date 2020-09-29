@@ -24,6 +24,9 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
     flags &= ~Qt::WindowContextHelpButtonHint;
     setWindowFlags(flags);
 
+    log.start(); // This seems broken...
+    RTI->setLogInstance(&log);
+
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
     connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(close()));
 
@@ -36,10 +39,12 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
     connect(ui->logServerTestConnectionButton, SIGNAL(clicked()), this, SLOT(callLogServerTestConnection()));
 
     ui->tabWidget->setCurrentIndex(0);
+
     callUpdateModeChanged(ui->updateCombobox->currentIndex());
 
     ui->networkModeCombobox->setCurrentIndex(0);
     ui->networkStackedWidget->setCurrentIndex(0);
+
 
     QString versionText="Version " + QString(RDS_VERSION) + ", Build date " + QString(__DATE__);
 #ifdef NETLOGGER_DISABLE_DOMAIN_VALIDATION
@@ -53,12 +58,26 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
 
     readConfiguration();
 
+    QDir update_dir(config.rdsUpdatePath);
+    QStringList dirs = update_dir.entryList(QDir::Dirs|QDir::NoDotAndDotDot|QDir::Readable);
+
+    qSort(dirs.begin(), dirs.end());
+
+    for (int i = 0; i < dirs.size(); ++i) {
+        ui->updateVersionsWidget->addItem(dirs[i]);
+    }
+    if (dirs.size()) {
+        ui->updateVersionsWidget->setCurrentRow(0);
+    } else {
+        ui->tabWidget->removeTab(6);
+    }
     ui->logServerStatusLabel->setText("");
 }
 
 
 rdsConfigurationWindow::~rdsConfigurationWindow()
 {
+    log.finish();
     delete ui;
 }
 
@@ -566,4 +585,183 @@ void rdsConfigurationWindow::callLogServerTestConnection()
     ui->logServerStatusLabel->setText(output);
 }
 
+void rdsConfigurationWindow::copyPath(QString src, QString dst)
+{
+    QDir dir(src);
+    if (! dir.exists())
+        return;
 
+    foreach (QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        QString dst_path = dst + QDir::separator() + d;
+        dir.mkpath(dst_path);
+        copyPath(src+ QDir::separator() + d, dst_path);
+    }
+
+    foreach (QString f, dir.entryList(QDir::Files)) {
+        QFile::copy(src + QDir::separator() + f, dst + QDir::separator() + f);
+    }
+}
+
+QString rdsConfigurationWindow::rot13( const QString & input )
+{
+    QString r = input;
+    int i = r.length();
+    while( i-- ) {
+        if ( r[i] >= QChar('A') && r[i] <= QChar('M') ||
+             r[i] >= QChar('a') && r[i] <= QChar('m') )
+            r[i] = (char)((int)QChar(r[i]).toLatin1() + 13);
+        else if  ( r[i] >= QChar('N') && r[i] <= QChar('Z') ||
+                   r[i] >= QChar('n') && r[i] <= QChar('z') )
+            r[i] = (char)((int)QChar(r[i]).toLatin1() - 13);
+    }
+    return r;
+}
+
+void rdsConfigurationWindow::on_doUpdateButton_clicked()
+{
+    if (!ui->updateVersionsWidget->currentItem()) {
+        return;
+    }
+
+    QString updateVersion = ui->updateVersionsWidget->currentItem()->text();
+    QString updateFolder = config.rdsUpdatePath+"/"+updateVersion;
+    QString updateFiles = updateFolder+"/files";
+
+    QDir tempDir(RTI->getAppPath()+"/temp");
+
+    // Check to see if this directory looks okay.
+    {
+        bool configFileExists = QFile(updateFolder+"/config.ini").exists();
+        bool updateFilesExists = QDir(updateFiles).exists();
+        bool rdsExeExists = QFile(updateFiles+"/RDS.exe").exists();
+
+        if (!(configFileExists && updateFilesExists && rdsExeExists)) {
+            QString err = QString("Unable to perform update. Package %1 is missing required files.").arg(updateVersion);
+            if (!configFileExists)  {
+                err += "\n./config.ini";
+            }
+            if (!updateFilesExists)  {
+                err += "\n./files";
+            }
+            if (!updateFilesExists)  {
+                err += "\n./RDS.exe";
+            }
+            QMessageBox::critical(this,"Update aborted",err);
+            RTI->log(err);
+            return;
+        }
+    }
+    QSettings updateInfo(updateFolder+"/config.ini",QSettings::IniFormat);
+    QString password = updateInfo.value("General/Password", "").toString();
+
+    // If there's a password set, validate it.
+    if (password.size()) {
+        QInputDialog pwdDialog;
+        pwdDialog.setInputMode(QInputDialog::TextInput);
+        pwdDialog.setWindowIcon(RDS_ICON);
+        pwdDialog.setWindowTitle("Password");
+        pwdDialog.setLabelText("Update Password:");
+        pwdDialog.setTextEchoMode(QLineEdit::Password);
+
+        Qt::WindowFlags flags = pwdDialog.windowFlags();
+        flags |= Qt::MSWindowsFixedSizeDialogHint;
+        flags &= ~Qt::WindowContextHelpButtonHint;
+        pwdDialog.setWindowFlags(flags);
+
+        if (pwdDialog.exec()==QDialog::Rejected)
+            return;
+
+        if (rot13(pwdDialog.textValue()) != password) {
+            QMessageBox::critical(this,"Password error","Invalid password. Do you have capslock turned on?");
+            return;
+        }
+    }
+
+    // Confirm that you really want to update.
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Update confirmation");
+        msgBox.setText(QString("Really update from version <b>%1</b> to <b>%2</b>?").arg(RDS_VERSION,updateVersion));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        if (msgBox.exec() != QMessageBox::Yes) {
+            return;
+        }
+    }
+
+    // Reset the temp directory
+    {
+        if (tempDir.exists()) {
+            tempDir.removeRecursively();
+        }
+        QDir appDir(RTI->getAppPath());
+        appDir.mkdir("temp");
+    }
+    copyPath(updateFiles, tempDir.absolutePath());
+
+    // Do a little rename dance with the RDS executable
+    {
+        QFile old_file (RTI->getAppPath() + "/RDS.exe.old");
+        if (old_file.exists())
+            old_file.remove();
+
+        QFile this_exe(RTI->getAppPath() + "/RDS.exe");
+        this_exe.rename(RTI->getAppPath() + "/RDS.exe.old");
+
+        QFile this_exe_check(RTI->getAppPath() + "/RDS.exe");
+        for (int i=0; i<5;i++){
+            if (this_exe_check.exists()) {
+                this_exe.rename(RTI->getAppPath() + "/RDS.exe.old");
+            } else {
+                break;
+            }
+        }
+        if (this_exe_check.exists()) {
+            QMessageBox::critical(this,"Update not applied","Update not applied: Failed to remove old executable.");
+            RTI->log("Update not applied: Failed to remove old executable.");
+            return;
+        }
+    }
+
+    // Perform the update...
+    copyPath(tempDir.absolutePath(), RTI->getAppPath());
+
+    tempDir.removeRecursively();
+    RTI->log(QString("Update to %1 applied").arg(updateVersion));
+    QMessageBox::information(this,"Update","Update applied, restarting RDS...");
+
+    // Shut this process down and start the updated .exe
+    QProcess::startDetached(RTI->getAppPath() + "/RDS.exe",{},RTI->getAppPath());
+    RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
+    qApp->quit();
+
+}
+
+void rdsConfigurationWindow::on_updateVersionsWidget_currentRowChanged(int currentRow)
+{
+//    QString compilation_date = QStringLiteral(__DATE__);
+
+    QString updateVersion = ui->updateVersionsWidget->currentItem()->text();
+    QString updateFolder = config.rdsUpdatePath+"/"+updateVersion;
+    QSettings updateInfo(updateFolder+"/config.ini",QSettings::IniFormat);
+    QString releaseDate  = updateInfo.value("General/ReleaseDate", "1970-01-01").toString();
+    QString releaseNotes = updateInfo.value("General/ReleaseInfo", "").toString();
+
+    QDate releaseQDate = QLocale("en_US").toDate(releaseDate.simplified(), "yyyy-MM-dd");
+    QDate compiledDate = QLocale("en_US").toDate(QStringLiteral(__DATE__).simplified(), "MMM d yyyy");
+
+
+    QString displayString = QString("<h1>RDS version %1</h1> <br/> <b>Released on</b>: %2").arg(updateVersion, releaseQDate.toString("yyyy-MM-dd"));
+    if (compiledDate > releaseQDate) {
+        displayString += "<h3 style='color:red;'>Warning: this release is older than the current one.</h3>";
+    }
+    if(releaseNotes.size()) {
+        displayString += QString("<p><b>Release notes</b>:</p> <p>%1</p>").arg(releaseNotes);
+    }
+    ui->updateVersionInfoDisplay->setText(displayString);
+}
+
+void rdsConfigurationWindow::on_updateModeSet_stateChanged(int arg1)
+{
+    ui->doUpdateButton->setEnabled(arg1!=0);
+}
