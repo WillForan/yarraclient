@@ -58,7 +58,7 @@ private slots:
     void on_protSmallFilesCheckbox_toggled(bool checked);
 
     void on_doUpdateButton_clicked();
-
+    bool doVersionUpdate(QString updateVersion, QString &error);
     void on_updateVersionsWidget_currentRowChanged(int currentRow);
 
     void on_updateModeSet_stateChanged(int arg1);
@@ -69,7 +69,9 @@ private:
     rdsConfiguration config;
     rdsLog log;
 
-    void copyPath(QString src, QString dst);
+    QByteArray fileChecksum(const QString &fileName,
+                            QCryptographicHash::Algorithm hashAlgorithm);
+    bool copyPath(QString src, QString dst, bool verify = true);
     QString rot13( const QString & input );
 };
 

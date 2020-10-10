@@ -93,9 +93,10 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         // Send the version number and name along with the boot notification
         QString dataString="<data>";
         dataString+="<version>"       +QString(RDS_VERSION)                   +"</version>";
-        dataString+="<name>"          +QString(RTI_CONFIG->infoName)          +"</name>";
-        dataString+="<system_model>"  +QString(RTI_CONFIG->infoScannerType)   +"</system_model>";
-        dataString+="<system_version>"+QString(RTI->getSyngoMRVersionString())+"</system_version>";
+        dataString+="<name>"          +RTI_CONFIG->infoName                   +"</name>";
+        dataString+="<path>"          +RTI->getAppPath()                      +"</path>";
+        dataString+="<system_model>"  +RTI_CONFIG->infoScannerType            +"</system_model>";
+        dataString+="<system_version>"+RTI->getSyngoMRVersionString()         +"</system_version>";
         dataString+="<system_vendor>Siemens</system_vendor>";
         dataString+="<time>"          +QDateTime::currentDateTime().toString()+"</time>";
         dataString+="</data>";

@@ -585,21 +585,60 @@ void rdsConfigurationWindow::callLogServerTestConnection()
     ui->logServerStatusLabel->setText(output);
 }
 
-void rdsConfigurationWindow::copyPath(QString src, QString dst)
+QByteArray rdsConfigurationWindow::fileChecksum(const QString &fileName,
+                        QCryptographicHash::Algorithm hashAlgorithm)
+{
+    QFile f(fileName);
+    if (f.open(QFile::ReadOnly)) {
+        QCryptographicHash hash(hashAlgorithm);
+        if (hash.addData(&f)) {
+            return hash.result();
+        }
+    }
+    return QByteArray();
+}
+
+bool rdsConfigurationWindow::copyPath(QString src, QString dst, bool verify) // std::function< bool(QString,QString) >& each_file
 {
     QDir dir(src);
+    bool success;
+    QString sep = QDir::separator();
     if (! dir.exists())
-        return;
+        return false;
 
     foreach (QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        QString dst_path = dst + QDir::separator() + d;
-        dir.mkpath(dst_path);
-        copyPath(src+ QDir::separator() + d, dst_path);
+        QString dst_path = dst + sep + d;
+        success = dir.mkpath(dst_path);
+        if (! success )
+            return false;
+        success = copyPath(src + sep + d, dst_path);
+        if (! success )
+            return false;
     }
 
     foreach (QString f, dir.entryList(QDir::Files)) {
-        QFile::copy(src + QDir::separator() + f, dst + QDir::separator() + f);
+        QString srcPath = src + sep + f;
+        QString dstPath = dst + sep + f;
+        success = QFile::copy(srcPath,dstPath);
+        if (! success )
+            return false;
+
+        if (! verify ) {
+            continue;
+        }
+
+        QByteArray srcCheck = fileChecksum(srcPath,QCryptographicHash::Md5);
+        QByteArray dstCheck = fileChecksum(dstPath,QCryptographicHash::Md5);
+
+        success = (srcCheck.size() == 0 || dstCheck.size() == 0);
+        if (! success )
+            return false;
+
+        if (srcCheck != dstCheck) {
+            return false;
+        }
     }
+    return true;
 }
 
 QString rdsConfigurationWindow::rot13( const QString & input )
@@ -617,13 +656,7 @@ QString rdsConfigurationWindow::rot13( const QString & input )
     return r;
 }
 
-void rdsConfigurationWindow::on_doUpdateButton_clicked()
-{
-    if (!ui->updateVersionsWidget->currentItem()) {
-        return;
-    }
-
-    QString updateVersion = ui->updateVersionsWidget->currentItem()->text();
+bool rdsConfigurationWindow::doVersionUpdate(QString updateVersion, QString& error) {
     QString updateFolder = config.rdsUpdatePath+"/"+updateVersion;
     QString updateFiles = updateFolder+"/files";
 
@@ -636,8 +669,8 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
         bool rdsExeExists = QFile(updateFiles+"/RDS.exe").exists();
 
         if (!(configFileExists && updateFilesExists && rdsExeExists)) {
-            QString err = QString("Unable to perform update. Package %1 is missing required files.").arg(updateVersion);
-            if (!configFileExists)  {
+            QString err = QString("Package %1 is missing required files.").arg(updateVersion);
+            if (!configFileExists) {
                 err += "\n./config.ini";
             }
             if (!updateFilesExists)  {
@@ -646,12 +679,17 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
             if (!updateFilesExists)  {
                 err += "\n./RDS.exe";
             }
-            QMessageBox::critical(this,"Update aborted",err);
-            RTI->log(err);
-            return;
+            error = err;
+            return false;
         }
     }
     QSettings updateInfo(updateFolder+"/config.ini",QSettings::IniFormat);
+
+    if (updateInfo.status() != QSettings::NoError) {
+        error = "Package configuration missing or corrupted.";
+        return false;
+    }
+
     QString password = updateInfo.value("General/Password", "").toString();
 
     // If there's a password set, validate it.
@@ -669,11 +707,11 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
         pwdDialog.setWindowFlags(flags);
 
         if (pwdDialog.exec()==QDialog::Rejected)
-            return;
+            return false;
 
         if (rot13(pwdDialog.textValue()) != password) {
-            QMessageBox::critical(this,"Password error","Invalid password. Do you have capslock turned on?");
-            return;
+            error = "Invalid password. Do you have capslock turned on?";
+            return false;
         }
     }
 
@@ -685,7 +723,7 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Cancel);
         if (msgBox.exec() != QMessageBox::Yes) {
-            return;
+            return false;
         }
     }
 
@@ -697,11 +735,14 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
         QDir appDir(RTI->getAppPath());
         appDir.mkdir("temp");
     }
-    copyPath(updateFiles, tempDir.absolutePath());
+    if ( ! copyPath(updateFiles, tempDir.absolutePath()) ) {
+        error = "Package download failed.";
+        return false;
+    }
 
     // Do a little rename dance with the RDS executable
     {
-        QFile old_file (RTI->getAppPath() + "/RDS.exe.old");
+        QFile old_file(RTI->getAppPath() + "/RDS.exe.old");
         if (old_file.exists())
             old_file.remove();
 
@@ -717,24 +758,52 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
             }
         }
         if (this_exe_check.exists()) {
-            QMessageBox::critical(this,"Update not applied","Update not applied: Failed to remove old executable.");
-            RTI->log("Update not applied: Failed to remove old executable.");
-            return;
+            error = "Failed to remove old executable.";
+            return false;
         }
     }
 
     // Perform the update...
-    copyPath(tempDir.absolutePath(), RTI->getAppPath());
+
+    oldConfigFile = QFile(RTI->getAppPath()+"/config.ini");
+    QFile(RTI->getAppPath()+"/config.ini.bak").remove();
+    oldConfigFile.copy(RTI->getAppPath()+"/config.ini.bak");
+
+    newConfigFile = QFile(tempDir.absolutePath()+"/config.ini");
+
+    if (! copyPath(tempDir.absolutePath(), RTI->getAppPath()) ) {
+        tempDir.removeRecursively();
+        error = "Package overwrite failed.";
+        return false;
+    }
 
     tempDir.removeRecursively();
-    RTI->log(QString("Update to %1 applied").arg(updateVersion));
-    QMessageBox::information(this,"Update","Update applied, restarting RDS...");
+    return true;
+}
 
-    // Shut this process down and start the updated .exe
-    QProcess::startDetached(RTI->getAppPath() + "/RDS.exe",{},RTI->getAppPath());
-    RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
-    qApp->quit();
+void rdsConfigurationWindow::on_doUpdateButton_clicked()
+{
+    if (!ui->updateVersionsWidget->currentItem()) {
+        return;
+    }
 
+    QString updateVersion = ui->updateVersionsWidget->currentItem()->text();
+    QString error;
+    bool updated = doVersionUpdate(updateVersion, error);
+    if (updated) {
+        RTI->log(QString("Update to %1 applied").arg(updateVersion));
+        QMessageBox::information(this,"Update","Update applied, restarting RDS...");
+
+        // Shut this process down and start the updated .exe
+        if (! QProcess::startDetached(RTI->getAppPath() + "/RDS.exe",{},RTI->getAppPath()) ) {
+            QMessageBox::critical(this,"Reload failed", "Failed to launch new RDS. Installation may be corrupted. Shutting down: manual intervention required.");
+        }
+        RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
+        qApp->quit();
+    } else if (error.size() != 0) {
+        RTI->log("Update failed: "+error);
+        QMessageBox::critical(this,"Update failed", error);
+    }
 }
 
 void rdsConfigurationWindow::on_updateVersionsWidget_currentRowChanged(int currentRow)
