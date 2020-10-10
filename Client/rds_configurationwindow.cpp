@@ -54,14 +54,14 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
 
     // Center the window on the screen
     setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,size(),
-                                    qApp->desktop()->availableGeometry()));
+                                    qApp->primaryScreen()->availableGeometry()));
 
     readConfiguration();
 
     QDir update_dir(config.rdsUpdatePath);
     QStringList dirs = update_dir.entryList(QDir::Dirs|QDir::NoDotAndDotDot|QDir::Readable);
 
-    qSort(dirs.begin(), dirs.end());
+    std::sort(dirs.begin(), dirs.end());
 
     for (int i = 0; i < dirs.size(); ++i) {
         ui->updateVersionsWidget->addItem(dirs[i]);
@@ -84,6 +84,7 @@ rdsConfigurationWindow::~rdsConfigurationWindow()
 
 void rdsConfigurationWindow::closeEvent(QCloseEvent *event)
 {
+    (void)event;
     RTI->setMode(rdsRuntimeInformation::RDS_OPERATION);
     qApp->quit();
 }
@@ -340,30 +341,35 @@ void rdsConfigurationWindow::callShowProt()
 
 void rdsConfigurationWindow::on_protListWidget_currentRowChanged(int currentRow)
 {
+    (void)currentRow;
     callShowProt();
 }
 
 
 void rdsConfigurationWindow::on_protNameEdit_textEdited(const QString &arg1)
 {
+    (void)arg1;
     callUpdateProt();
 }
 
 
 void rdsConfigurationWindow::on_protFilterEdit_textEdited(const QString &arg1)
 {
+    (void)arg1;
     callUpdateProt();
 }
 
 
 void rdsConfigurationWindow::on_protAdjustCheckbox_toggled(bool checked)
 {
+    (void)checked;
     callUpdateProt();
 }
 
 
 void rdsConfigurationWindow::on_protAnonymizeCheckbox_toggled(bool checked)
 {
+    (void)checked;
     callUpdateProt();
 }
 
@@ -405,6 +411,7 @@ void rdsConfigurationWindow::on_networkRemoteConfigurationButton_clicked()
 
 void rdsConfigurationWindow::on_protSmallFilesCheckbox_toggled(bool checked)
 {
+    (void)checked;
     callUpdateProt();
 }
 
@@ -646,11 +653,11 @@ QString rdsConfigurationWindow::rot13( const QString & input )
     QString r = input;
     int i = r.length();
     while( i-- ) {
-        if ( r[i] >= QChar('A') && r[i] <= QChar('M') ||
-             r[i] >= QChar('a') && r[i] <= QChar('m') )
+        if ( (r[i] >= QChar('A') && r[i] <= QChar('M')) ||
+             (r[i] >= QChar('a') && r[i] <= QChar('m')) )
             r[i] = (char)((int)QChar(r[i]).toLatin1() + 13);
-        else if  ( r[i] >= QChar('N') && r[i] <= QChar('Z') ||
-                   r[i] >= QChar('n') && r[i] <= QChar('z') )
+        else if  ( (r[i] >= QChar('N') && r[i] <= QChar('Z')) ||
+                   (r[i] >= QChar('n') && r[i] <= QChar('z')) )
             r[i] = (char)((int)QChar(r[i]).toLatin1() - 13);
     }
     return r;
@@ -765,11 +772,11 @@ bool rdsConfigurationWindow::doVersionUpdate(QString updateVersion, QString& err
 
     // Perform the update...
 
-    oldConfigFile = QFile(RTI->getAppPath()+"/config.ini");
+    QFile oldConfigFile(RTI->getAppPath()+"/config.ini");
     QFile(RTI->getAppPath()+"/config.ini.bak").remove();
     oldConfigFile.copy(RTI->getAppPath()+"/config.ini.bak");
 
-    newConfigFile = QFile(tempDir.absolutePath()+"/config.ini");
+    QFile newConfigFile(tempDir.absolutePath()+"/config.ini");
 
     if (! copyPath(tempDir.absolutePath(), RTI->getAppPath()) ) {
         tempDir.removeRecursively();
@@ -809,7 +816,7 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
 void rdsConfigurationWindow::on_updateVersionsWidget_currentRowChanged(int currentRow)
 {
 //    QString compilation_date = QStringLiteral(__DATE__);
-
+    (void)currentRow;
     QString updateVersion = ui->updateVersionsWidget->currentItem()->text();
     QString updateFolder = config.rdsUpdatePath+"/"+updateVersion;
     QSettings updateInfo(updateFolder+"/config.ini",QSettings::IniFormat);
