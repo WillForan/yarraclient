@@ -93,14 +93,9 @@ void rdsRuntimeInformation::prepare()
     }
 
     // Check if we have a valid environment
-    if ((!simulatorExists) && (!syngoMRExists))
-    {
-        invalidEnvironment=true;
-    }
-    else
-    {
+    invalidEnvironment=true;
+    if (simulatorExists || syngoMRExists)
         invalidEnvironment=false;
-    }
 
     simulation=true;
 

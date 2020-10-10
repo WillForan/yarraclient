@@ -351,7 +351,7 @@ bool rdsNetwork::copyFile()
             QEventLoop q;
             connect(&copyThread, SIGNAL(finished()), &q, SLOT(quit()));
 
-            QTime ti;
+            QElapsedTimer ti;
             ti.start();
 
             copyThread.start();
