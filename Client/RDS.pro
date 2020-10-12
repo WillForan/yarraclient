@@ -34,7 +34,8 @@ SOURCES += main.cpp \
         rds_checksum.cpp \
         ../NetLogger/netlogger.cpp \
     rds_iconwindow.cpp \
-    rds_exechelper.cpp
+    rds_exechelper.cpp \
+    rds_updater.cpp
 
 HEADERS  += rds_configurationwindow.h \
             rds_runtimeinformation.h \
@@ -54,7 +55,8 @@ HEADERS  += rds_configurationwindow.h \
             ../NetLogger/netlogger.h \
             ../NetLogger/netlog_events.h \
     rds_iconwindow.h \
-    rds_exechelper.h
+    rds_exechelper.h \
+    rds_updater.h
 
 FORMS    += rds_configurationwindow.ui \
             rds_operationwindow.ui \
