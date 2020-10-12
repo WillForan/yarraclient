@@ -437,7 +437,6 @@ void rdsOperationWindow::runStartCmds()
 
     rdsExecHelper exec;
     QString cmdLine="";
-    bool error=false;
 
     for (int i=0; i<RTI_CONFIG->startCmds.count(); i++)
     {
