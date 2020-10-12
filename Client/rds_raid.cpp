@@ -179,7 +179,7 @@ bool rdsRaid::callRaidTool(QStringList command, QStringList options, int timeout
     connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
 
     // Time measurement to diagnose RaidTool calling problems
-    QTime ti;
+    QElapsedTimer ti;
     ti.start();
     timeoutTimer.start();
     myProcess->start(raidToolCmd, args);
@@ -1394,7 +1394,7 @@ bool rdsRaid::debugReadTestFile(QString filename)
 
     ignoreLPFID=true;
 
-    QTime t;
+    QElapsedTimer t;
     t.start();
 
     result=parseOutputDirectory();

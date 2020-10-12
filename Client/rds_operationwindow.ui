@@ -202,11 +202,9 @@
       </item>
      </layout>
      <zorder>shutdownButton</zorder>
-     <zorder>verticalSpacer</zorder>
      <zorder>postponeButton</zorder>
      <zorder>logfileButton</zorder>
      <zorder>configurationButton</zorder>
-     <zorder>verticalSpacer_2</zorder>
      <zorder>transferButton</zorder>
      <zorder>hideButton</zorder>
     </widget>

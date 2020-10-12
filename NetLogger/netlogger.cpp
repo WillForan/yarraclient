@@ -409,7 +409,7 @@ QString NetLogger::dnsLookup(QString address)
     QObject::connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
 
     // Time measurement to diagnose RaidTool calling problems
-    QTime ti;
+    QElapsedTimer ti;
     ti.start();
     timeoutTimer.start();
     nslProcess->start("nslookup", args);

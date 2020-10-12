@@ -44,7 +44,7 @@ bool rdsExecHelper::run(QString cmdLine)
     QObject::connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
 
     // Time measurement to diagnose RaidTool calling problems
-    QTime ti;
+    QElapsedTimer ti;
     ti.start();
     timeoutTimer.start();
     myProcess->start(cmdLine);
@@ -152,7 +152,7 @@ bool rdsExecHelper::callNetUseTimout(int timeoutMs)
     }
 
     // Time measurement to diagnose RaidTool calling problems
-    QTime ti;
+    QElapsedTimer ti;
     ti.start();
     timeoutTimer.start();
 
@@ -258,7 +258,7 @@ void rdsExecHelper::readNetUseOutput()
 
 void rdsExecHelper::safeSleep(int ms)
 {
-    QTime ti;
+    QElapsedTimer ti;
     ti.start();
     while (ti.elapsed()<ms)
     {

@@ -36,12 +36,12 @@ rdsIconWindow::rdsIconWindow(QWidget *parent) :
     if (RTI->isSyngoXALine())
     {
         // For NumarixX, place the icon in the status bar
-        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignBottom, QSize(32,25), qApp->desktop()->screenGeometry()));
+        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignBottom, QSize(32,25), qApp->primaryScreen()->geometry()));
     }
     else
     {
         // Menubar of Syngo MR is 25 pixels high
-        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignTop, QSize(32,25), qApp->desktop()->availableGeometry()));
+        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignTop, QSize(32,25), qApp->primaryScreen()->availableGeometry()));
     }
 
     showStartupCommandsEntry=false;
@@ -78,6 +78,7 @@ rdsIconWindow::~rdsIconWindow()
 
 void rdsIconWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    (void)event;
     RTI->showOperationWindow();    
     clearError();
 }
@@ -173,6 +174,7 @@ void rdsIconWindow::runStartupCommands()
 
 void rdsIconWindow::setAnim(bool value)
 {
+    (void) value;
     if (animRunning)
     {
         animRunning=false;

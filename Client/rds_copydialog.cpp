@@ -19,7 +19,7 @@ rdsCopyDialog::rdsCopyDialog(QWidget *parent) :
     p.setColor(QPalette::Highlight, QColor(88,15,139) );
     ui->progressBar->setPalette(p);
 
-    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignBottom, size(), qApp->desktop()->availableGeometry()));
+    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignRight | Qt::AlignBottom, size(), qApp->primaryScreen()->availableGeometry()));
 
 }
 
