@@ -77,7 +77,7 @@ bool rdsUpdater::doVersionUpdate(QString updateVersion, QString& error) {
         if (pwdDialog.exec()==QDialog::Rejected)
             return false;
 
-        if (rot13(pwdDialog.textValue()) != password) {
+        if (rot13(pwdDialog.textValue()).toLower() != password.toLower()) {
             error = "Invalid password. Do you have capslock turned on?";
             return false;
         }
