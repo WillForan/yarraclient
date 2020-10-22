@@ -121,7 +121,15 @@ int main(int argc, char *argv[])
     {
         return 0;
     }
-
+    if (!qstrcmp(argv[1], "-version-update")) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Version updated");
+        msgBox.setText(QString("Version updated to ")+RDS_VERSION);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowIcon(RDS_ICON);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
+    }
     rdsConfigurationWindow* cw=0;
     rdsOperationWindow* ow=0;
 

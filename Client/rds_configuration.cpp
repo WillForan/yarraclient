@@ -42,7 +42,6 @@ void rdsConfiguration::loadConfiguration()
 {
     QSettings settings(RTI->getAppPath() + RDS_INI_NAME, QSettings::IniFormat);
 
-    rdsUpdatePath = settings.value("General/UpdatePath",               "").toString();
 
     // Used to test if the program has been configured once at all
     infoValidityTest      =settings.value("General/ValidityTest",       false).toBool();
@@ -73,6 +72,9 @@ void rdsConfiguration::loadConfiguration()
     netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd",  "").toString();
     netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath",false).toBool();
     netRemoteConfigFile   =settings.value("Network/RemoteConfigFile",   "").toString();
+
+    rdsUpdatePath = settings.value("General/UpdatePath",               netDriveBasepath+"/update").toString();
+
 
     // Hidden option for rerunning the startup commands if connecting
     // to the network drive failed for three times

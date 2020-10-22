@@ -23,7 +23,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
 
     QIcon icon = RDS_ICON;
     setWindowIcon(icon);
-
+    setWindowTitle(windowTitle() +" v"+ RDS_VERSION);
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon(icon);
     trayIcon->setContextMenu(trayIconMenu);

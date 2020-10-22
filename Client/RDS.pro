@@ -56,7 +56,8 @@ HEADERS  += rds_configurationwindow.h \
             ../NetLogger/netlog_events.h \
     rds_iconwindow.h \
     rds_exechelper.h \
-    rds_updater.h
+    rds_updater.h \
+    zip_file.h
 
 FORMS    += rds_configurationwindow.ui \
             rds_operationwindow.ui \

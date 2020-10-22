@@ -73,6 +73,7 @@ rdsConfigurationWindow::rdsConfigurationWindow(QWidget *parent) :
         }
         ui->updateVersionsWidget->addItem(item);
     }
+    ui->updateProgressBar->setVisible(false);
     if (!dirs.size()) {
         ui->tabWidget->removeTab(ui->tabWidget->indexOf(ui->updateTab));
     }
@@ -606,13 +607,16 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
 
     QString updateVersion = ui->updateVersionsWidget->currentItem()->text();
     QString error;
-    bool updated = rdsUpdater::doVersionUpdate(updateVersion, error);
+    ui->doUpdateButton->setEnabled(false);
+    ui->updateModeSet->setEnabled(false);
+    bool updated = rdsUpdater::doVersionUpdate(updateVersion, error, ui->updateProgressBar);
     if (updated) {
+        ui->updateProgressBar->setValue(100);
         RTI->log(QString("Update to %1 applied").arg(updateVersion));
         QMessageBox::information(this,"Update","Update applied, restarting RDS...");
 
         // Shut this process down and start the updated .exe
-        if (! QProcess::startDetached(RTI->getAppPath() + "/RDS.exe",{},RTI->getAppPath()) ) {
+        if (! QProcess::startDetached(RTI->getAppPath() + "/RDS.exe",{"-version-update"},RTI->getAppPath()) ) {
             QMessageBox::critical(this,"Reload failed", "Failed to launch new RDS. Installation may be corrupted. Shutting down: manual intervention required.");
         }
         RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
@@ -620,7 +624,10 @@ void rdsConfigurationWindow::on_doUpdateButton_clicked()
     } else if (error.size() != 0) {
         RTI->log("Update failed: "+error);
         QMessageBox::critical(this,"Update failed", error);
+        ui->updateProgressBar->setVisible(false);
     }
+    ui->doUpdateButton->setEnabled(true);
+    ui->updateModeSet->setEnabled(true);
 }
 
 void rdsConfigurationWindow::on_updateVersionsWidget_currentRowChanged(int currentRow)

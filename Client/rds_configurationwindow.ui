@@ -1528,10 +1528,10 @@ p, li { white-space: pre-wrap; }
       <widget class="QWidget" name="horizontalLayoutWidget">
        <property name="geometry">
         <rect>
-         <x>3</x>
-         <y>6</y>
+         <x>10</x>
+         <y>10</y>
          <width>621</width>
-         <height>331</height>
+         <height>321</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -1564,6 +1564,43 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
        </layout>
+      </widget>
+      <widget class="QProgressBar" name="updateProgressBar">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>270</x>
+         <y>340</y>
+         <width>171</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>12</height>
+        </size>
+       </property>
+       <property name="cursor">
+        <cursorShape>UpArrowCursor</cursorShape>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>5</number>
+       </property>
+       <property name="textVisible">
+        <bool>true</bool>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="invertedAppearance">
+        <bool>false</bool>
+       </property>
       </widget>
      </widget>
     </widget>
