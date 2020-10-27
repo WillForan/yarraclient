@@ -1,5 +1,7 @@
 #include "netlogger.h"
 
+#define NETLOGGER_LOG(x) RTI->log(x)
+
 #ifdef YARRA_APP_RDS
     #include "rds_global.h"
 #endif
@@ -12,6 +14,9 @@
     #include "sac_global.h"
 #endif
 
+#ifdef YARRA_UPDATER
+    #include "updater_global.h"
+#endif
 
 NetLogger::NetLogger()
 {
@@ -58,7 +63,7 @@ NetLogger::~NetLogger()
 bool NetLogger::isServerInSameDomain(QString serverPath)
 {
 #ifdef NETLOGGER_DISABLE_DOMAIN_VALIDATION
-    RTI->log("Domain validation disabled.");
+    NETLOGGER_LOG("Domain validation disabled.");
     return true;
 #endif
 
@@ -101,7 +106,7 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
 
         if (serverPath=="localhost")
         {
-            RTI->log("Skipping domain validation on localhost.");
+            NETLOGGER_LOG("Skipping domain validation on localhost.");
             return true;
         }
 
@@ -174,15 +179,15 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
     // what binary target this class is built into
     if (error)
     {
-        RTI->log("ERROR: Configuration of log server failed.");
-        RTI->log("ERROR: " + errorMessage);
-        RTI->log("ERROR: Use configuration dialog to test connection.");
-        RTI->log("ERROR: Logging has been suspended.");
+        NETLOGGER_LOG("ERROR: Configuration of log server failed.");
+        NETLOGGER_LOG("ERROR: " + errorMessage);
+        NETLOGGER_LOG("ERROR: Use configuration dialog to test connection.");
+        NETLOGGER_LOG("ERROR: Logging has been suspended.");
 
         return false;
     }
 
-    RTI->log("Connection to log server validated.");
+    NETLOGGER_LOG("Connection to log server validated.");
 
     return true;
 }
@@ -306,7 +311,7 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
 
     QUrl serviceUrl = QUrl("https://" + serverPath + "/" + endpt);
     serviceUrl.setScheme("https");
-    //RTI->log(serviceUrl.toString());
+    //NETLOGGER_LOG(serviceUrl.toString());
 
     QNetworkRequest req(serviceUrl);
     req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
@@ -420,18 +425,22 @@ QString NetLogger::dnsLookup(QString address)
     if ((timeoutTimer.isActive()) && (nslProcess->state()==QProcess::Running))
     {
         timeoutTimer.stop();
-        RTI->log("Warning: QEventLoop returned too early. Starting secondary loop.");
+        NETLOGGER_LOG("Warning: QEventLoop returned too early. Starting secondary loop.");
 
         while ((nslProcess->state()==QProcess::Running) && (ti.elapsed()<nslTimeout))
         {
-            RTI->processEvents();
+            #ifdef RTI
+               RTI->processEvents();
+            #else
+               QCoreApplication::processEvents();
+            #endif
             Sleep(10);
         }
 
         // If the process did not finish within the timeout duration
         if (nslProcess->state()==QProcess::Running)
         {
-            RTI->log("Warning: Process is still active. Killing process.");
+            NETLOGGER_LOG("Warning: Process is still active. Killing process.");
             nslProcess->kill();
             success=false;
         }
@@ -450,12 +459,12 @@ QString NetLogger::dnsLookup(QString address)
         }
         else
         {
-            RTI->log("Warning: Process event loop timed out.");
-            RTI->log("Warning: Duration since start "+QString::number(ti.elapsed())+" ms");
+            NETLOGGER_LOG("Warning: Process event loop timed out.");
+            NETLOGGER_LOG("Warning: Duration since start "+QString::number(ti.elapsed())+" ms");
             success=false;
             if (nslProcess->state()==QProcess::Running)
             {
-                RTI->log("Warning: Process is still active. Killing process.");
+                NETLOGGER_LOG("Warning: Process is still active. Killing process.");
                 nslProcess->kill();
             }
         }
@@ -463,7 +472,7 @@ QString NetLogger::dnsLookup(QString address)
 
     if (!success)
     {
-        RTI->log("ERROR: Problems running nslookup.");
+        NETLOGGER_LOG("ERROR: Problems running nslookup.");
     }
     else
     {
