@@ -87,7 +87,8 @@ namespace EventInfo
         ArchiveSearchIndexer,
         ArchiveSearchGUI,
         LogServer,
-        Peripheral
+        Peripheral,
+        Updater
     };
 
     inline std::ostream& operator<< (std::ostream& o, const SourceType& c)
@@ -104,6 +105,7 @@ namespace EventInfo
         case SourceType::ArchiveSearchGUI:      return o << "ArchiveSearchGUI";
         case SourceType::LogServer:             return o << "LogServer";
         case SourceType::Peripheral:            return o << "Peripheral";
+        case SourceType::Updater:               return o << "Updater";
         }
         return o << static_cast<std::uint16_t>(c);
     }
