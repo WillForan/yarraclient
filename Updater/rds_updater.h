@@ -30,6 +30,7 @@ public:
     static bool isRunning(const QString &process);
     static bool mergeSettings(QString path,QDir& fromDir,QString& error);
     static bool mergeSettings(QStringList paths,QDir& fromDir,QString& error);
+    static bool extractZip(QString path, QDir& tempFilesDir, QProgressBar* progress, QString& error);
 public:
     QString updateFolder;
 };

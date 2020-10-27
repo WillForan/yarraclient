@@ -108,27 +108,71 @@ QDebug operator<<(QDebug out, const std::string& str)
     out << QString::fromStdString(str);
     return out;
 }
+
+bool rdsUpdater::extractZip(QString path, QDir& tempFilesDir, QProgressBar* progress, QString& error) {
+    try {
+        miniz_cpp::zip_file zip_file(path.toStdString());
+        std::pair<bool, std::string> zip_test = zip_file.testzip();
+        TRY_WITH(zip_test.first,
+            "Package integrity error: failed on file %1",  QString::fromStdString(zip_test.second));
+        progress->setValue(60);
+        for( auto const & info: zip_file.infolist() ){
+            if (info.filename.back() == '/') {
+                TRY(tempFilesDir.mkpath(QString::fromStdString(info.filename)),
+                    "Error extracting package.");
+            }
+            qApp->processEvents();
+        }
+        zip_file.extractall(tempFilesDir.absolutePath().toStdString());
+        progress->setValue(90);
+        for( auto const & info: zip_file.infolist() ){
+            QString filename = QString::fromStdString(info.filename);
+            if (info.filename.back() == '/') {
+                TRY_WITH(QDir(tempFilesDir.filePath(filename)).exists(),
+                    "Error extracting package: directory failed to extract: %1", filename );
+            } else {
+                QFile file(tempFilesDir.filePath(filename));
+                TRY_WITH(file.exists(),
+                    "Error extracting package: file failed to extract: %1", filename);
+                FAIL_IF_WITH(file.size() != qint64(info.file_size),
+                    "Error extracting package: file size did not match: %1", filename);
+            }
+        }
+        progress->setValue(95);
+    } catch (std::runtime_error e) {
+        FAIL_WITH("Invalid zip: %1",e.what());
+    }
+    return true;
+}
+
 bool rdsUpdater::doVersionUpdate(QString updateVersion, QString& error, QProgressBar* progress) {
+    // This is the big function that does almost all the updating.
+
+    // Various important locations
+    // The folder where the update is coming from:
     QString versionFolder = updateFolder+"/"+updateVersion;
+    // The "files" folder, for loose files
     QString updateFiles = versionFolder+"/files";
 
     QDir appDir(qApp->applicationDirPath());
+    // Temporary directory for storing the update files before applying it
     QDir tempDir(appDir.absolutePath()+"/temp");
+    // The "files" folder, where the actual files to be applied will end up
     QDir tempFilesDir(tempDir.absolutePath()+"/files");
 
-    qDebug() << tempFilesDir.absolutePath();
-
-    QFile configFile(appDir.filePath("rds.ini"));
-
+    // We can't update if any element of Yarra is currently running.
     FAIL_IF(isRunning("RDS.exe"), "RDS.exe is still running. Shut down the Yarra Client before continuing.")
+    FAIL_IF(isRunning("ORT.exe"), "ORT.exe is still running. Shut down the Yarra Client before continuing.")
+    FAIL_IF(isRunning("SAC.exe"), "SAC.exe is still running. Shut down the Yarra Client before continuing.")
 
+    // Validate this package.
     if (!isValidPackage(versionFolder, error)) {
         return false;
     }
     versionDetails packageDetails = getVersionDetails(updateVersion);
     QString password = packageDetails.password;
 
-    // If there's a password set, validate it.
+    // If there's a password set, prompt the user.
     if (password.size()) {
         QInputDialog pwdDialog;
         pwdDialog.setInputMode(QInputDialog::TextInput);
@@ -150,7 +194,7 @@ bool rdsUpdater::doVersionUpdate(QString updateVersion, QString& error, QProgres
         )
     }
 
-    // Confirm that you really want to update.
+    // Prompt the user to confirm that the update should occur.
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Update confirmation");
@@ -164,7 +208,7 @@ bool rdsUpdater::doVersionUpdate(QString updateVersion, QString& error, QProgres
     qInfo() << "Updating to version" << updateVersion;
 
     progress->setVisible(true);
-    // Reset the temp directory
+    // Clear out the temp directory
     {
         TRY( removeDirIfExists(tempDir),
             "Unable to clear temp directory.")
@@ -175,6 +219,7 @@ bool rdsUpdater::doVersionUpdate(QString updateVersion, QString& error, QProgres
     }
     progress->setValue(10);
 
+    // If this is a zipped package, download the zip file, validate it, then extract.
     if (packageDetails.isZip) {
         QFile zip(versionFolder+"/files.zip");
         TRY_WITH( zip.copy(tempDir.filePath("files.zip")),
@@ -187,41 +232,7 @@ bool rdsUpdater::doVersionUpdate(QString updateVersion, QString& error, QProgres
             "Package integrity error: checksum mismatch, got %1",checksum);
 
         progress->setValue(30);
-
-        try {
-            miniz_cpp::zip_file zip_file(tempDir.filePath("files.zip").toStdString());
-            std::pair<bool, std::string> zip_test = zip_file.testzip();
-            TRY_WITH(zip_test.first,
-                "Package integrity error: failed on file %1",  QString::fromStdString(zip_test.second));
-            progress->setValue(60);
-            for( auto const & info: zip_file.infolist() ){
-                if (info.filename.back() == '/') {
-                    TRY(tempFilesDir.mkpath(QString::fromStdString(info.filename)),
-                        "Error extracting package.");
-                }
-                qApp->processEvents();
-            }
-            zip_file.extractall(tempFilesDir.absolutePath().toStdString());
-            progress->setValue(90);
-            for( auto const & info: zip_file.infolist() ){
-                QString filename = QString::fromStdString(info.filename);
-                if (info.filename.back() == '/') {
-                    TRY_WITH(QDir(tempFilesDir.filePath(filename)).exists(),
-                        "Error extracting package: directory failed to extract: %1", filename );
-                } else {
-                    QFile file(tempFilesDir.filePath(filename));
-                    TRY_WITH(file.exists(),
-                        "Error extracting package: file failed to extract: %1", filename);
-                    FAIL_IF_WITH(file.size() != qint64(info.file_size),
-                        "Error extracting package: file size did not match: %1", filename);
-                }
-            }
-            progress->setValue(95);
-        } catch (std::runtime_error e) {
-            FAIL_WITH("Invalid zip: %1",e.what());
-        }
-//            error = QString("Invalid zip: %1").arg(e.what());
-//            return false;
+        TRY(extractZip(tempDir.filePath("files.zip"),tempFilesDir,progress,error),error);
 
         QFile(tempDir.filePath("files.zip")).remove();
     } else {
@@ -229,6 +240,7 @@ bool rdsUpdater::doVersionUpdate(QString updateVersion, QString& error, QProgres
             "Package download failed: %1",error)
         progress->setValue(90);
     }
+
     // Do a little rename dance with the executable
     QString this_exe_name = QFileInfo(QCoreApplication::applicationFilePath()).fileName();
 
@@ -253,9 +265,12 @@ bool rdsUpdater::doVersionUpdate(QString updateVersion, QString& error, QProgres
     }
 
     // Perform the update...
-    TRY_WITH(mergeSettings({"rds.ini","ort.ini"} ,tempFilesDir,error),"Failed to update config file: %1", error);
 
+    // merge rds.ini and ort.ini if present in the package
+    TRY_WITH(mergeSettings({"rds.ini","ort.ini"} ,tempFilesDir,error),"Failed to update config file: %1", error);
+    // copy and replace with all the downloaded files.
     if (! copyPath(tempFilesDir.absolutePath(), appDir.absolutePath(), error, true, {"rds.ini","ort.ini"}) ) {
+        // if it didn't work, clear the temp dir and fail
         tempDir.removeRecursively();
         FAIL_WITH("Package overwrite failed: %1",error);
     }
