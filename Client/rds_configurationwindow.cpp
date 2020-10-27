@@ -92,7 +92,7 @@ bool rdsConfigurationWindow::checkAccessPassword()
     }
     else
     {
-        return (pwdDialog.textValue()==RDS_PASSWORD);
+        return (pwdDialog.textValue().toLower()==QString(RDS_PASSWORD).toLower());
     }
 }
 
