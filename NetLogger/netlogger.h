@@ -31,7 +31,7 @@ public:
 
 protected:
 
-    bool configured;
+    bool configured = false;
     bool configurationError;
 
     QString serverPath;
