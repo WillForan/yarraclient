@@ -33,3 +33,7 @@ DEFINES += YARRA_UPDATER
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    updater.qrc
+RC_FILE   = updater.rc

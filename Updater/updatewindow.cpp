@@ -10,6 +10,10 @@ UpdateWindow::UpdateWindow(QWidget *parent)
     QDir update_dir(updater.updateFolder);
     QStringList dirs = update_dir.entryList(QDir::Dirs|QDir::NoDotAndDotDot|QDir::Readable);
 
+    QIcon icon = QIcon(":/images/updateicon_16.png");
+
+    setWindowIcon(icon);
+
     std::sort(dirs.begin(), dirs.end());
 
     for (int i = 0; i < dirs.size(); ++i) {
