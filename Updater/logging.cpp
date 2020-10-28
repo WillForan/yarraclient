@@ -91,7 +91,9 @@ void Logging::initNetLog() {
     int http_status=0;
     QString errorString="n/a";
 
-    QUrlQuery data{{"api_key",logApiKey}};
+    QUrlQuery data;
+    data.addQueryItem("api_key",logApiKey);
+
     bool success=net_logger->postData(data, "test", net_error, http_status, errorString);
     if (!success) {
         qWarning() << "Unable to connect to logserver:" << net_error << "(" << errorString <<") HTTP" << http_status;

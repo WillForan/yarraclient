@@ -307,9 +307,9 @@ bool rdsUpdater::mergeSettings(QString path,QDir& fromDir,QString& error){
     auto newKeys = newConfig.allKeys();
     auto oldKeys = currentConfig.allKeys();
 
-    auto keysToSet = // newConfig.allKeys().toSet().subtract(oldConfig.allKeys().toSet());
-            QSet<QString>(newKeys.begin(), newKeys.end()).subtract(
-                QSet<QString>(oldKeys.begin(), oldKeys.end()));
+    auto keysToSet = newKeys.toSet().subtract(oldKeys.toSet());
+//            QSet<QString>(newKeys.begin(), newKeys.end()).subtract(
+//                QSet<QString>(oldKeys.begin(), oldKeys.end()));
     foreach (const QString &key, keysToSet) {
         currentConfig.setValue(key, newConfig.value(key));
     }
