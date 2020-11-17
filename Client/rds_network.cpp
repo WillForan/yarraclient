@@ -630,10 +630,24 @@ void rdsNetwork::runReconnectCmd()
             timeoutTimer.stop();
         }
 
+        QString output(myProcess->readAllStandardError());
+        if (!output.isEmpty()) {
+            RTI->log(QString("WARNING: Network drive reconnect command generated errors!"));
+            RTI->log(output);
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::FatalError,
+                         "Network drive reconnect command generated errors", output);
+        } else {
+            RTI->log(QString("Network drive reconnect command succeeded"));
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Success,
+                         "Network drive reconnect command executed");
+        }
+
         if (myProcess->state()==QProcess::Running)
         {
             RTI->log("WARNING: The network drive reconnect command timed out!");
             myProcess->kill();
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::FatalError,
+                         "Network drive reconnect command timed out", output);
         }
 
         delete myProcess;
