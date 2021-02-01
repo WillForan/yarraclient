@@ -108,7 +108,7 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
 
         veh.resize(ndset);
 
-        // TODO: Remove patient name from index block
+        // Remove patient name from index block
         for (size_t i=0; i<ndset; ++i)
         {
             qint64 startPos=file.pos();
@@ -150,6 +150,8 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
                 break;
             }
         }
+
+        // TODO: Reiterate over all lines and double check for the PHI
     }
     else
     {
@@ -429,6 +431,12 @@ int yctTWIXAnonymizer::analyzeLine(QByteArray* line)
     }
 
     if (line->indexOf("<ParamString.\"PatientID\">", 0) > 0)
+    {
+        expectedContent=CONTENT_ID;
+        return clearLine(line);
+    }
+
+    if (line->indexOf("<ParamString.\"Patient\">", 0) > 0)
     {
         expectedContent=CONTENT_ID;
         return clearLine(line);
