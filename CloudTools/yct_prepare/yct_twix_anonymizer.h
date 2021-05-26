@@ -82,6 +82,7 @@ public:
     bool    debug;
     bool    testing;
     bool    dumpProtocol;
+    bool    showOnlyInfo;
 
     bool    strictVersionChecking;
     void    setStrictVersionChecking(bool useStrictChecking);

@@ -22,6 +22,7 @@ yctTWIXAnonymizer::yctTWIXAnonymizer()
     debug=false;
     testing=false;
     dumpProtocol=false;
+    showOnlyInfo=false;
 
     fileVersion=UNKNOWN;
     strictVersionChecking=true;
@@ -48,10 +49,22 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
     patientInformation.mode       =mode;
 
     QFile file(twixFilename);
-    if (!file.open(QIODevice::ReadWrite))
+
+    if (testing)
     {
-        errorReason="Unable to open raw-data file";
-        return false;
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            errorReason="Unable to open raw-data file for reading";
+            return false;
+        }
+    }
+    else
+    {
+        if (!file.open(QIODevice::ReadWrite))
+        {
+            errorReason="Unable to open raw-data file for read/write";
+            return false;
+        }
     }
 
     // Determine TWIX file type: VA/VB or VD/VE?
@@ -108,12 +121,23 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
 
         veh.resize(ndset);
 
+        if (showOnlyInfo)
+        {
+            LOG("Format: VD/VE line");
+            LOG("Protocols: " << ndset);
+        }
+
         // Remove patient name from index block
         for (size_t i=0; i<ndset; ++i)
         {
             qint64 startPos=file.pos();
             file.read((char*)&veh[i], VD::ENTRY_HEADER_LEN);            
             qint64 endPos=file.pos();
+
+            if (showOnlyInfo)
+            {
+                LOG("- " << veh.at(i).ProtocolName);
+            }
 
             DBG(veh.at(i).PatientName);
             DBG(veh.at(i).ProtocolName);
@@ -135,6 +159,10 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
             }
         }
 
+        if (showOnlyInfo)
+        {
+            return true;
+        }
         DBG("");
 
         // Process the individual measurements in the file
@@ -155,6 +183,14 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
     }
     else
     {
+        if (showOnlyInfo)
+        {
+            LOG("Format: VB line");
+            LOG("Protocols: 1");
+            LOG("- Only main scan data");
+            return true;
+        }
+
         result=processMeasurement(&file);
     }    
 
