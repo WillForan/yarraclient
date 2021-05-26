@@ -4,7 +4,7 @@
 
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_DUMPPROT_VER "0.1b4"
+#define YCT_DUMPPROT_VER "0.1b5"
 
 
 int main(int argc, char *argv[])
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     if (cmd=="info")
     {
         anonymizer.showOnlyInfo=true;
-        qInfo() << "Filename:" << filename;
+        printf("Filename: %s\n",filename.toStdString().c_str());
     }
     else
     if (cmd=="dump")
@@ -52,8 +52,7 @@ int main(int argc, char *argv[])
 
     if (!anonymizer.processFile(filename,"","","","","",false))
     {
-        qInfo() << "";
-        qInfo() << "Error! Unable to parse file " << filename;
+        printf("\nError! Unable to parse file %s\n",filename.toStdString().c_str());
         return 1;
     }
 
