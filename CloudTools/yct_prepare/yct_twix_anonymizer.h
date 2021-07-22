@@ -4,7 +4,7 @@
 #include <QtCore>
 
 
-#define YCT_TWIXANONYMIZER_VER "0.1c"
+#define YCT_TWIXANONYMIZER_VER "0.1d"
 
 
 class yctPatientInformation
@@ -50,19 +50,21 @@ public:
 
     enum AnalyzeResult
     {
-        PROCESSING_ERROR              = -1,
-        NO_SENSITIVE_INFORMATION      =  0,
-        SENSITIVE_INFORMATION_CLEARED =  1,
-        SENSITIVE_INFORMATION_FOLLOWS =  2
+        PROCESSING_ERROR                      = -1,
+        NO_SENSITIVE_INFORMATION              =  0,
+        SENSITIVE_INFORMATION_CLEARED         =  1,
+        SENSITIVE_INFORMATION_FOLLOWS         =  2,
+        SENSITIVE_INFORMATION_CLEARED_FOLLOWS =  3
     };
 
     enum ContentType
     {
-        CONTENT_NAME          = 0,
-        CONTENT_BIRTHDAY      = 1,
-        CONTENT_ID            = 2,
-        CONTENT_VERSIONSTRING = 3,
-        CONTENT_REFPHYSICIAN  = 4
+        CONTENT_NAME                = 0,
+        CONTENT_BIRTHDAY            = 1,
+        CONTENT_ID                  = 2,
+        CONTENT_VERSIONSTRING       = 3,
+        CONTENT_REFPHYSICIAN        = 4,
+        CONTENT_PATIENTREGISTRATION = 5
     };
 
     yctTWIXAnonymizer();

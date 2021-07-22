@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -222,7 +221,7 @@ bool yctTWIXAnonymizer::processFile(QString twixFilename, QString phiPath,
 bool yctTWIXAnonymizer::processMeasurement(QFile* file)
 {
     uint32_t headerLength=0;
-    uint64_t headerEnd   =0;
+    qint64   headerEnd   =0;
     qint64   headerStart=file->pos();
 
     // Find header length
@@ -231,14 +230,12 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
     if ((headerLength<=0) || (headerLength>5000000))
     {
         // File header is invalid
-
         std::string fileType="VB";
         if (fileVersion==VDVE)
         {
             fileType="VD/VE";
         }
         LOG("WARNING: Unusual header size " << headerLength << " (file type " << fileType << ")");
-
         errorReason="File is invalid (unusual header size)";
         return false;
     }
@@ -247,7 +244,7 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
     DBG("Header size is " << headerLength << " bytes.");
     DBG("");
 
-    headerEnd=(uint64_t) headerStart+headerLength;
+    headerEnd=headerStart + (qint64) headerLength;
 
     QByteArray line="";
     qint64     lineStart=0;
@@ -258,7 +255,7 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
     int        charsToRead=0;
     //int      maxRead=0;
 
-    while ((!file->atEnd()) && (file->pos()<headerEnd) && (!terminateParsing))
+    while ((!file->atEnd()) && (file->pos() < headerEnd) && (!terminateParsing))
     {        
         isLineValid=false;
         lineStart=file->pos();
@@ -296,7 +293,6 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
                 LOG("ERROR: Anonymization not possible. Report error to Yarra team.");
                 //LOG("Chopped line: charsToRead=" << charsToRead << " actual: " << line.size());
                 //LOG(line.data())
-
                 return false;
             }
         }
@@ -313,21 +309,19 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
         {
             if (waitingForSensitiveData)
             {
-                // It is expected that this line contains sensitive information
-                // after a line break
+                // It is expected that this line contains sensitive information following a line break
                 result=analyzeFollowLine(&line);
 
                 if (result==PROCESSING_ERROR)
                 {
                     LOG("Error while processing follow line:");
                     LOG(line.data());
-
                     return false;
                 }
 
                 if ((result==SENSITIVE_INFORMATION_CLEARED) || (result==NO_SENSITIVE_INFORMATION))
                 {
-                    // Sensitive information found, continue normally for next line
+                    // Sensitive information cleared, continue normally for next line
                     waitingForSensitiveData=false;
                 }
             }
@@ -340,18 +334,17 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
                 {
                     LOG("Error while processing line:");
                     LOG(line.data());
-
                     return false;
                 }
 
-                if (result==SENSITIVE_INFORMATION_FOLLOWS)
+                if ((result==SENSITIVE_INFORMATION_FOLLOWS) || (result==SENSITIVE_INFORMATION_CLEARED_FOLLOWS))
                 {
                     // Sensitive information follows in the next lines
                     waitingForSensitiveData=true;
                 }
             }
 
-            if (result==SENSITIVE_INFORMATION_CLEARED)
+            if ((result==SENSITIVE_INFORMATION_CLEARED) || (result==SENSITIVE_INFORMATION_CLEARED_FOLLOWS))
             {
                 // Line contains information that has been anonymized.
                 // Write anonymized line back to file.
@@ -365,6 +358,7 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
                 if (file->pos() != lineEnd)
                 {
                     LOG("WARNING: File inconsistency detected during anonymization!");
+                    LOG("WARNING: Anonymization might not be complete. Discard file.");
                 }
             }
         }
@@ -372,7 +366,6 @@ bool yctTWIXAnonymizer::processMeasurement(QFile* file)
         if ((lineEnd>=headerEnd) || (file->atEnd()))
         {
             terminateParsing=true;
-
             //DBG("Stopped at position " + QString::number(lineEnd));
             //DBG("Line start is " + QString::number(lineStart));
         }
@@ -442,67 +435,74 @@ bool yctTWIXAnonymizer::checkAndStorePatientData(QString twixFilename, QString p
 
 int yctTWIXAnonymizer::analyzeLine(QByteArray* line)
 {
-    if (line->indexOf("<ParamString.\"tPatientName\">", 0) > 0)
+    if (line->indexOf("<ParamString.\"tPatientName\">", 0) >= 0)
     {
         expectedContent=CONTENT_NAME;
         return clearLine(line);
     }
 
-    if (line->indexOf("<ParamString.\"PatientName\">", 0) > 0)
+    if (line->indexOf("<ParamString.\"PatientName\">", 0) >= 0)
     {
         expectedContent=CONTENT_NAME;
         return clearLine(line);
     }
 
-    if (line->indexOf("<ParamString.\"PatientsName\">", 0) > 0)
+    if (line->indexOf("<ParamString.\"PatientsName\">", 0) >= 0)
     {
         expectedContent=CONTENT_NAME;
         return clearLine(line);
     }
 
-    if (line->indexOf("<ParamString.\"PatientBirthDay\">", 0) > 0)
+    if (line->indexOf("<ParamString.\"PatientBirthDay\">", 0) >= 0)
     {
         expectedContent=CONTENT_BIRTHDAY;
         return clearLine(line);
     }
 
-    if (line->indexOf("<ParamString.\"PatientID\">", 0) > 0)
+    if (line->indexOf("<ParamString.\"PatientID\">", 0) >= 0)
     {
         expectedContent=CONTENT_ID;
         return clearLine(line);
     }
 
-    if (line->indexOf("<ParamString.\"Patient\">", 0) > 0)
+    if (line->indexOf("<ParamString.\"Patient\">", 0) >= 0)
     {
         expectedContent=CONTENT_ID;
         return clearLine(line);
     }
 
-    if (line->indexOf("<ParamString.\"tPerfPhysiciansName\">", 0) > 0)
+    if (line->indexOf("<ParamString.\"tPerfPhysiciansName\">", 0) >= 0)
     {
         expectedContent=CONTENT_REFPHYSICIAN;
         return clearLine(line);
     }
 
-    if (line->indexOf("<ParamString.\"SoftwareVersions\">", 0) > 0)
+    if (line->indexOf("<ParamString.\"SoftwareVersions\">", 0) >= 0)
     {
         expectedContent=CONTENT_VERSIONSTRING;
         return clearLine(line);
     }
 
-    if (   (line->indexOf("HEADER.tPatientName")            > 0)
-        || (line->indexOf("IRIS.RECOMPOSE.tPatientName")    > 0)
-        || (line->indexOf("IRIS.RECOMPOSE.PatientBirthDay") > 0)
+    if (line->indexOf("<ParamArray.\"PatientRegistrationData\">", 0) >= 0)
+    {
+        expectedContent=CONTENT_PATIENTREGISTRATION;
+        return clearLine(line);
+    }
+
+    if (   (line->indexOf("HEADER.tPatientName")            >= 0)
+        || (line->indexOf("IRIS.RECOMPOSE.tPatientName")    >= 0)
+        || (line->indexOf("IRIS.RECOMPOSE.PatientBirthDay") >= 0)
         || (line->indexOf("IRIS.RECOMPOSE.PatientID")))
     {
         // These two entries don't contain the PHI
         return NO_SENSITIVE_INFORMATION;
     }
 
-    if (   (line->indexOf("PatientName")  > 0)
-        || (line->indexOf("PatientsName") > 0)
-        || (line->indexOf("BirthDay")     > 0)
-        || (line->indexOf("PatientID")    > 0))
+    if (   (line->indexOf("PatientName")             >= 0)
+        || (line->indexOf("PatientsName")            >= 0)
+        || (line->indexOf("BirthDay")                >= 0)
+        || (line->indexOf("PatientID")               >= 0)
+        || (line->indexOf("PatientRegistrationData") >= 0))
     {
         // If unexpected fields with the patient name occur, raise an error
         return PROCESSING_ERROR;
@@ -621,6 +621,14 @@ int yctTWIXAnonymizer::clearLine(QByteArray* line)
             }
         }
         break;
+
+    case CONTENT_PATIENTREGISTRATION:
+        // The patient registration block should always start in the next line, so that the above
+        // check for the missing "{" should trigger. If we reach this point, something must be wrong,
+        // so create an error
+        DBG("Invalid formating of patient registration found: " + line->toStdString());
+        return PROCESSING_ERROR;
+        break;
     }
 
     return SENSITIVE_INFORMATION_CLEARED;
@@ -629,39 +637,92 @@ int yctTWIXAnonymizer::clearLine(QByteArray* line)
 
 int yctTWIXAnonymizer::analyzeFollowLine(QByteArray* line)
 {
+    // The block containing the patient registration information requires special treatment
+    if (expectedContent==CONTENT_PATIENTREGISTRATION)
+    {
+        // Ignore the preceeding items
+        if (line->indexOf("<DefaultSize>", 0) >= 0)
+        {
+            return SENSITIVE_INFORMATION_FOLLOWS;
+        }
+        if (line->indexOf("<MaxSize>", 0) >= 0)
+        {
+            return SENSITIVE_INFORMATION_FOLLOWS;
+        }
+        if (line->indexOf("<Default>", 0) >= 0)
+        {
+            return SENSITIVE_INFORMATION_FOLLOWS;
+        }
+
+        // Check and clear the content line
+        if (line->indexOf("{ \"", 0) >= 0)
+        {
+            // Find the quotation marks
+            int startPos=line->indexOf("\"", 0);
+            int endPos=line->indexOf("\"", startPos+1);
+
+            // Check if the line contains two quotation marks
+            if ((endPos < 0) || (startPos < 0))
+            {
+                DBG("Incorrect patient registration data: " + line->toStdString());
+                return PROCESSING_ERROR;
+            }
+
+            // Fill the patient registration string with space characters
+            for (int i=startPos+1; i<endPos; i++)
+            {
+                line->replace(i,1," ");
+            }
+
+            // Make sure that the modified string gets written into the file
+            return SENSITIVE_INFORMATION_CLEARED_FOLLOWS;
+        }
+        else
+        {
+            // Ignore the line that opens the block
+            if (line->indexOf("{", 0) >= 0)
+            {
+                return SENSITIVE_INFORMATION_FOLLOWS;
+            }
+            // Continue normally when the line that closes the block has been fonud
+            if (line->indexOf("}", 0) >= 0)
+            {
+                return NO_SENSITIVE_INFORMATION;
+            }
+        }
+    }
+
     // Check if line contains closing of brackets
-    if (line->indexOf("}", 0)>=0)
+    if (line->indexOf("}", 0) >= 0)
     {
         return NO_SENSITIVE_INFORMATION;
     }
 
-    if (line->indexOf("<Visible> \"true\"",0)>=0)
+    if (line->indexOf("<Visible> \"true\"",0) >= 0)
     {
         return SENSITIVE_INFORMATION_FOLLOWS;
     }
 
     // Check if line contains new XML tag
-    if (line->indexOf("<", 0)>=0)
+    if (line->indexOf("<", 0) >= 0)
     {
         LOG("ERROR: File inconsistency while expecting sensitive information!");
         LOG("ERROR: Affected line: " << line->toStdString());
         errorReason="File inconsistency while expecting sensitive information!";
-
         return PROCESSING_ERROR;
     }
 
     int startPos=line->indexOf("\"", 0);
     int endPos=line->indexOf("\"", startPos+1);
 
-    if ((startPos>=0) && (endPos<=startPos))
+    if ((startPos >= 0) && (endPos <= startPos))
     {
         LOG("ERROR: Inconsistent information found!");
         errorReason="Inconsistent information found!";
-
         return PROCESSING_ERROR;
     }
 
-    if ((startPos>=0) && (endPos>startPos))
+    if ((startPos >= 0) && (endPos > startPos))
     {
         // Information found to be cleared
 
