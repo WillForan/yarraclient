@@ -26,6 +26,7 @@ yctTWIXAnonymizer::yctTWIXAnonymizer()
     fileVersion=UNKNOWN;
     strictVersionChecking=true;
     versionStringSeen=false;
+    readAdditionalPatientInformation=false;
 }
 
 
@@ -492,7 +493,7 @@ int yctTWIXAnonymizer::analyzeLine(QByteArray* line)
     if (   (line->indexOf("HEADER.tPatientName")            >= 0)
         || (line->indexOf("IRIS.RECOMPOSE.tPatientName")    >= 0)
         || (line->indexOf("IRIS.RECOMPOSE.PatientBirthDay") >= 0)
-        || (line->indexOf("IRIS.RECOMPOSE.PatientID")))
+        || (line->indexOf("IRIS.RECOMPOSE.PatientID")       >= 0))
     {
         // These two entries don't contain the PHI
         return NO_SENSITIVE_INFORMATION;
@@ -506,6 +507,23 @@ int yctTWIXAnonymizer::analyzeLine(QByteArray* line)
     {
         // If unexpected fields with the patient name occur, raise an error
         return PROCESSING_ERROR;
+    }
+
+    if (readAdditionalPatientInformation)
+    {
+        int startPos=line->indexOf("{", 0);
+        int endPos=line->indexOf("}", 0);
+        QString temp = "";
+
+        if ((patientInformation.serialNumber.isEmpty()) &&
+            (line->indexOf("<ParamString.\"DeviceSerialNumber\">", 0) >= 0))
+        {
+            if ((startPos >= 0) && (endPos >= 0))
+            {
+                temp=QString(line->mid(startPos+1,endPos-startPos-1)).trimmed();
+            }
+            patientInformation.serialNumber=temp.trimmed().mid(1,temp.length()-2);
+        }
     }
 
     return NO_SENSITIVE_INFORMATION;

@@ -65,15 +65,24 @@ int main(int argc, char *argv[])
         yctTWIXAnonymizer anonymizer;
         anonymizer.testing = true;
         anonymizer.setStrictVersionChecking(true);
+        anonymizer.readAdditionalPatientInformation=true;
 
-        printf("%s.\n", fileInfo.fileName().toStdString().c_str());
-
-        /*
-        if (!anonymizer.processFile(fileInfo.fileName(), "", "", "", "", "", false))
+        if (!anonymizer.processFile(inputPath.absoluteFilePath(fileInfo.fileName()), "", "", "", "", "", false))
         {
+            printf("Invalid Twix file: %s\n", fileInfo.fileName().toStdString().c_str());
             return 1;
         }
-        */
+
+        printf("Name = %s\n", anonymizer.patientInformation.name.toStdString().c_str());
+        printf("Serial = %s\n", anonymizer.patientInformation.serialNumber.toStdString().c_str());
+
+        if ((!scannerSerial.isEmpty()) && (scannerSerial!=anonymizer.patientInformation.serialNumber))
+        {
+            printf("Error: Files do not belong together (SerialNumer) %s\n", fileInfo.fileName().toStdString().c_str());
+            return 1;
+        }
+        scannerSerial=anonymizer.patientInformation.serialNumber;
+
     }
 
     return 0;

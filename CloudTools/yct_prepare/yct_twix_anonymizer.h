@@ -21,6 +21,8 @@ public:
         uuid="";
         taskid="";
         fillStr="";
+
+        serialNumber="";
     }
 
     // Information extracted from TWIX file
@@ -34,6 +36,9 @@ public:
     QString taskid;
     QString mode;    
     QString fillStr;
+
+    // Additional information optionally extracted from TWIX file
+    QString serialNumber;
 };
 
 
@@ -90,6 +95,7 @@ public:
     void    setStrictVersionChecking(bool useStrictChecking);
     bool    checkVersionString(QString versionString);
     bool    versionStringSeen;
+    bool    readAdditionalPatientInformation;
 
     QFile   dumpFile;
 
