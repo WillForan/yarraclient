@@ -23,6 +23,8 @@ public:
         fillStr="";
 
         serialNumber="";
+        patientWeight="";
+        patientSex="";
     }
 
     // Information extracted from TWIX file
@@ -39,6 +41,8 @@ public:
 
     // Additional information optionally extracted from TWIX file
     QString serialNumber;
+    QString patientWeight;
+    QString patientSex;
 };
 
 

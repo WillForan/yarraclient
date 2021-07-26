@@ -11,7 +11,7 @@
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
 
-#define YMC_TWIXCHECKER_VER "0.1b1"
+#define YMC_TWIXCHECKER_VER "0.1b2"
 
 
 int main(int argc, char *argv[])
@@ -49,15 +49,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    QString scannerSerial="";
     int minSize = 10*1024*1024;
+    int validFileCount = 0;
+    QString scannerSerial="";
+    QString patientWeight="";
+    QString patientSex="";
 
     for (int i = 0; i < fileList.size(); ++i)
     {
         QFileInfo fileInfo = fileList.at(i);
         if (fileInfo.size() < minSize)
         {
-            printf("Implausible size of file %s.\n", fileInfo.fileName().toStdString().c_str());
+            printf("Implausible size of file\n%s\n", fileInfo.fileName().toStdString().c_str());
             return 1;
         }
 
@@ -69,20 +72,57 @@ int main(int argc, char *argv[])
 
         if (!anonymizer.processFile(inputPath.absoluteFilePath(fileInfo.fileName()), "", "", "", "", "", false))
         {
-            printf("Invalid Twix file: %s\n", fileInfo.fileName().toStdString().c_str());
+            printf("Invalid Twix file\n%s\n", fileInfo.fileName().toStdString().c_str());
             return 1;
         }
 
+        /*
         printf("Name = %s\n", anonymizer.patientInformation.name.toStdString().c_str());
         printf("Serial = %s\n", anonymizer.patientInformation.serialNumber.toStdString().c_str());
+        printf("Weight = %s\n", anonymizer.patientInformation.patientWeight.toStdString().c_str());
+        printf("Sex = %s\n", anonymizer.patientInformation.patientSex.toStdString().c_str());
+        */
+
+        if (!anonymizer.patientInformation.name.contains("xxxxxxxxxx"))
+        {
+            printf("Error: Files not anonymized (PatientName)\n%s\n", fileInfo.fileName().toStdString().c_str());
+            return 1;
+        }
+
+        if (!anonymizer.patientInformation.mrn.contains("xxxxxxxx"))
+        {
+            printf("Error: Files not anonymized (PatientID)\n%s\n", fileInfo.fileName().toStdString().c_str());
+            return 1;
+        }
 
         if ((!scannerSerial.isEmpty()) && (scannerSerial!=anonymizer.patientInformation.serialNumber))
         {
-            printf("Error: Files do not belong together (SerialNumer) %s\n", fileInfo.fileName().toStdString().c_str());
+            printf("Error: Files do not belong together (SerialNumer)\n%s\n", fileInfo.fileName().toStdString().c_str());
             return 1;
         }
         scannerSerial=anonymizer.patientInformation.serialNumber;
 
+        if ((!patientWeight.isEmpty()) && (patientWeight!=anonymizer.patientInformation.patientWeight))
+        {
+            printf("Error: Files do not belong together (PatientWeight)\n%s\n", fileInfo.fileName().toStdString().c_str());
+            return 1;
+        }
+        patientWeight=anonymizer.patientInformation.patientWeight;
+
+        if ((!patientSex.isEmpty()) && (patientSex!=anonymizer.patientInformation.patientSex))
+        {
+            printf("Error: Files do not belong together (PatientSex)\n%s\n", fileInfo.fileName().toStdString().c_str());
+            return 1;
+        }
+        patientSex=anonymizer.patientInformation.patientSex;
+
+        validFileCount++;
+    }
+
+    if (validFileCount!=4)
+    {
+        printf("Error: Invalid number of files (required 5, found %d)\n", validFileCount);
+        return 1;
     }
 
     return 0;

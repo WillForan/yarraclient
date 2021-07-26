@@ -521,8 +521,31 @@ int yctTWIXAnonymizer::analyzeLine(QByteArray* line)
             if ((startPos >= 0) && (endPos >= 0))
             {
                 temp=QString(line->mid(startPos+1,endPos-startPos-1)).trimmed();
+                patientInformation.serialNumber=temp.trimmed().mid(1,temp.length()-2);
             }
-            patientInformation.serialNumber=temp.trimmed().mid(1,temp.length()-2);
+            return NO_SENSITIVE_INFORMATION;
+        }
+
+        if ((patientInformation.patientWeight.isEmpty()) &&
+            (line->indexOf("<ParamDouble.\"flUsedPatientWeight\">", 0) >= 0))
+        {
+            if ((startPos >= 0) && (endPos >= 0))
+            {
+                temp=QString(line->mid(startPos+1,endPos-startPos-1)).trimmed();
+                patientInformation.patientWeight=temp;
+            }
+            return NO_SENSITIVE_INFORMATION;
+        }
+
+        if ((patientInformation.patientSex.isEmpty()) &&
+            (line->indexOf("<ParamLong.\"lPatientSex\">", 0) >= 0))
+        {
+            if ((startPos >= 0) && (endPos >= 0))
+            {
+                temp=QString(line->mid(startPos+1,endPos-startPos-1)).trimmed();
+                patientInformation.patientSex=temp;
+            }
+            return NO_SENSITIVE_INFORMATION;
         }
     }
 
