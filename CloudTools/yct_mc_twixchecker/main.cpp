@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
 
         /*
         printf("Name = %s\n", anonymizer.patientInformation.name.toStdString().c_str());
+        printf("ID = %s\n", anonymizer.patientInformation.mrn.toStdString().c_str());
         printf("Serial = %s\n", anonymizer.patientInformation.serialNumber.toStdString().c_str());
         printf("Weight = %s\n", anonymizer.patientInformation.patientWeight.toStdString().c_str());
         printf("Sex = %s\n", anonymizer.patientInformation.patientSex.toStdString().c_str());
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        if (!anonymizer.patientInformation.mrn.contains("xxxxxxxx"))
+        if (!anonymizer.patientInformation.mrn.contains("xxxxxxx"))
         {
             printf("Error: Files not anonymized (PatientID)\n%s\n", fileInfo.fileName().toStdString().c_str());
             return 1;
@@ -119,7 +120,7 @@ int main(int argc, char *argv[])
         validFileCount++;
     }
 
-    if (validFileCount!=4)
+    if (validFileCount!=5)
     {
         printf("Error: Invalid number of files (required 5, found %d)\n", validFileCount);
         return 1;
