@@ -676,6 +676,36 @@ int yctTWIXAnonymizer::clearLine(QByteArray* line)
 }
 
 
+bool yctTWIXAnonymizer::clearPatientRegistrationEntry(QByteArray* line)
+{
+    int currentPosition = 0;
+
+    while ((currentPosition < line->length()) && (line->indexOf("{ \"", currentPosition) >= 0))
+    {
+        // Find the quotation marks
+        int startPos=line->indexOf("\"", currentPosition);
+        int endPos=line->indexOf("\"", startPos+1);
+
+        // Check if the line contains two quotation marks
+        if ((endPos < 0) || (startPos < 0))
+        {
+            DBG("Incorrect patient registration data: " + line->toStdString());
+            return false;
+        }
+
+        // Fill the patient registration string with space characters
+        for (int i=startPos+1; i<endPos; i++)
+        {
+            line->replace(i,1," ");
+        }
+
+        currentPosition = endPos+1;
+    }
+
+    return true;
+}
+
+
 int yctTWIXAnonymizer::analyzeFollowLine(QByteArray* line)
 {
     // The block containing the patient registration information requires special treatment
@@ -698,25 +728,15 @@ int yctTWIXAnonymizer::analyzeFollowLine(QByteArray* line)
         // Check and clear the content line
         if (line->indexOf("{ \"", 0) >= 0)
         {
-            // Find the quotation marks
-            int startPos=line->indexOf("\"", 0);
-            int endPos=line->indexOf("\"", startPos+1);
-
-            // Check if the line contains two quotation marks
-            if ((endPos < 0) || (startPos < 0))
+            if (!clearPatientRegistrationEntry(line))
             {
-                DBG("Incorrect patient registration data: " + line->toStdString());
                 return PROCESSING_ERROR;
             }
-
-            // Fill the patient registration string with space characters
-            for (int i=startPos+1; i<endPos; i++)
+            else
             {
-                line->replace(i,1," ");
+                // Make sure that the modified string gets written into the file
+                return SENSITIVE_INFORMATION_CLEARED_FOLLOWS;
             }
-
-            // Make sure that the modified string gets written into the file
-            return SENSITIVE_INFORMATION_CLEARED_FOLLOWS;
         }
         else
         {
