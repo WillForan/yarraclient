@@ -232,7 +232,7 @@ bool rdsRaid::callRaidTool(QStringList command, QStringList options, int timeout
 
     if (!success)
     {
-        // The process timeed out. Probably some error occured.
+        // The process timeed out. Probably some error occurred.
         RTI->log("ERROR: Timeout during call of RaidTool!");
         RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Process timeout during RaidTool call");
     }
@@ -263,7 +263,7 @@ bool rdsRaid::callRaidTool(QStringList command, QStringList options, int timeout
 
 void rdsRaid::readLPFI()
 {
-    QSettings lpfiFile(RTI->getAppPath() + RDS_LPFI_NAME, QSettings::IniFormat);
+    QSettings lpfiFile(RTI->getLpfiPath(), QSettings::IniFormat);
     lastProcessedFileID        =lpfiFile.value("LPFI/FileID",     -1).toInt();
     lastProcessedFileIDScaninfo=lpfiFile.value("Scaninfo/FileID", -1).toInt();
 }
@@ -271,7 +271,7 @@ void rdsRaid::readLPFI()
 
 void rdsRaid::saveLPFI()
 {
-    QSettings lpfiFile(RTI->getAppPath() + RDS_LPFI_NAME, QSettings::IniFormat);
+    QSettings lpfiFile(RTI->getLpfiPath(), QSettings::IniFormat);
     lpfiFile.setValue("LPFI/FileID",     lastProcessedFileID);
     lpfiFile.setValue("Scaninfo/FileID", lastProcessedFileIDScaninfo);
 }
@@ -467,6 +467,9 @@ bool rdsRaid::readRaidList()
         return false;
     };
 
+    // Update last processed file ID from the LPFI file (might be needed here in case a remote LPFI file is used for dual-console systems)
+    readLPFI();
+
     // Parse the raid output
     if (!parseOutputDirectory())
     {
@@ -625,7 +628,7 @@ bool rdsRaid::parseOutputDirectory()
             }
 
             // The parsing should be stopped when the last-processed file ID is reached. However,
-            // for use with the ORT client, this mode should be ignorred.
+            // for use with the ORT client, this mode should be ignored.
             if (!ignoreLPFID)
             {
                 // ## Evaluate the LPFI value
@@ -633,8 +636,8 @@ bool rdsRaid::parseOutputDirectory()
                 {
                     // Latest file on the RAID, i.e. the file with the highest fileID, has
                     // a value the is smaller than the lastProcessedFileID --> This can
-                    // only mean that an overlap of the fileID has occured. Therefore,
-                    // reset the lastProcessedFileID couner
+                    // only mean that an overlap of the fileID has occurred. Therefore,
+                    // reset the lastProcessedFileID counter
                     lastProcessedFileID=-1;
                     lastProcessedFileIDScaninfo=-1;
                 }
@@ -732,7 +735,7 @@ bool rdsRaid::parseOutputDirectory()
                     if (temp.contains("wip"))
                     {
                         // Scan is not closed. This can only be the case for the first
-                        // file on raid. This means, scannig is active. Raw data storate
+                        // file on raid. This means, scanning is active. Raw data storate
                         // should be postponed. Scan info transfer can take place.
                         scanActive=true;
                         skipEntry=true;
@@ -1315,7 +1318,7 @@ QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString par
     }
 
     /* // NOTE: The protocol name is not attached for now because otherwise the
-       //       protocol lentgh might become too long
+       //       protocol length might become too long
     QString protocolName=entry->protName;
 
     // Filter unreasonable characters in protocol name
@@ -1355,7 +1358,6 @@ QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString par
 }
 
 
-
 bool rdsRaid::debugReadTestFile(QString filename)
 {
     bool result=false;
@@ -1381,7 +1383,7 @@ bool rdsRaid::debugReadTestFile(QString filename)
     while (!in.atEnd())
     {
         input=in.readLine();
-        // Skip the header line for files safed from the debug dialog
+        // Skip the header line for files saved from the debug dialog
         if ((input.contains(RDS_RAID_DEBUG_HEADER)) || (input.contains(RDS_RAID_DEBUG_FOOTER)))
         {
             continue;

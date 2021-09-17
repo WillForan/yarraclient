@@ -22,6 +22,7 @@ rdsRuntimeInformation::rdsRuntimeInformation()
     simulatorExists=false;
     syngoMRExists=false;
     appPath="";
+    lpfiPath="";
     logInstance=0;
     configInstance=0;
     raidInstance=0;
@@ -118,8 +119,7 @@ void rdsRuntimeInformation::prepare()
 
 bool rdsRuntimeInformation::prepareEnvironment()
 {
-    // If any prior constructors request that start of the
-    // client is prevented
+    // If any prior constructors request that start of the client is prevented
     if (preventStart)
     {
         return false;
@@ -128,9 +128,10 @@ bool rdsRuntimeInformation::prepareEnvironment()
     bool error=false;
 
     // Prepare all directories etc
+    appPath=qApp->applicationDirPath();
+    lpfiPath = appPath + RDS_LPFI_NAME;
 
     // Change directory to application path
-    appPath=qApp->applicationDirPath();
     QDir dir;
     dir.setCurrent(appPath);
 
@@ -280,7 +281,7 @@ int rdsRuntimeInformation::determineNumarisXVersion()
                 break;
             }
 
-            // TODO: Validate that this is still true for XA20 versions
+            // TODO: Validate that this is still true for newer versions
 
             if (buffer=="VA20A")
             {
@@ -291,6 +292,18 @@ int rdsRuntimeInformation::determineNumarisXVersion()
             if (buffer=="VA20B")
             {
                 detectedVersion=RDS_XA20B;
+                break;
+            }
+
+            if (buffer=="VA30A")
+            {
+                detectedVersion=RDS_XA30A;
+                break;
+            }
+
+            if (buffer=="VA31A")
+            {
+                detectedVersion=RDS_XA31A;
                 break;
             }
         }        

@@ -59,8 +59,10 @@ public:
     int     netMode;
     QString netDriveBasepath;
     QString netDriveReconnectCmd;
+    QString netDriveDisconnectCmd;
     bool    netDriveCreateBasepath;
     QString netRemoteConfigFile;
+    QString netRemoteLpfiFile;
     bool    netDriveStartupCmdsAfterFail;
 
     QString logServerPath;

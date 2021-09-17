@@ -53,6 +53,8 @@ public:
         RDS_VE11S,
         RDS_XA20A,
         RDS_XA20B,
+        RDS_XA30A,
+        RDS_XA31A,
         RDS_SYNGOVERSIONS_COUNT
     };
 
@@ -88,6 +90,8 @@ public:
     bool isInvalidEnvironment();
 
     QString getAppPath();
+    QString getLpfiPath();
+    void    setLpfiPath(QString newPath);
 
     void setLogInstance(rdsLog* instance);
     void flushLog();
@@ -163,6 +167,7 @@ private:
     bool preventStart;
 
     QString appPath;
+    QString lpfiPath;
     rdsLog* logInstance;
     rdsConfiguration* configInstance;
     rdsRaid* raidInstance;
@@ -223,6 +228,18 @@ inline bool rdsRuntimeInformation::isInvalidEnvironment()
 inline QString rdsRuntimeInformation::getAppPath()
 {
     return appPath;
+}
+
+
+inline QString rdsRuntimeInformation::getLpfiPath()
+{
+    return lpfiPath;
+}
+
+
+inline void rdsRuntimeInformation::setLpfiPath(QString newPath)
+{
+    lpfiPath = newPath;
 }
 
 
@@ -457,6 +474,14 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString(int syngoVersionEn
         versionString="XA20B";
         break;
 
+    case RDS_XA30A:
+        versionString="XA30A";
+        break;
+
+    case RDS_XA31A:
+        versionString="XA31A";
+        break;
+
     default:
         versionString="Unknown - Use with care!";
         break;
@@ -560,6 +585,8 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     case RDS_VE11S:
     case RDS_XA20A:
     case RDS_XA20B:
+    case RDS_XA30A:
+    case RDS_XA31A:        
         return RDS_RAIDTOOL_VE;
         break;
     case RDS_VB15A:
@@ -610,6 +637,8 @@ inline int rdsRuntimeInformation::getSyngoMRLine()
     case RDS_XA11B:
     case RDS_XA20A:
     case RDS_XA20B:
+    case RDS_XA30A:    
+    case RDS_XA31A:        
         return RDS_XA;
         break;
     }

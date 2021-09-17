@@ -156,6 +156,7 @@ void rdsConfigurationWindow::readConfiguration()
 
     ui->networkDrivePathEdit->setText(config.netDriveBasepath);
     ui->networkDriveReconnectCmd->setText(config.netDriveReconnectCmd);
+    ui->networkDriveDisconnectCmd->setText(config.netDriveDisconnectCmd);    
     ui->networkDriveCreatePath->setChecked(config.netDriveCreateBasepath);
     ui->networkRemoteConfigLabelEdit->setText(config.netRemoteConfigFile);
     ui->networkRerunStartupCmdsCheckbox->setChecked(config.netDriveStartupCmdsAfterFail);
@@ -202,6 +203,7 @@ void rdsConfigurationWindow::storeConfiguration()
     config.netMode=ui->networkModeCombobox->currentIndex();
     config.netDriveBasepath=ui->networkDrivePathEdit->text();
     config.netDriveReconnectCmd=ui->networkDriveReconnectCmd->text();
+    config.netDriveDisconnectCmd=ui->networkDriveDisconnectCmd->text();
     config.netDriveCreateBasepath=ui->networkDriveCreatePath->isChecked();
     config.netRemoteConfigFile=ui->networkRemoteConfigLabelEdit->text();
     config.netDriveStartupCmdsAfterFail=ui->networkRerunStartupCmdsCheckbox->isChecked();

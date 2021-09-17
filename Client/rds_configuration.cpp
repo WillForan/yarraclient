@@ -69,8 +69,10 @@ void rdsConfiguration::loadConfiguration()
     netMode               =settings.value("Network/Mode",               NETWORKMODE_DRIVE).toInt();
     netDriveBasepath      =settings.value("Network/DriveBasepath",      "").toString();
     netDriveReconnectCmd  =settings.value("Network/DriveReconnectCmd",  "").toString();
+    netDriveDisconnectCmd =settings.value("Network/DriveDisconnectCmd", "").toString();
     netDriveCreateBasepath=settings.value("Network/DriveCreateBasepath",false).toBool();
     netRemoteConfigFile   =settings.value("Network/RemoteConfigFile",   "").toString();
+    netRemoteLpfiFile     =settings.value("Network/RemoteLpfiFile",     "").toString();
 
     // Hidden option for rerunning the startup commands if connecting
     // to the network drive failed for three times
@@ -135,6 +137,17 @@ void rdsConfiguration::loadConfiguration()
         infoName = infoScannerType+infoSerialNumber;
     }
 
+    // Check if a remote LPFI file should be used. Might be needed for systems with dual host computers
+    if (!netRemoteLpfiFile.isEmpty())
+    {
+        RTI->log("Using remote LPFI file:" + netRemoteLpfiFile);
+        RTI->setLpfiPath(netRemoteLpfiFile);
+    }
+    else
+    {
+        RTI->setLpfiPath(RTI->getAppPath() + RDS_LPFI_NAME);
+    }    
+
     loadCloudSettings();
 }
 
@@ -168,8 +181,10 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("Network/Mode",               netMode);
     settings.setValue("Network/DriveBasepath",      netDriveBasepath);
     settings.setValue("Network/DriveReconnectCmd",  netDriveReconnectCmd);
+    settings.setValue("Network/DriveDisconnectCmd", netDriveDisconnectCmd);
     settings.setValue("Network/DriveCreateBasepath",netDriveCreateBasepath);
     settings.setValue("Network/RemoteConfigFile",   netRemoteConfigFile);
+    settings.setValue("Network/RemoteLpfiFile",     netRemoteLpfiFile);
     settings.setValue("Network/DriveStartupCmdsAfterFail",netDriveStartupCmdsAfterFail);
 
     settings.setValue("LogServer/ServerPath",         logServerPath);

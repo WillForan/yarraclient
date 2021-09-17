@@ -12,6 +12,7 @@
 #ifdef YARRA_APP_RDS
     #include "rds_checksum.h"
     #include "rds_copydialog.h"
+    #include "rds_exechelper.h"
 #endif
 
 
@@ -121,8 +122,7 @@ bool rdsNetwork::openConnection()
 
 void rdsNetwork::closeConnection()
 {  
-    // NOTE: Nothing to be done for the network-drive mode.
-
+    runDisconnectCmd();
     connectionActive=false;
 }
 
@@ -510,8 +510,8 @@ bool rdsNetwork::checkExistance(QString filename)
 }
 
 
-
-QString rdsNetwork::getConfigFileData() {
+QString rdsNetwork::getConfigFileData() 
+{
     QFile configFile(RTI->getAppPath() + RDS_INI_NAME);
     QString  result = "";
     try {
@@ -526,7 +526,9 @@ QString rdsNetwork::getConfigFileData() {
     return result;
 }
 
-QString rdsNetwork::getLogFileData(int lines) {
+
+QString rdsNetwork::getLogFileData(int lines) 
+{
     QString logName="rds.log";
     QString logPath=RTI->getLogInstance()->getLocalLogPath();
     QFile logFile(logPath+logName);
@@ -561,6 +563,7 @@ QString rdsNetwork::getLogFileData(int lines) {
     RTI->getLogInstance()->resumeLogfile();
     return result;
 }
+
 
 bool rdsNetwork::copyLogFile()
 {
@@ -652,6 +655,23 @@ void rdsNetwork::runReconnectCmd()
 
         delete myProcess;
         myProcess=0;
+    }
+}
+
+
+void rdsNetwork::runDisconnectCmd()
+{
+    // If a disconnect command has been defined, call it after the update has finished
+    if (!RTI_CONFIG->netDriveDisconnectCmd.isEmpty())
+    {
+        RTI->log("Calling network drive reconnect command.");
+        rdsExecHelper exec;
+        if (!exec.run(RTI_CONFIG->netDriveDisconnectCmd))
+        {
+            RTI->log("ERROR: Execution of disconnect command failed '" + RTI_CONFIG->netDriveDisconnectCmd + "'");
+            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Diagnostics,EventInfo::Severity::Error,
+                         "Execution of disconnect command failed");
+        }
     }
 }
 

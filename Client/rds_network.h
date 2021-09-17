@@ -39,6 +39,7 @@ public:
     QString getLogFileData(int lines);
     bool copyLogFile();
     void runReconnectCmd();
+    void runDisconnectCmd();
 
     NetLogger netLogger;
 
