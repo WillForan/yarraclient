@@ -8,11 +8,11 @@
 
 #include "rds_network.h"
 #include "rds_global.h"
+#include "rds_exechelper.h"
 
 #ifdef YARRA_APP_RDS
     #include "rds_checksum.h"
     #include "rds_copydialog.h"
-    #include "rds_exechelper.h"
 #endif
 
 
