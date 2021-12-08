@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>612</width>
-    <height>410</height>
+    <width>676</width>
+    <height>486</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,7 +40,7 @@
         <number>16</number>
        </property>
        <property name="rightMargin">
-        <number>80</number>
+        <number>12</number>
        </property>
        <property name="verticalSpacing">
         <number>7</number>
@@ -501,7 +501,7 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>150</width>
+             <width>74</width>
              <height>20</height>
             </size>
            </property>
@@ -605,7 +605,7 @@ p, li { white-space: pre-wrap; }
           <widget class="QLabel" name="label_13">
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>140</width>
              <height>0</height>
             </size>
            </property>
@@ -693,7 +693,7 @@ p, li { white-space: pre-wrap; }
                 <widget class="QLabel" name="label_14">
                  <property name="minimumSize">
                   <size>
-                   <width>120</width>
+                   <width>140</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -740,7 +740,7 @@ p, li { white-space: pre-wrap; }
                 <number>0</number>
                </property>
                <property name="leftMargin">
-                <number>128</number>
+                <number>146</number>
                </property>
                <item>
                 <widget class="QCheckBox" name="networkDriveCreatePath">
@@ -776,7 +776,7 @@ p, li { white-space: pre-wrap; }
                 <widget class="QLabel" name="networkRemoteConfigLabel">
                  <property name="minimumSize">
                   <size>
-                   <width>120</width>
+                   <width>140</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -819,7 +819,7 @@ p, li { white-space: pre-wrap; }
                 <widget class="QLabel" name="label_17">
                  <property name="minimumSize">
                   <size>
-                   <width>120</width>
+                   <width>140</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -842,7 +842,7 @@ p, li { white-space: pre-wrap; }
                 <widget class="QLabel" name="networkDriveDisconnectCmdLabel">
                  <property name="minimumSize">
                   <size>
-                   <width>120</width>
+                   <width>140</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -1016,22 +1016,6 @@ p, li { white-space: pre-wrap; }
            </widget>
           </widget>
          </item>
-         <item>
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>10</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
         </layout>
        </item>
        <item>
@@ -1064,7 +1048,7 @@ p, li { white-space: pre-wrap; }
         <number>16</number>
        </property>
        <property name="rightMargin">
-        <number>80</number>
+        <number>12</number>
        </property>
        <property name="bottomMargin">
         <number>7</number>
