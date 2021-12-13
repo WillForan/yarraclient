@@ -950,13 +950,13 @@ bool rdsRaid::findAdjustmentScans()
 }
 
 
-bool rdsRaid::processTotalExportList()
+bool rdsRaid::processTotalExportList(bool& diskFull)
 {
     bool result=true;
 
     while ((result==true) && (exportList.count()>0))
     {
-        result=exportScanFromList();
+        result=exportScanFromList(diskFull);
 
         RTI->processEvents();
         if (RTI->isPostponementRequested())
@@ -973,7 +973,8 @@ bool rdsRaid::processTotalExportList()
 
 bool rdsRaid::processExportListEntry()
 {
-    return exportScanFromList();
+    bool diskFull; //the only caller of this won't use diskFull anyway
+    return exportScanFromList(diskFull);
 }
 
 
@@ -983,7 +984,7 @@ bool rdsRaid::exportsAvailable()
 }
 
 
-bool rdsRaid::exportScanFromList()
+bool rdsRaid::exportScanFromList(bool& diskFull)
 {
     if (exportList.count()==0)
     {
@@ -1004,6 +1005,7 @@ bool rdsRaid::exportScanFromList()
         RTI->log("ERROR: Available = " + QString::number(RTI->getFreeDiskSpace()));
         RTI->showOperationWindow();
         RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::FatalError, "Not enough disk space");
+        diskFull = true;
         return false;
     }
 

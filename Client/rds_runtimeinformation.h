@@ -186,6 +186,7 @@ private:
 
     bool    detectedNumarisX;
     QString numarisXBinPath;
+    long long simulationInitFreeSpace;
 };
 
 

@@ -352,7 +352,14 @@ qint64 rdsRuntimeInformation::getFreeDiskSpace(QString path)
 #endif
     QDir::setCurrent( oldDir );
 #if (defined (WINDOWS) || defined (__windows__) || defined(Q_OS_WIN))
-    return static_cast<__int64>(freeSpace.QuadPart);
+    auto free_space = static_cast<__int64>(freeSpace.QuadPart);
+    if ( simulation && path == appPath ) {
+        if (simulationInitFreeSpace == 0) { // simulate very low diskspace
+            simulationInitFreeSpace = free_space;
+        }
+        return free_space - simulationInitFreeSpace + 3*10240000 + 140000;
+    }
+    return free_space;
 #else
     #warning "Warning: Free disk space check omitted!"
     RTI->log("Running on Linux. Skipping check for free disk space.");

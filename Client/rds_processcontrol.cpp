@@ -119,7 +119,7 @@ void rdsProcessControl::performUpdate()
     // scanner
     // TODO: Resolve compiler warning
 
-    if (diskSpace < qint64(RDS_DISKLIMIT_ALTERNATING))
+    if (!RTI->isSimulation() && diskSpace < qint64(RDS_DISKLIMIT_ALTERNATING))
     {
         alternatingUpdate=true;
         RTI->log("Using alternating update mode due to low disk space.");
@@ -264,7 +264,21 @@ void rdsProcessControl::performUpdate()
             else
             {
                 // Export all scheduled scans to the queue directory
-                exportSuccessful=RTI_RAID->processTotalExportList();
+                for (int i=0; i<5; i++) {
+                    // If exporting the list fails for lack of space, export what we can and try again
+                    bool diskFull = false;
+                    if (i > 0 ) {
+                        RTI->log("WARNING: Transfer ran out of disk space; attempt number "+ QString::number(i));
+                    }
+                    exportSuccessful=RTI_RAID->processTotalExportList(diskFull);
+                    if (!exportSuccessful && diskFull) { // It failed due to disk space
+                        setState(STATE_NETWORKTRANSFER_ALTERNATING); // not sure about this
+                        RTI_NETWORK->transferFiles(); // transfer the files we were able to export
+                        RTI->processEvents();
+                    } else {
+                        break; // either we succeeded or failed for some other reason
+                    }
+                }
             }
 
             if (!exportSuccessful)

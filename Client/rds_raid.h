@@ -54,7 +54,7 @@ public:
     ~rdsRaid();
 
     bool createExportList();
-    bool processTotalExportList();
+    bool processTotalExportList(bool& diskFull);
     bool processExportListEntry();
     bool exportsAvailable();
 
@@ -107,7 +107,7 @@ protected:
     bool parseVB15Line(QString line, rdsRaidEntry* entry);
     bool parseOutputDirectory();
     bool parseOutputFileExport();
-    bool exportScanFromList();
+    bool exportScanFromList(bool &diskFull);
 
     bool setCurrentFileID();
     bool setCurrentFilename(int refID=-1);
