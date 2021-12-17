@@ -357,7 +357,7 @@ qint64 rdsRuntimeInformation::getFreeDiskSpace(QString path)
         if (simulationInitFreeSpace == 0) { // simulate very low diskspace
             simulationInitFreeSpace = free_space;
         }
-        return free_space - simulationInitFreeSpace + 3*10240000 + 140000;
+        return free_space - simulationInitFreeSpace + 3*10240000 + 10*1024*1024;
     }
     return free_space;
 #else

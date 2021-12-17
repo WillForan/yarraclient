@@ -950,14 +950,16 @@ bool rdsRaid::findAdjustmentScans()
 }
 
 
-bool rdsRaid::processTotalExportList(bool& diskFull)
+bool rdsRaid::processTotalExportList(bool& diskFull, int& exportCount)
 {
     bool result=true;
-
+    int exported = 0;
     while ((result==true) && (exportList.count()>0))
     {
         result=exportScanFromList(diskFull);
-
+        if (result) {
+            exported = exported + 1;
+        }
         RTI->processEvents();
         if (RTI->isPostponementRequested())
         {
@@ -966,7 +968,7 @@ bool rdsRaid::processTotalExportList(bool& diskFull)
             break;
         }
     }
-
+    exportCount = exported;
     return result;
 }
 
@@ -978,9 +980,9 @@ bool rdsRaid::processExportListEntry()
 }
 
 
-bool rdsRaid::exportsAvailable()
+int rdsRaid::exportsAvailable()
 {
-    return (exportList.count()>0);
+    return exportList.count();
 }
 
 
@@ -997,14 +999,17 @@ bool rdsRaid::exportScanFromList(bool& diskFull)
     bool saveAdjustScans=getFirstExportEntry()->adjustmentScans;
     bool anonymize=getFirstExportEntry()->anonymize;
 
-    // Test if enough space for exporting the file is available!
-    if ( RTI->getFreeDiskSpace() < getRaidEntry(currentRaidIndex)->size )
+    auto spaceAvailable = RTI->getFreeDiskSpace();
+
+    // Multiply by 1.2 to be on the safe side for the adjustment scans
+    auto spaceRequired = (getRaidEntry(currentRaidIndex)->size)*1.2 + 10*1024*1024;
+    if ( spaceAvailable < spaceRequired )
     {
         RTI->log("ERROR: Available disk space too small for exporting data.");
-        RTI->log("ERROR: Needed    = " + QString::number(getRaidEntry(currentRaidIndex)->size));
-        RTI->log("ERROR: Available = " + QString::number(RTI->getFreeDiskSpace()));
+        RTI->log("ERROR: Needed    = " + QString::number(spaceRequired / 1024,'f',0) + " kB");
+        RTI->log("ERROR: Available = " + QString::number(spaceAvailable / 1024,'f',0) + " kB");
         RTI->showOperationWindow();
-        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::FatalError, "Not enough disk space");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::FatalError, "Not enough disk space", QString::number(spaceAvailable,'f',0));
         diskFull = true;
         return false;
     }

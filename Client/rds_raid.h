@@ -54,9 +54,9 @@ public:
     ~rdsRaid();
 
     bool createExportList();
-    bool processTotalExportList(bool& diskFull);
+    bool processTotalExportList(bool& diskFull, int& exportCount);
     bool processExportListEntry();
-    bool exportsAvailable();
+    int exportsAvailable();
 
     void dumpRaidList(QString filename);
     void dumpRaidToolOutput(QString filename);

@@ -244,7 +244,7 @@ void rdsProcessControl::performUpdate()
             if (alternatingUpdate)
             {
                 // Loop over all scans scheduled for the export
-                while ((exportSuccessful) && (!RTI->isPostponementRequested()) && (RTI_RAID->exportsAvailable()))
+                while ((exportSuccessful) && (!RTI->isPostponementRequested()) && (RTI_RAID->exportsAvailable() > 0))
                 {
                     // Save one file to the queue directory
                     setState(STATE_RAIDTRANSFER);
@@ -264,19 +264,37 @@ void rdsProcessControl::performUpdate()
             else
             {
                 // Export all scheduled scans to the queue directory
-                for (int i=0; i<5; i++) {
-                    // If exporting the list fails for lack of space, export what we can and try again
+                int exportCount = 0;
+
+                // If exporting the list fails for lack of space, export what we can and try again
+                // Worst case we export one file at a time.
+
+                RTI->log("===== Begin Export & Transfer =====");
+                int totalToExport = RTI_RAID->exportsAvailable();
+                int totalExported = 0;
+                for (int i=0; i < totalToExport + 1; i++) {
                     bool diskFull = false;
-                    if (i > 0 ) {
-                        RTI->log("WARNING: Transfer ran out of disk space; attempt number "+ QString::number(i));
-                    }
-                    exportSuccessful=RTI_RAID->processTotalExportList(diskFull);
-                    if (!exportSuccessful && diskFull) { // It failed due to disk space
+                    RTI->log("==== Beginning RAID file export. ====");
+                    exportSuccessful = RTI_RAID->processTotalExportList(diskFull, exportCount);
+                    totalExported += exportCount;
+                    if ( exportSuccessful ) {
+                        RTI->log("===== RAID export SUCCESS =====");
+                        RTI->log("Exported "+ QString::number(totalExported) + " of "+ QString::number(totalToExport) + " files.");
+                        break; // we exported everything, we're done (transfer happens later)
+                    } else if ( diskFull ) { // It failed due to disk space
+                        if ( exportCount == 0 ) { // If it couldn't even export one file, we are out of options.
+                            RTI->log("ERROR: Critical disk space error.");
+                            break;
+                        }
+                        RTI->log("WARNING: RAID file export ran out of disk space.");
+                        RTI->log("==== Transfering " + QString::number(exportCount) + " files. ====");
                         setState(STATE_NETWORKTRANSFER_ALTERNATING); // not sure about this
                         RTI_NETWORK->transferFiles(); // transfer the files we were able to export
                         RTI->processEvents();
-                    } else {
-                        break; // either we succeeded or failed for some other reason
+                        RTI->log("===== Finished export phase "+ QString::number(i+1) + " =====");
+                    } else { // something else went wrong
+                        RTI->log("===== RAID export FAILURE =====");
+                        break;
                     }
                 }
             }
