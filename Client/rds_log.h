@@ -44,14 +44,14 @@ inline void rdsLog::setLogWidget(QTextEdit* widget)
 
 inline void rdsLog::log(QString text)
 {
-    QString line=QDateTime::currentDateTime().toString("dd.MM.yy hh:mm:ss") + "  --  " + text + "\n";
-    logfile.write(line.toLatin1());
+    QString line=QDateTime::currentDateTime().toString("dd.MM.yy hh:mm:ss") + "  --  " + text;
+    logfile.write((line + "\n").toLatin1());
     logfile.flush();
-    qInfo() << line;
+    qInfo() << qUtf8Printable(line);
 
     if (logWidget!=0)
     {
-        logWidget->setPlainText(line+logWidget->toPlainText());
+        logWidget->setPlainText((line + "\n")+logWidget->toPlainText());
     }
 
 }
@@ -59,11 +59,14 @@ inline void rdsLog::log(QString text)
 
 inline void rdsLog::debug(QString text)
 {
-    QString line=QDateTime::currentDateTime().toString("dd.MM.yy hh:mm:ss") + "  >>  " + text + "\n";
+    QString line=QDateTime::currentDateTime().toString("dd.MM.yy hh:mm:ss") + "  >>  " + text;
+    logfile.write((line + "\n").toLatin1());
+    logfile.flush();
+    qInfo() << qUtf8Printable(line);
 
     if (logWidget!=0)
     {
-        logWidget->setText(line+logWidget->toPlainText());
+        logWidget->setText((line + "\n")+logWidget->toPlainText());
     }
 
 }
