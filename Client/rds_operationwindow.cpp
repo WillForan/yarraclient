@@ -99,6 +99,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         dataString+="<system_version>"+RTI->getSyngoMRVersionString()         +"</system_version>";
         dataString+="<system_vendor>Siemens</system_vendor>";
         dataString+="<time>"          +QDateTime::currentDateTime().toString()+"</time>";
+        dataString+="<free_space>"    +QString::number(RTI->getFreeDiskSpace(),'f',0) +"</free_space>";
         dataString+="</data>";
         RTI_NETLOG.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"Ver "+QString(RDS_VERSION),dataString);
 
@@ -505,6 +506,10 @@ void rdsOperationWindow::sendHeartbeat()
     if (control.getState()==rdsProcessControl::STATE_IDLE)
     {
         RTI_NETLOG.postEvent(EventInfo::Type::Heartbeat,EventInfo::Detail::Diagnostics,EventInfo::Severity::Success,"","");
+        auto space = RTI->getFreeDiskSpace();
+        if (space < RDS_DISKLIMIT_WARNING) {
+            RTI_NETLOG.postEvent(EventInfo::Type::Heartbeat,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Warning,"low disk space",QString::number(space,'f',0));
+        }
     }
 
     heartbeatTimer.start();
