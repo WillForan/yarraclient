@@ -370,7 +370,9 @@ bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, b
     }
 
     RTI->log("Exported file " + filename);
-
+    if (RTI->isSimulation()) {
+        Sleep(1000);
+    }
     return true;
 }
 
@@ -973,9 +975,8 @@ bool rdsRaid::processTotalExportList(bool& diskFull, int& exportCount)
 }
 
 
-bool rdsRaid::processExportListEntry()
+bool rdsRaid::processExportListEntry(bool& diskFull)
 {
-    bool diskFull; //the only caller of this won't use diskFull anyway
     return exportScanFromList(diskFull);
 }
 
@@ -1009,7 +1010,7 @@ bool rdsRaid::exportScanFromList(bool& diskFull)
         RTI->log("ERROR: Needed    = " + QString::number(spaceRequired / 1024,'f',0) + " kB");
         RTI->log("ERROR: Available = " + QString::number(spaceAvailable / 1024,'f',0) + " kB");
         RTI->showOperationWindow();
-        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::FatalError, "Not enough disk space", QString::number(spaceAvailable,'f',0));
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Not enough disk space", QString::number(spaceAvailable,'f',0));
         diskFull = true;
         return false;
     }

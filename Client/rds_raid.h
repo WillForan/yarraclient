@@ -55,7 +55,7 @@ public:
 
     bool createExportList();
     bool processTotalExportList(bool& diskFull, int& exportCount);
-    bool processExportListEntry();
+    bool processExportListEntry(bool& diskFull);
     int exportsAvailable();
 
     void dumpRaidList(QString filename);

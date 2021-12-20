@@ -119,7 +119,7 @@ void rdsProcessControl::performUpdate()
     // scanner
     // TODO: Resolve compiler warning
 
-    if (!RTI->isSimulation() && diskSpace < qint64(RDS_DISKLIMIT_ALTERNATING))
+    if ( diskSpace < qint64(RDS_DISKLIMIT_ALTERNATING))
     {
         alternatingUpdate=true;
         RTI->log("Using alternating update mode due to low disk space.");
@@ -248,7 +248,12 @@ void rdsProcessControl::performUpdate()
                 {
                     // Save one file to the queue directory
                     setState(STATE_RAIDTRANSFER);
-                    exportSuccessful=RTI_RAID->processExportListEntry();
+                    bool diskFull;
+                    exportSuccessful=RTI_RAID->processExportListEntry(diskFull);
+                    if (!exportSuccessful && diskFull) {
+                        RTI->log("ERROR: CRITICAL disk space error. Raw data export cannot succeed until disk space is freed.");
+                        RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Disk space critical error", QString::number(RTI->getFreeDiskSpace(),'f',0));
+                    }
                     RTI->processEvents();
 
                     // Transfer the file to the network
@@ -283,7 +288,8 @@ void rdsProcessControl::performUpdate()
                         break; // we exported everything, we're done (transfer happens later)
                     } else if ( diskFull ) { // It failed due to disk space
                         if ( exportCount == 0 ) { // If it couldn't even export one file, we are out of options.
-                            RTI->log("ERROR: Critical disk space error.");
+                            RTI->log("ERROR: CRITICAL disk space error. Raw data export cannot succeed until disk space is freed.");
+                            RTI_NETLOG.postEvent(EventInfo::Type::RawDataStorage,EventInfo::Detail::Information,EventInfo::Severity::FatalError, "Disk space critical error", QString::number(RTI->getFreeDiskSpace(),'f',0));
                             break;
                         }
                         RTI->log("WARNING: RAID file export ran out of disk space.");
@@ -292,6 +298,12 @@ void rdsProcessControl::performUpdate()
                         RTI_NETWORK->transferFiles(); // transfer the files we were able to export
                         RTI->processEvents();
                         RTI->log("===== Finished export phase "+ QString::number(i+1) + " =====");
+                        if (RTI->isPostponementRequested())
+                        {
+                            RTI->log("Received postponement request. Stopping update.");
+                            exportSuccessful = true; // if we quit partway through, don't show errors
+                            break;
+                        }
                     } else { // something else went wrong
                         RTI->log("===== RAID export FAILURE =====");
                         break;
