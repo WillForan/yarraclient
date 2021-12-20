@@ -1,8 +1,8 @@
 #include "netlogger.h"
-
 #ifdef YARRA_APP_RDS
     #include "rds_global.h"
 #endif
+#include <sstream>
 
 #ifdef YARRA_APP_ORT
     #include "ort_global.h"
@@ -265,6 +265,20 @@ QUrlQuery NetLogger::buildEventQuery(EventInfo::Type type, EventInfo::Detail det
 
 void NetLogger::postEvent(EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data)
 {
+#ifdef RTI
+    if (RTI->isDebugMode()) {
+        std::stringstream k;
+        k << "NetEvent: <Type: " << type << ", Detail: " << detail << ", Severity: " << severity;
+        if (!info.isEmpty())
+            k << ", Info: " << info.toStdString();
+        if (!data.isEmpty())
+            k << ", Data: " << data.toStdString();
+        k << ">";
+
+        RTI->debug(QString::fromStdString(k.str()));
+    }
+#endif
+
     if (!configured)
     {
         return;
@@ -285,6 +299,18 @@ bool NetLogger::postEventSync(EventInfo::Type type, EventInfo::Detail detail, Ev
 
 bool NetLogger::postEventSync(QNetworkReply::NetworkError& error, int& status_code, EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data, int timeoutMsec)
 {
+#ifdef RTI
+    if (RTI->isDebugMode()) {
+        std::stringstream k;
+        k << "NetEvent: <Type: " << type << ", Detail: " << detail << ", Severity: " << severity;
+        if (!info.isEmpty())
+            k << ", Info: " << info.toStdString();
+        if (!data.isEmpty())
+            k << ", Data: " << data.toStdString();
+        k << ">";
+        RTI->debug(QString::fromStdString(k.str()));
+    }
+#endif
     if (!configured)
     {
         return false;
