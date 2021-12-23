@@ -1119,12 +1119,18 @@ bool rdsRaid::setCurrentFilename(int refID)
 
     QString protocolName=raidEntry->protName;
 
-    // Filter unreasonable characters in protocol name
+    // Remove characters from the protocol name that are not allowed in file names
     protocolName.remove(QChar('.'),  Qt::CaseInsensitive);
     protocolName.remove(QChar('/'),  Qt::CaseInsensitive);
     protocolName.remove(QChar('\\'), Qt::CaseInsensitive);
     protocolName.remove(QChar(':'),  Qt::CaseInsensitive);
     protocolName.remove(QChar(' '),  Qt::CaseInsensitive);
+    protocolName.remove(QChar('*'),  Qt::CaseInsensitive);
+    protocolName.remove(QChar('>'),  Qt::CaseInsensitive);
+    protocolName.remove(QChar('<'),  Qt::CaseInsensitive);
+    protocolName.remove(QChar('|'),  Qt::CaseInsensitive);
+    protocolName.remove(QChar('?'),  Qt::CaseInsensitive);
+    protocolName.remove(QChar('"'),  Qt::CaseInsensitive);
 
     currentFilename += protocolName;
     currentFilename += ".dat";
@@ -1317,19 +1323,8 @@ QString rdsRaid::getORTFilename(rdsRaidEntry* entry, QString modeID, QString par
         filename += QString(RTI_SEPT_CHAR) + "P" + param;
     }
 
-    /* // NOTE: The protocol name is not attached for now because otherwise the
-       //       protocol length might become too long
-    QString protocolName=entry->protName;
-
-    // Filter unreasonable characters in protocol name
-    protocolName.remove(QChar('.'),  Qt::CaseInsensitive);
-    protocolName.remove(QChar('/'),  Qt::CaseInsensitive);
-    protocolName.remove(QChar('\\'), Qt::CaseInsensitive);
-    protocolName.remove(QChar(':'),  Qt::CaseInsensitive);
-    protocolName.remove(QChar(' '),  Qt::CaseInsensitive);
-
-    filename += protocolName;
-    */
+    // NOTE: The protocol name is not attached for now because otherwise the
+    //       protocol length might become too long
 
     // In cloud mode, the files are named by the UUID. However, the normal ORT file name
     // is still needed as taskID, so store that in a variable

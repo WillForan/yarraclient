@@ -230,7 +230,21 @@ void rdsConfiguration::addProtocol(QString name, QString filter, bool saveAdjust
 {
     rdsConfigurationProtocol* newItem=new rdsConfigurationProtocol;
 
-    newItem->name=name;
+    // Remove characters that are not allowed in file names
+    QString safeName=name;
+    safeName.remove(QChar('.'),  Qt::CaseInsensitive);
+    safeName.remove(QChar('/'),  Qt::CaseInsensitive);
+    safeName.remove(QChar('\\'), Qt::CaseInsensitive);
+    safeName.remove(QChar(':'),  Qt::CaseInsensitive);
+    safeName.remove(QChar(' '),  Qt::CaseInsensitive);
+    safeName.remove(QChar('*'),  Qt::CaseInsensitive);
+    safeName.remove(QChar('>'),  Qt::CaseInsensitive);
+    safeName.remove(QChar('<'),  Qt::CaseInsensitive);
+    safeName.remove(QChar('|'),  Qt::CaseInsensitive);
+    safeName.remove(QChar('?'),  Qt::CaseInsensitive);
+    safeName.remove(QChar('"'),  Qt::CaseInsensitive);
+
+    newItem->name=safeName;
     newItem->filter=filter;
     newItem->saveAdjustData=saveAdjustData;
     newItem->anonymizeData=anonymizeData;
