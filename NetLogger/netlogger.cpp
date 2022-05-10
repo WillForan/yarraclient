@@ -125,27 +125,21 @@ bool NetLogger::isServerInSameDomain(QString serverPath)
     }
 
     // Lookup the hostname of the local client from the DNS server
-    if (!error)
-    {
-        localHostname=NetLogger::dnsLookup(localIP);
+    localHostname=NetLogger::dnsLookup(localIP);
 
-        if (localHostname.isEmpty())
-        {
-            errorMessage="Unable to resolve local hostname.";
-            error=true;
-        }
+    if (localHostname.isEmpty())
+    {
+        errorMessage += "Unable to resolve local hostname. ";
+        error=true;
     }
 
     // Lookup the hostname of the log server from the DNS server
-    if (!error)
-    {
-        serverPath=NetLogger::dnsLookup(serverPath);
+    serverPath=NetLogger::dnsLookup(serverPath);
 
-        if (serverPath.isEmpty())
-        {
-            errorMessage="Unable to resolve server name.";
-            error=true;
-        }
+    if (serverPath.isEmpty())
+    {
+        errorMessage += "Unable to resolve logserver hostname. ";
+        error=true;
     }
 
     // Compare if the local system and the server live on the same domain
@@ -293,11 +287,12 @@ bool NetLogger::postEventSync(EventInfo::Type type, EventInfo::Detail detail, Ev
 {
     QNetworkReply::NetworkError networkError;
     int networkStatusCode=0;
-    return postEventSync(networkError, networkStatusCode, type, detail, severity, info, data, timeoutMsec);
+    QString errorString;
+    return postEventSync(errorString, networkError, networkStatusCode, type, detail, severity, info, data, timeoutMsec);
 }
 
 
-bool NetLogger::postEventSync(QNetworkReply::NetworkError& error, int& status_code, EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data, int timeoutMsec)
+bool NetLogger::postEventSync(QString& errorString, QNetworkReply::NetworkError& error, int& status_code, EventInfo::Type type, EventInfo::Detail detail, EventInfo::Severity severity, QString info, QString data, int timeoutMsec)
 {
 #ifdef RTI
     if (RTI->isDebugMode()) {
@@ -318,7 +313,6 @@ bool NetLogger::postEventSync(QNetworkReply::NetworkError& error, int& status_co
 
     QUrlQuery query=buildEventQuery(type,detail,severity,info,data);
 
-    QString errorString="";
     return postData(query,NETLOG_ENDPT_EVENT,error,status_code,errorString,timeoutMsec);
 }
 
@@ -487,6 +481,7 @@ QString NetLogger::dnsLookup(QString address)
         }
     }
 
+    // QStringList nsLookupResults;
     if (!success)
     {
         RTI->log("ERROR: Problems running nslookup.");
@@ -502,6 +497,7 @@ QString NetLogger::dnsLookup(QString address)
             if (lineLength != -1)
             {
                 QString line=QString(buf);
+                // nsLookupResults << line;
                 if  (line.startsWith("Name:"))
                 {
                     line.remove(0,5);
@@ -512,7 +508,15 @@ QString NetLogger::dnsLookup(QString address)
             }
         } while (lineLength!=-1);
     }
-
+/*
+    if (success && nameFound.isEmpty()) {
+        RTI->log("--- nslookup output begin ---");
+        for(int i=0 ; i < nsLookupResults.length() ; i++) {
+            RTI->log(nsLookupResults.at(i));
+        }
+        RTI->log("---- nslookup output end ----");
+    }
+    */
     delete nslProcess;
     nslProcess=0;
 

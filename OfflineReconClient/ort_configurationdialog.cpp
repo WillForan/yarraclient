@@ -299,31 +299,28 @@ void ortConfigurationDialog::on_logServerTestButton_clicked()
 #ifndef NETLOGGER_DISABLE_DOMAIN_VALIDATION
 
     // Lookup the hostname of the local client from the DNS server
-    if (!error)
-    {
-        localHostname=NetLogger::dnsLookup(localIP);
+    localHostname=NetLogger::dnsLookup(localIP);
 
-        if (localHostname.isEmpty())
-        {
-            output += errorPrefix + "Unable to resolve local hostname.<br /><br />IP = " + localIP;
-            output += "<br />Check local DNS server settings.";
-            error=true;
-        }
+    if (localHostname.isEmpty())
+    {
+        output += errorPrefix + "Unable to resolve local hostname.<br /><br />IP = " + localIP+"<br />";
+        error=true;
     }
 
     // Lookup the hostname of the log server from the DNS server
-    if (!error)
-    {
-        serverPath=NetLogger::dnsLookup(serverPath);
+    serverPath=NetLogger::dnsLookup(serverPath);
 
-        if (serverPath.isEmpty())
-        {
-            output += errorPrefix + "Unable to resolve server name.<br /><br />";
-            output += "Check local DNS server settings.";
-            error=true;
-        }
+    if (serverPath.isEmpty())
+    {
+        output += errorPrefix + "Unable to resolve logserver hostname.<br /><br />";
+        error=true;
     }
 
+    if (serverPath.isEmpty() && localHostname.isEmpty()) {
+        output += "<br />This system may not be resolving hostnames with the correct DNS servers. Check local DNS server settings.";
+    } else if (serverPath.isEmpty() || localHostname.isEmpty()) {
+        output += "<br /> Make sure both server and client have a DNS alias assigned.";
+    }
     // Compare if the local system and the server are on the same domain
     if (!error)
     {

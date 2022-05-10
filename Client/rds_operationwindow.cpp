@@ -90,19 +90,34 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
 
         log.log("System "+config.infoName+" / Serial # "+config.infoSerialNumber);
 
-        // Send the version number and name along with the boot notification
-        QString dataString="<data>";
-        dataString+="<version>"       +QString(RDS_VERSION)                   +"</version>";
-        dataString+="<name>"          +RTI_CONFIG->infoName                   +"</name>";
-        dataString+="<path>"          +RTI->getAppPath()                      +"</path>";
-        dataString+="<system_model>"  +RTI_CONFIG->infoScannerType            +"</system_model>";
-        dataString+="<system_version>"+RTI->getSyngoMRVersionString()         +"</system_version>";
-        dataString+="<system_vendor>Siemens</system_vendor>";
-        dataString+="<time>"          +QDateTime::currentDateTime().toString()+"</time>";
-        dataString+="<free_space>"    +QString::number(RTI->getFreeDiskSpace(),'f',0) +"</free_space>";
-        dataString+="</data>";
-        RTI_NETLOG.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"Ver "+QString(RDS_VERSION),dataString);
+        if ( RTI_NETLOG.isConfigured() ) {
+            // Send the version number and name along with the boot notification
+            QString dataString="<data>";
+            dataString+="<version>"       +QString(RDS_VERSION)                   +"</version>";
+            dataString+="<name>"          +RTI_CONFIG->infoName                   +"</name>";
+            dataString+="<path>"          +RTI->getAppPath()                      +"</path>";
+            dataString+="<system_model>"  +RTI_CONFIG->infoScannerType            +"</system_model>";
+            dataString+="<system_version>"+RTI->getSyngoMRVersionString()         +"</system_version>";
+            dataString+="<system_vendor>Siemens</system_vendor>";
+            dataString+="<time>"          +QDateTime::currentDateTime().toString()+"</time>";
+            dataString+="<free_space>"    +QString::number(RTI->getFreeDiskSpace(),'f',0) +"</free_space>";
+            dataString+="</data>";
 
+            QNetworkReply::NetworkError networkError;
+            QString errorString;
+            int networkStatusCode=0;
+
+            bool result = RTI_NETLOG.postEventSync(errorString, networkError, networkStatusCode, EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"Ver "+QString(RDS_VERSION),dataString, 1000);
+            if (!result) {
+                log.log("Warning: could not send boot event. Network logging is likely to fail.");
+                if (!errorString.isEmpty()) {
+                    log.log("Logging network error: " + errorString);
+                }
+                if (networkStatusCode != 0) {
+                    log.log("HTTP Status: " + QString(networkStatusCode));
+                }
+            }
+        }
         // Start the timer for triggering updates. Checks update condition only every
         // minute to prevent undesired system load
         controlTimer.setInterval(RDS_TIMERINTERVAL);
@@ -243,11 +258,7 @@ void rdsOperationWindow::callShutDown()
         log.log("Shutdown on user request.");
         log.flush();
         // Send event in non-async mode
-
-        QNetworkReply::NetworkError networkError;
-        int networkStatusCode=0;
-        RTI_NETLOG.postEventSync(networkError, networkStatusCode, EventInfo::Type::Shutdown,EventInfo::Detail::Information,EventInfo::Severity::Success, "", "", 5000);
-
+        RTI_NETLOG.postEventSync(EventInfo::Type::Shutdown,EventInfo::Detail::Information,EventInfo::Severity::Success, "", "", 5000);
         RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
         qApp->quit();
     }

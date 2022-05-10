@@ -90,17 +90,32 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         return;
     }
 
-    // Send the version number and name along with the boot notification
-    QString dataString="<data>";
-    dataString+="<version>"       +QString(ORT_VERSION)                   +"</version>";
-    dataString+="<name>"          +QString(config.ortSystemName)          +"</name>";
-    dataString+="<system_model>"  +QString(config.infoScannerType)        +"</system_model>";
-    dataString+="<system_version>"+QString(RTI->getSyngoMRVersionString())+"</system_version>";
-    dataString+="<system_vendor>Siemens</system_vendor>";
-    dataString+="<time>"          +QDateTime::currentDateTime().toString()+"</time>";
-    dataString+="</data>";
-    network.netLogger.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"Ver "+QString(ORT_VERSION),dataString);
+    if ( network.netLogger.isConfigured() ) {
+        // Send the version number and name along with the boot notification
+        QString dataString="<data>";
+        dataString+="<version>"       +QString(ORT_VERSION)                   +"</version>";
+        dataString+="<name>"          +QString(config.ortSystemName)          +"</name>";
+        dataString+="<system_model>"  +QString(config.infoScannerType)        +"</system_model>";
+        dataString+="<system_version>"+QString(RTI->getSyngoMRVersionString())+"</system_version>";
+        dataString+="<system_vendor>Siemens</system_vendor>";
+        dataString+="<time>"          +QDateTime::currentDateTime().toString()+"</time>";
+        dataString+="</data>";
 
+        QNetworkReply::NetworkError networkError;
+        QString errorString;
+        int networkStatusCode=0;
+
+        bool result = network.netLogger.postEventSync(errorString, networkError, networkStatusCode, EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"Ver "+QString(ORT_VERSION),dataString, 1000);
+        if (!result) {
+            log.log("Warning: could not send boot event. Network logging is likely to fail.");
+            if (!errorString.isEmpty()) {
+                log.log("Logging network error: " + errorString);
+            }
+            if (networkStatusCode != 0) {
+                log.log("HTTP Status: " + QString(networkStatusCode));
+            }
+        }
+    }
     // Connect to the on-premise server if a server path has been defined. If not and
     // cloud support is disabled, also call it so that an error message appears. Do not
     // call it if no server path has been defined but cloud support is enabled (because
