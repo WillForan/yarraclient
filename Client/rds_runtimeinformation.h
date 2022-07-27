@@ -55,6 +55,8 @@ public:
         RDS_XA20B,
         RDS_XA30A,
         RDS_XA31A,
+        RDS_XA40A,
+        RDS_XA50A,
         RDS_SYNGOVERSIONS_COUNT
     };
 
@@ -482,6 +484,14 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString(int syngoVersionEn
         versionString="XA31A";
         break;
 
+    case RDS_XA40A:
+        versionString="XA40A";
+        break;
+
+    case RDS_XA50A:
+        versionString="XA50A";
+        break;
+
     default:
         versionString="Unknown - Use with care!";
         break;
@@ -587,6 +597,8 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     case RDS_XA20B:
     case RDS_XA30A:
     case RDS_XA31A:        
+    case RDS_XA40A:
+    case RDS_XA50A:
         return RDS_RAIDTOOL_VE;
         break;
     case RDS_VB15A:
@@ -637,8 +649,10 @@ inline int rdsRuntimeInformation::getSyngoMRLine()
     case RDS_XA11B:
     case RDS_XA20A:
     case RDS_XA20B:
-    case RDS_XA30A:    
-    case RDS_XA31A:        
+    case RDS_XA30A:
+    case RDS_XA31A:
+    case RDS_XA40A:
+    case RDS_XA50A:
         return RDS_XA;
         break;
     }

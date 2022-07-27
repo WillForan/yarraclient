@@ -96,10 +96,11 @@ void rdsRuntimeInformation::prepare()
     // Check if we have a valid environment
     invalidEnvironment=true;
     if (simulatorExists || syngoMRExists)
+    {
         invalidEnvironment=false;
+    }
 
     simulation=true;
-
     if (syngoMRExists)
     {
         simulation=false;
@@ -306,7 +307,19 @@ int rdsRuntimeInformation::determineNumarisXVersion()
                 detectedVersion=RDS_XA31A;
                 break;
             }
-        }        
+
+            if (buffer=="VA40A")
+            {
+                detectedVersion=RDS_XA40A;
+                break;
+            }
+
+            if (buffer=="VA50A")
+            {
+                detectedVersion=RDS_XA50A;
+                break;
+            }
+        }
     }
 
     stateFile.close();
