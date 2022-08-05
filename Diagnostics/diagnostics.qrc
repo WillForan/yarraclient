@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/yd_256.png</file>		
+    </qresource>
+</RCC>
+
