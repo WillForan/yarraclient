@@ -28,15 +28,17 @@ ydMainWindow::ydMainWindow(QWidget *parent) :
     QSize currentButtonSize = ui->runButton->size();
     ui->runButton->setMinimumSize(currentButtonSize);
 
-    ui->tabWidget->setCurrentIndex(0);
     ui->issuesEdit->clear();
     ui->allResultsEdit->clear();
+    ui->tabWidget->setCurrentIndex(0);
 }
+
 
 ydMainWindow::~ydMainWindow()
 {
     delete ui;
 }
+
 
 void ydMainWindow::on_runButton_clicked()
 {
@@ -70,6 +72,7 @@ void ydMainWindow::timerCall()
         ui->runButton->setText("Run Diagnostics");
 
         ui->issuesEdit->setText("Everything looks great!");
+        ui->tabWidget->setCurrentIndex(0);
     }
     else
     {
