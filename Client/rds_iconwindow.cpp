@@ -132,12 +132,14 @@ void rdsIconWindow::mouseReleaseEvent(QMouseEvent *event)
         QPalette p = palette();
         p.setColor(QPalette::Background, QColor(0,0,0));
         p.setColor(QPalette::Window, QColor(0, 0, 0));
-
         infoMenu.setPalette(p);
 
-        QFont defaultFont = QApplication::font();
-        defaultFont.setPointSize(defaultFont.pointSize()-1);
-        infoMenu.setFont(defaultFont);
+        this->setStyleSheet("QMenu { background-color: black; border-color: white; border: 1px solid white; padding: 0px; }" \
+                            "QMenu::separator { height: 1px; background-color: white;  margin-top: 0px; margin-bottom: 0px; }" \
+                            "QMenu::item { padding-left: 40px; padding-right: 40px; padding-top: 3px; padding-bottom: 3px; min-height: 20px; }" \
+                            "QMenu::item:selected { color: white; background: rgb(83, 86, 90); }" \
+                            "QMenu::icon { margin-left: 8px; }" \
+                            );
 
         infoMenu.exec(this->mapToGlobal((event->pos())));
     }
