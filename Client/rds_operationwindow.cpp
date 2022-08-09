@@ -420,12 +420,12 @@ void rdsOperationWindow::updateInfoUI()
 
         if (RTI_CONTROL->getState()==RTI_CONTROL->STATE_NETWORKTRANSFER)
         {
-            ui->InfoValueError->setText("<span style=""color:#580F8B;""><b>Transfer running...<br>It is safe to scan now.</b></span>");
+            ui->InfoValueError->setText("<span style=""color:#E0A526;""><b>Transfer running...<br>It is safe to scan now.</b></span>");
             //hide();
         }
         else
         {
-            ui->InfoValueError->setText("<span style=""color:#580F8B;""><b>Update running...<br>Don't start new scans at this time!</b></b></span>");
+            ui->InfoValueError->setText("<span style=""color:#E0A526;""><b>Update running...<br>Don't start new scans at this time!</b></b></span>");
         }
     }
 }

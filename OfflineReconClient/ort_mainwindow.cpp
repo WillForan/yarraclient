@@ -708,6 +708,8 @@ void ortMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
     infoMenu.addSeparator();
     infoMenu.addAction("Configuration...", this, SLOT(showConfiguration()));
     infoMenu.addAction("Show log file...", this, SLOT(showLogfile()));
+    infoMenu.addSeparator();
+    infoMenu.addAction("Diagnostics...", this, SLOT(runDiagnostics()));
 
     if (config.ortCloudSupportEnabled)
     {
@@ -887,3 +889,9 @@ bool ortMainWindow::processCloudRecon(ortReconTask& task)
 }
 
 
+void ortMainWindow::runDiagnostics()
+{
+    QString cmd=qApp->applicationDirPath() + "/Diagnostics.exe";
+    QProcess::startDetached(cmd);
+    close();
+}

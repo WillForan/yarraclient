@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>611</width>
-    <height>357</height>
+    <width>641</width>
+    <height>393</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -501,16 +501,32 @@ Write each address in a separate row.</string>
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Yarra Offline Reconstruction Client (ORT)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;Yarra Offline Reconstruction Client (ORT)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLabel" name="versionLabel">
          <property name="text">
-          <string>Version xx.xx, Build date </string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Version xx.xx, Build date &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_10">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Minimum</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>4</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QLabel" name="label_12">
@@ -525,8 +541,8 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;WARNING:&lt;/span&gt; This software comes without any warranties. Operation of this software is solely on the &lt;span style=&quot; font-weight:600;&quot;&gt;user's own risk&lt;/span&gt;. The authors take no responsibility for damage or misfunction of any kind caused by this software, including permanent damages to the MR system, temporary unavailability of the MR system, and loss of data. This applies to all software components included in the Yarra software packages.&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;WARNING:&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; This software comes without any warranties. Operation of this software is solely on the &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;user's own risk&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. The authors take no responsibility for damage or misfunction of any kind caused by this software, including permanent damages to the MR system, temporary unavailability of the MR system, and loss of data. This applies to all software components included in the Yarra software packages.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignJustify|Qt::AlignTop</set>
@@ -592,7 +608,7 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For updates and documentation, please visit: &lt;a href=&quot;https://yarra-framework.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#ff6a13;&quot;&gt;https://yarra-framework.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;Made with &lt;span style=&quot; font-family:'arial'; font-size:15px; color:#ff6a13;&quot;&gt;♥&lt;/span&gt; in NYC, by the Yarra team at &lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#ff6a13;&quot;&gt;CAI&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#ff6a13; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#ff6a13;&quot;&gt;R&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;For updates and documentation, please visit: &lt;/span&gt;&lt;a href=&quot;https://yarra-framework.org&quot;&gt;&lt;span style=&quot; font-size:9pt; text-decoration: underline; color:#ff6a13;&quot;&gt;https://yarra-framework.org&lt;/span&gt;&lt;br /&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Made with &lt;/span&gt;&lt;span style=&quot; font-family:'arial'; font-size:9pt; color:#ff6a13;&quot;&gt;♥&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; in NYC, by the Yarra team at &lt;/span&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; font-size:9pt; text-decoration: underline; color:#ff6a13;&quot;&gt;CAI&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; font-size:9pt; text-decoration: underline; color:#ff6a13; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://cai2r.net&quot;&gt;&lt;span style=&quot; font-size:9pt; text-decoration: underline; color:#ff6a13;&quot;&gt;R&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -655,21 +671,27 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <tabstops>
-  <tabstop>connectCmdEdit</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>systemNameEdit</tabstop>
+  <tabstop>softwareVersionEdit</tabstop>
+  <tabstop>serialNumberEdit</tabstop>
   <tabstop>serverPathEdit</tabstop>
+  <tabstop>connectCmdEdit</tabstop>
+  <tabstop>disconnectCmdEdit</tabstop>
+  <tabstop>fallbackConnectCmdEdit</tabstop>
+  <tabstop>autoLaunchRDSCheckbox</tabstop>
+  <tabstop>okButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>emailPresetsEdit</tabstop>
   <tabstop>logServerAddressEdit</tabstop>
   <tabstop>logServerAPIKeyEdit</tabstop>
   <tabstop>logServerTestButton</tabstop>
-  <tabstop>fallbackConnectCmdEdit</tabstop>
-  <tabstop>okButton</tabstop>
-  <tabstop>cancelButton</tabstop>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>emailPresetsEdit</tabstop>
-  <tabstop>autoLaunchRDSCheckbox</tabstop>
-  <tabstop>serialNumberEdit</tabstop>
-  <tabstop>systemNameEdit</tabstop>
-  <tabstop>disconnectCmdEdit</tabstop>
-  <tabstop>softwareVersionEdit</tabstop>
+  <tabstop>cloudCheckbox</tabstop>
+  <tabstop>cloudCredetialsEdit</tabstop>
+  <tabstop>cloudCredentialsButton</tabstop>
+  <tabstop>cloudProxyEdit</tabstop>
+  <tabstop>cloudProxyButton</tabstop>
+  <tabstop>cloudConnectionButton</tabstop>
  </tabstops>
  <resources>
   <include location="ort.qrc"/>

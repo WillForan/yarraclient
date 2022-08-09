@@ -398,7 +398,7 @@ void rdsConfigurationWindow::callLogServerTestConnection()
     ui->logServerStatusLabel->setText("Testing connection...");
     RTI->processEvents();
 
-    const QString errorPrefix="<span style=""color:#990000;""><strong>ERROR:</strong></span>&nbsp;&nbsp;";
+    const QString errorPrefix="<span style=""color:#E5554F;""><strong>ERROR:</strong></span>&nbsp;&nbsp;";
 
     QString output="";
     bool error=false;
@@ -562,7 +562,7 @@ void rdsConfigurationWindow::callLogServerTestConnection()
 
     if (!error)
     {
-        output="<span style=""color:#009900;""><strong>Success.</strong></span>";
+        output="<span style=""color:#40C1AC;""><strong>Success.</strong></span>";
     }
 
     ui->logServerStatusLabel->setText(output);

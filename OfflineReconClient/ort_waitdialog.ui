@@ -81,7 +81,7 @@
      <item>
       <widget class="QLabel" name="textLabel">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The measurement data is now transferred to the Yarra server. This can take up to several minutes depending on the amount of data.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Important:&amp;nbsp;&amp;nbsp;&lt;/span&gt;Scanning is &lt;span style=&quot; text-decoration: underline;&quot;&gt;not possible&lt;/span&gt; until this window disappears.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;The measurement data is now transferred to the Yarra server. This can take up to several minutes depending on the amount of data.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;Important:  &lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Scanning is &lt;/span&gt;&lt;span style=&quot; font-size:9pt; text-decoration: underline;&quot;&gt;not possible&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; until this window disappears.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::RichText</enum>

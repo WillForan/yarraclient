@@ -129,6 +129,16 @@ void rdsIconWindow::mouseReleaseEvent(QMouseEvent *event)
             infoMenu.addAction(icon,"Offline Reconstruction Task...",this,SLOT(startORTClient()));
         }
 
+        QPalette p = palette();
+        p.setColor(QPalette::Background, QColor(0,0,0));
+        p.setColor(QPalette::Window, QColor(0, 0, 0));
+
+        infoMenu.setPalette(p);
+
+        QFont defaultFont = QApplication::font();
+        defaultFont.setPointSize(defaultFont.pointSize()-1);
+        infoMenu.setFont(defaultFont);
+
         infoMenu.exec(this->mapToGlobal((event->pos())));
     }
 }

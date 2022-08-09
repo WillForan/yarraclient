@@ -29,7 +29,15 @@ public:
 
     bool runAllTests();
 
+private
+
 };
+
+
+class ydTestRunner
+{
+
+}
 
 
 

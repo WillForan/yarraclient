@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>708</width>
-    <height>414</height>
+    <width>716</width>
+    <height>422</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,16 +21,16 @@
     <number>8</number>
    </property>
    <property name="leftMargin">
-    <number>10</number>
+    <number>14</number>
    </property>
    <property name="topMargin">
-    <number>12</number>
+    <number>16</number>
    </property>
    <property name="rightMargin">
-    <number>10</number>
+    <number>14</number>
    </property>
    <property name="bottomMargin">
-    <number>10</number>
+    <number>14</number>
    </property>
    <item>
     <widget class="QTableWidget" name="scansWidget">
@@ -101,7 +101,7 @@
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+       <set>AlignCenter</set>
       </property>
      </column>
      <column>

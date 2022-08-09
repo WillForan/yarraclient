@@ -7,6 +7,15 @@ class ydTestSysteminfo : ydTest
 {
 public:
     ydTestSysteminfo();
+
+    QString getName();
+    QString getDescription();
+
+    QString getIssuesHTML();
+    QString getResultsHTML();
+    QString getResultsText();
+
+    bool run();
 };
 
 #endif // YDTESTSYSTEMINFO_H
