@@ -56,6 +56,10 @@ private slots:
 
     void on_protSmallFilesCheckbox_toggled(bool checked);
 
+    void on_networkBufferPathButton_clicked();
+
+    void on_networkBufferPathClearButton_clicked();
+
 private:
     Ui::rdsConfigurationWindow *ui;
 

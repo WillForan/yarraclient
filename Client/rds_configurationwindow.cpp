@@ -160,6 +160,7 @@ void rdsConfigurationWindow::readConfiguration()
     ui->networkDriveCreatePath->setChecked(config.netDriveCreateBasepath);
     ui->networkRemoteConfigLabelEdit->setText(config.netRemoteConfigFile);
     ui->networkRerunStartupCmdsCheckbox->setChecked(config.netDriveStartupCmdsAfterFail);
+    ui->networkBufferPathEdit->setText(config.netDriveLocalBufferPath);
 
     ui->updateCombobox->setCurrentIndex(config.infoUpdateMode);
     ui->updatePeriodCombobox->setCurrentIndex(config.infoUpdatePeriodUnit);
@@ -207,6 +208,7 @@ void rdsConfigurationWindow::storeConfiguration()
     config.netDriveCreateBasepath=ui->networkDriveCreatePath->isChecked();
     config.netRemoteConfigFile=ui->networkRemoteConfigLabelEdit->text();
     config.netDriveStartupCmdsAfterFail=ui->networkRerunStartupCmdsCheckbox->isChecked();
+    config.netDriveLocalBufferPath=ui->networkBufferPathEdit->text();
 
     config.logServerPath=ui->logServerPathEdit->text();
     config.logApiKey=ui->logServerApiKeyEdit->text();
@@ -569,3 +571,26 @@ void rdsConfigurationWindow::callLogServerTestConnection()
 }
 
 
+void rdsConfigurationWindow::on_networkBufferPathButton_clicked()
+{
+    QString newPath=ui->networkBufferPathEdit->text();
+    newPath=QFileDialog::getExistingDirectory(this, "Select Local Buffer Path", newPath);
+    if (newPath!="")
+    {
+        ui->networkBufferPathEdit->setText(newPath);
+
+        QMessageBox msgBox;
+        msgBox.setWindowIcon(RDS_ICON);
+        msgBox.setWindowTitle("Local Buffer Path");
+        msgBox.setText("<b>NOTE:</b> The local buffer path should only be modified in specific cases. <br /><br />"\
+                       "Ensure that the local buffer path is always available (e.g., if using a USB drive). "\
+                       "Otherwise exporting the raw data will not be possible.");
+        msgBox.exec();
+    }
+}
+
+
+void rdsConfigurationWindow::on_networkBufferPathClearButton_clicked()
+{
+    ui->networkBufferPathEdit->clear();
+}

@@ -75,10 +75,6 @@ int main(int argc, char *argv[])
 
     // Set color scheme
     qApp->setStyle(QStyleFactory::create("Fusion"));
-
-
-    // Set color scheme
-    qApp->setStyle(QStyleFactory::create("Fusion"));
     QPalette palette=QPalette(QColor(240,240,240),QColor(240,240,240));
 
     palette.setColor(QPalette::Window, QColor(53, 53, 53));

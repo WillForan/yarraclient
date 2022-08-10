@@ -218,11 +218,11 @@ void sacConfigurationDialog::on_cloudConnectionButton_clicked()
 
     if (!success)
     {
-        ui->cloudConnectionLabel->setText("<span style=""color:#990000;""><strong>&nbsp; Failure</strong></span>");
+        ui->cloudConnectionLabel->setText("<span style=""color:#E5554F;""><strong>&nbsp; Failure</strong></span>");
     }
     else
     {
-        ui->cloudConnectionLabel->setText("<span style=""color:#009900;""><strong>&nbsp; Success</strong></span>&nbsp; (Region: " + userRegion + ")");
+        ui->cloudConnectionLabel->setText("<span style=""color:#40C1AC;""><strong>&nbsp; Success</strong></span>&nbsp; (Region: " + userRegion + ")");
     }
 
     QApplication::restoreOverrideCursor();

@@ -64,6 +64,7 @@ public:
     QString netRemoteConfigFile;
     QString netRemoteLpfiFile;
     bool    netDriveStartupCmdsAfterFail;
+    QString netDriveLocalBufferPath;
 
     QString logServerPath;
     QString logApiKey;

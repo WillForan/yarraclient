@@ -32,7 +32,7 @@ ycaDetailsDialog::~ycaDetailsDialog()
 
 
 #define YCA_ADDROW(a,b,c) ui->tableWidget->setRowCount(rowIndex+1); \
-                          if (!QString(a).isEmpty()) { color=QColor(247,176,44); textcolor=QColor("#FFF"); } else { color=QColor("#FFF"); textcolor=QColor("#000"); } \
+                          if (!QString(a).isEmpty()) { color=QColor(247,176,44); textcolor=QColor("#FFF"); } else { color=QColor(42, 42, 42); textcolor=QColor("#FFF"); } \
                           item=new QTableWidgetItem(a); \
                           item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter); \
                           item->setBackgroundColor(color); item->setTextColor(textcolor); \

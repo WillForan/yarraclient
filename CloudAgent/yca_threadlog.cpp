@@ -103,6 +103,7 @@ void ycaThreadLog::readLogFile(QTableWidget* widget, int detailLevel)
         QStringList entries=fileContent.at(i).split(YTL_SEP);
 
         QColor rowColor("#D9D9D9");
+        QColor textColor(35, 35, 35);
         QString typeStr="INFO";
         QString levelStr="MID";
         ImportanceLevel level=Medium;
@@ -154,21 +155,25 @@ void ycaThreadLog::readLogFile(QTableWidget* widget, int detailLevel)
             item=new QTableWidgetItem(entries.at(0));
             item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
             item->setBackgroundColor(rowColor);
+            item->setTextColor(textColor);
             widget->setItem(renderedLines,0,item);
 
             item=new QTableWidgetItem(typeStr);
             item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
             item->setBackgroundColor(rowColor);
+            item->setTextColor(textColor);
             widget->setItem(renderedLines,1,item);
 
             item=new QTableWidgetItem(levelStr);
             item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
             item->setBackgroundColor(rowColor);
+            item->setTextColor(textColor);
             widget->setItem(renderedLines,2,item);
 
             item=new QTableWidgetItem(entries.at(3));
             item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
             item->setBackgroundColor(rowColor);
+            item->setTextColor(textColor);
             widget->setItem(renderedLines,3,item);
 
             item=new QTableWidgetItem(entries.at(4));
@@ -178,6 +183,7 @@ void ycaThreadLog::readLogFile(QTableWidget* widget, int detailLevel)
             item->setToolTip(toolTipStr);
             item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
             item->setBackgroundColor(rowColor);
+            item->setTextColor(textColor);
             widget->setItem(renderedLines,4,item);
         }
         renderedLines++;
