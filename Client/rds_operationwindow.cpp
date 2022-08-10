@@ -10,6 +10,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
     QDialog(parent),
     ui(new Ui::rdsOperationWindow)
 {
+    forceTermination=false;
     ui->setupUi(this);
     log.setLogWidget(ui->logEdit);    
 
@@ -56,8 +57,10 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         msgBox.setText("The service has not been configured correctly. Please validate the configuration and restart the service.");
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setWindowIcon(RDS_ICON);
+        msgBox.setIcon(QMessageBox::Critical);
         msgBox.exec();
 
+        forceTermination=true;
         QTimer::singleShot(0, this, SLOT(callConfiguration()));
     }
     else
@@ -157,6 +160,23 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         if ((isFirstRun) && (!RTI_CONFIG->startCmds.isEmpty()))
         {            
             QTimer::singleShot(1,this,SLOT(runStartCmds()));
+        }
+    }
+
+    if (!config.netDriveLocalBufferPath.isEmpty())
+    {
+        if (!raid.setLocalBufferPath(config.netDriveLocalBufferPath))
+        {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Configuration invalid");
+            msgBox.setText("Unable to access configured local buffer path. Raw data storage will not be possible. Please review configuration.");
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowIcon(RDS_ICON);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.exec();
+
+            forceTermination=true;
+            QTimer::singleShot(0, this, SLOT(callConfiguration()));
         }
     }
 
@@ -274,7 +294,7 @@ void rdsOperationWindow::callConfiguration()
         // If the configuration password is wrong and the system has not
         // been configured yet, then shut down the program. Otherwise,
         // the user would end up in an infinite loop.
-        if (!config.isConfigurationValid())
+        if (forceTermination)
         {
             RTI->setMode(rdsRuntimeInformation::RDS_QUIT);
             qApp->quit();

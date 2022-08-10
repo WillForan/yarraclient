@@ -60,6 +60,8 @@ private slots:
 
     void on_networkBufferPathClearButton_clicked();
 
+    void on_networkRemoteConfigResetButton_clicked();
+
 private:
     Ui::rdsConfigurationWindow *ui;
 

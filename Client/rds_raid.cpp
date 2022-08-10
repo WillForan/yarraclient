@@ -148,6 +148,31 @@ rdsRaid::~rdsRaid()
 }
 
 
+bool rdsRaid::setLocalBufferPath(QString bufferPath)
+{
+    if (bufferPath.isEmpty())
+    {
+        return true;
+    }
+
+    if (!queueDir.cd(bufferPath))
+    {
+        RTI->log("ERROR: Selected LocalBufferPath does not exist");
+        RTI_NETLOG.postEvent(EventInfo::Type::Boot, EventInfo::Detail::Start, EventInfo::Severity::Error, "Selected LocalBufferPath does not exist");
+        return false;
+    }
+
+    RTI->log("Using custom buffer path");
+    return true;
+}
+
+
+bool rdsRaid::isLocalBufferPathValid()
+{
+    return queueDir.exists();
+}
+
+
 bool rdsRaid::callRaidTool(QStringList command, QStringList options, int timeout)
 {
     // Clear the output buffer
@@ -995,13 +1020,14 @@ bool rdsRaid::exportScanFromList()
     currentRaidIndex=getFirstExportEntry()->raidIndex;
     bool saveAdjustScans=getFirstExportEntry()->adjustmentScans;
     bool anonymize=getFirstExportEntry()->anonymize;
+    QString bufferPath = queueDir.absolutePath();
 
     // Test if enough space for exporting the file is available!
-    if ( RTI->getFreeDiskSpace() < getRaidEntry(currentRaidIndex)->size )
+    if ( RTI->getFreeDiskSpace(bufferPath) < getRaidEntry(currentRaidIndex)->size )
     {
         RTI->log("ERROR: Available disk space too small for exporting data.");
         RTI->log("ERROR: Needed    = " + QString::number(getRaidEntry(currentRaidIndex)->size));
-        RTI->log("ERROR: Available = " + QString::number(RTI->getFreeDiskSpace()));
+        RTI->log("ERROR: Available = " + QString::number(RTI->getFreeDiskSpace(bufferPath)));
         RTI->showOperationWindow();
         RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::FatalError, "Not enough disk space");
         return false;

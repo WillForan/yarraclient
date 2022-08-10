@@ -1022,7 +1022,11 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="networkRemoteConfigLabelEdit"/>
+          <widget class="QLineEdit" name="networkRemoteConfigLabelEdit">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QToolButton" name="networkRemoteConfigurationButton">
@@ -1031,6 +1035,16 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="networkRemoteConfigResetButton">
+           <property name="toolTip">
+            <string>Reset file</string>
+           </property>
+           <property name="text">
+            <string>X</string>
            </property>
           </widget>
          </item>
@@ -1052,15 +1066,9 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="networkBufferPathEdit"/>
-         </item>
-         <item>
-          <widget class="QToolButton" name="networkBufferPathClearButton">
-           <property name="toolTip">
-            <string>Reset folder</string>
-           </property>
-           <property name="text">
-            <string>Reset</string>
+          <widget class="QLineEdit" name="networkBufferPathEdit">
+           <property name="readOnly">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -1071,6 +1079,16 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="networkBufferPathClearButton">
+           <property name="toolTip">
+            <string>Reset folder</string>
+           </property>
+           <property name="text">
+            <string>X</string>
            </property>
           </widget>
          </item>

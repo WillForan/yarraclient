@@ -77,6 +77,8 @@ private:
     QTimer controlTimer;
     QTimer heartbeatTimer;
 
+    bool forceTermination;
+
     rdsDebugWindow debugWindow;
 };
 

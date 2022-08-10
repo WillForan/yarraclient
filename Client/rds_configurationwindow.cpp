@@ -594,3 +594,8 @@ void rdsConfigurationWindow::on_networkBufferPathClearButton_clicked()
 {
     ui->networkBufferPathEdit->clear();
 }
+
+void rdsConfigurationWindow::on_networkRemoteConfigResetButton_clicked()
+{
+    ui->networkRemoteConfigLabelEdit->clear();
+}

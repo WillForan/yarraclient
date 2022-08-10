@@ -108,10 +108,38 @@ void rdsProcessControl::performUpdate()
     RTI->setIconWindowAnim(true);   
     RTI->setSevereErrors(false);
 
+    // Check if the local buffer folder is still accessible (e.g., in case a USB drive has been removed)
+    if (!RTI->getRaidInstance()->isLocalBufferPathValid())
+    {
+        RTI->log("");
+        RTI->log("ERROR: Configured LocalBufferPath not accessible");
+        RTI->log("ERROR: Unable to perform update!");
+        RTI->log("");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::LowDiskSpace, EventInfo::Severity::Error, "Configured LocalBufferPath not accessible");
+        RTI->showOperationWindow();
+
+        setExplicitUpdate(RDS_UPDATETIME_RETRY);
+
+        RTI->flushLog();
+        setState(STATE_IDLE);
+        RTI->updateInfoUI();
+        RTI->setIconWindowAnim(false);
+
+        // Indicate the error in the top icon
+        if (!RTI->getWindowInstance()->isVisible())
+        {
+            RTI->getWindowInstance()->iconWindow.setError();
+        }
+
+        return;
+    }
+
     explicitUpdate=false;
     bool alternatingUpdate=false;
-    qint64 diskSpace=RTI->getFreeDiskSpace();
-    RTI->debug("Disk space on appdir = " + QString::number(diskSpace));
+    qint64 diskSpace=RTI->getFreeDiskSpace(RTI_CONFIG->netDriveLocalBufferPath);
+
+    RTI->debug("Local buffer dir = " + QString(RTI_CONFIG->netDriveLocalBufferPath));
+    RTI->debug("Disk space on local buffer dir = " + QString::number(diskSpace));
 
     // Use the alternating update mode when the disk space is below 5 Gb.
     // In the alternating mode, files are fetched from RAID and transferred
@@ -123,7 +151,7 @@ void rdsProcessControl::performUpdate()
     {
         alternatingUpdate=true;
         RTI->log("Using alternating update mode due to low disk space.");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Warning,"Using alternating update mode");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::LowDiskSpace, EventInfo::Severity::Warning, "Using alternating update mode");
     }
 
     if (diskSpace < qint64(RDS_DISKLIMIT_WARNING))
@@ -133,7 +161,7 @@ void rdsProcessControl::performUpdate()
         RTI->log("WARNING: Exporting files from RAID might fail.");
         RTI->log("WARNING: Please free disk space.");
         RTI->log("");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::LowDiskSpace,EventInfo::Severity::Error,"Critically low disk space");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::LowDiskSpace, EventInfo::Severity::Error, "Critically low disk space");
         RTI->showOperationWindow();
     }
 
@@ -142,12 +170,12 @@ void rdsProcessControl::performUpdate()
     if (logServerOnlyUpdate)
     {
         RTI->log("Starting log update...");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"ScanInfo only");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Start, EventInfo::Severity::Success, "ScanInfo only");
     }
     else
     {
         RTI->log("Starting update...");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Start,EventInfo::Severity::Success,"");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Start, EventInfo::Severity::Success, "");
     }
 
     if (state!=STATE_IDLE)
@@ -164,7 +192,7 @@ void rdsProcessControl::performUpdate()
     {
         RTI->log("ERROR: Unable to read RAID list.");
         RTI->log("ERROR: Retrying in " + QString::number(RDS_UPDATETIME_RETRY) + " minutes.");
-        RTI_NETLOG.postEvent(EventInfo::Type::Update,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read RAID list");
+        RTI_NETLOG.postEvent(EventInfo::Type::Update, EventInfo::Detail::Information, EventInfo::Severity::Error, "Unable to read RAID list");
         setExplicitUpdate(RDS_UPDATETIME_RETRY);
 
         // Indicate the error in the top icon

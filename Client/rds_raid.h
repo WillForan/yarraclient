@@ -101,6 +101,9 @@ public:
 
     bool debugReadTestFile(QString filename);
 
+    bool setLocalBufferPath(QString bufferPath);
+    bool isLocalBufferPathValid();
+
 
 protected:
 
