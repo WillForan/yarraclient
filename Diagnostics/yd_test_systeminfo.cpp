@@ -18,19 +18,28 @@ QString ydTestSysteminfo::getDescription()
 }
 
 
-QString getIssuesHTML()
+QString ydTestSysteminfo::getIssuesHTML()
 {
     return "";
 }
 
 
-QString getResultsHTML()
+QString ydTestSysteminfo::getResultsHTML()
 {
     return "";
 }
 
 
-QString getResultsText()
+QString ydTestSysteminfo::getResultsText()
 {
     return "";
+}
+
+bool ydTestSysteminfo::run()
+{
+    qInfo() << "PING";
+    QThread::sleep(3);
+    qInfo() << "PONG";
+
+    return true;
 }

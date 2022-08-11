@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <QTimer>
 
+#include "yd_test.h"
+
+
 namespace Ui {
 class ydMainWindow;
 }
@@ -24,7 +27,9 @@ private slots:
 private:
     Ui::ydMainWindow *ui;
 
-    QTimer runTimer;
+    QTimer updateTimer;
+
+    ydTestRunner testRunner;
 
 };
 

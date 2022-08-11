@@ -44,23 +44,81 @@ bool ydTest::run()
 
 
 
-
-ydTestList::ydTestList()
+ysTestThread::ysTestThread(ydTestRunner* myParent)
 {
-    testResultHTML="";
+    runner=myParent;
+    currentIndex=0;
 }
 
 
-bool ydTestList::runAllTests()
+void ysTestThread::run()
 {
-    testResultHTML="";
+    runner->testResultHTML="";
 
-    for (int i=0; i<this->count(); i++)
+    qInfo() << "HERE";
+
+    for (int i=0; i<runner->testList.count(); i++)
     {
+        qInfo() << "THIS";
 
+        if (isInterruptionRequested())
+        {
+            break;
+        }
 
-        this->at(i)->getName();
+        currentIndex=i;
+        runner->testList.at(i)->run();
+        //this->at(i)->getName();
+
+        if (isInterruptionRequested())
+        {
+            break;
+        }
     }
 
+    runner->isActive=false;
+    quit();
+
+}
+
+
+ydTestRunner::ydTestRunner() : testThread(this)
+{
+    testResultHTML="";
+    isActive=false;
+}
+
+
+bool ydTestRunner::runTests()
+{
+    if (isActive)
+    {
+        return false;
+    }
+    isActive=true;
+    testThread.start();
     return true;
 }
+
+
+bool ydTestRunner::cancelTests()
+{
+    if (!isActive)
+    {
+        return false;
+    }
+    testThread.requestInterruption();
+    return true;
+}
+
+
+int ydTestRunner::getPercentage()
+{
+    if (testList.isEmpty())
+    {
+        return 0;
+    }
+
+    return int(100.*(testThread.currentIndex)/double(testList.count()));
+}
+

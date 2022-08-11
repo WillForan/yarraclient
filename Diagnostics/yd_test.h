@@ -15,30 +15,53 @@ public:
     QString getResultsHTML();
     QString getResultsText();
 
-    bool run();
+    virtual bool run();
 
 };
 
 
-class ydTestList : QList<ydTest*>
+class ydTestList : public QList<ydTest*>
 {
+};
+
+
+class ydTestRunner;
+
+class ysTestThread : public QThread
+{
+    Q_OBJECT
+
 public:
-    ydTestList();
+    ysTestThread(ydTestRunner* myParent);
+    int currentIndex;
 
-    QString testResultHTML;
+protected:
+    virtual void run();
 
-    bool runAllTests();
-
-private
-
+private:
+    ydTestRunner* runner;
 };
 
 
 class ydTestRunner
 {
+public:
+    ydTestRunner();
 
-}
+    bool isActive;
+    bool runTests();
+    bool cancelTests();
+
+    int getPercentage();
+
+    ydTestList testList;
+    ysTestThread testThread;
+
+    QString testResultHTML;
+
+};
 
 
 
 #endif // YDTEST_H
+

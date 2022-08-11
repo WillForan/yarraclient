@@ -3,7 +3,7 @@
 
 #include "yd_test.h"
 
-class ydTestSysteminfo : ydTest
+class ydTestSysteminfo : public ydTest
 {
 public:
     ydTestSysteminfo();
