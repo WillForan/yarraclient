@@ -11,9 +11,8 @@ public:
     QString getName();
     QString getDescription();
 
-    QString getIssuesHTML();
-    QString getResultsHTML();
-    QString getResultsText();
+    QString getIssues();
+    QString getResults();
 
     bool run();
 };

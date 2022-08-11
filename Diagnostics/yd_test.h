@@ -8,12 +8,11 @@ class ydTest
 public:
     ydTest();
 
-    QString getName();
-    QString getDescription();
+    virtual QString getName();
+    virtual QString getDescription();
 
-    QString getIssuesHTML();
-    QString getResultsHTML();
-    QString getResultsText();
+    virtual QString getIssues();
+    virtual QString getResults();
 
     virtual bool run();
 
@@ -49,6 +48,8 @@ public:
     ydTestRunner();
 
     bool isActive;
+    bool isTerminating;
+
     bool runTests();
     bool cancelTests();
 
@@ -57,7 +58,8 @@ public:
     ydTestList testList;
     ysTestThread testThread;
 
-    QString testResultHTML;
+    QString results;
+    QString issues;
 
 };
 

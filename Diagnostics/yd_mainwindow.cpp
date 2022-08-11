@@ -1,3 +1,5 @@
+#include <QScrollbar>
+
 #include "yd_mainwindow.h"
 #include "ui_yd_mainwindow.h"
 #include "yd_global.h"
@@ -28,17 +30,13 @@ ydMainWindow::ydMainWindow(QWidget *parent) :
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(timerCall()));
     ui->runButton->setText("Run Diagnostics");
 
-    QSize currentButtonSize = ui->runButton->size();
-    ui->runButton->setMinimumSize(currentButtonSize);
-
     ui->issuesEdit->clear();
     ui->allResultsEdit->clear();
     ui->tabWidget->setCurrentIndex(0);
+    ui->progressBar->setTextVisible(false);
+    ui->progressBar->setVisible(false);
 
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
+    composeTests();
 }
 
 
@@ -48,20 +46,37 @@ ydMainWindow::~ydMainWindow()
 }
 
 
+void ydMainWindow::composeTests()
+{
+    testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestSysteminfo);
+}
+
+
 void ydMainWindow::on_runButton_clicked()
 {
     if (testRunner.isActive)
     {
-        updateTimer.stop();
-        testRunner.cancelTests();
-        ui->progressBar->setValue(0);
-        ui->progressBar->setEnabled(false);
-        ui->runButton->setText("Run Diagnostics");
+        if (!testRunner.isTerminating)
+        {
+            testRunner.cancelTests();
+            ui->runButton->setText("Terminating...");
+            ui->runButton->setEnabled(false);
+        }
     }
     else
     {
+        ui->tabWidget->setCurrentIndex(1);
         ui->progressBar->setValue(0);
         ui->progressBar->setEnabled(true);
+        ui->progressBar->setTextVisible(true);
+        ui->progressBar->setVisible(true);
         ui->runButton->setText("Cancel");
         ui->issuesEdit->clear();
         ui->allResultsEdit->clear();
@@ -73,36 +88,28 @@ void ydMainWindow::on_runButton_clicked()
 
 void ydMainWindow::timerCall()
 {
+    // Update UI
+    ui->progressBar->setValue(testRunner.getPercentage());
+    ui->allResultsEdit->setHtml(testRunner.results);
+    ui->allResultsEdit->verticalScrollBar()->setValue(ui->allResultsEdit->verticalScrollBar()->maximum());
+
     if (!testRunner.isActive)
     {
         updateTimer.stop();
         ui->progressBar->setValue(0);
         ui->progressBar->setEnabled(false);
+        ui->progressBar->setTextVisible(false);
+        ui->progressBar->setVisible(false);
         ui->runButton->setText("Run Diagnostics");
+        ui->runButton->setEnabled(true);
         ui->tabWidget->setCurrentIndex(0);
-    }
-    else
-    {
-        // Update UI
-        ui->progressBar->setValue(testRunner.getPercentage());
-    }
+        ui->issuesEdit->setText(testRunner.issues);
 
-    /*
-    int currentValue = ui->progressBar->value();
-    if (currentValue==100)
-    {
-        runTimer.stop();
-        ui->progressBar->setValue(0);
-        ui->progressBar->setEnabled(false);
-        ui->runButton->setText("Run Diagnostics");
+        ui->exportButton->setEnabled(true);
+    }
+}
 
-        ui->issuesEdit->setText("Everything looks great!");
-        ui->tabWidget->setCurrentIndex(0);
-    }
-    else
-    {
-        currentValue++;
-        ui->progressBar->setValue(currentValue);
-    }
-    */
+void ydMainWindow::on_exportButton_clicked()
+{
+    //
 }

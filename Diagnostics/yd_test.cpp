@@ -19,21 +19,15 @@ QString ydTest::getDescription()
 }
 
 
-QString ydTest::getResultsHTML()
+QString ydTest::getResults()
 {
     return "OK";
 }
 
 
-QString ydTest::getIssuesHTML()
+QString ydTest::getIssues()
 {
     return "Nothing";
-}
-
-
-QString ydTest::getResultsText()
-{
-    return "OK";
 }
 
 
@@ -53,38 +47,56 @@ ysTestThread::ysTestThread(ydTestRunner* myParent)
 
 void ysTestThread::run()
 {
-    runner->testResultHTML="";
+    bool cancelled=false;
 
-    qInfo() << "HERE";
+    runner->results="<p>Running diagnostics at "+QDateTime::currentDateTime().toString()+"</p>";
+    runner->issues="";
 
     for (int i=0; i<runner->testList.count(); i++)
     {
-        qInfo() << "THIS";
-
         if (isInterruptionRequested())
         {
+            cancelled=true;
             break;
         }
+
+        runner->results+="<hr><p>Now running test '" + runner->testList.at(i)->getName() + "'...<br />Description: " + runner->testList.at(i)->getDescription() + "</p>";
+        runner->results+="<p>" + runner->testList.at(i)->getResults() + "</p>";
+        runner->issues="";
 
         currentIndex=i;
         runner->testList.at(i)->run();
-        //this->at(i)->getName();
 
         if (isInterruptionRequested())
         {
+            cancelled=true;
             break;
         }
     }
+    if (cancelled)
+    {
+        runner->results+="<hr><p><strong>Cancelled.</strong></p>";
+    }
+    else
+    {
+        runner->results+="<hr><p><strong>Done.</strong></p>";
+    }
 
+    if (runner->issues.isEmpty())
+    {
+        runner->issues="No issues found";
+    }
+
+    runner->isTerminating=false;
     runner->isActive=false;
     quit();
-
 }
 
 
 ydTestRunner::ydTestRunner() : testThread(this)
 {
-    testResultHTML="";
+    results="";
+    issues="";
     isActive=false;
 }
 
@@ -95,7 +107,8 @@ bool ydTestRunner::runTests()
     {
         return false;
     }
-    isActive=true;
+    isTerminating=false;
+    isActive=true;    
     testThread.start();
     return true;
 }
@@ -108,6 +121,7 @@ bool ydTestRunner::cancelTests()
         return false;
     }
     testThread.requestInterruption();
+    isTerminating=true;
     return true;
 }
 

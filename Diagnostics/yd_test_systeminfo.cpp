@@ -18,28 +18,21 @@ QString ydTestSysteminfo::getDescription()
 }
 
 
-QString ydTestSysteminfo::getIssuesHTML()
+QString ydTestSysteminfo::getIssues()
 {
     return "";
 }
 
 
-QString ydTestSysteminfo::getResultsHTML()
+QString ydTestSysteminfo::getResults()
 {
-    return "";
+    return "Time is now "+QDateTime::currentDateTime().toString();
 }
 
-
-QString ydTestSysteminfo::getResultsText()
-{
-    return "";
-}
 
 bool ydTestSysteminfo::run()
 {
-    qInfo() << "PING";
     QThread::sleep(3);
-    qInfo() << "PONG";
 
     return true;
 }
