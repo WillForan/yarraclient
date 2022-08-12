@@ -1,31 +1,31 @@
-#include "yd_test_systeminfo.h"
+#include "yd_test_syngo.h"
 #include "yd_global.h"
 
 
-ydTestSysteminfo::ydTestSysteminfo() : ydTest()
+ydTestSyngo::ydTestSyngo() : ydTest()
 {
 }
 
 
-QString ydTestSysteminfo::getName()
+QString ydTestSyngo::getName()
 {
-    return "System Information";
+    return "Siemens Syngo";
 }
 
 
-QString ydTestSysteminfo::getDescription()
+QString ydTestSyngo::getDescription()
 {
-    return "collect general system information";
+    return "indentify installed Siemens software";
 }
 
 
-QString ydTestSysteminfo::getIssues()
+QString ydTestSyngo::getIssues()
 {
     return "";
 }
 
 
-QString ydTestSysteminfo::getResults()
+QString ydTestSyngo::getResults()
 {
     QString result = "Time is now "+QDateTime::currentDateTime().toString();
     result += "<p>"+YD_TEXT_ERROR("This should be in red!")+"</p>";
@@ -41,7 +41,7 @@ QString ydTestSysteminfo::getResults()
 }
 
 
-bool ydTestSysteminfo::run()
+bool ydTestSyngo::run()
 {
     QThread::msleep(100);
 

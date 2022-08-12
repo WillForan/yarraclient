@@ -4,6 +4,7 @@
 
 ydTest::ydTest()
 {
+    broker=0;
 }
 
 
@@ -37,6 +38,11 @@ bool ydTest::run()
 }
 
 
+void ydTest::setBroker(ydBroker* brokerInstance)
+{
+    broker=brokerInstance;
+}
+
 
 ysTestThread::ysTestThread(ydTestRunner* myParent)
 {
@@ -51,6 +57,7 @@ void ysTestThread::run()
 
     runner->results="<p>Running diagnostics at "+QDateTime::currentDateTime().toString()+"</p>";
     runner->issues="";
+    runner->broker.clear();
 
     for (int i=0; i<runner->testList.count(); i++)
     {
@@ -60,7 +67,7 @@ void ysTestThread::run()
             break;
         }
 
-        runner->results+="<hr><p>Now running test '" + runner->testList.at(i)->getName() + "'...<br />Description: " + runner->testList.at(i)->getDescription() + "</p>";
+        runner->results+="<hr><p>Executing test <strong>" + runner->testList.at(i)->getName() + "</strong> <span style=\"color: #7f7f7f; \">(" + runner->testList.at(i)->getDescription() + ")</span></p>";
         runner->results+="<p>" + runner->testList.at(i)->getResults() + "</p>";
         runner->issues="";
 
@@ -107,8 +114,16 @@ bool ydTestRunner::runTests()
     {
         return false;
     }
+
     isTerminating=false;
-    isActive=true;    
+    isActive=true;
+
+    // Make sure that all test objects have a pointer to the broker instance
+    for (int i=0; i<testList.count(); i++)
+    {
+        testList.at(i)->setBroker(&broker);
+    }
+
     testThread.start();
     return true;
 }

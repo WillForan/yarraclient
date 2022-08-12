@@ -7,8 +7,9 @@
 #include "ui_yd_mainwindow.h"
 #include "yd_global.h"
 
-#include "yd_test_systeminfo.h"
 #include "yd_test.h"
+#include "yd_test_systeminfo.h"
+#include "yd_test_syngo.h"
 
 
 ydMainWindow::ydMainWindow(QWidget *parent) :
@@ -52,13 +53,7 @@ ydMainWindow::~ydMainWindow()
 void ydMainWindow::composeTests()
 {
     testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
-    testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestSyngo);
 }
 
 

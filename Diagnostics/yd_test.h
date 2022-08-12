@@ -3,6 +3,8 @@
 
 #include <QtCore>
 
+typedef QMap<QString, QString> ydBroker;
+
 class ydTest
 {
 public:
@@ -16,6 +18,8 @@ public:
 
     virtual bool run();
 
+    ydBroker* broker;
+    void setBroker(ydBroker* brokerInstance);
 };
 
 
@@ -61,6 +65,7 @@ public:
     QString results;
     QString issues;
 
+    ydBroker broker;
 };
 
 

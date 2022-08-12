@@ -15,13 +15,15 @@ DEFINES+=YARRA_APP_YD
 SOURCES += main.cpp \
     yd_mainwindow.cpp \
     yd_test.cpp \
-    yd_test_systeminfo.cpp
+    yd_test_systeminfo.cpp \
+    yd_test_syngo.cpp
 
 HEADERS  += \ 
     yd_mainwindow.h \
     yd_global.h \
     yd_test.h \
-    yd_test_systeminfo.h
+    yd_test_systeminfo.h \
+    yd_test_syngo.h
 
 FORMS    += \ 
     yd_mainwindow.ui
