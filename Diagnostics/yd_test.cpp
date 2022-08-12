@@ -84,7 +84,7 @@ void ysTestThread::run()
 
     if (runner->issues.isEmpty())
     {
-        runner->issues="No issues found";
+        runner->issues="<p>No issues found</p>";
     }
 
     runner->isTerminating=false;
