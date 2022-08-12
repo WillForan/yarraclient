@@ -105,6 +105,9 @@ void ydMainWindow::timerCall()
         ui->issuesEdit->setText(testRunner.issues);
 
         ui->exportButton->setEnabled(true);
+
+        ui->allResultsEdit->setHtml(testRunner.results);
+        ui->allResultsEdit->verticalScrollBar()->setValue(0);
     }
 }
 

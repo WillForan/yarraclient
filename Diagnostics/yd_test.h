@@ -3,20 +3,19 @@
 
 #include <QtCore>
 
+
 typedef QMap<QString, QString> ydBroker;
+
 
 class ydTest
 {
 public:
     ydTest();
 
+    virtual bool run(QString& issues, QString& results);
+
     virtual QString getName();
     virtual QString getDescription();
-
-    virtual QString getIssues();
-    virtual QString getResults();
-
-    virtual bool run();
 
     ydBroker* broker;
     void setBroker(ydBroker* brokerInstance);

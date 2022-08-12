@@ -11,10 +11,7 @@ public:
     QString getName();
     QString getDescription();
 
-    QString getIssues();
-    QString getResults();
-
-    bool run();
+    bool run(QString& issues, QString& results);
 };
 
 #endif // YDTESTSYNGO_H

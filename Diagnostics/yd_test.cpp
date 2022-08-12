@@ -20,19 +20,7 @@ QString ydTest::getDescription()
 }
 
 
-QString ydTest::getResults()
-{
-    return "OK";
-}
-
-
-QString ydTest::getIssues()
-{
-    return "Nothing";
-}
-
-
-bool ydTest::run()
+bool ydTest::run(QString& issues, QString& results)
 {
     return true;
 }
@@ -55,7 +43,7 @@ void ysTestThread::run()
 {
     bool cancelled=false;
 
-    runner->results="<p>Running diagnostics at "+QDateTime::currentDateTime().toString()+"</p>";
+    runner->results="<p>Starting diagnostics at "+QDateTime::currentDateTime().toString()+"</p>";
     runner->issues="";
     runner->broker.clear();
 
@@ -67,12 +55,10 @@ void ysTestThread::run()
             break;
         }
 
-        runner->results+="<hr><p>Executing test <strong>" + runner->testList.at(i)->getName() + "</strong> <span style=\"color: #7f7f7f; \">(" + runner->testList.at(i)->getDescription() + ")</span></p>";
-        runner->results+="<p>" + runner->testList.at(i)->getResults() + "</p>";
-        runner->issues="";
+        runner->results+="<hr><p>&raquo; Running test <strong>" + runner->testList.at(i)->getName() + "</strong> <span style=\"color: #7f7f7f; \">(" + runner->testList.at(i)->getDescription() + ")</span></p>";
 
         currentIndex=i;
-        runner->testList.at(i)->run();
+        runner->testList.at(i)->run(runner->issues, runner->results);
 
         if (isInterruptionRequested())
         {
@@ -82,11 +68,12 @@ void ysTestThread::run()
     }
     if (cancelled)
     {
-        runner->results+="<hr><p><strong>Cancelled.</strong></p>";
+        runner->results+="<hr><p style=\"color: #E5554F; \"><strong>Cancelled </strong></p>";
+        runner->issues="<p>- Diagnostics incomplete -</p>";
     }
     else
     {
-        runner->results+="<hr><p><strong>Done.</strong></p>";
+        runner->results+="<hr><p>Done at "+QDateTime::currentDateTime().toString()+"</p>";
     }
 
     if (runner->issues.isEmpty())
