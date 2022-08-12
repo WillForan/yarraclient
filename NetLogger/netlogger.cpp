@@ -12,6 +12,9 @@
     #include "sac_global.h"
 #endif
 
+#ifdef YARRA_APP_DIAGNOSTICS
+    #include "yd_global.h"
+#endif
 
 NetLogger::NetLogger()
 {

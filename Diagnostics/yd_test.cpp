@@ -55,7 +55,7 @@ void ysTestThread::run()
             break;
         }
 
-        runner->results+="<hr><p>&raquo; Running test <strong>" + runner->testList.at(i)->getName() + "</strong> <span style=\"color: #7f7f7f; \">(" + runner->testList.at(i)->getDescription() + ")</span></p>";
+        runner->results+="<hr><p><strong>&raquo; Running test '" + runner->testList.at(i)->getName() + "'</strong> <span style=\"color: #7f7f7f; \">(" + runner->testList.at(i)->getDescription() + ")</span></p>";
 
         currentIndex=i;
         runner->testList.at(i)->run(runner->issues, runner->results);

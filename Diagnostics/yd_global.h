@@ -1,6 +1,9 @@
 #ifndef YD_GLOBAL_H
 #define YD_GLOBAL_H
 
+// Include global definitions from the RDS client
+#include "../Client/rds_global.h"
+
 #define YD_VERSION    "0.1a"
 #define YD_ICON QIcon(":/images/yd_256.png")
 
@@ -23,9 +26,12 @@
 #define YD_INFO 3
 
 #define YD_ADDISSUE(A,B) issues += "<p style=\"margin-bottom: 4px; margin-top: 4px; \">&bull;&nbsp; "; \
-                         if (B==YD_CRITICAL) { issues += "<span style=\"background-color: #E5554F; color: #FFF; width: 120px; \">&nbsp;CRITICAL&nbsp;</span>&nbsp;"; } \
-                         if (B==YD_WARNING) { issues += "<span style=\"background-color: #E0A526; color: #FFF; width: 120px; \">&nbsp;WARNING&nbsp;</span>&nbsp;"; } \
-                         if (B==YD_INFO) { issues += "<span style=\"background-color: #489FDF; color: #FFF; width: 120px; \">&nbsp;INFO&nbsp;</span>&nbsp;"; } \
+                         if (B==YD_CRITICAL) { issues += "<span style=\"background-color: #E5554F; color: #FFF; width: 120px; \">&nbsp;CRITICAL&nbsp;</span> &nbsp;"; } \
+                         if (B==YD_WARNING) { issues += "<span style=\"background-color: #E0A526; color: #FFF; width: 120px; \">&nbsp;WARNING&nbsp;</span> &nbsp;"; } \
+                         if (B==YD_INFO) { issues += "<span style=\"background-color: #489FDF; color: #FFF; width: 120px; \">&nbsp;INFO&nbsp;</span> &nbsp;"; } \
                          issues += QString(A)+" <span style=\"color: #7f7f7f; \">("+this->getName()+")</span></p>";
+
+#define YD_ADDRESULT(A) results +=  "<p>"+QString(A)+"</p>";
+
 
 #endif // YD_GLOBAL_H

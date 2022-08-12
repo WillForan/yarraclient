@@ -10,6 +10,7 @@
 #include "yd_test.h"
 #include "yd_test_systeminfo.h"
 #include "yd_test_syngo.h"
+#include "yd_test_yarra.h"
 
 
 ydMainWindow::ydMainWindow(QWidget *parent) :
@@ -54,6 +55,7 @@ void ydMainWindow::composeTests()
 {
     testRunner.testList.append(new ydTestSysteminfo);
     testRunner.testList.append(new ydTestSyngo);
+    testRunner.testList.append(new ydTestYarra);
 }
 
 
