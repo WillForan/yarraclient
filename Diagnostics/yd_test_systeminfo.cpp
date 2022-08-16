@@ -31,12 +31,12 @@ bool ydTestSysteminfo::run(QString& issues, QString& results)
 
     // Check drives and available disk space
     YD_RESULT_STARTSECTION
-    YD_ADDRESULT("Available drives:")
+    YD_ADDRESULT("<u>Available drives:</u>")
     foreach (const QStorageInfo &storage, QStorageInfo::mountedVolumes())
     {
         if (storage.isValid() && storage.isReady()) {
 
-            YD_ADDRESULT_LINE("------");
+            YD_ADDRESULT_LINE("&nbsp;");
             YD_ADDRESULT_LINE("Drive: " + storage.rootPath() + "  (volume name: "+storage.name()+")");
             YD_ADDRESULT_LINE("Filesystem: " + storage.fileSystemType() + " (" + (storage.isReadOnly()? "read-only" : "read/write" ) + ")");
             YD_ADDRESULT_LINE("Size: " + QString::number(storage.bytesTotal()/1000/1000) + " MB");
@@ -57,34 +57,51 @@ bool ydTestSysteminfo::run(QString& issues, QString& results)
     // Check mapped network drives
     {
         YD_RESULT_STARTSECTION
-        YD_ADDRESULT("Network shares (net use):")
+        YD_ADDRESULT("<u>Network shares:</u>")
         rdsExecHelper execHelper;
         QString command = "net use";
         execHelper.setCommand(command);
         execHelper.run();
-        YD_ADDRESULT_LINE("[--- Capture Begin ---]");
+        YD_ADDRESULT_LINE("<div style=\"font-family: monospace; color: #CCC; background-color: #141414; \">");
         for (int i=0; i<execHelper.output.length(); i++)
         {
             YD_ADDRESULT_LINE(execHelper.output.at(i));
         }
-        YD_ADDRESULT_LINE("[--- Capture End ---]");
+        YD_ADDRESULT_LINE("</div>");
         YD_RESULT_ENDSECTION
     }
 
     // Check network configuration / DNS settings
     {
         YD_RESULT_STARTSECTION
-        YD_ADDRESULT("Network configuration (ipconfig):")
+        YD_ADDRESULT("<u>Network configuration:</u>")
         rdsExecHelper execHelper;
         QString command = "ipconfig /all";
         execHelper.setCommand(command);
         execHelper.run();
-        YD_ADDRESULT_LINE("[--- Capture Begin ---]");
+        YD_ADDRESULT_LINE("<div style=\"font-family: monospace; color: #CCC; background-color: #141414; \">");
         for (int i=0; i<execHelper.output.length(); i++)
         {
             YD_ADDRESULT_LINE(execHelper.output.at(i));
         }
-        YD_ADDRESULT_LINE("[--- Capture End ---]");
+        YD_ADDRESULT_LINE("</div>");
+        YD_RESULT_ENDSECTION
+    }
+
+    // Get all environment variables
+    {
+        YD_RESULT_STARTSECTION
+        YD_ADDRESULT("<u>Environment variables:</u>")
+        rdsExecHelper execHelper;
+        QString command = "cmd.exe /c \"set\"";
+        execHelper.setCommand(command);
+        execHelper.run();
+        YD_ADDRESULT_LINE("<div style=\"font-family: monospace; color: #CCC; background-color: #141414; \">");
+        for (int i=0; i<execHelper.output.length(); i++)
+        {
+            YD_ADDRESULT_LINE(execHelper.output.at(i));
+        }
+        YD_ADDRESULT_LINE("</div>");
         YD_RESULT_ENDSECTION
     }
 

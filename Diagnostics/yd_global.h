@@ -43,6 +43,7 @@
 
 #define YD_KEY_NO_ORT_AVAILABLE "no_ort_available"
 #define YD_KEY_NO_RDS_AVAILABLE "no_rds_available"
+#define YD_KEY_NO_SYNGO_AVAILABLE "no_syngo_available"
 
 
 #endif // YD_GLOBAL_H

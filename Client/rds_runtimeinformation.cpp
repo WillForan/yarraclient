@@ -21,7 +21,7 @@ rdsRuntimeInformation::rdsRuntimeInformation()
 
     simulatorExists=false;
     syngoMRExists=false;
-    appPath="";
+    appPath=qApp->applicationDirPath();
     lpfiPath="";
     logInstance=0;
     configInstance=0;
