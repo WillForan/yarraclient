@@ -21,11 +21,15 @@ SOURCES += main.cpp \
     ../Client/rds_network.cpp \
     ../Client/rds_anonymizeVB17.cpp \
     ../NetLogger/netlogger.cpp \
+    ../OfflineReconClient/ort_configuration.cpp \
     yd_mainwindow.cpp \
     yd_test.cpp \
     yd_test_systeminfo.cpp \
     yd_test_syngo.cpp \
-    yd_test_yarra.cpp
+    yd_test_yarra.cpp \
+    yd_test_ort.cpp \
+    yd_test_rds.cpp \
+    yd_test_logserver.cpp
 
 HEADERS  += \ 
     ../Client/rds_runtimeinformation.h \
@@ -37,12 +41,16 @@ HEADERS  += \
     ../Client/rds_anonymizeVB17.h \
     ../NetLogger/netlogger.h \
     ../NetLogger/netlog_events.h \
+    ../OfflineReconClient/ort_configuration.h \
     yd_mainwindow.h \
     yd_global.h \
     yd_test.h \
     yd_test_systeminfo.h \
     yd_test_syngo.h \
-    yd_test_yarra.h
+    yd_test_yarra.h \
+    yd_test_ort.h \
+    yd_test_rds.h \
+    yd_test_logserver.h
 
 FORMS    += \ 
     yd_mainwindow.ui

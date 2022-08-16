@@ -31,7 +31,19 @@
                          if (B==YD_INFO) { issues += "<span style=\"background-color: #489FDF; color: #FFF; width: 120px; \">&nbsp;INFO&nbsp;</span> &nbsp;"; } \
                          issues += QString(A)+" <span style=\"color: #7f7f7f; \">("+this->getName()+")</span></p>";
 
-#define YD_ADDRESULT(A) results +=  "<p>"+QString(A)+"</p>";
+#define YD_ADDRESULT(A) results +=  QString(A);
+#define YD_ADDRESULT_LINE(A) results +=  "<br />" + QString(A);
+#define YD_ADDRESULT_COLORLINE(A,B) results +=  "<br />"; \
+                                                if (B==YD_CRITICAL) { results += "<span style=\"color: #E5554F; \">Critical:</span> " + QString(A); } \
+                                                if (B==YD_WARNING) { results += "<span style=\"color: #E0A526; \">Warning:</span> " + QString(A); } \
+                                                if (B==YD_INFO) { results += "<span style=\"color: #489FDF; \">Info:</span> " + QString(A); }
+
+#define YD_RESULT_STARTSECTION results += "<p>";
+#define YD_RESULT_ENDSECTION results += "</p>";
+
+#define YD_KEY_NO_ORT_AVAILABLE "no_ort_available"
+#define YD_KEY_NO_RDS_AVAILABLE "no_rds_available"
 
 
 #endif // YD_GLOBAL_H
+
