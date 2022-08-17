@@ -17,6 +17,8 @@ rdsExecHelper::rdsExecHelper()
     monitorNetUseOutput  =false;
     detectedNetUseError  =false;
     detectedNetUseSuccess=false;
+
+    exitCode=1;
 }
 
 
@@ -30,6 +32,7 @@ bool rdsExecHelper::run(QString cmdLine)
 {
     // Clear the output buffer
     output.clear();
+    exitCode = 1;
 
     QProcess *myProcess=new QProcess(0);
     myProcess->setReadChannel(QProcess::StandardOutput);
@@ -105,6 +108,8 @@ bool rdsExecHelper::run(QString cmdLine)
         }
     }
 
+    exitCode = myProcess->exitCode();
+
     if (!success)
     {
         // The process timeed out. Probably some error occured.
@@ -136,6 +141,7 @@ bool rdsExecHelper::run(QString cmdLine)
 bool rdsExecHelper::callNetUseTimout(int timeoutMs)
 {
     bool success=false;
+    exitCode=1;
 
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
@@ -207,6 +213,8 @@ bool rdsExecHelper::callNetUseTimout(int timeoutMs)
             }
         }
     }
+
+    exitCode=process.exitCode();
 
     if (monitorNetUseOutput)
     {

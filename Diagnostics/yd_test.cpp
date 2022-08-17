@@ -1,6 +1,8 @@
 #include "yd_test.h"
 #include "yd_global.h"
 
+#include <QApplication>
+
 
 ydTest::ydTest()
 {
@@ -65,6 +67,7 @@ void ysTestThread::run()
             break;
         }
     }
+
     if (cancelled)
     {
         runner->results+="<hr><p style=\"color: #E5554F; \"><strong>Cancelled </strong></p>";

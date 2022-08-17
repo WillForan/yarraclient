@@ -78,6 +78,9 @@ void ydMainWindow::on_runButton_clicked()
     }
     else
     {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::processEvents();
+
         ui->tabWidget->setCurrentIndex(1);
         ui->progressBar->setValue(0);
         ui->progressBar->setEnabled(true);
@@ -113,6 +116,7 @@ void ydMainWindow::timerCall()
         ui->issuesEdit->setText(testRunner.issues);
 
         ui->exportButton->setEnabled(true);
+        QApplication::restoreOverrideCursor();
 
         ui->allResultsEdit->setHtml(testRunner.results);
         ui->allResultsEdit->verticalScrollBar()->setValue(0);

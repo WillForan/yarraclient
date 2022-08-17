@@ -1,6 +1,9 @@
 #include "yd_test_ort.h"
 #include "yd_global.h"
 
+#include "yd_helper.h"
+
+
 ydTestORT::ydTestORT() : ydTest()
 {
 }
@@ -44,7 +47,65 @@ bool ydTestORT::run(QString& issues, QString& results)
         YD_ADDISSUE("ORT system name not defined",YD_WARNING);
     }
 
+    testConnectivity(issues, results);
+
     YD_RESULT_ENDSECTION
     return true;
 }
 
+
+void ydTestORT::testConnectivity(QString& issues, QString& results)
+{
+    if (ortConfig.ortConnectCmd.isEmpty())
+    {
+        YD_ADDRESULT_COLORLINE("ORT connect command has not been defined", YD_WARNING);
+        YD_ADDRESULT_COLORLINE("ORT will not work", YD_WARNING);
+        YD_ADDISSUE("ORT connect command not defined", YD_CRITICAL);
+        return;
+    }
+
+    QString connectIP = ydHelper::extractIP(ortConfig.ortConnectCmd);
+    if (connectIP.isEmpty())
+    {
+        YD_ADDRESULT_LINE("Unknown connect command for ORT seed server");
+        YD_ADDISSUE("Unknown connect command for ORT seed server", YD_INFO);
+    }
+    else
+    {
+        if (ydHelper::pingServer(connectIP))
+        {
+            YD_ADDRESULT_LINE("Seed server " + connectIP + " responded to ping");
+        }
+        else
+        {
+            YD_ADDRESULT_COLORLINE("Unable to ping seed server " + connectIP, YD_CRITICAL);
+            YD_ADDISSUE("Unable to ping seed server " + connectIP, YD_CRITICAL);
+        }
+    }
+
+    QString fallbackConnectIP = ortConfig.ortFallbackConnectCmd;
+
+    if (!fallbackConnectIP.isEmpty())
+    {
+        fallbackConnectIP=ydHelper::extractIP(fallbackConnectIP);
+        if (fallbackConnectIP.isEmpty())
+        {
+            YD_ADDRESULT_LINE("Unknown connect command for ORT fallback seed server");
+            YD_ADDISSUE("Unknown connect command for ORT fallback seed server", YD_INFO);
+        }
+        else
+        {
+            if (ydHelper::pingServer(fallbackConnectIP))
+            {
+                YD_ADDRESULT_LINE("Fallback seed server " + fallbackConnectIP + " responded to ping");
+            }
+            else
+            {
+                YD_ADDRESULT_COLORLINE("Unable to ping fallback seed server " + fallbackConnectIP, YD_CRITICAL);
+                YD_ADDISSUE("Unable to ping fallback seed server " + fallbackConnectIP, YD_CRITICAL);
+            }
+        }
+    }
+
+
+}

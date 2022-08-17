@@ -14,6 +14,8 @@ public:
     QString getDescription();
 
     bool run(QString& issues, QString& results);
+    void testConnectivity(QString& issues, QString& results);
+
 
 protected:
     ortConfiguration ortConfig;

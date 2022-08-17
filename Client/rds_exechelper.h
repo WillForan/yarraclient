@@ -27,12 +27,14 @@ public:
     bool callNetUseTimout(int timeoutMs);
     void setMonitorNetUseOutput(bool state=true);
 
+    int getExitCode();
 
 private:
     QProcess process;
 
     int      timeoutMs;
     QString  cmdLine;
+    int      exitCode;
 
     bool monitorNetUseOutput;
     bool detectedNetUseError;
@@ -59,6 +61,12 @@ inline void rdsExecHelper::setCommand(QString& cmdLineToRun)
 inline void rdsExecHelper::setMonitorNetUseOutput(bool state)
 {
     monitorNetUseOutput=state;
+}
+
+
+inline int rdsExecHelper::getExitCode()
+{
+    return exitCode;
 }
 
 
