@@ -105,5 +105,22 @@ bool ydTestSysteminfo::run(QString& issues, QString& results)
         YD_RESULT_ENDSECTION
     }
 
+    // Get further system information
+    {
+        YD_RESULT_STARTSECTION
+        YD_ADDRESULT("<u>System information:</u>")
+        rdsExecHelper execHelper;
+        QString command = "systeminfo";
+        execHelper.setCommand(command);
+        execHelper.run();
+        YD_ADDRESULT_LINE("<div style=\"font-family: monospace; color: #CCC; background-color: #141414; \">");
+        for (int i=0; i<execHelper.output.length(); i++)
+        {
+            YD_ADDRESULT_LINE(execHelper.output.at(i));
+        }
+        YD_ADDRESULT_LINE("</div>");
+        YD_RESULT_ENDSECTION
+    }
+
     return true;
 }
