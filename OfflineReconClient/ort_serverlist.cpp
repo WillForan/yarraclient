@@ -116,8 +116,20 @@ bool ortServerList::syncServerList(QString remotePath)
 
 bool ortServerList::readLocalServerList()
 {
-    QDir localDir(appPath);
+    return readServerList("");
+}
 
+
+bool ortServerList::readServerList(QString filePath)
+{
+    // If no file path is provided, use the application path by default
+    if (filePath.isEmpty())
+    {
+        filePath=appPath;
+    }
+    QDir localDir(filePath);
+
+    // Check if the file with the server list exists in the folder
     if (!localDir.exists(ORT_SERVERLISTFILE))
     {
         return false;

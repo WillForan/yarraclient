@@ -25,6 +25,7 @@ public:
     void clearList();
     bool syncServerList(QString remotePath);
     bool readLocalServerList();
+    bool readServerList(QString filePath);
     bool isServerListAvailable();
     ortServerEntry* getServerEntry(QString name);
 

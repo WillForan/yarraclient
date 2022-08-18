@@ -23,6 +23,8 @@ QString ydTestORT::getDescription()
 
 bool ydTestORT::run(QString& issues, QString& results)
 {
+    serverList.clearList();
+
     YD_RESULT_STARTSECTION
     if (broker->contains(YD_KEY_NO_ORT_AVAILABLE))
     {
@@ -107,5 +109,42 @@ void ydTestORT::testConnectivity(QString& issues, QString& results)
         }
     }
 
+    // Try connecting to the seed server
+    if (!ortConfig.ortConnectCmd.isEmpty())
+    {
+        if (!mountServerAndVerify(ortConfig.ortConnectCmd, issues, results))
+        {
+            // TODO
+        }
+    }
 
+    // Try connecting to the fallback seed server
+    if (!ortConfig.ortConnectCmd.isEmpty())
+    {
+        if (!mountServerAndVerify(ortConfig.ortFallbackConnectCmd, issues, results))
+        {
+            // TODO
+        }
+    }
+
+    // Now try to connect to all servers defined in the server list
+    for (int i=0; i<serverList.servers.count(); i++)
+    {
+//        if (!mountServerAndVerify(ortConfig.ortFallbackConnectCmd, issues, results))
+//        {
+//            // TODO
+//        }
+
+    }
+
+}
+
+
+bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QString& results)
+{
+    // Connect
+    // Read server list
+    // Disconnect
+
+    return true;
 }

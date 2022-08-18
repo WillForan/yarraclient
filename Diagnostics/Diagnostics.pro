@@ -22,6 +22,7 @@ SOURCES += main.cpp \
     ../Client/rds_anonymizeVB17.cpp \
     ../NetLogger/netlogger.cpp \
     ../OfflineReconClient/ort_configuration.cpp \
+    ../OfflineReconClient/ort_serverlist.cpp \
     yd_mainwindow.cpp \
     yd_test.cpp \
     yd_test_systeminfo.cpp \
@@ -43,6 +44,7 @@ HEADERS  += \
     ../NetLogger/netlogger.h \
     ../NetLogger/netlog_events.h \
     ../OfflineReconClient/ort_configuration.h \
+    ../OfflineReconClient/ort_serverlist.h \
     yd_mainwindow.h \
     yd_global.h \
     yd_test.h \

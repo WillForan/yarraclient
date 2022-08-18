@@ -3,6 +3,7 @@
 
 #include "yd_test.h"
 #include "../OfflineReconClient/ort_configuration.h"
+#include "../OfflineReconClient/ort_serverlist.h"
 
 
 class ydTestORT : public ydTest
@@ -15,10 +16,13 @@ public:
 
     bool run(QString& issues, QString& results);
     void testConnectivity(QString& issues, QString& results);
+    bool mountServerAndVerify(QString connectCmd, QString& issues, QString& results);
 
 
 protected:
-    ortConfiguration ortConfig;
+    ortConfiguration ortConfig;    
+    ortServerList serverList;
+
 };
 
 #endif // YDTESTORT_H
