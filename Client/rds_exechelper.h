@@ -26,6 +26,7 @@ public:
     // These two functions are only used for calling the "net use" command from ORT
     bool callNetUseTimout(int timeoutMs);
     void setMonitorNetUseOutput(bool state=true);
+    QString getDetectedNetUseErrorMessage();
 
     int getExitCode();
 
@@ -39,6 +40,7 @@ private:
     bool monitorNetUseOutput;
     bool detectedNetUseError;
     bool detectedNetUseSuccess;
+    QString detectedNetUseErrorMessage;
 
 public slots:
     void readNetUseOutput();
@@ -67,6 +69,11 @@ inline void rdsExecHelper::setMonitorNetUseOutput(bool state)
 inline int rdsExecHelper::getExitCode()
 {
     return exitCode;
+}
+
+inline QString rdsExecHelper::getDetectedNetUseErrorMessage()
+{
+    return detectedNetUseErrorMessage;
 }
 
 

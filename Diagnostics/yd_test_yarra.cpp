@@ -30,6 +30,12 @@ bool ydTestYarra::run(QString& issues, QString& results)
     YD_ADDRESULT("Yarra installation path: " + installationPath);
     YD_RESULT_ENDSECTION
 
+    YD_RESULT_STARTSECTION
+    YD_ADDRESULT("Build version numbers:");
+    YD_ADDRESULT_LINE(" - RDS version: " + QString(RDS_VERSION));
+    YD_ADDRESULT_LINE(" - ORT version: " + QString(ORT_VERSION));
+    YD_ADDRESULT_LINE(" - YCA version: " + QString(YCA_VERSION));
+    YD_RESULT_ENDSECTION
 
     YD_RESULT_STARTSECTION
     YD_ADDRESULT("Checking installation integrity");

@@ -1,7 +1,7 @@
 #include "yd_test_ort.h"
 #include "yd_global.h"
-
 #include "yd_helper.h"
+#include "../Client/rds_exechelper.h"
 
 
 ydTestORT::ydTestORT() : ydTest()
@@ -49,15 +49,18 @@ bool ydTestORT::run(QString& issues, QString& results)
         YD_ADDISSUE("ORT system name not defined",YD_WARNING);
     }
 
+    YD_RESULT_ENDSECTION
+
     testConnectivity(issues, results);
 
-    YD_RESULT_ENDSECTION
     return true;
 }
 
 
 void ydTestORT::testConnectivity(QString& issues, QString& results)
 {
+    YD_RESULT_STARTSECTION
+
     if (ortConfig.ortConnectCmd.isEmpty())
     {
         YD_ADDRESULT_COLORLINE("ORT connect command has not been defined", YD_WARNING);
@@ -109,6 +112,8 @@ void ydTestORT::testConnectivity(QString& issues, QString& results)
         }
     }
 
+    YD_RESULT_ENDSECTION
+
     // Try connecting to the seed server
     if (!ortConfig.ortConnectCmd.isEmpty())
     {
@@ -142,9 +147,44 @@ void ydTestORT::testConnectivity(QString& issues, QString& results)
 
 bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QString& results)
 {
-    // Connect
-    // Read server list
-    // Disconnect
+    YD_RESULT_STARTSECTION
+
+    if (connectCmd!="")
+    {
+        rdsExecHelper execHelper;
+        execHelper.setMonitorNetUseOutput();
+        execHelper.setCommand(connectCmd);
+
+        QString serverName = ydHelper::extractIP(connectCmd);
+        YD_ADDRESULT_LINE("Connecting to server " + serverName);
+        YD_ADDRESULT_LINE("Command: " + connectCmd);
+
+        if (!execHelper.callNetUseTimout(ORT_CONNECT_TIMEOUT))
+        {
+            YD_ADDRESULT_COLORLINE("Connecting to server failed " + serverName, YD_CRITICAL);
+            YD_ADDRESULT_COLORLINE("Detected error: " + execHelper.getDetectedNetUseErrorMessage(), YD_CRITICAL);
+        }
+    }
+
+    // TODO: Read server list if it's one of the seed servers
+
+    if (ortConfig.ortDisconnectCmd!="")
+    {
+        rdsExecHelper execHelper;
+        execHelper.setMonitorNetUseOutput();
+        execHelper.setCommand(ortConfig.ortDisconnectCmd);
+
+        YD_ADDRESULT_LINE("Disconnecting from server");
+        YD_ADDRESULT_LINE("Command: " + ortConfig.ortDisconnectCmd);
+
+        if (!execHelper.callNetUseTimout(ORT_CONNECT_TIMEOUT))
+        {
+            YD_ADDRESULT_COLORLINE("Calling the disconnect command failed", YD_CRITICAL);
+            YD_ADDRESULT_COLORLINE("Detected error: " + execHelper.getDetectedNetUseErrorMessage(), YD_CRITICAL);
+        }
+    }
+
+    YD_RESULT_ENDSECTION
 
     return true;
 }

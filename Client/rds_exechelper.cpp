@@ -17,6 +17,7 @@ rdsExecHelper::rdsExecHelper()
     monitorNetUseOutput  =false;
     detectedNetUseError  =false;
     detectedNetUseSuccess=false;
+    detectedNetUseError="";
 
     exitCode=1;
 }
@@ -142,6 +143,7 @@ bool rdsExecHelper::callNetUseTimout(int timeoutMs)
 {
     bool success=false;
     exitCode=1;
+    detectedNetUseErrorMessage="";
 
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
@@ -236,11 +238,15 @@ bool rdsExecHelper::callNetUseTimout(int timeoutMs)
 
 void rdsExecHelper::readNetUseOutput()
 {
+    detectedNetUseError  =false;
+    detectedNetUseSuccess=false;
+
     while (process.canReadLine())
     {
         // Read the current line, but restrict the maximum length to 512 chars to
         // avoid infinite output (if a module starts outputting binary data)
         QString currentLine=process.readLine(512);
+        qDebug() << currentLine;
 
         // Mapping or deletion sucessfull
         if (currentLine.contains("successfully."))
@@ -259,6 +265,7 @@ void rdsExecHelper::readNetUseOutput()
         {
             detectedNetUseError=true;
             RTI->log("Error detected: "+currentLine);
+            detectedNetUseErrorMessage=currentLine;
         }
     }
 }

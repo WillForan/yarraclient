@@ -3,6 +3,8 @@
 
 // Include global definitions from the RDS client
 #include "../Client/rds_global.h"
+#include "../OfflineReconClient/ort_global.h"
+#include "../CloudAgent/yca_global.h"
 
 #define YD_VERSION    "0.1a"
 #define YD_ICON QIcon(":/images/yd_256.png")
