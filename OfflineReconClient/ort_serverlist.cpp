@@ -128,6 +128,7 @@ bool ortServerList::readServerList(QString filePath)
         filePath=appPath;
     }
     QDir localDir(filePath);
+    localDir.cd(filePath);
 
     // Check if the file with the server list exists in the folder
     if (!localDir.exists(ORT_SERVERLISTFILE))

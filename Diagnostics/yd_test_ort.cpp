@@ -3,6 +3,8 @@
 #include "yd_helper.h"
 #include "../Client/rds_exechelper.h"
 
+#include <QDir>
+
 
 ydTestORT::ydTestORT() : ydTest()
 {
@@ -79,7 +81,7 @@ void ydTestORT::testConnectivity(QString& issues, QString& results)
     {
         if (ydHelper::pingServer(connectIP))
         {
-            YD_ADDRESULT_LINE("Seed server " + connectIP + " responded to ping");
+            YD_ADDRESULT_COLORLINE("Seed server " + connectIP + " responded to ping", YD_SUCCESS);
         }
         else
         {
@@ -102,7 +104,7 @@ void ydTestORT::testConnectivity(QString& issues, QString& results)
         {
             if (ydHelper::pingServer(fallbackConnectIP))
             {
-                YD_ADDRESULT_LINE("Fallback seed server " + fallbackConnectIP + " responded to ping");
+                YD_ADDRESULT_COLORLINE("Fallback seed server " + fallbackConnectIP + " responded to ping", YD_SUCCESS);
             }
             else
             {
@@ -113,41 +115,84 @@ void ydTestORT::testConnectivity(QString& issues, QString& results)
     }
 
     YD_RESULT_ENDSECTION
+    YD_RESULT_STARTSECTION
+    YD_ADDRESULT("Testing server connectivity...");
+    YD_RESULT_ENDSECTION
 
     // Try connecting to the seed server
     if (!ortConfig.ortConnectCmd.isEmpty())
     {
-        if (!mountServerAndVerify(ortConfig.ortConnectCmd, issues, results))
-        {
-            // TODO
-        }
+        YD_RESULT_STARTSECTION
+        mountServerAndVerify(ortConfig.ortConnectCmd, issues, results, true);
+        YD_RESULT_ENDSECTION
     }
 
     // Try connecting to the fallback seed server
     if (!ortConfig.ortConnectCmd.isEmpty())
     {
-        if (!mountServerAndVerify(ortConfig.ortFallbackConnectCmd, issues, results))
+        YD_RESULT_STARTSECTION
+        mountServerAndVerify(ortConfig.ortFallbackConnectCmd, issues, results, true);
+        YD_RESULT_ENDSECTION
+    }
+
+    YD_RESULT_STARTSECTION
+    if (serverList.servers.isEmpty())
+    {
+        YD_ADDRESULT_COLORLINE("Server list is empty", YD_INFO);
+    }
+    else
+    {
+        YD_ADDRESULT_LINE("Available servers:");
+        for (int i=0; i<serverList.servers.count(); i++)
         {
-            // TODO
+            YD_ADDRESULT_LINE(QString(" - Name = ") + serverList.servers.at(i)->name + QString(", Type = ") + serverList.servers.at(i)->type.join(","));
         }
     }
+    YD_RESULT_ENDSECTION
 
     // Now try to connect to all servers defined in the server list
     for (int i=0; i<serverList.servers.count(); i++)
     {
-//        if (!mountServerAndVerify(ortConfig.ortFallbackConnectCmd, issues, results))
-//        {
-//            // TODO
-//        }
+        YD_RESULT_STARTSECTION
 
+        // First, try to ping server
+        QString connectIP = ydHelper::extractIP(serverList.servers.at(i)->connectCmd);
+        if (connectIP.isEmpty())
+        {
+            YD_ADDRESULT_LINE("Unknown connect command for ORT server " + serverList.servers.at(i)->name);
+            YD_ADDISSUE("Unknown connect command for ORT server " + serverList.servers.at(i)->name , YD_INFO);
+        }
+        else
+        {
+            if (ydHelper::pingServer(connectIP))
+            {
+                YD_ADDRESULT_COLORLINE("Server " + connectIP + " responded to ping", YD_SUCCESS);
+            }
+            else
+            {
+                YD_ADDRESULT_COLORLINE("Unable to ping server " + serverList.servers.at(i)->name, YD_CRITICAL);
+                YD_ADDISSUE("Unable to ping server " + serverList.servers.at(i)->name, YD_CRITICAL);
+            }
+        }
+
+        // Now try to mount the server
+        mountServerAndVerify(serverList.servers.at(i)->connectCmd, issues, results, false, serverList.servers.at(i)->name);
+
+        YD_RESULT_ENDSECTION
     }
-
 }
 
 
-bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QString& results)
+bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QString& results, bool isSeedServer, QString serverName)
 {
-    YD_RESULT_STARTSECTION
+
+    if (serverName.isEmpty())
+    {
+        if (!connectCmd.isEmpty())
+        {
+            serverName = ydHelper::extractIP(connectCmd);
+        }
+    }
 
     if (connectCmd!="")
     {
@@ -155,7 +200,6 @@ bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QStrin
         execHelper.setMonitorNetUseOutput();
         execHelper.setCommand(connectCmd);
 
-        QString serverName = ydHelper::extractIP(connectCmd);
         YD_ADDRESULT_LINE("Connecting to server " + serverName);
         YD_ADDRESULT_LINE("Command: " + connectCmd);
 
@@ -163,10 +207,48 @@ bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QStrin
         {
             YD_ADDRESULT_COLORLINE("Connecting to server failed " + serverName, YD_CRITICAL);
             YD_ADDRESULT_COLORLINE("Detected error: " + execHelper.getDetectedNetUseErrorMessage(), YD_CRITICAL);
+            YD_ADDISSUE("Connecting to server failed " + serverName, YD_CRITICAL);
         }
     }
 
-    // TODO: Read server list if it's one of the seed servers
+    QDir serverDir;
+    serverDir.cd(ortConfig.ortServerPath);
+    serverDir.refresh();
+    if (!serverDir.exists())
+    {
+        YD_ADDRESULT_COLORLINE("Unable to map server folder " + ortConfig.ortServerPath, YD_CRITICAL);
+        YD_ADDISSUE("Unable to map server folder " + ortConfig.ortServerPath, YD_CRITICAL);
+    }
+    else
+    {
+        if ((!serverDir.exists(ORT_MODEFILE)) || (!serverDir.exists(ORT_SERVERFILE)))
+        {
+            YD_ADDRESULT_COLORLINE("Mode or server file not found at " + ortConfig.ortServerPath, YD_CRITICAL);
+            YD_ADDISSUE("Mode or server file not found on server " + serverName, YD_CRITICAL);
+        }
+        else
+        {
+            YD_ADDRESULT_COLORLINE("Server and mode file found", YD_SUCCESS);
+
+            // Read server list if it's one of the seed servers
+            if (isSeedServer)
+            {
+                if (!serverDir.exists(ORT_SERVERLISTFILE))
+                {
+                    YD_ADDRESULT_COLORLINE("No server list found", YD_INFO);
+                }
+                else
+                {
+                    YD_ADDRESULT_COLORLINE("Server list found", YD_SUCCESS);
+                    if ((serverList.servers.isEmpty()))
+                    {
+                        YD_ADDRESULT_LINE("Reading server list");
+                        serverList.readServerList(serverDir.absolutePath());
+                    }
+                }
+            }
+        }
+    }
 
     if (ortConfig.ortDisconnectCmd!="")
     {
@@ -181,6 +263,7 @@ bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QStrin
         {
             YD_ADDRESULT_COLORLINE("Calling the disconnect command failed", YD_CRITICAL);
             YD_ADDRESULT_COLORLINE("Detected error: " + execHelper.getDetectedNetUseErrorMessage(), YD_CRITICAL);
+            YD_ADDISSUE("Disconnecting from server failed ", YD_CRITICAL);
         }
     }
 

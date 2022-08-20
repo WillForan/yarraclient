@@ -246,7 +246,6 @@ void rdsExecHelper::readNetUseOutput()
         // Read the current line, but restrict the maximum length to 512 chars to
         // avoid infinite output (if a module starts outputting binary data)
         QString currentLine=process.readLine(512);
-        qDebug() << currentLine;
 
         // Mapping or deletion sucessfull
         if (currentLine.contains("successfully."))

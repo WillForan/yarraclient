@@ -15,7 +15,6 @@ bool ydHelper::pingServer(QString ipAddress)
     }
 
     QString cmd="ping " + ipAddress + " -n 1";
-    qDebug() << cmd ;
     rdsExecHelper execHelper;
     execHelper.setCommand(cmd);
     execHelper.run();

@@ -16,7 +16,7 @@ public:
 
     bool run(QString& issues, QString& results);
     void testConnectivity(QString& issues, QString& results);
-    bool mountServerAndVerify(QString connectCmd, QString& issues, QString& results);
+    bool mountServerAndVerify(QString connectCmd, QString& issues, QString& results, bool isSeedServer, QString serverName="");
 
 
 protected:

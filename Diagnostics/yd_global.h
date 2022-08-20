@@ -26,6 +26,7 @@
 #define YD_CRITICAL 1
 #define YD_WARNING 2
 #define YD_INFO 3
+#define YD_SUCCESS 4
 
 #define YD_ADDISSUE(A,B) issues += "<p style=\"margin-bottom: 4px; margin-top: 4px; \">&bull;&nbsp; "; \
                          if (B==YD_CRITICAL) { issues += "<span style=\"background-color: #E5554F; color: #FFF; width: 120px; \">&nbsp;CRITICAL&nbsp;</span> &nbsp;"; } \
@@ -38,7 +39,8 @@
 #define YD_ADDRESULT_COLORLINE(A,B) results +=  "<br />"; \
                                                 if (B==YD_CRITICAL) { results += "<span style=\"color: #E5554F; \">Critical:</span> " + QString(A); } \
                                                 if (B==YD_WARNING) { results += "<span style=\"color: #E0A526; \">Warning:</span> " + QString(A); } \
-                                                if (B==YD_INFO) { results += "<span style=\"color: #489FDF; \">Info:</span> " + QString(A); }
+                                                if (B==YD_INFO) { results += "<span style=\"color: #489FDF; \">Info:</span> " + QString(A); } \
+                                                if (B==YD_SUCCESS) { results += "<span style=\"color: #40C1AC; \">Success:</span> " + QString(A); }
 
 #define YD_RESULT_STARTSECTION results += "<p>";
 #define YD_RESULT_ENDSECTION results += "</p>";
