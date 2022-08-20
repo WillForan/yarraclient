@@ -51,6 +51,13 @@ bool ydTestORT::run(QString& issues, QString& results)
         YD_ADDISSUE("ORT system name not defined",YD_WARNING);
     }
 
+    if ((!ortConfig.logServerAddress.isEmpty()) && (!ortConfig.logServerAPIKey.isEmpty()))
+    {
+        broker->insert("logserver_address", ortConfig.logServerAddress);
+        broker->insert("logserver_apikey", ortConfig.logServerAPIKey);
+        broker->insert("logserver_source", "ort");
+    }
+
     YD_RESULT_ENDSECTION
 
     testConnectivity(issues, results);
@@ -71,6 +78,36 @@ void ydTestORT::testConnectivity(QString& issues, QString& results)
         return;
     }
 
+    // Check if the ORT server path already exists. If it does, try to disconnect
+    {
+        QDir serverDir;
+        if (serverDir.exists(ortConfig.ortServerPath))
+        {
+            qDebug() << serverDir.absolutePath();
+
+            YD_ADDRESULT_COLORLINE("Server path already mapped " + ortConfig.ortServerPath, YD_WARNING);
+            YD_ADDRESULT_COLORLINE("Trying to disconnect", YD_WARNING);
+            YD_ADDISSUE("Server path already mapped", YD_WARNING);
+
+            if (ortConfig.ortDisconnectCmd!="")
+            {
+                rdsExecHelper execHelper;
+                execHelper.setMonitorNetUseOutput();
+                execHelper.setCommand(ortConfig.ortDisconnectCmd);
+
+                YD_ADDRESULT_LINE("Command: " + ortConfig.ortDisconnectCmd);
+
+                if (!execHelper.callNetUseTimout(ORT_CONNECT_TIMEOUT))
+                {
+                    YD_ADDRESULT_COLORLINE("Calling the disconnect command failed", YD_CRITICAL);
+                    YD_ADDRESULT_COLORLINE("Detected error: " + execHelper.getDetectedNetUseErrorMessage(), YD_CRITICAL);
+                    YD_ADDISSUE("Disconnecting failed ", YD_CRITICAL);
+                }
+            }
+        }
+    }
+
+    // First ping the seed and seed-fallback server
     QString connectIP = ydHelper::extractIP(ortConfig.ortConnectCmd);
     if (connectIP.isEmpty())
     {
@@ -91,7 +128,6 @@ void ydTestORT::testConnectivity(QString& issues, QString& results)
     }
 
     QString fallbackConnectIP = ortConfig.ortFallbackConnectCmd;
-
     if (!fallbackConnectIP.isEmpty())
     {
         fallbackConnectIP=ydHelper::extractIP(fallbackConnectIP);
