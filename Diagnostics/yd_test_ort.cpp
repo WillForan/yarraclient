@@ -55,7 +55,7 @@ bool ydTestORT::run(QString& issues, QString& results)
     {
         broker->insert("logserver_address", ortConfig.logServerAddress);
         broker->insert("logserver_apikey", ortConfig.logServerAPIKey);
-        broker->insert("logserver_source", "ort");
+        broker->insert("logserver_source", "ORT");
     }
 
     YD_RESULT_ENDSECTION
@@ -283,6 +283,9 @@ bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QStrin
                     }
                 }
             }
+
+            // TODO: Check for available disk space and warn if low
+            // TODO: Test write permissions
         }
     }
 

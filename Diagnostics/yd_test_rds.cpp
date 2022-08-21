@@ -54,8 +54,12 @@ bool ydTestRDS::run(QString& issues, QString& results)
     {
         broker->insert("logserver_address", rdsConfig.logServerPath);
         broker->insert("logserver_apikey", rdsConfig.logApiKey);
-        broker->insert("logserver_source", "rds");
+        broker->insert("logserver_source", "RDS");
     }
+
+    // TODO: Open connection and check for storage destination
+    // TODO: Check for available disk space and warn if low
+    // TODO: Test write permissions
 
     return true;
 }

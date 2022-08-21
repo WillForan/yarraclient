@@ -12,6 +12,12 @@ public:
     QString getDescription();
 
     bool run(QString& issues, QString& results);
+    void testConnection(QString& issues, QString& results);
+
+protected:
+    QString logServerAddress;
+    QString logServerAPIKey;
+
 };
 
 #endif // YDTESTLOGSERVER_H
