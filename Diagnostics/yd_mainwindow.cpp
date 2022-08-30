@@ -14,6 +14,7 @@
 #include "yd_test_ort.h"
 #include "yd_test_rds.h"
 #include "yd_test_logserver.h"
+#include "yd_test_logs.h"
 
 
 ydMainWindow::ydMainWindow(QWidget *parent) :
@@ -62,6 +63,7 @@ void ydMainWindow::composeTests()
     testRunner.testList.append(new ydTestRDS);
     testRunner.testList.append(new ydTestLogServer);
     testRunner.testList.append(new ydTestSysteminfo);
+    testRunner.testList.append(new ydTestLogs);
 }
 
 

@@ -23,8 +23,7 @@ QString ydTestSyngo::getDescription()
 bool ydTestSyngo::run(QString& issues, QString& results)
 {
     YD_RESULT_STARTSECTION
-
-    YD_ADDRESULT("Checking Syngo installation")
+    YD_ADDRESULT("Checking Syngo installation...")
 
     QDir syngoDir("C:\\Medcom");
     if (!syngoDir.exists())
@@ -36,7 +35,7 @@ bool ydTestSyngo::run(QString& issues, QString& results)
         return true;
     }
 
-    QString serialNumber=QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER", "0");
+    QString serialNumber=QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER", "Unknown");
     QString scannerType =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",  "Unknown");
 
     // On NumarisX, a different key is used to store the serial number
@@ -45,10 +44,24 @@ bool ydTestSyngo::run(QString& issues, QString& results)
         serialNumber=QProcessEnvironment::systemEnvironment().value("SerialNumber", "0");
     }
 
-    YD_ADDRESULT("Serial number: " + serialNumber);
-    YD_ADDRESULT("Product name: " + scannerType);
+    RTI->prepare();
+    if (RTI->isInvalidEnvironment())
+    {
+        YD_ADDRESULT_COLORLINE("Invalid or unknown Syngo environment found", YD_WARNING);
+        YD_ADDISSUE("Invalid or unknown Syngo environment", YD_WARNING);
+    }
+    else
+    {
+        if (RTI->isSimulation())
+        {
+            YD_ADDRESULT_COLORLINE("Running in Syngo simulation environment", YD_INFO);
+            YD_ADDISSUE("Syngo simulation environment", YD_INFO);
+        }
+        YD_ADDRESULT_LINE("- SyngoMR version: " + RTI->getSyngoMRVersionString());
+    }
+    YD_ADDRESULT_LINE("- Serial number: " + serialNumber);
+    YD_ADDRESULT_LINE("- Product name: " + scannerType);
 
     YD_RESULT_ENDSECTION
-
     return true;
 }

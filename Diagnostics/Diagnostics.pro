@@ -31,7 +31,8 @@ SOURCES += main.cpp \
     yd_test_ort.cpp \
     yd_test_rds.cpp \
     yd_test_logserver.cpp \
-    yd_helper.cpp
+    yd_helper.cpp \
+    yd_test_logs.cpp
 
 HEADERS  += \ 
     ../Client/rds_runtimeinformation.h \
@@ -54,7 +55,8 @@ HEADERS  += \
     yd_test_ort.h \
     yd_test_rds.h \
     yd_test_logserver.h \
-    yd_helper.h
+    yd_helper.h \
+    yd_test_logs.h
 
 FORMS    += \ 
     yd_mainwindow.ui
