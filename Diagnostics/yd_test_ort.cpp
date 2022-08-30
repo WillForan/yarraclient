@@ -247,10 +247,8 @@ bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QStrin
         }
     }
 
-    QDir serverDir;
-    serverDir.cd(ortConfig.ortServerPath);
-    serverDir.refresh();
-    if (!serverDir.exists())
+    QDir serverDir;    
+    if (!serverDir.cd(ortConfig.ortServerPath))
     {
         YD_ADDRESULT_COLORLINE("Unable to map server folder " + ortConfig.ortServerPath, YD_CRITICAL);
         YD_ADDISSUE("Unable to map server folder " + ortConfig.ortServerPath, YD_CRITICAL);
@@ -284,8 +282,63 @@ bool ydTestORT::mountServerAndVerify(QString connectCmd, QString& issues, QStrin
                 }
             }
 
-            // TODO: Check for available disk space and warn if low
-            // TODO: Test write permissions
+            QStorageInfo storageInfo(serverDir.absolutePath());
+            if (storageInfo.isReadOnly())
+            {
+                YD_ADDRESULT_COLORLINE("ORT server folder seems read-only", YD_WARNING);
+                YD_ADDISSUE("ORT server folder seems read-only", YD_WARNING);
+            }
+
+            // Check for available disk space and warn if low
+            double freeSpaceGB = storageInfo.bytesTotal()/1000./1000./1000.;
+            YD_ADDRESULT_LINE("Free space on server: " + QString::number(freeSpaceGB) + " GB");
+
+            if (freeSpaceGB < YD_LOWSPACE_ALERT)
+            {
+                YD_ADDRESULT_COLORLINE("Disk space on ORT server critically low: " + QString::number(freeSpaceGB) + " GB", YD_CRITICAL);
+                YD_ADDISSUE("Critically low disk space on ORT server " + serverName, YD_CRITICAL);
+            }
+            else
+            {
+                if (freeSpaceGB < YD_LOWSPACE_WARNING)
+                {
+                    YD_ADDRESULT_COLORLINE("Low disk space on ORT server: " + QString::number(freeSpaceGB) + " GB", YD_WARNING);
+                    YD_ADDISSUE("Low disk space on ORT server " + serverName, YD_WARNING);
+                }
+            }
+
+            // Test write permissions
+            QString uidFilename = QUuid::createUuid().toString();
+            uidFilename.remove(0,1);
+            uidFilename.remove(uidFilename.length()-1,1);
+            uidFilename += ".diagnostics";
+
+            QFile testFile(serverDir.absoluteFilePath(uidFilename));
+            if (!testFile.open(QIODevice::ReadWrite))
+            {
+                YD_ADDRESULT_COLORLINE("Unable to create files on server " + serverName, YD_CRITICAL);
+                YD_ADDISSUE("Unable to create files on server " + serverName, YD_CRITICAL);
+            }
+            else
+            {
+                char testString[] = "Created by Yarra Diagnostics";
+                if (testFile.write(testString) < 0)
+                {
+                    YD_ADDRESULT_COLORLINE("Unable to write to server " + serverName, YD_CRITICAL);
+                    YD_ADDISSUE("Unable to write to server " + serverName, YD_CRITICAL);
+                }
+
+                // Remove test file again
+                if (!testFile.remove())
+                {
+                    YD_ADDRESULT_COLORLINE("Incorrect file permissions on server " + serverName, YD_CRITICAL);
+                    YD_ADDISSUE("Incorrect file permissions on server " + serverName, YD_CRITICAL);
+                }
+                else
+                {
+                    YD_ADDRESULT_COLORLINE("Can create and write files", YD_SUCCESS);
+                }
+            }
         }
     }
 

@@ -49,6 +49,9 @@
 #define YD_KEY_NO_RDS_AVAILABLE "no_rds_available"
 #define YD_KEY_NO_SYNGO_AVAILABLE "no_syngo_available"
 
+#define YD_LOWSPACE_WARNING 100
+#define YD_LOWSPACE_ALERT 20
+
 
 #endif // YD_GLOBAL_H
 
