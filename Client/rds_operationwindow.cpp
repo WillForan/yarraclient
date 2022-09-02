@@ -165,7 +165,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
 
     if (!config.netDriveLocalBufferPath.isEmpty())
     {
-        if (!raid.setLocalBufferPath(config.netDriveLocalBufferPath))
+        if ((!raid.setLocalBufferPath(config.netDriveLocalBufferPath)) || (!network.setLocalBufferPath(config.netDriveLocalBufferPath)))
         {
             QMessageBox msgBox;
             msgBox.setWindowTitle("Configuration invalid");
@@ -177,7 +177,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
 
             forceTermination=true;
             QTimer::singleShot(0, this, SLOT(callConfiguration()));
-        }
+        }                
     }
 
     if (raid.isPatchedRaidToolMissing())

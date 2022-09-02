@@ -34,6 +34,30 @@ rdsNetwork::~rdsNetwork()
 }
 
 
+bool rdsNetwork::setLocalBufferPath(QString bufferPath)
+{
+    if (bufferPath.isEmpty())
+    {
+        return true;
+    }
+
+    if (!queueDir.cd(bufferPath))
+    {
+        RTI->log("ERROR: Selected LocalBufferPath does not exist");
+        RTI_NETLOG.postEvent(EventInfo::Type::Boot, EventInfo::Detail::Start, EventInfo::Severity::Error, "Selected LocalBufferPath does not exist");
+        return false;
+    }
+
+    return true;
+}
+
+
+bool rdsNetwork::isLocalBufferPathValid()
+{
+    return queueDir.exists();
+}
+
+
 bool rdsNetwork::openConnection()
 {
     queueDir.refresh();

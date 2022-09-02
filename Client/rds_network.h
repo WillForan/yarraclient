@@ -41,6 +41,9 @@ public:
     void runReconnectCmd();
     void runDisconnectCmd();
 
+    bool setLocalBufferPath(QString bufferPath);
+    bool isLocalBufferPathValid();
+
     NetLogger netLogger;
 
 private:
