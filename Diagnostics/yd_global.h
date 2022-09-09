@@ -6,7 +6,7 @@
 #include "../OfflineReconClient/ort_global.h"
 #include "../CloudAgent/yca_global.h"
 
-#define YD_VERSION    "0.1a"
+#define YD_VERSION    "0.1b1"
 #define YD_ICON QIcon(":/images/yd_256.png")
 
 #define YD_COLOR_ERROR QString("#E5554F")

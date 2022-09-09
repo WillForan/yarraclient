@@ -26,7 +26,9 @@ bool ydTestSyngo::run(QString& issues, QString& results)
     YD_ADDRESULT("Checking Syngo installation...")
 
     QDir syngoDir("C:\\Medcom");
-    if (!syngoDir.exists())
+    QDir syngoXADir("C:\\Program Files\\Siemens\\Numaris");
+
+    if ((!syngoDir.exists()) && (!syngoXADir.exists()))
     {
         YD_ADDRESULT_COLORLINE("No Syngo folder found. Not running on scanner.", YD_INFO);
         YD_ADDISSUE("No Syngo installation found", YD_INFO);
