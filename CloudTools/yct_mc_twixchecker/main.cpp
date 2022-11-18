@@ -11,7 +11,7 @@
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
 
-#define YMC_TWIXCHECKER_VER "0.1b2"
+#define YMC_TWIXCHECKER_VER "0.1b3"
 
 
 int main(int argc, char *argv[])
