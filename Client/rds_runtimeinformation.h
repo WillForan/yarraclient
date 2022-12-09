@@ -57,6 +57,7 @@ public:
         RDS_XA31A,
         RDS_XA40A,
         RDS_XA50A,
+        RDS_XA51A,
         RDS_SYNGOVERSIONS_COUNT
     };
 
@@ -492,6 +493,10 @@ inline QString rdsRuntimeInformation::getSyngoMRVersionString(int syngoVersionEn
         versionString="XA50A";
         break;
 
+    case RDS_XA51A:
+        versionString="XA51A";
+        break;
+
     default:
         versionString="Unknown - Use with care!";
         break;
@@ -599,6 +604,7 @@ inline int rdsRuntimeInformation::getRaidToolFormat()
     case RDS_XA31A:        
     case RDS_XA40A:
     case RDS_XA50A:
+    case RDS_XA51A:
         return RDS_RAIDTOOL_VE;
         break;
     case RDS_VB15A:
@@ -653,6 +659,7 @@ inline int rdsRuntimeInformation::getSyngoMRLine()
     case RDS_XA31A:
     case RDS_XA40A:
     case RDS_XA50A:
+    case RDS_XA51A:
         return RDS_XA;
         break;
     }
