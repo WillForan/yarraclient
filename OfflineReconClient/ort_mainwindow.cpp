@@ -228,6 +228,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     ui->scansWidget->horizontalHeader()->resizeSection(1,210);
     ui->scansWidget->horizontalHeader()->resizeSection(2,210);
     ui->scansWidget->horizontalHeader()->resizeSection(3,120);
+    ui->scansWidget->horizontalHeader()->resizeSection(7,10);
 
     QFont font = ui->scansWidget->font();
     ui->scansWidget->horizontalHeader()->setFont( font );
@@ -264,24 +265,37 @@ void ortMainWindow::addScanItem(int mid, QString patientName, QString protocolNa
     ui->scansWidget->insertRow(ui->scansWidget->rowCount());
     int myRow=ui->scansWidget->rowCount()-1;
 
+    bool isSubmitted = false;
+    QColor textColor = QColor(255,255,255);
+
+    isSubmitted = true;
+
+    if (isSubmitted)
+    {
+        textColor = QColor(140,140,140);
+    }
+
     QTableWidgetItem *myItem=0;
 
     // Col MID
     myItem=new QTableWidgetItem;
     myItem->setText(QString::number(mid));
     myItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    myItem->setForeground(QBrush(textColor));
     ui->scansWidget->setItem(myRow,0,myItem);
 
     // Col Patient Name
     myItem=new QTableWidgetItem;
     myItem->setText(patientName);
     myItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    myItem->setForeground(QBrush(textColor));
     ui->scansWidget->setItem(myRow,1,myItem);
 
     // Col Protocol Name
     myItem=new QTableWidgetItem;
     myItem->setText(protocolName);
     myItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    myItem->setForeground(QBrush(textColor));
     ui->scansWidget->setItem(myRow,2,myItem);
 
     // Col Scan Time
@@ -289,6 +303,7 @@ void ortMainWindow::addScanItem(int mid, QString patientName, QString protocolNa
     QString timeString=scanTime.toString("dd/MM/yy")+"  "+scanTime.toString("HH:mm:ss");
     myItem->setText(timeString);
     myItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    myItem->setForeground(QBrush(textColor));
     ui->scansWidget->setItem(myRow,3,myItem);
 
     // Col Size
@@ -296,6 +311,7 @@ void ortMainWindow::addScanItem(int mid, QString patientName, QString protocolNa
     double mbSize=scanSize/1048576.;
     myItem->setText(QString::number(mbSize,'f',1));
     myItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    myItem->setForeground(QBrush(textColor));
     ui->scansWidget->setItem(myRow,4,myItem);
 
     // Col FID
@@ -305,8 +321,27 @@ void ortMainWindow::addScanItem(int mid, QString patientName, QString protocolNa
 
     // Col Mode
     myItem=new QTableWidgetItem;
-    myItem->setText(QString::number(mode));
+    myItem->setText(QString::number(mode));    
     ui->scansWidget->setItem(myRow,6,myItem);
+
+    // Status
+    myItem=new QTableWidgetItem;
+    myItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    if (isSubmitted)
+    {
+        myItem->setText("SENT");
+        myItem->setBackground(QBrush(QColor(0,108,91)));
+        myItem->setForeground(QBrush(QColor(64,193,172)));
+
+        myItem->setToolTip("Scan has been transferred to a server");
+    } else
+    {
+        myItem->setText("NOT SUBMITTED");
+        myItem->setForeground(QBrush(QColor(255,255,255)));
+        myItem->setBackground(QBrush(QColor(229,85,79)));
+        myItem->setToolTip("Scan has not yet been transferred to a server");
+    }
+    ui->scansWidget->setItem(myRow,7,myItem);
 }
 
 
@@ -390,7 +425,7 @@ void ortMainWindow::updateScanList()
     // Select the first row if there are any scans
     if (ui->scansWidget->rowCount()>0)
     {
-        ui->scansWidget->setRangeSelected(QTableWidgetSelectionRange(0,0,0,4),true);
+        ui->scansWidget->setRangeSelected(QTableWidgetSelectionRange(0,0,0,7),true);
         ui->sendButton->setEnabled(true);
     }
     else
@@ -419,6 +454,7 @@ void ortMainWindow::on_sendButton_clicked()
     selectedScantime="";
     selectedProtocol="";
     selectedMode=ui->modeComboBox->currentIndex();
+    bool alreadySent = false;
 
     // Identify clicked item
     if (ui->scansWidget->selectedRanges().count()>0)
@@ -430,6 +466,7 @@ void ortMainWindow::on_sendButton_clicked()
             selectedPatient =ui->scansWidget->item(selectedRow,1)->text();
             selectedScantime=ui->scansWidget->item(selectedRow,3)->text();
             selectedProtocol=ui->scansWidget->item(selectedRow,2)->text();
+            alreadySent=ui->scansWidget->item(selectedRow,7)->text()=="SENT";
         }
     }
     else
@@ -444,6 +481,29 @@ void ortMainWindow::on_sendButton_clicked()
         network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid FID after pressing Send button");
         showTransferError("Invalid FID has been selected.");
         return;
+    }
+
+    if (alreadySent)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Task already submitted");
+        msgBox.setText("This task has already been submitted to a server.\n\nAre you sure to submit it again?");
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setWindowModality(Qt::ApplicationModal);
+
+        Qt::WindowFlags flags = msgBox.windowFlags();
+        flags |= Qt::MSWindowsFixedSizeDialogHint;
+        flags &= ~Qt::WindowContextHelpButtonHint;
+        flags |= Qt::WindowStaysOnTopHint;
+        msgBox.setWindowFlags(flags);
+
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Cancel)
+        {
+            return;
+        }
     }
 
     // Configure configuration dialog
