@@ -1,5 +1,7 @@
 
 #include <QtWidgets>
+#include <QtCore>
+
 #include "ort_mainwindow.h"
 #include "ui_ort_mainwindow.h"
 
@@ -21,6 +23,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     selectedProtocol="";
     selectedMode=0;
     selectedFID=-1;
+    selectedMID=-1;
 
     ui->setupUi(this);
     setWindowIcon(ORT_ICON);
@@ -215,6 +218,10 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         }
     }
 
+    // Prepare the folder used for storing the "submitted case status"
+    caseStatusInvalid=true;
+    prepareCaseStatus();
+
     bootDialog.close();
 
     isManualAssignment=false;
@@ -224,11 +231,12 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     ui->scansWidget->setColumnHidden(6, true);
 
     // Set reasonable sizes for columns
-    ui->scansWidget->horizontalHeader()->resizeSection(0,50);
-    ui->scansWidget->horizontalHeader()->resizeSection(1,210);
-    ui->scansWidget->horizontalHeader()->resizeSection(2,210);
-    ui->scansWidget->horizontalHeader()->resizeSection(3,120);
-    ui->scansWidget->horizontalHeader()->resizeSection(7,10);
+    ui->scansWidget->horizontalHeader()->resizeSection(0,60);
+    ui->scansWidget->horizontalHeader()->resizeSection(1,240);
+    ui->scansWidget->horizontalHeader()->resizeSection(2,240);
+    ui->scansWidget->horizontalHeader()->resizeSection(3,140);
+    ui->scansWidget->horizontalHeader()->resizeSection(4,85);
+    ui->scansWidget->horizontalHeader()->resizeSection(7,50);
 
     QFont font = ui->scansWidget->font();
     ui->scansWidget->horizontalHeader()->setFont( font );
@@ -265,14 +273,16 @@ void ortMainWindow::addScanItem(int mid, QString patientName, QString protocolNa
     ui->scansWidget->insertRow(ui->scansWidget->rowCount());
     int myRow=ui->scansWidget->rowCount()-1;
 
+    QString timeString=scanTime.toString("dd/MM/yy")+"  "+scanTime.toString("HH:mm:ss");
+
     bool isSubmitted = false;
     QColor textColor = QColor(255,255,255);
 
-    isSubmitted = true;
+    isSubmitted = checkCaseStatus(mid, fid, timeString);
 
-    if (isSubmitted)
+    if ((isSubmitted) && (!caseStatusInvalid))
     {
-        textColor = QColor(140,140,140);
+        textColor = QColor(128,128,128);
     }
 
     QTableWidgetItem *myItem=0;
@@ -300,7 +310,6 @@ void ortMainWindow::addScanItem(int mid, QString patientName, QString protocolNa
 
     // Col Scan Time
     myItem=new QTableWidgetItem;
-    QString timeString=scanTime.toString("dd/MM/yy")+"  "+scanTime.toString("HH:mm:ss");
     myItem->setText(timeString);
     myItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     myItem->setForeground(QBrush(textColor));
@@ -327,19 +336,28 @@ void ortMainWindow::addScanItem(int mid, QString patientName, QString protocolNa
     // Status
     myItem=new QTableWidgetItem;
     myItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    if (isSubmitted)
-    {
-        myItem->setText("SENT");
-        myItem->setBackground(QBrush(QColor(0,108,91)));
-        myItem->setForeground(QBrush(QColor(64,193,172)));
 
-        myItem->setToolTip("Scan has been transferred to a server");
-    } else
+    if (caseStatusInvalid)
     {
-        myItem->setText("NOT SUBMITTED");
-        myItem->setForeground(QBrush(QColor(255,255,255)));
-        myItem->setBackground(QBrush(QColor(229,85,79)));
-        myItem->setToolTip("Scan has not yet been transferred to a server");
+        myItem->setText("UNKNOWN");
+        myItem->setBackground(QBrush(QColor(100,100,100)));
+        myItem->setForeground(QBrush(QColor(220,220,220)));
+        myItem->setToolTip("Unable to obtain submission information");
+    }
+    else {
+        if (isSubmitted)
+        {
+            myItem->setText("SENT");
+            myItem->setBackground(QBrush(QColor(0,108,91)));
+            myItem->setForeground(QBrush(QColor(64,193,172)));
+            myItem->setToolTip("Scan has been transferred to a server");
+        } else
+        {
+            myItem->setText("NOT SENT");
+            myItem->setForeground(QBrush(QColor(255,255,255)));
+            myItem->setBackground(QBrush(QColor(229,85,79)));
+            myItem->setToolTip("Scan has not yet been transferred to a server");
+        }
     }
     ui->scansWidget->setItem(myRow,7,myItem);
 }
@@ -450,6 +468,7 @@ void ortMainWindow::on_cancelButton_clicked()
 void ortMainWindow::on_sendButton_clicked()
 {
     selectedFID=-1;
+    selectedMID=-1;
     selectedPatient="";
     selectedScantime="";
     selectedProtocol="";
@@ -462,6 +481,7 @@ void ortMainWindow::on_sendButton_clicked()
         int selectedRow=ui->scansWidget->selectedRanges().at(0).topRow();
         if (selectedRow>=0)
         {
+            selectedMID     =ui->scansWidget->item(selectedRow,0)->text().toInt();
             selectedFID     =ui->scansWidget->item(selectedRow,5)->text().toInt();
             selectedPatient =ui->scansWidget->item(selectedRow,1)->text();
             selectedScantime=ui->scansWidget->item(selectedRow,3)->text();
@@ -486,8 +506,8 @@ void ortMainWindow::on_sendButton_clicked()
     if (alreadySent)
     {
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Task already submitted");
-        msgBox.setText("This task has already been submitted to a server.\n\nAre you sure to submit it again?");
+        msgBox.setWindowTitle("Scan Already Submitted");
+        msgBox.setText("This case has already been submitted for reconstruction.\n\nAre you sure to submit it again?");
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Cancel);
         msgBox.setIcon(QMessageBox::Question);
@@ -695,6 +715,8 @@ void ortMainWindow::on_sendButton_clicked()
     // shutdown the ORT client.
     if (reconTask.isSubmissionSuccessful())
     {
+        storeCaseStatus();
+
         //RTI->log(getTaskInfo(reconTask));
         QString taskInfo=getTaskInfo(reconTask);
         network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,taskInfo);
@@ -839,6 +861,19 @@ void ortMainWindow::on_manualAssignButton_clicked()
     ui->modeComboBox->setEnabled(isManualAssignment);
     ui->modeLabel->setEnabled(isManualAssignment);
 
+    if (isManualAssignment)
+    {
+        QPalette pal=ui->priorityButton->palette();
+        pal.setColor(QPalette::Button, QColor(255,106,19));
+        pal.setColor(QPalette::ButtonText, QColor(255,255,255));
+
+        ui->manualAssignButton->setPalette(pal);
+    }
+    else
+    {
+        ui->manualAssignButton->setPalette(this->palette());
+    }
+
     updateScanList();
 }
 
@@ -955,3 +990,78 @@ void ortMainWindow::runDiagnostics()
     QProcess::startDetached(cmd);
     close();
 }
+
+
+bool ortMainWindow::checkCaseStatus(int mid, int fid, QString timeString)
+{
+    if (caseStatusDir.exists(composeCaseStatusFilename(mid, fid, timeString)))
+    {
+        return true;
+    }
+    return false;
+}
+
+
+bool ortMainWindow::storeCaseStatus()
+{
+    QString fileName = composeCaseStatusFilename(selectedMID, selectedFID, selectedScantime);
+
+    QFile ocsFile(caseStatusDir.absoluteFilePath(fileName));
+    if (!ocsFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+    {
+        // TODO: Report error
+        return false;
+    }
+
+    QTextStream out(&ocsFile);
+    out << "Submitted=" << QDateTime::currentDateTime().toString() << "\n";
+    out << "Server=" << network.selectedServer << "\n";
+    out << "Mode=" << modeList.modes.at(selectedMode)->readableName << "\n";
+
+    RTI->log("Case Status written to " + fileName);
+
+    return true;
+}
+
+
+bool ortMainWindow::prepareCaseStatus()
+{
+    QString caseStatusFolder = "ocs";
+    caseStatusDir.setCurrent(RTI->getAppPath());
+
+    if (!caseStatusDir.exists(caseStatusFolder))
+    {
+        caseStatusDir.mkdir(caseStatusFolder);
+    }
+    if (!caseStatusDir.cd(caseStatusFolder))
+    {
+        // TODO: Report problem in log and netlogger
+        return false;
+    }
+
+    // TODO: Delete old files
+
+    caseStatusInvalid=false;
+    return true;
+}
+
+
+QString ortMainWindow::composeCaseStatusFilename(int mid, int fid, QString timeString)
+{
+    // Remove problematic characters from the timeString
+    // Format: "dd/MM/yy"+"  "+"HH:mm:ss"
+    QString timeSuffix = timeString;
+    timeSuffix[2]='-';
+    timeSuffix[5]='-';
+    timeSuffix[8]='-';
+    timeSuffix[9]='-';
+    timeSuffix[12]='-';
+    timeSuffix[15]='-';
+
+    QString fileName="";
+    fileName += "M" + QString::number(mid) + "_F" + QString::number(fid) + "_T" + timeSuffix;
+    //fileName += "M" + QString::number(mid) + "_F" + QString::number(fid) + "_T"; //DBG
+    fileName += ".log";
+    return fileName;
+}
+

@@ -82,6 +82,14 @@ private:
     QString selectedProtocol;
     int     selectedMode;
     int     selectedFID;
+    int     selectedMID;
+
+    bool caseStatusInvalid;
+    bool prepareCaseStatus();
+    bool checkCaseStatus(int mid, int fid, QString timeString);
+    bool storeCaseStatus();
+    QString composeCaseStatusFilename(int mid, int fid, QString timeString);
+    QDir caseStatusDir;
 
 };
 
