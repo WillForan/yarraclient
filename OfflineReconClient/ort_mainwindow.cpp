@@ -1004,12 +1004,19 @@ bool ortMainWindow::checkCaseStatus(int mid, int fid, QString timeString)
 
 bool ortMainWindow::storeCaseStatus()
 {
+    if (caseStatusInvalid)
+    {
+        // If the folder to store the case status is not available, then we cannot do anything
+        return true;
+    }
+
     QString fileName = composeCaseStatusFilename(selectedMID, selectedFID, selectedScantime);
 
     QFile ocsFile(caseStatusDir.absoluteFilePath(fileName));
     if (!ocsFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
     {
-        // TODO: Report error
+        RTI->log("ERROR: Unable to write Case Status file " + fileName);
+        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to write ocs file");
         return false;
     }
 
@@ -1019,6 +1026,33 @@ bool ortMainWindow::storeCaseStatus()
     out << "Mode=" << modeList.modes.at(selectedMode)->readableName << "\n";
 
     RTI->log("Case Status written to " + fileName);
+
+    // Delete old files (do this now because the client is running in the background)
+    RTI->log("Removing old Case Status files...");
+
+    QDateTime deleteAfterDate = QDateTime::currentDateTime();
+    deleteAfterDate=deleteAfterDate.addDays(-14);
+
+    caseStatusDir.refresh();
+
+    QStringList nameFilter;
+    nameFilter << "*.log";
+    QFileInfoList fileList = caseStatusDir.entryInfoList(nameFilter);
+    for (int i=0; i<fileList.count(); i++)
+    {
+        if (fileList.at(i).lastModified() < deleteAfterDate)
+        {
+            if (caseStatusDir.remove(fileList.at(i).fileName()))
+            {
+                RTI->log("Removed file " + fileList.at(i).fileName());
+            }
+            else
+            {
+                RTI->log("ERROR: Unable to remove file " + fileList.at(i).fileName());
+            }
+        }
+    }
+    RTI->log("...finished");
 
     return true;
 }
@@ -1035,11 +1069,10 @@ bool ortMainWindow::prepareCaseStatus()
     }
     if (!caseStatusDir.cd(caseStatusFolder))
     {
-        // TODO: Report problem in log and netlogger
+        RTI->log("ERROR: Unable to enter ocs subfolder for Case Status files");
+        network.netLogger.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to enter ocs subfolder");
         return false;
     }
-
-    // TODO: Delete old files
 
     caseStatusInvalid=false;
     return true;
@@ -1048,8 +1081,7 @@ bool ortMainWindow::prepareCaseStatus()
 
 QString ortMainWindow::composeCaseStatusFilename(int mid, int fid, QString timeString)
 {
-    // Remove problematic characters from the timeString
-    // Format: "dd/MM/yy"+"  "+"HH:mm:ss"
+    // Remove problematic characters from the timeString (format: "dd/MM/yy"+"  "+"HH:mm:ss")
     QString timeSuffix = timeString;
     timeSuffix[2]='-';
     timeSuffix[5]='-';
@@ -1060,7 +1092,6 @@ QString ortMainWindow::composeCaseStatusFilename(int mid, int fid, QString timeS
 
     QString fileName="";
     fileName += "M" + QString::number(mid) + "_F" + QString::number(fid) + "_T" + timeSuffix;
-    //fileName += "M" + QString::number(mid) + "_F" + QString::number(fid) + "_T"; //DBG
     fileName += ".log";
     return fileName;
 }
