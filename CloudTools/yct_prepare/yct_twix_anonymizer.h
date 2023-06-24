@@ -4,7 +4,7 @@
 #include <QtCore>
 
 
-#define YCT_TWIXANONYMIZER_VER "0.1d"
+#define YCT_TWIXANONYMIZER_VER "0.1e"
 
 
 class yctPatientInformation
