@@ -43,6 +43,8 @@ private slots:
 
     void on_cloudProxyButton_clicked();
 
+    void on_serverTypeComboBox_currentIndexChanged(const QString &arg1);
+
 private:
     Ui::ortConfigurationDialog *ui;
 

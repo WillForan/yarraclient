@@ -23,67 +23,34 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>4</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>General</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="3" column="0">
-        <widget class="QLabel" name="serialNumberLabel">
-         <property name="text">
-          <string>Serial Number:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1">
-        <widget class="QLineEdit" name="connectCmdEdit"/>
-       </item>
-       <item row="6" column="1">
-        <widget class="QLineEdit" name="serverPathEdit"/>
-       </item>
-       <item row="13" column="0">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="Line" name="line">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>10</height>
-          </size>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
+       <item row="8" column="0">
         <widget class="QLabel" name="serverPathLabel">
          <property name="text">
           <string>Server Path:</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="0">
-        <widget class="QLabel" name="connectCmdLabel">
+       <item row="14" column="0" colspan="3">
+        <widget class="QCheckBox" name="autoLaunchRDSCheckbox">
          <property name="text">
-          <string>Connect Cmd:</string>
+          <string>Automatically start RDS client (if not running)</string>
          </property>
         </widget>
        </item>
-       <item row="10" column="0">
+       <item row="11" column="2">
+        <widget class="QLineEdit" name="disconnectCmdEdit"/>
+       </item>
+       <item row="10" column="2">
+        <widget class="QLineEdit" name="connectCmdEdit"/>
+       </item>
+       <item row="12" column="0">
         <widget class="QLabel" name="fallbackConnectCmdLabel">
          <property name="minimumSize">
           <size>
@@ -96,13 +63,27 @@
          </property>
         </widget>
        </item>
-       <item row="10" column="1">
-        <widget class="QLineEdit" name="fallbackConnectCmdEdit"/>
+       <item row="10" column="0">
+        <widget class="QLabel" name="connectCmdLabel">
+         <property name="text">
+          <string>Connect Cmd:</string>
+         </property>
+        </widget>
        </item>
-       <item row="1" column="1">
+       <item row="1" column="2">
         <widget class="QLineEdit" name="systemNameEdit">
          <property name="inputMask">
           <string>NNNNNNNNNNNNNNNNNNNNNNNN</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QLineEdit" name="serverPathEdit"/>
+       </item>
+       <item row="11" column="0">
+        <widget class="QLabel" name="disconnectCmdLabel">
+         <property name="text">
+          <string>Disconnect Cmd:</string>
          </property>
         </widget>
        </item>
@@ -113,10 +94,50 @@
          </property>
         </widget>
        </item>
-       <item row="9" column="0">
-        <widget class="QLabel" name="disconnectCmdLabel">
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="serialNumberEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="15" column="0">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Disconnect Cmd:</string>
+          <string>Server Type:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="serialNumberLabel">
+         <property name="text">
+          <string>Serial Number:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="softwareVersionEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -127,20 +148,7 @@
          </property>
         </widget>
        </item>
-       <item row="9" column="1">
-        <widget class="QLineEdit" name="disconnectCmdEdit"/>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="softwareVersionEdit">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="11" column="0" colspan="2">
+       <item row="13" column="0" colspan="3">
         <widget class="Line" name="line_2">
          <property name="minimumSize">
           <size>
@@ -153,21 +161,39 @@
          </property>
         </widget>
        </item>
-       <item row="12" column="0" colspan="2">
-        <widget class="QCheckBox" name="autoLaunchRDSCheckbox">
-         <property name="text">
-          <string>Automatically start RDS client (if not running)</string>
+       <item row="5" column="0" colspan="3">
+        <widget class="Line" name="line">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>10</height>
+          </size>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="serialNumberEdit">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
+       <item row="12" column="2">
+        <widget class="QLineEdit" name="fallbackConnectCmdEdit"/>
+       </item>
+       <item row="7" column="2">
+        <widget class="QComboBox" name="serverTypeComboBox">
+         <item>
+          <property name="text">
+           <string>SMB</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>SFTP</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>FTP</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>

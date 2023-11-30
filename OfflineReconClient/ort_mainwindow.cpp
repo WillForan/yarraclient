@@ -12,7 +12,7 @@
 #include "ort_recontask.h"
 #include "ort_bootdialog.h"
 #include "ort_configurationdialog.h"
-
+#include "ort_network_sftp.h"
 
 ortMainWindow::ortMainWindow(QWidget *parent) :
     QDialog(parent),
@@ -28,7 +28,6 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     ui->setupUi(this);
     setWindowIcon(ORT_ICON);
     setWindowTitle("Yarra - Offline Reconstruction Task");
-
     Qt::WindowFlags flags = windowFlags();
     flags |= Qt::MSWindowsFixedSizeDialogHint;
     flags &= ~Qt::WindowContextHelpButtonHint;
@@ -72,6 +71,11 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         QTimer::singleShot(0, qApp, SLOT(quit()));        
         return;
     }
+    if (config.ortServerType == "SFTP" || config.ortServerType == "FTP") {
+        network = new ortNetworkSftp();
+    } else if (config.ortServerType == "SMB") {
+        network = new ortNetwork();
+    }
 
     // Forward system name (necessary to define filename of the exported scans)
     raid.setORTSystemName(config.ortSystemName);
@@ -86,9 +90,16 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     bootDialog.show();
     RTI->processEvents();
 
-    network.setConfigInstance(&config);
-    if (!network.prepare())
+    network->setConfigInstance(&config);
+    if (!network->prepare())
     {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Network configuration failed");
+        msgBox.setText("Failed to configure the network connection.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowIcon(ORT_ICON);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
         QTimer::singleShot(0, qApp, SLOT(quit()));
         return;
     }
@@ -102,7 +113,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     dataString+="<system_vendor>Siemens</system_vendor>";
     dataString+="<time>"          +QDateTime::currentDateTime().toString()+"</time>";
     dataString+="</data>";
-    network.netLogger.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"Ver "+QString(ORT_VERSION),dataString);
+    network->netLogger.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Success,"Ver "+QString(ORT_VERSION),dataString);
 
     // Connect to the on-premise server if a server path has been defined. If not and
     // cloud support is disabled, also call it so that an error message appears. Do not
@@ -111,18 +122,18 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     if ((!config.ortServerPath.isEmpty()) || (!config.ortCloudSupportEnabled))
     {
         // Establish the connection to the yarra server
-        if (!network.openConnection())
+        if (!network->openConnection())
         {
             bool connectError=true;
 
             // Check if a fallback server has been defined
-            if (network.fallbackConnectCmd.length()>0)
+            if (network->fallbackConnectCmd.length()>0)
             {
                 bootDialog.setFallbacktext();
 
                 // Connect to the fallback server. If successful, then discard
                 // the connection error and continue
-                if (network.openConnection(true))
+                if (network->openConnection(true))
                 {
                     connectError=false;
                 }
@@ -130,7 +141,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 
             if (connectError)
             {
-                network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"No connection to server");
+                network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"No connection to server");
                 QTimer::singleShot(0, qApp, SLOT(quit()));
                 return;
             }
@@ -139,11 +150,11 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         // OK, now connect to the ORT directory, read the configuration
         // from there, and read the RAID list.
 
-        modeList.network=&network;
+        modeList.network=network;
 
         if (!modeList.readModeList())
         {
-            network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read mode list");
+            network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to read mode list");
             QTimer::singleShot(0, qApp, SLOT(quit()));
             return;
         }
@@ -248,7 +259,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
 
 ortMainWindow::~ortMainWindow()
 {
-    network.closeConnection();
+    network->closeConnection();
 
     if (config.ortStartRDSOnShutdown)
     {
@@ -498,7 +509,7 @@ void ortMainWindow::on_sendButton_clicked()
     if (selectedFID==-1)
     {
         RTI->log("ERROR: Invalid FID after pressing Send button");
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid FID after pressing Send button");
+        network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid FID after pressing Send button");
         showTransferError("Invalid FID has been selected.");
         return;
     }
@@ -535,7 +546,7 @@ void ortMainWindow::on_sendButton_clicked()
     if ((selectedMode<0) or (selectedMode>=modeList.modes.count()))
     {
         RTI->log("ERROR: Invalid mode has been selected.");
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid mode has been selected");
+        network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Invalid mode has been selected");
         showTransferError("Invalid reconstruction mode has been selected.");
         return;
     }
@@ -569,7 +580,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     // Go ahead with the submission
     ortReconTask reconTask;
-    reconTask.setInstances(&raid, &network, &config);
+    reconTask.setInstances(&raid, network, &config);
     reconTask.setCloudPaths(cloud.getCloudPath(YCT_CLOUDFOLDER_OUT), cloud.getCloudPath(YCT_CLOUDFOLDER_PHI));
     reconTask.reconMode       =modeList.modes.at(selectedMode)->idName;
     reconTask.reconName       =modeList.modes.at(selectedMode)->readableName;
@@ -629,24 +640,24 @@ void ortMainWindow::on_sendButton_clicked()
     RTI->processEvents();
 
     // Tell the network module the name and type of the current server
-    network.currentServer       =modeList.serverName;
+    network->currentServer       =modeList.serverName;
     QString requiredServerType  =modeList.modes.at(selectedMode)->requiredServerType;
     reconTask.requiredServerType=requiredServerType;
 
     // Try to connect to a matching server (or switch server for load balancing)
-    if (!network.reconnectToMatchingServer(requiredServerType))
+    if (!network->reconnectToMatchingServer(requiredServerType))
     {
         // Error handling
         waitDialog.close();
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to connect to required server");
-        showTransferError(network.errorReason);
+        network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to connect to required server");
+        showTransferError(network->errorReason);
         this->show();
         return;
     }
-    reconTask.selectedServer=network.selectedServer;
+    reconTask.selectedServer=network->selectedServer;
 
     RTI->log("Reconstruction request submitted (ORT client " + QString(ORT_VERSION) + ")");
-    RTI->log("Selected server: "+network.selectedServer);
+    RTI->log("Selected server: "+network->selectedServer);
 
     if (ui->priorityButton->isChecked())
     {
@@ -655,7 +666,7 @@ void ortMainWindow::on_sendButton_clicked()
 
     if (!reconTask.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
     {
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
+        network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
         return;
@@ -690,7 +701,7 @@ void ortMainWindow::on_sendButton_clicked()
         }
         else
         {
-            network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error transfering file: "+reconTask.getErrorMessageUI());
+            network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error transfering file: "+reconTask.getErrorMessageUI());
             showTransferError(reconTask.getErrorMessageUI());
             this->show();
         }
@@ -700,7 +711,7 @@ void ortMainWindow::on_sendButton_clicked()
     if (!reconTask.generateTaskFile())
     {
         copyDialog.close();
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error generating task: "+reconTask.getErrorMessageUI());
+        network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error generating task: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
         return;
@@ -709,7 +720,7 @@ void ortMainWindow::on_sendButton_clicked()
     copyDialog.close();
 
     // Clean local queue directory (in any case)
-    network.cleanLocalQueueDir();
+    network->cleanLocalQueueDir();
 
     // If the reconstruction tasked has been submitted successfully, then
     // shutdown the ORT client.
@@ -719,12 +730,12 @@ void ortMainWindow::on_sendButton_clicked()
 
         //RTI->log(getTaskInfo(reconTask));
         QString taskInfo=getTaskInfo(reconTask);
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,taskInfo);
+        network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::End,EventInfo::Severity::Success,taskInfo);
         this->close();
     }
     else
     {
-        network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error with task submission: "+reconTask.getErrorMessageUI());
+        network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error with task submission: "+reconTask.getErrorMessageUI());
         showTransferError(reconTask.getErrorMessageUI());
         this->show();
     }
@@ -798,14 +809,14 @@ void ortMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
         infoMenu.addAction("Show YarraCloud Agent...", this, SLOT(showYCAWindow()));
     }
 
-    if (network.netLogger.isConfigured())
+    if (network->netLogger.isConfigured())
     {
         infoMenu.addSeparator();
         infoMenu.addAction("<Log Server Connected>");
     }
     else
     {
-        if (network.netLogger.isConfigurationError())
+        if (network->netLogger.isConfigurationError())
         {
             infoMenu.addSeparator();
             infoMenu.addAction("<Error Connecting to Log Server>", this, SLOT(showLogfile()));
@@ -917,7 +928,7 @@ void ortMainWindow::refreshRaidList()
     if (!raid.readRaidList())
     {
         RTI->log("Error reading the RAID list.");
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error reading RAID list");
+        network->netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error reading RAID list");
     }
     isRaidListAvaible=true;
 }
@@ -954,7 +965,7 @@ bool ortMainWindow::processCloudRecon(ortReconTask& task)
 
     if (!task.exportDataFiles(selectedFID, modeList.modes.at(selectedMode)))
     {
-        //network.netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
+        //network->netLogger.postEventSync(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Error exporting file: "+reconTask.getErrorMessageUI());
         showTransferError(task.getErrorMessageUI());
         this->show();
         waitDialog.close();

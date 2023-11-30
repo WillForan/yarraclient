@@ -24,7 +24,7 @@ public:
     QStringList ortMailPresets;
     bool        ortStartRDSOnShutdown;
     bool        ortCloudSupportEnabled;
-
+    QString     ortServerType;
     QString     logServerAddress;
     QString     logServerAPIKey;
 

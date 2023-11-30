@@ -9,6 +9,8 @@ public:
     QString     name;
     QStringList type;
     QString     connectCmd;
+    QString     serverPath;
+    QString     hostKey;
     bool        acceptsUndefined;
 };
 
@@ -24,6 +26,7 @@ public:
 
     void clearList();
     bool syncServerList(QString remotePath);
+    bool removeLocalServerList();
     bool readLocalServerList();
     bool readServerList(QString filePath);
     bool isServerListAvailable();

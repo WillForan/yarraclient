@@ -155,6 +155,7 @@ void ortConfigurationDialog::readSettings()
     ui->fallbackConnectCmdEdit->setText  (settings.value("ORT/FallbackConnectCmd", "").toString());
     ui->autoLaunchRDSCheckbox->setChecked(settings.value("ORT/StartRDSOnShutdown", false).toBool());
     ui->cloudCheckbox->setChecked        (settings.value("ORT/CloudSupport",       false).toBool());
+    ui->serverTypeComboBox->setCurrentText(settings.value("ORT/ServerType",         "SMB").toString());
 
     ui->serialNumberEdit->setText(RTI->getConfigInstance()->infoSerialNumber);
 
@@ -188,7 +189,7 @@ void ortConfigurationDialog::writeSettings()
     settings.setValue("ORT/FallbackConnectCmd",ui->fallbackConnectCmdEdit->text());
     settings.setValue("ORT/StartRDSOnShutdown",ui->autoLaunchRDSCheckbox->isChecked());
     settings.setValue("ORT/CloudSupport",      ui->cloudCheckbox->isChecked());
-
+    settings.setValue("ORT/ServerType",       ui->serverTypeComboBox->currentText());
     QStringList emailList=ui->emailPresetsEdit->toPlainText().split("\n",QString::SkipEmptyParts);
 
     for (int i=0; i<emailList.count(); i++)
@@ -580,3 +581,17 @@ void ortConfigurationDialog::on_cloudProxyButton_clicked()
 
     updateProxyStatus();
 }
+
+void ortConfigurationDialog::on_serverTypeComboBox_currentIndexChanged(const QString &val)
+{
+    if (val == "SMB") {
+        ui->connectCmdEdit->setEnabled(true);
+        ui->disconnectCmdEdit->setEnabled(true);
+        ui->fallbackConnectCmdEdit->setEnabled(true);
+    } else {
+        ui->connectCmdEdit->setEnabled(false);
+        ui->disconnectCmdEdit->setEnabled(false);
+        ui->fallbackConnectCmdEdit->setEnabled(false);
+    }
+}
+

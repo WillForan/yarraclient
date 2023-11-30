@@ -32,7 +32,13 @@ ortConfiguration::~ortConfiguration()
 
 bool ortConfiguration::isConfigurationValid()
 {
-    return (ortSystemName!=ORT_INVALID);
+    if (ortSystemName==ORT_INVALID) {
+        return false;
+    }
+    if (ortServerType != "FTP" && ortServerType != "SFTP" && ortServerType != "SMB" ) {
+        return false;
+    }
+    return true;
 }
 
 
@@ -49,7 +55,7 @@ void ortConfiguration::loadConfiguration()
     ortConnectTimeout     =settings.value("ORT/ConnectTimeout", 0).toInt();
     ortStartRDSOnShutdown =settings.value("ORT/StartRDSOnShutdown", false).toBool();
     ortCloudSupportEnabled=settings.value("ORT/CloudSupport",false).toBool();
-
+    ortServerType         =settings.value("ORT/ServerType", "SMB").toString();
     // Read the mail presets for the ORT configuration dialog
     ortMailPresets.clear();
     int mCount=1;

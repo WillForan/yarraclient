@@ -36,7 +36,7 @@ public:
 
     // Own components for ORT
     ortConfiguration config;
-    ortNetwork network;
+    ortNetwork* network;
     ortModeList modeList;
 
     yctConfiguration  cloudConfig;
