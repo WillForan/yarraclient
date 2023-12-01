@@ -1027,13 +1027,13 @@ bool ortMainWindow::storeCaseStatus()
     if (!ocsFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
     {
         RTI->log("ERROR: Unable to write Case Status file " + fileName);
-        network.netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to write ocs file");
+        network->netLogger.postEvent(EventInfo::Type::Transfer,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to write ocs file");
         return false;
     }
 
     QTextStream out(&ocsFile);
     out << "Submitted=" << QDateTime::currentDateTime().toString() << "\n";
-    out << "Server=" << network.selectedServer << "\n";
+    out << "Server=" << network->selectedServer << "\n";
     out << "Mode=" << modeList.modes.at(selectedMode)->readableName << "\n";
 
     RTI->log("Case Status written to " + fileName);
@@ -1081,7 +1081,7 @@ bool ortMainWindow::prepareCaseStatus()
     if (!caseStatusDir.cd(caseStatusFolder))
     {
         RTI->log("ERROR: Unable to enter ocs subfolder for Case Status files");
-        network.netLogger.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to enter ocs subfolder");
+        network->netLogger.postEvent(EventInfo::Type::Boot,EventInfo::Detail::Information,EventInfo::Severity::Error,"Unable to enter ocs subfolder");
         return false;
     }
 
