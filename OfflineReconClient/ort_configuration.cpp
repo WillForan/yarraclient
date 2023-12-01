@@ -7,8 +7,8 @@ ortConfiguration::ortConfiguration()
     ortSystemName=ORT_INVALID;
 
     infoSerialNumber   =QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER",   "0");
-    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unkown");
-    infoSoftwareVersion=QProcessEnvironment::systemEnvironment().value("SOFTWARE_VERSION","Unkown");
+    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unknown");
+    infoSoftwareVersion=QProcessEnvironment::systemEnvironment().value("SOFTWARE_VERSION","Unknown");
 
     // Read information specifically for NumarisX
     if (infoScannerType=="Numaris/X")

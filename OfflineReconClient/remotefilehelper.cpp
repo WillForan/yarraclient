@@ -45,11 +45,13 @@ bool remoteFileHelper::testConnection() {
 
 bool remoteFileHelper::exists(QString path) {
     QStringList output;
+    exec.setTimeout(ORT_CONNECT_TIMEOUT);
     return runServerOperations(QStringList("stat "+path),output);
 }
 
 long int remoteFileHelper::size(QString path) {
     QStringList output;
+    exec.setTimeout(ORT_CONNECT_TIMEOUT);
     bool success = runServerOperations(QStringList("stat "+path),output);
     if (!success) {
         return -1;
@@ -92,19 +94,23 @@ bool remoteFileHelper::runServerOperation(QString operation, QStringList &output
 bool remoteFileHelper::runServerOperations(QStringList operations, QStringList &output) {
     QString openCommand = "open " + serverURI;
     if (connectionType == remoteFileHelper::SFTP) {
-        openCommand += " -hostkey=\"" + hostkey + "\"";
+        if (hostkey == "acceptnew") {
+            openCommand += " -hostkey=acceptnew";
+        } else {
+            openCommand += " -hostkey=\"\"" + hostkey + "\"\"";
+        }
     }
     QStringList allOperations = QStringList(openCommand) + operations;
     return callWinSCP(allOperations, output);
 }
 
 bool remoteFileHelper::callWinSCP(QStringList commands, QStringList &output) {
-    QString cmdString = winSCPPath +
-            " /ini=nul /command" +
-            " \"" + commands.join("\" \"") +"\""+
+    QString cmdString = "/ini=nul /command \"" + commands.join("\" \"") +"\""+
             " \"exit\"";
     RTI->log(cmdString);
-    exec.run(cmdString);
+//    QStringList allCommands = QStringList{"/ini=nul", "/command"} + commands + QStringList{"exit"};
+//    RTI->log(winSCPPath+" \""+allCommands.join("\" \"")+"\"");
+    exec.run(winSCPPath, cmdString);
     output = exec.output;
     RTI->log("Exit code: " + QString::number(exec.getExitCode()));
     RTI->log("Exec output: ");

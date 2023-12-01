@@ -29,7 +29,7 @@ bool rdsExecHelper::run()
 }
 
 
-bool rdsExecHelper::run(QString cmdLine)
+bool rdsExecHelper::run(QString cmdLine, QString nativeArguments)
 {
     // Clear the output buffer
     output.clear();
@@ -44,14 +44,21 @@ bool rdsExecHelper::run(QString cmdLine)
     timeoutTimer.setSingleShot(true);
     timeoutTimer.setInterval(timeoutMs);
     QEventLoop q;
-    QObject::connect(myProcess, SIGNAL(finished(int , QProcess::ExitStatus)), &q, SLOT(quit()));
+    QObject::connect(myProcess, SIGNAL(finished(int, QProcess::ExitStatus)), &q, SLOT(quit()));
     QObject::connect(&timeoutTimer, SIGNAL(timeout()), &q, SLOT(quit()));
 
     // Time measurement to diagnose RaidTool calling problems
     QElapsedTimer ti;
     ti.start();
     timeoutTimer.start();
+    if (!nativeArguments.isEmpty()){
+        myProcess->setNativeArguments(nativeArguments);
+    }
+//    else {
+//        myProcess->start(cmdLine, arguments);
+//    }
     myProcess->start(cmdLine);
+
     if (myProcess->state()==QProcess::NotRunning)
     {
         delete myProcess;
