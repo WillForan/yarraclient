@@ -11,7 +11,7 @@
 #include <../NetLogger/netlogger.h>
 #include "../CloudTools/yct_common.h"
 #include "../CloudTools/yct_aws/qtaws.h"
-
+#include "remotefilehelper.h"
 
 ortConfigurationDialog::ortConfigurationDialog(QWidget *parent) :
     QDialog(parent),
@@ -116,7 +116,7 @@ void ortConfigurationDialog::on_okButton_clicked()
         return;
     }
 
-    if ((ui->serverPathEdit->text().isEmpty()) && (!ui->cloudCheckbox->isChecked()))
+    if ((ui->serverPathEdit->text().isEmpty()) && (!ui->cloudCheckbox->isChecked()) && ui->serverTypeComboBox->currentData() =="SMB")
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Server Path Needed");
@@ -155,7 +155,11 @@ void ortConfigurationDialog::readSettings()
     ui->fallbackConnectCmdEdit->setText  (settings.value("ORT/FallbackConnectCmd", "").toString());
     ui->autoLaunchRDSCheckbox->setChecked(settings.value("ORT/StartRDSOnShutdown", false).toBool());
     ui->cloudCheckbox->setChecked        (settings.value("ORT/CloudSupport",       false).toBool());
-    ui->serverTypeComboBox->setCurrentText(settings.value("ORT/ServerType",         "SMB").toString());
+
+    ui->serverTypeComboBox->setCurrentText(settings.value("ORT/ConnectionType",         "SMB").toString());
+    ui->serverURIEdit->setText           (settings.value("ORT/ServerURI",         "").toString());
+    ui->fallbackServerURIEdit->setText   (settings.value("ORT/FallbackServerURI",         "").toString());
+
 
     ui->serialNumberEdit->setText(RTI->getConfigInstance()->infoSerialNumber);
 
@@ -189,7 +193,10 @@ void ortConfigurationDialog::writeSettings()
     settings.setValue("ORT/FallbackConnectCmd",ui->fallbackConnectCmdEdit->text());
     settings.setValue("ORT/StartRDSOnShutdown",ui->autoLaunchRDSCheckbox->isChecked());
     settings.setValue("ORT/CloudSupport",      ui->cloudCheckbox->isChecked());
-    settings.setValue("ORT/ServerType",       ui->serverTypeComboBox->currentText());
+    settings.setValue("ORT/ConnectionType",    ui->serverTypeComboBox->currentText());
+
+    settings.setValue("ORT/ServerURI",         ui->serverURIEdit->text());
+    settings.setValue("ORT/FallbackServerURI", ui->fallbackServerURIEdit->text());
     QStringList emailList=ui->emailPresetsEdit->toPlainText().split("\n",QString::SkipEmptyParts);
 
     for (int i=0; i<emailList.count(); i++)
@@ -584,14 +591,38 @@ void ortConfigurationDialog::on_cloudProxyButton_clicked()
 
 void ortConfigurationDialog::on_serverTypeComboBox_currentIndexChanged(const QString &val)
 {
-    if (val == "SMB") {
-        ui->connectCmdEdit->setEnabled(true);
-        ui->disconnectCmdEdit->setEnabled(true);
-        ui->fallbackConnectCmdEdit->setEnabled(true);
-    } else {
-        ui->connectCmdEdit->setEnabled(false);
-        ui->disconnectCmdEdit->setEnabled(false);
-        ui->fallbackConnectCmdEdit->setEnabled(false);
-    }
+
 }
 
+void ortConfigurationDialog::on_serverTypeComboBox_currentIndexChanged(int index)
+{
+    ui->serverConnectionStack->setCurrentIndex(index);
+}
+
+
+void ortConfigurationDialog::on_serverURITestButton_clicked()
+{
+    remoteFileHelper  helper;
+    QString err;
+    ui->serverURITestLabel->setText("Testing connection...");
+
+    QString output = "";
+    for (int i=0; i<2; i++) {
+        QString uri;
+        QString name;
+        if (i==0) {uri = ui->serverURIEdit->text(); name="Primary server"; }
+        if (i==1) {uri = ui->fallbackServerURIEdit->text(); name="Fallback server";}
+        if (uri.isEmpty()) {
+            output += "\n" + name + " not configured.";
+        }
+        helper.init(uri);
+        bool result = helper.testConnection(err);
+        if (result) {
+            output += "\n"+name+" <span style=""color:#40C1AC;""><strong>validated</strong></span>.";
+        } else {
+            output += "\n"+name+" <span style=""color:#E5554F;""><strong>FAILED</strong></span>:\n"+err;
+        }
+        output = output.trimmed();
+        ui->serverURITestLabel->setText(output.replace("\n","<br/>"));
+    }
+}

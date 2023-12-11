@@ -71,9 +71,9 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         QTimer::singleShot(0, qApp, SLOT(quit()));        
         return;
     }
-    if (config.ortServerType == "SFTP" || config.ortServerType == "FTP") {
+    if (config.ortConnectionType == "New") {
         network = new ortNetworkSftp();
-    } else if (config.ortServerType == "SMB") {
+    } else if (config.ortConnectionType == "SMB") {
         network = new ortNetwork();
     }
 
@@ -83,7 +83,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
     RTI->log("System: "+config.ortSystemName);
     RTI->log("Serial: "+config.infoSerialNumber);
     RTI->log("Type:   "+config.infoScannerType);
-
+    RTI->log("Connection Type:   "+config.ortConnectionType);
     // Show a splash screen while the network connection is established, so that the user
     // knows that something is going on.
     ortBootDialog bootDialog;
@@ -127,7 +127,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
             bool connectError=true;
 
             // Check if a fallback server has been defined
-            if (network->fallbackConnectCmd.length()>0)
+            if (!config.ortFallbackConnectCmd.isEmpty() || !config.ortFallbackServerURI.isEmpty())
             {
                 bootDialog.setFallbacktext();
 

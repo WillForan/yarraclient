@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>641</width>
-    <height>393</height>
+    <width>656</width>
+    <height>463</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,10 +30,10 @@
        <string>General</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="8" column="0">
-        <widget class="QLabel" name="serverPathLabel">
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Server Path:</string>
+          <string>Connection Type:</string>
          </property>
         </widget>
        </item>
@@ -44,29 +44,10 @@
          </property>
         </widget>
        </item>
-       <item row="11" column="2">
-        <widget class="QLineEdit" name="disconnectCmdEdit"/>
-       </item>
-       <item row="10" column="2">
-        <widget class="QLineEdit" name="connectCmdEdit"/>
-       </item>
-       <item row="12" column="0">
-        <widget class="QLabel" name="fallbackConnectCmdLabel">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>0</height>
-          </size>
-         </property>
+       <item row="1" column="0">
+        <widget class="QLabel" name="systemNameLabel">
          <property name="text">
-          <string>Fallback Connect Cmd:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="10" column="0">
-        <widget class="QLabel" name="connectCmdLabel">
-         <property name="text">
-          <string>Connect Cmd:</string>
+          <string>System Name:</string>
          </property>
         </widget>
        </item>
@@ -74,23 +55,6 @@
         <widget class="QLineEdit" name="systemNameEdit">
          <property name="inputMask">
           <string>NNNNNNNNNNNNNNNNNNNNNNNN</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="2">
-        <widget class="QLineEdit" name="serverPathEdit"/>
-       </item>
-       <item row="11" column="0">
-        <widget class="QLabel" name="disconnectCmdLabel">
-         <property name="text">
-          <string>Disconnect Cmd:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="systemNameLabel">
-         <property name="text">
-          <string>System Name:</string>
          </property>
         </widget>
        </item>
@@ -117,30 +81,6 @@
          </property>
         </spacer>
        </item>
-       <item row="7" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Server Type:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="serialNumberLabel">
-         <property name="text">
-          <string>Serial Number:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLineEdit" name="softwareVersionEdit">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="0">
         <widget class="QLabel" name="softwareVersionLabel">
          <property name="text">
@@ -161,6 +101,23 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="softwareVersionEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="serialNumberLabel">
+         <property name="text">
+          <string>Serial Number:</string>
+         </property>
+        </widget>
+       </item>
        <item row="5" column="0" colspan="3">
         <widget class="Line" name="line">
          <property name="minimumSize">
@@ -174,10 +131,7 @@
          </property>
         </widget>
        </item>
-       <item row="12" column="2">
-        <widget class="QLineEdit" name="fallbackConnectCmdEdit"/>
-       </item>
-       <item row="7" column="2">
+       <item row="6" column="2">
         <widget class="QComboBox" name="serverTypeComboBox">
          <item>
           <property name="text">
@@ -186,14 +140,171 @@
          </item>
          <item>
           <property name="text">
-           <string>SFTP</string>
+           <string>New</string>
           </property>
          </item>
-         <item>
-          <property name="text">
-           <string>FTP</string>
-          </property>
-         </item>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="3">
+        <widget class="QStackedWidget" name="serverConnectionStack">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="SMBEditPage">
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="1" column="0">
+            <widget class="QLabel" name="connectCmdLabel">
+             <property name="text">
+              <string>Connect Cmd:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLineEdit" name="serverPathEdit"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="serverPathLabel">
+             <property name="text">
+              <string>Server Path:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QLineEdit" name="fallbackConnectCmdEdit"/>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="connectCmdEdit"/>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLineEdit" name="disconnectCmdEdit"/>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="fallbackConnectCmdLabel">
+             <property name="minimumSize">
+              <size>
+               <width>120</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Fallback Connect Cmd:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="disconnectCmdLabel">
+             <property name="text">
+              <string>Disconnect Cmd:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <spacer name="verticalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+          <zorder>serverPathLabel</zorder>
+          <zorder>serverPathLabel</zorder>
+          <zorder>serverPathEdit</zorder>
+          <zorder>connectCmdLabel</zorder>
+          <zorder>connectCmdEdit</zorder>
+          <zorder>disconnectCmdLabel</zorder>
+          <zorder>fallbackConnectCmdLabel</zorder>
+          <zorder>fallbackConnectCmdEdit</zorder>
+          <zorder>disconnectCmdEdit</zorder>
+          <zorder>verticalSpacer_11</zorder>
+         </widget>
+         <widget class="QWidget" name="SftpURIEditPage">
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="4" column="3">
+            <widget class="QLabel" name="serverURITestLabel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>120</height>
+              </size>
+             </property>
+             <property name="sizeIncrement">
+              <size>
+               <width>0</width>
+               <height>10</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::AutoText</enum>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             </property>
+             <property name="textInteractionFlags">
+              <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QLineEdit" name="fallbackServerURIEdit"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="fallbackServerURILabel">
+             <property name="text">
+              <string>Fallback URI</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="serverURILabel">
+             <property name="text">
+              <string>Server URI</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLineEdit" name="serverURIEdit"/>
+           </item>
+           <item row="2" column="3">
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QPushButton" name="serverURITestButton">
+               <property name="text">
+                <string>Test Connection</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -313,6 +424,9 @@ Write each address in a separate row.</string>
         <widget class="QLabel" name="logServerTestLabel">
          <property name="text">
           <string>Connection Result</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
          </property>
         </widget>
        </item>
@@ -701,10 +815,13 @@ p, li { white-space: pre-wrap; }
   <tabstop>systemNameEdit</tabstop>
   <tabstop>softwareVersionEdit</tabstop>
   <tabstop>serialNumberEdit</tabstop>
+  <tabstop>serverTypeComboBox</tabstop>
   <tabstop>serverPathEdit</tabstop>
   <tabstop>connectCmdEdit</tabstop>
   <tabstop>disconnectCmdEdit</tabstop>
   <tabstop>fallbackConnectCmdEdit</tabstop>
+  <tabstop>serverURIEdit</tabstop>
+  <tabstop>fallbackServerURIEdit</tabstop>
   <tabstop>autoLaunchRDSCheckbox</tabstop>
   <tabstop>okButton</tabstop>
   <tabstop>cancelButton</tabstop>

@@ -35,7 +35,7 @@ bool ortConfiguration::isConfigurationValid()
     if (ortSystemName==ORT_INVALID) {
         return false;
     }
-    if (ortServerType != "FTP" && ortServerType != "SFTP" && ortServerType != "SMB" ) {
+    if (ortConnectionType != "New" && ortConnectionType != "SMB" ) {
         return false;
     }
     return true;
@@ -55,7 +55,11 @@ void ortConfiguration::loadConfiguration()
     ortConnectTimeout     =settings.value("ORT/ConnectTimeout", 0).toInt();
     ortStartRDSOnShutdown =settings.value("ORT/StartRDSOnShutdown", false).toBool();
     ortCloudSupportEnabled=settings.value("ORT/CloudSupport",false).toBool();
-    ortServerType         =settings.value("ORT/ServerType", "SMB").toString();
+    ortConnectionType     =settings.value("ORT/ConnectionType", "SMB").toString();
+
+    ortServerURI          =settings.value("ORT/ServerURI", "").toString();
+    ortFallbackServerURI  =settings.value("ORT/FallbackServerURI", "").toString();
+
     // Read the mail presets for the ORT configuration dialog
     ortMailPresets.clear();
     int mCount=1;
@@ -82,6 +86,9 @@ void ortConfiguration::saveConfiguration()
     settings.setValue("ORT/ConnectTimeout",     ortConnectTimeout);
     settings.setValue("ORT/StartRDSOnShutdown", ortStartRDSOnShutdown);
     settings.setValue("ORT/CloudSupport",       ortCloudSupportEnabled);
+    settings.setValue("ORT/ConnectionType",     ortConnectionType);
+    settings.setValue("ORT/ServerURI",          ortServerURI);
+    settings.setValue("ORT/FallbackServerURI",  ortFallbackServerURI);
 
     // Read the mail presets for the ORT configuration dialog
     for (int i=0; i<ortMailPresets.count(); i++)

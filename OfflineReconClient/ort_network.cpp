@@ -264,6 +264,7 @@ bool ortNetwork::openConnection(bool fallback)
                 // Call configuration dialog
                 ortConfigurationDialog::executeDialog();
             }
+
         }
     }
 
@@ -476,7 +477,7 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
 
     if (!serverConnected)
     {
-        errorReason="Unable to connected to requested server type.";
+        errorReason="Unable to connect to requested server type.";
     }
 
     return serverConnected;

@@ -1,6 +1,9 @@
+#include <QtWidgets>
+
 #include "ort_network_sftp.h"
 #include "remotefilehelper.h"
 #include "ort_configuration.h"
+#include "ort_configurationdialog.h"
 #include "ort_global.h"
 ortNetworkSftp::ortNetworkSftp()
 {
@@ -9,18 +12,12 @@ bool ortNetworkSftp::prepare()
 {
     bool result = ortNetwork::prepare();
     if (!result) return false;
-    if (configInstance->ortServerType == "FTP") {
-        helper.init(configInstance->ortServerPath, remoteFileHelper::FTP);
-    }
-    if (configInstance->ortServerType == "SFTP") {
-        helper.init(configInstance->ortServerPath, remoteFileHelper::SFTP);
-    }
     return true;
 }
 
 QSettings* ortNetworkSftp::readModelist(QString &error) {
-    helper.get(ORT_MODEFILE, QDir("C:\\Temp\\"));
-    return new QSettings("C:\\Temp\\"+QString(ORT_MODEFILE),QSettings::Format::IniFormat);
+    helper.get(ORT_MODEFILE, QDir::temp());
+    return new QSettings(QDir::temp().absoluteFilePath(ORT_MODEFILE),QSettings::Format::IniFormat);
 }
 bool ortNetworkSftp::copyFile() {
     QString sourceName=queueDir.absoluteFilePath(currentFilename);
@@ -56,13 +53,9 @@ bool ortNetworkSftp::doReconnectServerEntry(ortServerEntry *selectedEntry) {
     if(serverPath.isEmpty()){
         return false;
     }
-    if (configInstance->ortServerType == "FTP") {
-        helper.init(serverPath, remoteFileHelper::FTP, selectedEntry->hostKey);
-    }
-    if (configInstance->ortServerType == "SFTP") {
-        helper.init(serverPath, remoteFileHelper::SFTP, selectedEntry->hostKey);
-    }
-    return helper.testConnection();
+    helper.init(serverPath, selectedEntry->hostKey);
+    QString out;
+    return helper.testConnection(out);
 }
 
 bool ortNetworkSftp::syncServerList() {
@@ -117,34 +110,45 @@ bool ortNetworkSftp::syncServerList() {
     return true;
 }
 bool ortNetworkSftp::openConnection(bool fallback) {
-    bool result = helper.testConnection();
-    if (result) {
-        RTI->log("Connection validated.");
+    if (!fallback) {
+        helper.init(configInstance->ortServerURI);
     } else {
-        RTI->log("Unable to connect to server.");
-        RTI->setSevereErrors(true);
-        return false;
+        helper.init(configInstance->ortFallbackServerURI);
     }
-    if(!helper.exists(ORT_MODEFILE) || !helper.exists(ORT_SERVERFILE)) {
-        RTI->log("ERROR: ORT mode or server file not found.");
-        RTI->setSevereErrors(true);
-    } else {
-        RTI->log("Mode and server files found.");
+    QString error;
+    bool result = helper.testConnection(error);
+    if (!result) {
+        goto on_error;
     }
+    if(!helper.exists(QStringList{ORT_MODEFILE, ORT_SERVERFILE})) {
+        error = "ERROR: ORT mode or server file not found.";
+        goto on_error;
+    }
+    RTI->log("Mode and server files found.");
+    RTI->log("Connection validated.");
     if (syncServerList())
     {
-        // If copying the server list was succesul, read the local
+        // If copying the server list was successful, read the local
         // copy of the list into memory.
         serverList.readLocalServerList();
     }
 
-//    QString mode_file;
-//    result = helper.read(ORT_MODEFILE, mode_file);
-//    if ( result ) {
-//        RTI->log("Mode file:");
-//        RTI->log(mode_file);
-//    } else {
-//        RTI->log("Could not read mode file.");
-//    }
     return true;
+on_error:
+    RTI->log(error);
+    RTI->log("Unable to connect to server.");
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Error");
+    msgBox.setText("Unable to connect:\n" + error + "\n\nDo you want to review the configuration?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowIcon(ORT_ICON);
+    msgBox.setIcon(QMessageBox::Critical);
+
+    if (msgBox.exec()==QMessageBox::Yes)
+    {
+        // Call configuration dialog
+        ortConfigurationDialog::executeDialog();
+    }
+    RTI->setSevereErrors(true);
+    return false;
 }

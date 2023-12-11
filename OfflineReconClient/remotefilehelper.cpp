@@ -9,13 +9,17 @@ remoteFileHelper::remoteFileHelper(QObject *parent) : QObject(parent)
 
 }
 
-void remoteFileHelper::init(QString server, enum remoteFileHelper::connectionType type, QString hostKey) {
-    if (type == remoteFileHelper::connectionType::FTP) {
-        serverURI = "ftp://"+server;
-    } else if (type == remoteFileHelper::connectionType::SFTP) {
-        serverURI = "sftp://"+server;
+void remoteFileHelper::init(QString server, QString hostKey) {
+    serverURI = server;
+    if (server.startsWith("ftp://")) {
+        connectionType = FTP;
+    } else if (server.startsWith("sftp://")) {
+        connectionType = SFTP;
+    } else if (server.startsWith("scp://")) {
+        connectionType = SCP;
+    } else {
+        connectionType = UNKNOWN;
     }
-    connectionType = type;
     if (hostKey.isEmpty()) {
         hostkey = "acceptnew";
     } else {
@@ -25,34 +29,41 @@ void remoteFileHelper::init(QString server, enum remoteFileHelper::connectionTyp
     RTI->log("Set server URI to " + server);
 }
 
-bool remoteFileHelper::testConnection() {
+bool remoteFileHelper::testConnection(QString& error) {
     if (serverURI.isEmpty()) {
-        RTI->log("Server is not configured!");
+        error = "The Yarra server URI has not been defined.\nPlease check the configuration.";
         return false;
     }
     QStringList output;
     exec.setTimeout(ORT_CONNECT_TIMEOUT);
     bool success = runServerOperations(QStringList{}, output);
-    if (!success) return false;
-    for ( const QString& i : qAsConst(output))
-    {
-        if (i.contains("Session started")) {
-            return true;
-        }
+    if (success) {
+        return true;
     }
+    error = output.mid(output.count()-3,3).join("").trimmed();
     return false;
 }
 
 bool remoteFileHelper::exists(QString path) {
     QStringList output;
     exec.setTimeout(ORT_CONNECT_TIMEOUT);
-    return runServerOperations(QStringList("stat "+path),output);
+    return runServerOperations(QStringList("stat \"\""+path+"\"\""),output);
+}
+
+bool remoteFileHelper::exists(QStringList paths) {
+    QStringList output;
+    exec.setTimeout(ORT_CONNECT_TIMEOUT);
+    QStringList statCommands;
+    for ( const QString& i : static_cast<const QStringList&>(paths)) {
+        statCommands.append("stat \"\""+i+"\"\"");
+    }
+    return runServerOperations(statCommands, output);
 }
 
 long int remoteFileHelper::size(QString path) {
     QStringList output;
     exec.setTimeout(ORT_CONNECT_TIMEOUT);
-    bool success = runServerOperations(QStringList("stat "+path),output);
+    bool success = runServerOperations(QStringList("stat \"\""+path+"\"\""),output);
     if (!success) {
         return -1;
     }
@@ -64,16 +75,26 @@ long int remoteFileHelper::size(QString path) {
     return -1;
 }
 
+bool remoteFileHelper::get(QStringList paths, QDir dest) {
+   QStringList output;
+   exec.setTimeout(RDS_COPY_TIMEOUT);
+   QStringList getCommands;
+   for ( const QString& i : static_cast<const QStringList&>(paths)) {
+       getCommands.append("get \"\""+i+"\"\" \"\""+QDir::toNativeSeparators(dest.absolutePath())+"\\\"\"");
+   }
+   return runServerOperations(getCommands, output);
+}
+
 bool remoteFileHelper::get(QString path, QDir dest) {
    QStringList output;
    exec.setTimeout(RDS_COPY_TIMEOUT);
-   return runServerOperation("get "+path+" "+QDir::toNativeSeparators(dest.absolutePath())+"\\", output);
+   return runServerOperation("get \"\""+path+"\"\" \"\""+QDir::toNativeSeparators(dest.absolutePath())+"\\\"\"", output);
 }
 
 bool remoteFileHelper::put(QString path) {
    QStringList output;
    exec.setTimeout(RDS_COPY_TIMEOUT);
-   return runServerOperation("put "+QDir::toNativeSeparators(path)+" ./", output);
+   return runServerOperation("put \"\""+QDir::toNativeSeparators(path)+"\"\" ./", output);
 }
 
 
@@ -93,7 +114,7 @@ bool remoteFileHelper::runServerOperation(QString operation, QStringList &output
 
 bool remoteFileHelper::runServerOperations(QStringList operations, QStringList &output) {
     QString openCommand = "open " + serverURI;
-    if (connectionType == remoteFileHelper::SFTP) {
+    if (connectionType == SFTP || connectionType == SCP) {
         if (hostkey == "acceptnew") {
             openCommand += " -hostkey=acceptnew";
         } else {
