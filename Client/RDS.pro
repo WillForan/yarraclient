@@ -34,7 +34,9 @@ SOURCES += main.cpp \
         rds_checksum.cpp \
         ../NetLogger/netlogger.cpp \
     rds_iconwindow.cpp \
-    rds_exechelper.cpp
+    rds_exechelper.cpp \
+    rds_mailbox.cpp \
+    rds_mailboxwindow.cpp
 
 HEADERS  += rds_configurationwindow.h \
             rds_runtimeinformation.h \
@@ -54,11 +56,14 @@ HEADERS  += rds_configurationwindow.h \
             ../NetLogger/netlogger.h \
             ../NetLogger/netlog_events.h \
     rds_iconwindow.h \
-    rds_exechelper.h
+    rds_exechelper.h \
+    rds_mailbox.h \
+    rds_mailboxwindow.h
 
 FORMS    += rds_configurationwindow.ui \
             rds_operationwindow.ui \
             rds_activitywindow.ui \
             rds_debugwindow.ui \
             rds_copydialog.ui \
-    rds_iconwindow.ui
+    rds_iconwindow.ui \
+    rds_mailboxwindow.ui
