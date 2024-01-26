@@ -8,6 +8,8 @@ rdsMailboxWindow::rdsMailboxWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
+    ui->titleIcon->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
+
     setWindowFlags(Qt::SplashScreen | Qt::WindowStaysOnTopHint);
     QRect screenrect = ((QGuiApplication*)QGuiApplication::instance())->primaryScreen()->availableGeometry();
     move(screenrect.right() - width(), screenrect.bottom() - height());
@@ -15,6 +17,7 @@ rdsMailboxWindow::rdsMailboxWindow(QWidget *parent) :
 
 void rdsMailboxWindow::setMessage(QString message) {
     ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
+    ui->titleIcon->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
     ui->buttonBox->clear();
     ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Ok);
     ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Cancel);
@@ -23,6 +26,7 @@ void rdsMailboxWindow::setMessage(QString message) {
 
 void rdsMailboxWindow::setError(QString message) {
     ui->titleLabel->setStyleSheet("QLabel { background-color : #FF0000; color : white; }");
+    ui->titleIcon->setStyleSheet("QLabel { background-color : #FF0000; color : white; }");
     ui->buttonBox->clear();
     ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Ok);
     ui->messageText->setText(message);

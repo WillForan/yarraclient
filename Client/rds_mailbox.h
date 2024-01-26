@@ -7,7 +7,7 @@
 #include "rds_global.h"
 #include "rds_mailboxwindow.h"
 #include <../NetLogger/netlogger.h>
-
+#include <functional>
 class MailboxMessage
 {
 public:
@@ -24,22 +24,22 @@ class MailboxWorker : public QObject
 
     NetLogger netLogger;
     bool waiting;
-    QNetworkReply* currentReply;
 public:
     explicit MailboxWorker(QObject *parent = 0);
     void start();
     QTimer timer;
-    QTimer timeout;
     MailboxMessage currentMessage;
     rdsMailboxWindow* mailboxWindow;
+    void startChecking();
+    void stopChecking();
 
-signals:
-    void newMessage(MailboxMessage message);
+    template <typename F>
+    bool doRequest(QString endpoint, F&& fn);
 public slots:
     void updateMailbox();
-    void onMarkedMessageResponse();
-    void onNewMessagesResponse();
-    void replyTimeout();
+//    void onMarkedMessageResponse(QNetworkReply* reply);
+//    void onNewMessagesResponse(QNetworkReply* reply);
+//    void replyTimeout(QNetworkReply*);
     void windowClosing(QString button);
     void showMessage(MailboxMessage message);
 

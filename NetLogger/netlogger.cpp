@@ -306,13 +306,6 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
     {
         return 0;
     }
-//    if (!apiKey.isEmpty())
-//    {
-//        if (!query.hasQueryItem("api_key")) {
-//            query.addQueryItem("api_key",apiKey);
-//        }
-//    }
-    query.addQueryItem("api_key",apiKey);
 
     QUrl serviceUrl = QUrl("http://" + serverPath + "/" + endpt);
     serviceUrl.setScheme("http");
