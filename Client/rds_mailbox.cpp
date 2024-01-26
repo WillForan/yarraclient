@@ -67,7 +67,9 @@ void MailboxWorker::updateMailbox(){
 
 void MailboxWorker::windowClosing(QString button) {
     qDebug()<< "Window closing" << button;
-    bool did = doRequest(QString("mark_message_as_read/") + currentMessage.id, [this](QNetworkReply* reply) {
+    QUrlQuery query;
+    query.addQueryItem("response", button);
+    bool did = doRequest(QString("mark_message_as_read/") + currentMessage.id, query, [this](QNetworkReply* reply) {
         if (reply->error() == QNetworkReply::NetworkError::NoError)
         {
             startChecking();
@@ -96,10 +98,13 @@ void MailboxWorker::showMessage(MailboxMessage message) {
     mailboxWindow->show();
 
 }
-
 template <typename F>
 bool MailboxWorker::doRequest(QString endpoint, F&& fn) {
-    QUrlQuery query;
+    return doRequest(endpoint, QUrlQuery{}, fn);
+}
+
+template <typename F>
+bool MailboxWorker::doRequest(QString endpoint, QUrlQuery query, F&& fn) {
     query.addQueryItem("api_key",   RTI_CONFIG->logApiKey);
     query.addQueryItem("source_id", RTI_CONFIG->infoSerialNumber);
 

@@ -35,6 +35,8 @@ public:
 
     template <typename F>
     bool doRequest(QString endpoint, F&& fn);
+    template <typename F>
+    bool doRequest(QString endpoint, QUrlQuery, F&& fn);
 public slots:
     void updateMailbox();
 //    void onMarkedMessageResponse(QNetworkReply* reply);
