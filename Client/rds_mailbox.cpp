@@ -1,11 +1,17 @@
 #include "rds_mailbox.h"
 #include <QGuiApplication>
-
+#include "rds_network.h"
 MailboxMessage::MailboxMessage() {}
 
 MailboxMessage::MailboxMessage(QString id, QString content) {
     this->id=id;
     this->content;
+}
+
+
+Mailbox::Mailbox(QObject *parent) : QObject(parent) {
+//    worker.moveToThread(&mailboxThread);
+//    mailboxThread.start();
 }
 
 MailboxMessage::MailboxMessage(QJsonObject obj) {
@@ -16,21 +22,41 @@ MailboxMessage::MailboxMessage(QJsonObject obj) {
 
 MailboxWorker::MailboxWorker(QObject *parent) : QObject(parent)
 {
-    netLogger.configure("localhost:9999", EventInfo::SourceType::RDS, "12345", "12345", true);
-    connect(netLogger.networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onNewMessagesResponse(QNetworkReply*))) ;
 }
-void MailboxWorker::onMarkedMessageResponse(QNetworkReply* reply)
-{
-    qDebug() << "Marked message response";
-    disconnect(netLogger.networkManager, SIGNAL(finished(QNetworkReply*)), 0,0);
-    connect(netLogger.networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onNewMessagesResponse(QNetworkReply*))) ;
+void MailboxWorker::start() {
+    if (!RTI_NETLOG.isConfigured()) {
+        qDebug() << "netlog not configured";
+        return;
+    }
+    QObject::connect(&timer, SIGNAL(timeout()), this, SLOT(updateMailbox()));
+    QObject::connect(this, SIGNAL(newMessage(MailboxMessage)), this, SLOT(showMessage(MailboxMessage)));
     timer.start(1000);
 }
 
-void MailboxWorker::onNewMessagesResponse(QNetworkReply* reply)
+void MailboxWorker::onMarkedMessageResponse()
 {
     timer.start(1000);
-    auto result = reply->readAll();
+    if (currentReply->error() == QNetworkReply::NetworkError::NoError)
+    {
+        qDebug() << "Marked message response" << currentReply->readAll();
+        mailboxWindow->close();
+        return;
+    }
+    mailboxWindow = new rdsMailboxWindow();
+    mailboxWindow->setError("Network error while responding to message");
+    mailboxWindow->show();
+    delete currentReply;
+    currentReply = nullptr;
+}
+
+void MailboxWorker::onNewMessagesResponse()
+{
+    timer.start(1000);
+    if (currentReply->error() != QNetworkReply::NetworkError::NoError) {
+        qDebug()<< "Network error:" << currentReply->errorString();
+        return;
+    }
+    auto result = currentReply->readAll();
     QJsonParseError err;
     QJsonDocument js = QJsonDocument::fromJson(result, &err);
     if (err.error != QJsonParseError::NoError) {
@@ -48,40 +74,49 @@ void MailboxWorker::onNewMessagesResponse(QNetworkReply* reply)
 }
 
 
-Mailbox::Mailbox(QObject *parent) : QObject(parent) {
-    QObject::connect(&worker.timer, SIGNAL(timeout()), &worker, SLOT(onTimeout()));
-    QObject::connect(&worker, SIGNAL(newMessage(MailboxMessage)), this, SLOT(showMessage(MailboxMessage)));
-    worker.timer.start(1000);
-//    worker.moveToThread(&mailboxThread);
-//    mailboxThread.start();
-}
 
 void MailboxWorker::windowClosing(QString button) {
-    qDebug()<< "Window closed" << button;
+    qDebug()<< "Window closing" << button;
     QUrlQuery query;
-    disconnect(netLogger.networkManager, SIGNAL(finished(QNetworkReply*)), 0,0);
-    connect(netLogger.networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onMarkedMessageResponse(QNetworkReply*))) ;
-    netLogger.postDataAsync(query, QString("mark_message_as_read/") + currentMessage.id);
-//    worker.timer.start(1000);
+    query.addQueryItem("source_id",     RTI_CONFIG->infoSerialNumber);
+    currentReply = RTI_NETLOG.postDataAsync(query, QString("mark_message_as_read/") + currentMessage.id);
+    if (!currentReply) {
+        return;
+    }
+    connect(currentReply, SIGNAL(finished()), this, SLOT(onMarkedMessageResponse())) ;
+    timeout.singleShot(2000, this, &MailboxWorker::replyTimeout);
 }
 
-void Mailbox::showMessage(MailboxMessage message) {
+void MailboxWorker::showMessage(MailboxMessage message) {
     qDebug()<< message.id;
-    worker.timer.stop();
+    timer.stop();
     mailboxWindow = new rdsMailboxWindow();
-    QRect screenrect = ((QGuiApplication*)QGuiApplication::instance())->primaryScreen()->availableGeometry();
-    mailboxWindow->move(screenrect.right() - mailboxWindow->width(), screenrect.bottom() - mailboxWindow->height());
+//    QRect screenrect = ((QGuiApplication*)QGuiApplication::instance())->primaryScreen()->availableGeometry();
+//    mailboxWindow->move(screenrect.right() - mailboxWindow->width(), screenrect.bottom() - mailboxWindow->height());
     mailboxWindow->setMessage(message.content);
-    connect(mailboxWindow, SIGNAL(closing(QString)), &worker, SLOT(windowClosing(QString)));
+    connect(mailboxWindow, SIGNAL(closing(QString)), this, SLOT(windowClosing(QString)));
     mailboxWindow->show();
-    worker.currentMessage = message;
+    currentMessage = message;
 }
 
+void MailboxWorker::replyTimeout() {
+    if (currentReply->isRunning()) {
+        qDebug() << "Aborting: timeout";
+        emit currentReply->abort();
+    }
+}
 
-void MailboxWorker::onTimeout(){
-    qDebug()<<"Worker::onTimeout called";
+void MailboxWorker::updateMailbox(){
+    qDebug()<<"Worker::updateMailbox called";
     QUrlQuery query;
-    netLogger.postDataAsync(query, "get_unread_messages");
+    query.addQueryItem("source_id",     RTI_CONFIG->infoSerialNumber);
+
+    currentReply = RTI_NETLOG.postDataAsync(query, "get_unread_messages");
+    if (!currentReply) {
+        return;
+    }
+    connect(currentReply, SIGNAL(finished()), this, SLOT(onNewMessagesResponse())) ;
+    timeout.singleShot(2000, this, &MailboxWorker::replyTimeout);
     timer.stop();
     //    netLogger.waitForReply(reply, 1000);
 //    emit newMessage("asdf");

@@ -12,7 +12,7 @@
 #include "rds_processcontrol.h"
 #include "rds_debugwindow.h"
 #include "rds_iconwindow.h"
-
+#include "rds_mailbox.h"
 
 namespace Ui
 {
@@ -73,7 +73,7 @@ private:
     rdsLog log;
     rdsNetwork network;
     rdsProcessControl control;
-
+    MailboxWorker mailbox;
     QTimer controlTimer;
     QTimer heartbeatTimer;
 

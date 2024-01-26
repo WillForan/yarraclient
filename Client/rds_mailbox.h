@@ -24,34 +24,36 @@ class MailboxWorker : public QObject
 
     NetLogger netLogger;
     bool waiting;
-
+    QNetworkReply* currentReply;
 public:
     explicit MailboxWorker(QObject *parent = 0);
+    void start();
     QTimer timer;
+    QTimer timeout;
     MailboxMessage currentMessage;
+    rdsMailboxWindow* mailboxWindow;
 
 signals:
     void newMessage(MailboxMessage message);
 public slots:
-    void onTimeout();
-    void onMarkedMessageResponse(QNetworkReply* reply);
-    void onNewMessagesResponse(QNetworkReply* reply);
+    void updateMailbox();
+    void onMarkedMessageResponse();
+    void onNewMessagesResponse();
+    void replyTimeout();
     void windowClosing(QString button);
+    void showMessage(MailboxMessage message);
+
 };
 
 
 class Mailbox: public QObject
 {
     Q_OBJECT
-    QThread mailboxThread;
-    QTimer mailboxTimer;
+//    QThread mailboxThread;
+//    QTimer mailboxTimer;
     MailboxWorker worker;
-    rdsMailboxWindow* mailboxWindow;
 public:
     explicit Mailbox(QObject *parent = 0);
-public slots:
-    void showMessage(MailboxMessage message);
-
 };
 
 

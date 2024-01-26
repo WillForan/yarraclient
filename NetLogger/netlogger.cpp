@@ -313,7 +313,6 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
 //        }
 //    }
     query.addQueryItem("api_key",apiKey);
-    query.addQueryItem("source_id",     source_id);
 
     QUrl serviceUrl = QUrl("http://" + serverPath + "/" + endpt);
     serviceUrl.setScheme("http");
