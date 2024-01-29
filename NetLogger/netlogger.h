@@ -5,6 +5,7 @@
 #include <QUrlQuery>
 #include <QtNetwork>
 #include "netlog_events.h"
+#include <functional>
 
 class NetLogger
 {
@@ -26,6 +27,11 @@ public:
     void postEvent    (EventInfo::Type type, EventInfo::Detail detail=EventInfo::Detail::Information, EventInfo::Severity severity=EventInfo::Severity::Success, QString info=QString(""), QString data=QString(""));
     bool postEventSync(EventInfo::Type type, EventInfo::Detail detail=EventInfo::Detail::Information, EventInfo::Severity severity=EventInfo::Severity::Success, QString info=QString(""), QString data=QString(""), int timeoutMsec=NETLOG_EVENT_TIMEOUT);
     bool postEventSync(QNetworkReply::NetworkError& error, int& status_code, EventInfo::Type type, EventInfo::Detail detail=EventInfo::Detail::Information, EventInfo::Severity severity=EventInfo::Severity::Success, QString info=QString(""), QString data=QString(""), int timeoutMsec=NETLOG_POST_TIMEOUT);
+
+//    template <typename F>
+    bool doRequest(QString endpoint, const std::function<void(QNetworkReply*)> fn, int timeout = 2000);
+//    template <typename F>
+    bool doRequest(QString endpoint, QUrlQuery, const std::function<void(QNetworkReply*)> fn, int timeout = 2000);
 
     static QString dnsLookup(QString address);
     QNetworkAccessManager* networkManager;

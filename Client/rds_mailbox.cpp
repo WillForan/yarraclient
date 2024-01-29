@@ -8,41 +8,37 @@ MailboxMessage::MailboxMessage(QString id, QString content) {
     this->content;
 }
 
-
-Mailbox::Mailbox(QObject *parent) : QObject(parent) {
-}
-
 MailboxMessage::MailboxMessage(QJsonObject obj) {
     id=obj.value("message_id").toString();
     content=obj.value("content").toString();
 }
 
-MailboxWorker::MailboxWorker(QObject *parent) : QObject(parent)
+Mailbox::Mailbox(QObject *parent) : QObject(parent)
 {
 }
-void MailboxWorker::start() {
+void Mailbox::start() {
     if (!RTI_NETLOG.isConfigured()) {
         qDebug() << "netlog not configured";
         return;
     }
-    QObject::connect(&timer, &QTimer::timeout, this, &MailboxWorker::updateMailbox);
+    QObject::connect(&timer, &QTimer::timeout, this, &Mailbox::updateMailbox);
     startChecking();
 }
 
-void MailboxWorker::startChecking() {
+void Mailbox::startChecking() {
     qDebug() << "start checking";
     timer.start(1000);
 }
 
-void MailboxWorker::stopChecking() {
+void Mailbox::stopChecking() {
     qDebug() << "stop checking";
     timer.stop();
 }
 
-void MailboxWorker::updateMailbox(){
-    qDebug()<<"Worker::updateMailbox called";
+void Mailbox::updateMailbox(){
+    qDebug()<<"updateMailbox called";
 
-    doRequest("get_unread_messages", [this](QNetworkReply* reply) {
+    RTI_NETLOG.doRequest("get_unread_messages", [this](QNetworkReply* reply) {
         startChecking();
 
         if (reply->error() != QNetworkReply::NetworkError::NoError) {
@@ -65,11 +61,11 @@ void MailboxWorker::updateMailbox(){
     });
 }
 
-void MailboxWorker::windowClosing(QString button) {
+void Mailbox::windowClosing(QString button) {
     qDebug()<< "Window closing" << button;
     QUrlQuery query;
     query.addQueryItem("response", button);
-    bool did = doRequest(QString("mark_message_as_read/") + currentMessage.id, query, [this](QNetworkReply* reply) {
+    bool did = RTI_NETLOG.doRequest(QString("mark_message_as_read/") + currentMessage.id, query, [this](QNetworkReply* reply) {
         if (reply->error() == QNetworkReply::NetworkError::NoError)
         {
             startChecking();
@@ -88,47 +84,14 @@ void MailboxWorker::windowClosing(QString button) {
     }
 }
 
-void MailboxWorker::showMessage(MailboxMessage message) {
+void Mailbox::showMessage(MailboxMessage message) {
     qDebug()<< message.id;
     stopChecking();
     mailboxWindow = new rdsMailboxWindow();
     mailboxWindow->setMessage(message.content);
     currentMessage = message;
-    connect(mailboxWindow, &rdsMailboxWindow::closing, this, &MailboxWorker::windowClosing);
+    connect(mailboxWindow, &rdsMailboxWindow::closing, this, &Mailbox::windowClosing);
     mailboxWindow->show();
 
-}
-template <typename F>
-bool MailboxWorker::doRequest(QString endpoint, F&& fn) {
-    return doRequest(endpoint, QUrlQuery{}, fn);
-}
-
-template <typename F>
-bool MailboxWorker::doRequest(QString endpoint, QUrlQuery query, F&& fn) {
-    query.addQueryItem("api_key",   RTI_CONFIG->logApiKey);
-    query.addQueryItem("source_id", RTI_CONFIG->infoSerialNumber);
-
-    QNetworkReply* reply = RTI_NETLOG.postDataAsync(query, endpoint);
-    if (!reply) {
-        return false;
-    }
-    connect(reply, &QNetworkReply::finished, this,
-            [this, reply, fn, endpoint] {
-                qDebug() << "Reply from: " << endpoint;
-                (fn)(reply);
-                reply->deleteLater();
-            }
-    );
-    QTimer::singleShot(2000, reply,
-        [this,reply]() {
-            qDebug()<<"timeout";
-            if (reply->isRunning()) {
-                qDebug() << "Aborting: timeout";
-                emit reply->abort();
-            }
-            reply->deleteLater();
-        }
-    );
-    return true;
 }
 
