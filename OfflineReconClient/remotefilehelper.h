@@ -22,6 +22,7 @@ class remoteFileHelper : public QObject
     QString hostkey;
 public:
     connectionType connectionType;
+    QString remoteBasePath;
     explicit remoteFileHelper(QObject *parent = nullptr);
     void init(QString server, QString hostKey="acceptnew");
     bool testConnection(QString& error);
