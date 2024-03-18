@@ -108,7 +108,7 @@ bool ortReconTask::transferDataFiles()
     if (!fileInfo.exists())
     {
         reconTaskFailed=true;
-        RTI->log("ERROR: Could not find previously exported file.");
+        RTI->log(QString("ERROR: Could not find previously exported file ")+scanFile+" in "+ network->queueDir.absolutePath());
         errorMessageUI="Exported files could not be found.";
         return false;
     }
@@ -181,9 +181,11 @@ bool ortReconTask::generateTaskFile()
             if (cloudReconstruction)
             {
                 taskFilePath=cloudOUTpath+"/"+taskFilename;
+            } else if (QString(network->metaObject()->className()) == QString("ortNetworkSftp")) {
+                // If we are using the sftp uploader we need to put the task somewhere locally and then upload it.
+                taskFilePath=network->queueDir.filePath(taskFilename);
             }
             QSettings taskFile(taskFilePath, QSettings::IniFormat);
-
             // Write the entries
             taskFile.setValue("Task/ReconMode", reconMode);
             taskFile.setValue("Task/EMailNotification", emailNotifier);
@@ -233,6 +235,12 @@ bool ortReconTask::generateTaskFile()
         // Free the lock file
         lockFile.unlock();
 
+
+        if (QString(network->metaObject()->className()) == QString("ortNetworkSftp")) {
+            // If we are using the sftp uploader we need to put the task somewhere locally and then upload it.
+            network->currentFilename = taskFilename;
+            network->copyFile();
+        }
         RTI->log("Generated task file. Done with submission.");
     }
     else
