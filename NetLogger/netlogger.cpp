@@ -307,8 +307,8 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
         return 0;
     }
 
-    QUrl serviceUrl = QUrl("https://" + serverPath + "/" + endpt);
-    serviceUrl.setScheme("https");
+    QUrl serviceUrl = QUrl("http://" + serverPath + "/" + endpt);
+    serviceUrl.setScheme("http");
     //RTI->log(serviceUrl.toString());
 
     QNetworkRequest req(serviceUrl);
@@ -322,11 +322,62 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
     return networkManager->post(req,postData);
 }
 
+bool NetLogger::doRequest(QString endpoint, const std::function<void(QNetworkReply*)> fn, int timeout) {
+    return doRequest(endpoint, QUrlQuery{}, fn, timeout);
+}
+
+bool NetLogger::doRequest(QString endpoint, QUrlQuery query, const std::function<void(QNetworkReply*)> fn, int timeout) {
+    query.addQueryItem("api_key",   RTI_CONFIG->logApiKey);
+    query.addQueryItem("source_id", RTI_CONFIG->infoSerialNumber);
+
+    QNetworkReply* reply = postDataAsync(query, endpoint);
+    if (!reply) {
+        return false;
+    }
+    QObject::connect(reply, &QNetworkReply::finished,
+            [this, reply, fn, endpoint]() {
+                qDebug() << "Reply from: " << endpoint;
+                fn(reply);
+                reply->deleteLater();
+            }
+    );
+    QTimer::singleShot(timeout, reply,
+        [this,reply]() {
+            qDebug()<<"timeout";
+            if (reply->isRunning()) {
+                qDebug() << "Aborting: timeout";
+                emit reply->abort();
+            }
+            reply->deleteLater();
+        }
+    );
+    return true;
+}
+
+
+bool NetLogger::waitForReply(QNetworkReply* reply, int timeoutMsec) {
+    // Use eventloop to wait until post event has finished. Event loop will timeout after 20sec
+    QEventLoop eventLoop;
+    QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+    QTimer::singleShot(timeoutMsec, &eventLoop, SLOT(quit()));
+
+    if (reply->isRunning())
+    {
+        eventLoop.exec();
+    }
+
+    if (reply->isRunning())
+    {
+        return true;
+    }
+    reply->disconnect(&eventLoop);
+    return false;
+}
+
 
 // This posts some data by urlencoding is, so that's why the parameter is a URLQuery.
 // It returns true if and only if it recieves an HTTP 200 OK response. Otherwise, there's either a network error
 // or, if the network succeeded but the server failed, an HTTP status code.
-
 bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkError& error, int &http_status, QString &errorString, int timeoutMsec)
 {    
     if (!configured)
@@ -347,22 +398,7 @@ bool NetLogger::postData(QUrlQuery query, QString endpt, QNetworkReply::NetworkE
         return false;
     }
 
-    // Use eventloop to wait until post event has finished. Event loop will timeout after 20sec
-    QEventLoop eventLoop;
-    QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-    QTimer::singleShot(timeoutMsec, &eventLoop, SLOT(quit()));
-
-    if (reply->isRunning())
-    {
-        eventLoop.exec();
-    }
-
-    if (reply->isRunning())
-    {
-        timeout=true;
-    }
-
-    reply->disconnect(&eventLoop);
+    timeout = waitForReply(reply, timeoutMsec);
 
     if (reply->error() != QNetworkReply::NoError)
     {
