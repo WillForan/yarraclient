@@ -6,7 +6,6 @@
 #include <ort_serverlist.h>
 #include <../NetLogger/netlogger.h>
 
-
 class ortConfiguration;
 
 
@@ -19,13 +18,13 @@ public:
     ortConfiguration* configInstance;
     void setConfigInstance(ortConfiguration* instance);
 
-    bool prepare();
+    virtual bool prepare();
 
-    bool openConnection(bool fallback=false);
-    void closeConnection();    
-    bool transferQueueFiles();
+    virtual bool openConnection(bool fallback=false);
+    virtual void closeConnection();
+    virtual bool transferQueueFiles();
 
-    bool reconnectToMatchingServer(QString requiredServerType);
+    virtual bool reconnectToMatchingServer(QString requiredServerType);
 
     QString connectCmd;
     QString serverPath;
@@ -50,11 +49,13 @@ public:
     QString currentFilename;
     qint64  currentFilesize;
 
-    void releaseFile();
-    bool removeFile();
-    bool verifyTransfer();
-    bool getFileToProcess(int index);
-    bool copyFile();
+    virtual void releaseFile();
+    virtual bool removeFile();
+    virtual bool verifyTransfer();
+    virtual bool getFileToProcess(int index);
+    virtual bool copyFile();
+    virtual bool doReconnectServerEntry(ortServerEntry *selectedEntry);
+    virtual QSettings* readModelist(QString& error);
 
     void cleanLocalQueueDir();
 

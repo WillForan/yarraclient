@@ -11,7 +11,6 @@
 
 #include "ort_network.h"
 
-
 ortNetwork::ortNetwork()
 {
     connectCmd="";
@@ -265,13 +264,51 @@ bool ortNetwork::openConnection(bool fallback)
                 // Call configuration dialog
                 ortConfigurationDialog::executeDialog();
             }
+
         }
     }
 
     return (!error);
 }
 
+QSettings* ortNetwork::readModelist(QString &error) {
+    // Check if the mode file exists and if it's readable
+    QString modeFileName = serverPath+"/"+ORT_MODEFILE;
+    QString serverFileName = serverPath+"/"+ORT_SERVERFILE;
 
+    QFile modeFile(modeFileName);
+    if (!modeFile.open(QIODevice::ReadOnly))
+    {
+        // Opening the file failed -- maybe the file is edited at this moment
+        // Wait for a moment, then try again
+
+        // TODO: Better check for lock file.
+
+        RTI->log("WARNING: Opening mode file failed. Retrying in 2 sec.");
+        Sleep(2000);
+
+        if (!modeFile.open(QIODevice::ReadOnly))
+        {
+            error="Could not read mode file (file locked).";
+            return nullptr;
+        }
+    }
+
+    modeFile.close();
+
+    // First read the server file to learn what server this is
+    QSettings serverFileIni(serverFileName, QSettings::IniFormat);
+
+    QString serverName=serverFileIni.value("Server/Name", ORT_INVALID).toString();// TODO: should this be "YarraServer/Name?
+    if (serverName==ORT_INVALID)
+    {
+        error="Server file content is not valid.";
+        return nullptr;
+    }
+
+    // Now we should be safe, so read the file
+    return new QSettings(modeFileName, QSettings::IniFormat);
+}
 void ortNetwork::closeConnection()
 {
     if (disconnectCmd!="")
@@ -287,6 +324,46 @@ void ortNetwork::closeConnection()
     }
 }
 
+bool ortNetwork::doReconnectServerEntry(ortServerEntry *selectedEntry) {
+
+
+    bool success=false;
+    bool connectCmdSuccess=false;
+    {
+    rdsExecHelper execHelper;
+    execHelper.setMonitorNetUseOutput();
+    execHelper.setCommand(connectCmd);
+    connectCmdSuccess=execHelper.callNetUseTimout(connectTimeout);
+    success=connectCmdSuccess;
+    RTI->processEvents();
+    }
+    if (!success)
+    {
+        RTI->log("Calling the reconnect command failed: " + connectCmd);
+        return false;
+    }
+
+    serverTaskDir.refresh();
+    if ((success) && (!serverTaskDir.exists(serverPath)))
+    {
+        RTI->log("ERROR: Could not access server path on new server: " + serverPath);
+        return false;
+    }
+
+    if ((success) && (!serverTaskDir.cd(serverPath)))
+    {
+        RTI->log("ERROR: Could not change to base path of network drive.");
+        return false;
+    }
+
+    if ((success) &&
+        ((!serverTaskDir.exists(ORT_MODEFILE)) || (!serverTaskDir.exists(ORT_SERVERFILE))))
+    {
+        RTI->log("ERROR: Mode or server file not found.");
+        return false;
+    }
+    return true;
+}
 
 bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
 {
@@ -352,6 +429,7 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
     // If already connected to this server, then exit
     if (selectedEntry->name==currentServer)
     {
+        RTI->log("Already connected to this server.");
         selectedServer=currentServer;
         return true;
     }
@@ -376,47 +454,12 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
             RTI->log("Error: Invalid server entry received.");
             continue;
         }
-
+        serverPath=selectedEntry->serverPath;
         selectedServer=selectedEntry->name;
         connectCmd=selectedEntry->connectCmd;
 
-        bool success=false;
-        bool connectCmdSuccess=false;
+        bool success = doReconnectServerEntry(selectedEntry);
 
-        {
-            // Declared inside explicit scope to enforce prompt destruction
-            rdsExecHelper execHelper;
-            execHelper.setMonitorNetUseOutput();
-            execHelper.setCommand(connectCmd);
-            connectCmdSuccess=execHelper.callNetUseTimout(connectTimeout);
-            success=connectCmdSuccess;
-            RTI->processEvents();
-        }
-
-        if (!success)
-        {
-            RTI->log("Calling the reconnect command failed: " + connectCmd);
-        }
-
-        serverTaskDir.refresh();
-        if ((success) && (!serverTaskDir.exists(serverPath)))
-        {
-            RTI->log("ERROR: Could not access server path on new server: " + serverPath);
-            success=false;
-        }
-
-        if ((success) && (!serverTaskDir.cd(serverPath)))
-        {
-            RTI->log("ERROR: Could not change to base path of network drive.");
-            success=false;
-        }
-
-        if ((success) &&
-            ((!serverTaskDir.exists(ORT_MODEFILE)) || (!serverTaskDir.exists(ORT_SERVERFILE))))
-        {
-            RTI->log("ERROR: Mode or server file not found.");
-            success=false;
-        }
 
         // OK, everything looks good. New server is connected.
         if (success)
@@ -434,7 +477,7 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
 
     if (!serverConnected)
     {
-        errorReason="Unable to connected to requested server type.";
+        errorReason="Unable to connect to requested server type.";
     }
 
     return serverConnected;

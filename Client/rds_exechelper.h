@@ -17,7 +17,7 @@ public:
     void setCommand(QString& cmdLineToRun);
 
     bool run();
-    bool run(QString cmdLine);
+    bool run(QString cmdLine, QString nativeArguments="");
     QStringList output;
 
     static void safeSleep(int ms);

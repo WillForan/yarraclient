@@ -69,47 +69,8 @@ bool ortModeList::readModeList()
         return false;
     }
 
-    // Check if the mode file exists and if it's readable
-    QString modeFileName=network->serverPath+"/"+ORT_MODEFILE;
-    QString serverFileName=network->serverPath+"/"+ORT_SERVERFILE;
-
-    QFile modeFile(modeFileName);
-    if (!modeFile.open(QIODevice::ReadOnly))
-    {
-        // Opening the file failed -- maybe the file is edited at this moment
-        // Wait for a moment, then try again
-
-        // TODO: Better check for lock file.
-
-        RTI->log("WARNING: Opening mode file failed. Retrying in 2 sec.");
-        Sleep(2000);
-
-        if (!modeFile.open(QIODevice::ReadOnly))
-        {
-            error=true;
-            errorText="Could not read mode file (file locked).";
-        }
-    }
-
-    if (!error)
-    {
-        modeFile.close();
-
-        // First read the server file to learn what server this is
-        {
-            QSettings serverFileIni(serverFileName, QSettings::IniFormat);
-
-            serverName=serverFileIni.value("YarraServer/Name", ORT_INVALID).toString();
-            if (serverName==ORT_INVALID)
-            {
-                error=true;
-                errorText="Server file content is not valid.";
-            }
-        }
-
-        // Now we should be safe, so read the file
-        QSettings modeFileIni(modeFileName, QSettings::IniFormat);
-
+    QSettings* modeFileIni = network->readModelist(errorText);
+    if (modeFileIni) {
         // Read the settings from the file
         int modeCount=0;
         QString modeName="";
@@ -118,7 +79,7 @@ bool ortModeList::readModeList()
         // First estimate the number of modes and mode names
         while (!finished)
         {
-            modeName=modeFileIni.value("Modes/"+QString::number(modeCount), ORT_INVALID).toString();
+            modeName=modeFileIni->value("Modes/"+QString::number(modeCount), ORT_INVALID).toString();
 
             if ((modeName!=ORT_INVALID) && (modeCount<65000))
             {
@@ -142,26 +103,26 @@ bool ortModeList::readModeList()
         {
             modeName=modes.at(i)->idName;
 
-            modes.at(i)->protocolTag     =modeFileIni.value(modeName+"/Tag",              ORT_INVALID).toString();
-            modes.at(i)->readableName    =modeFileIni.value(modeName+"/Name",             ORT_INVALID).toString();
+            modes.at(i)->protocolTag     =modeFileIni->value(modeName+"/Tag",              ORT_INVALID).toString();
+            modes.at(i)->readableName    =modeFileIni->value(modeName+"/Name",             ORT_INVALID).toString();
 
-            QStringList tempList=modeFileIni.value(modeName+"/ConfirmationMail", "").toStringList();
+            QStringList tempList=modeFileIni->value(modeName+"/ConfirmationMail", "").toStringList();
             modes.at(i)->mailConfirmation=tempList.join(",");
 
-            modes.at(i)->requiresACC           =modeFileIni.value(modeName+"/RequiresACC",        true).toBool();
-            modes.at(i)->requiresAdjScans      =modeFileIni.value(modeName+"/RequiresAdjScans",   false).toBool();
-            modes.at(i)->minimumSizeMB         =modeFileIni.value(modeName+"/MinimumSizeMB",      ORT_MINSIZEMB).toDouble();
-            modes.at(i)->requiredServerType    =modeFileIni.value(modeName+"/RequiredServerType", "").toString();
-            modes.at(i)->requestAdditionalFiles=modeFileIni.value(modeName+"/RequestAdditionalFiles", false).toBool();
+            modes.at(i)->requiresACC           =modeFileIni->value(modeName+"/RequiresACC",        true).toBool();
+            modes.at(i)->requiresAdjScans      =modeFileIni->value(modeName+"/RequiresAdjScans",   false).toBool();
+            modes.at(i)->minimumSizeMB         =modeFileIni->value(modeName+"/MinimumSizeMB",      ORT_MINSIZEMB).toDouble();
+            modes.at(i)->requiredServerType    =modeFileIni->value(modeName+"/RequiredServerType", "").toString();
+            modes.at(i)->requestAdditionalFiles=modeFileIni->value(modeName+"/RequestAdditionalFiles", false).toBool();
             modes.at(i)->computeMode           =ortModeEntry::OnPremise;
 
             // Read first user parameter
-            modes.at(i)->paramLabel      =modeFileIni.value(modeName+"/ParamLabel",       "").toString();
-            modes.at(i)->paramDescription=modeFileIni.value(modeName+"/ParamDescription", "").toString();
-            modes.at(i)->paramDefault    =modeFileIni.value(modeName+"/ParamDefault",     1).toDouble();
-            modes.at(i)->paramMin        =modeFileIni.value(modeName+"/ParamMin",         0).toDouble();
-            modes.at(i)->paramMax        =modeFileIni.value(modeName+"/ParamMax",         999999).toDouble();
-            modes.at(i)->paramIsFloat    =modeFileIni.value(modeName+"/ParamIsFloat",     false).toBool();
+            modes.at(i)->paramLabel      =modeFileIni->value(modeName+"/ParamLabel",       "").toString();
+            modes.at(i)->paramDescription=modeFileIni->value(modeName+"/ParamDescription", "").toString();
+            modes.at(i)->paramDefault    =modeFileIni->value(modeName+"/ParamDefault",     1).toDouble();
+            modes.at(i)->paramMin        =modeFileIni->value(modeName+"/ParamMin",         0).toDouble();
+            modes.at(i)->paramMax        =modeFileIni->value(modeName+"/ParamMax",         999999).toDouble();
+            modes.at(i)->paramIsFloat    =modeFileIni->value(modeName+"/ParamIsFloat",     false).toBool();
 
             // If the parameter is an integer parameter, then round all values to integers
             if (!modes.at(i)->paramIsFloat)
@@ -172,12 +133,12 @@ bool ortModeList::readModeList()
             }
 
             // Read second user parameter
-            modes.at(i)->param2Label      =modeFileIni.value(modeName+"/Param2Label",       "").toString();
-            modes.at(i)->param2Description=modeFileIni.value(modeName+"/Param2Description", "").toString();
-            modes.at(i)->param2Default    =modeFileIni.value(modeName+"/Param2Default",     1).toDouble();
-            modes.at(i)->param2Min        =modeFileIni.value(modeName+"/Param2Min",         0).toDouble();
-            modes.at(i)->param2Max        =modeFileIni.value(modeName+"/Param2Max",         999999).toDouble();
-            modes.at(i)->param2IsFloat    =modeFileIni.value(modeName+"/Param2IsFloat",     false).toBool();
+            modes.at(i)->param2Label      =modeFileIni->value(modeName+"/Param2Label",       "").toString();
+            modes.at(i)->param2Description=modeFileIni->value(modeName+"/Param2Description", "").toString();
+            modes.at(i)->param2Default    =modeFileIni->value(modeName+"/Param2Default",     1).toDouble();
+            modes.at(i)->param2Min        =modeFileIni->value(modeName+"/Param2Min",         0).toDouble();
+            modes.at(i)->param2Max        =modeFileIni->value(modeName+"/Param2Max",         999999).toDouble();
+            modes.at(i)->param2IsFloat    =modeFileIni->value(modeName+"/Param2IsFloat",     false).toBool();
 
             // If the parameter is an integer parameter, then round all values to integers
             if (!modes.at(i)->param2IsFloat)
@@ -187,10 +148,8 @@ bool ortModeList::readModeList()
                 modes.at(i)->param2Max    =int(modes.at(i)->param2Max);
             }
         }
-    }
-
-    if (error)
-    {
+        return true;
+    } else {
         RTI->log("Error during reading of mode file.");
         RTI->log("ERROR: "+errorText);
 
@@ -203,11 +162,6 @@ bool ortModeList::readModeList()
         msgBox.exec();
 
         return false;
-    }
-    else
-    {
-        // Reading the mode file was successful
-        return true;
     }
 }
 

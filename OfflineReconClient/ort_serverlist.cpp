@@ -27,12 +27,8 @@ void ortServerList::clearList()
     }
 }
 
-
-bool ortServerList::syncServerList(QString remotePath)
-{
+bool ortServerList::removeLocalServerList() {
     QDir localDir(appPath);
-
-    bool removedServerList=false;
 
     // Remove the old copy of the serverlist file, if it exists
     if (localDir.exists(ORT_SERVERLISTFILE))
@@ -46,20 +42,23 @@ bool ortServerList::syncServerList(QString remotePath)
 
         if (!localDir.remove(ORT_SERVERLISTFILE))
         {
-            RTI->log("Error: Cannot remove local chached copy of server list!");
+            RTI->log("Error: Cannot remove local cached copy of server list!");
             RTI->log("Error: Check write permission in installation folder.");
-
-            removedServerList=false;
             return false;
         }
         else
         {
-            removedServerList=true;
+            return true;
         }
     }
-
+    return false;
+}
+bool ortServerList::syncServerList(QString remotePath)
+{
+    QDir localDir(appPath);
     QDir remoteDir(remotePath);
 
+    bool removedServerList = removeLocalServerList();
     // Check if server list exists in remote directory
     if (!remoteDir.exists(ORT_SERVERLISTFILE))
     {
@@ -70,7 +69,6 @@ bool ortServerList::syncServerList(QString remotePath)
             // a problem with the server.
             RTI->log("Warning: Removed local server list but did not find one on server.");
         }
-
         return true;
     }
 
@@ -152,8 +150,9 @@ bool ortServerList::readServerList(QString filePath)
                 entry->name      =serverName;
                 entry->type      =serverListIni.value("Type","").toStringList();
                 entry->connectCmd=serverListIni.value("ConnectCmd","").toString();
-
-                // If a Base64 encoded version is availabe, decode it and overwrite
+                entry->serverPath=serverListIni.value("ServerPath","").toString();
+                entry->hostKey   =serverListIni.value("HostKey","").toString();
+                // If a Base64 encoded version is available, decode it and overwrite
                 // the other setting.
                 QString connectCmdE=serverListIni.value("ConnectCmdE","").toString();
                 if (connectCmdE!="")

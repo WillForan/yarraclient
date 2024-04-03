@@ -25,6 +25,10 @@ public:
     bool        ortStartRDSOnShutdown;
     bool        ortCloudSupportEnabled;
 
+    QString     ortConnectionType;
+    QString     ortServerURI;
+    QString     ortFallbackServerURI;
+
     QString     logServerAddress;
     QString     logServerAPIKey;
 

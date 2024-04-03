@@ -7,8 +7,8 @@ ortConfiguration::ortConfiguration()
     ortSystemName=ORT_INVALID;
 
     infoSerialNumber   =QProcessEnvironment::systemEnvironment().value("SERIAL_NUMBER",   "0");
-    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unkown");
-    infoSoftwareVersion=QProcessEnvironment::systemEnvironment().value("SOFTWARE_VERSION","Unkown");
+    infoScannerType    =QProcessEnvironment::systemEnvironment().value("PRODUCT_NAME",    "Unknown");
+    infoSoftwareVersion=QProcessEnvironment::systemEnvironment().value("SOFTWARE_VERSION","Unknown");
 
     // Read information specifically for NumarisX
     if (infoScannerType=="Numaris/X")
@@ -32,7 +32,13 @@ ortConfiguration::~ortConfiguration()
 
 bool ortConfiguration::isConfigurationValid()
 {
-    return (ortSystemName!=ORT_INVALID);
+    if (ortSystemName==ORT_INVALID) {
+        return false;
+    }
+    if (ortConnectionType != "New" && ortConnectionType != "SMB" ) {
+        return false;
+    }
+    return true;
 }
 
 
@@ -49,6 +55,10 @@ void ortConfiguration::loadConfiguration()
     ortConnectTimeout     =settings.value("ORT/ConnectTimeout", 0).toInt();
     ortStartRDSOnShutdown =settings.value("ORT/StartRDSOnShutdown", false).toBool();
     ortCloudSupportEnabled=settings.value("ORT/CloudSupport",false).toBool();
+    ortConnectionType     =settings.value("ORT/ConnectionType", "SMB").toString();
+
+    ortServerURI          =settings.value("ORT/ServerURI", "").toString();
+    ortFallbackServerURI  =settings.value("ORT/FallbackServerURI", "").toString();
 
     // Read the mail presets for the ORT configuration dialog
     ortMailPresets.clear();
@@ -76,6 +86,9 @@ void ortConfiguration::saveConfiguration()
     settings.setValue("ORT/ConnectTimeout",     ortConnectTimeout);
     settings.setValue("ORT/StartRDSOnShutdown", ortStartRDSOnShutdown);
     settings.setValue("ORT/CloudSupport",       ortCloudSupportEnabled);
+    settings.setValue("ORT/ConnectionType",     ortConnectionType);
+    settings.setValue("ORT/ServerURI",          ortServerURI);
+    settings.setValue("ORT/FallbackServerURI",  ortFallbackServerURI);
 
     // Read the mail presets for the ORT configuration dialog
     for (int i=0; i<ortMailPresets.count(); i++)

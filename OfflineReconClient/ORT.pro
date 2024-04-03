@@ -25,6 +25,7 @@ SOURCES += main.cpp \
     ../Client/rds_log.cpp \
     ort_confirmationdialog.cpp \
     ort_modelist.cpp \
+    ort_network_sftp.cpp \
     ort_waitdialog.cpp \
     ort_copydialog.cpp \
     ort_network.cpp \
@@ -41,7 +42,8 @@ SOURCES += main.cpp \
     ../CloudTools/yct_aws/qtaws.cpp \
     ../CloudTools/yct_api.cpp \
     ../CloudTools/yct_prepare/yct_twix_anonymizer.cpp \
-    ../CloudAgent/yca_threadlog.cpp
+    ../CloudAgent/yca_threadlog.cpp \
+    remotefilehelper.cpp
 
 
 HEADERS  += \
@@ -54,6 +56,7 @@ HEADERS  += \
     ../Client/rds_log.h \
     ort_confirmationdialog.h \
     ort_modelist.h \
+    ort_network_sftp.h \
     ort_waitdialog.h \
     ort_copydialog.h \
     ort_network.h \
@@ -71,7 +74,8 @@ HEADERS  += \
     ../CloudTools/yct_aws/qtawsqnam.h \
     ../CloudTools/yct_aws/qtaws.h \
     ../CloudTools/yct_prepare/yct_twix_anonymizer.h \
-    ../CloudTools/yct_api.h
+    ../CloudTools/yct_api.h \
+    remotefilehelper.h
 
     
 FORMS    += \
