@@ -299,7 +299,7 @@ QSettings* ortNetwork::readModelist(QString &error) {
     // First read the server file to learn what server this is
     QSettings serverFileIni(serverFileName, QSettings::IniFormat);
 
-    QString serverName=serverFileIni.value("Server/Name", ORT_INVALID).toString();// TODO: should this be "YarraServer/Name?
+    QString serverName=serverFileIni.value("YarraServer/Name", ORT_INVALID).toString();
     if (serverName==ORT_INVALID)
     {
         error="Server file content is not valid.";

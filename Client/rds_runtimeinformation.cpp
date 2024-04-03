@@ -325,6 +325,18 @@ int rdsRuntimeInformation::determineNumarisXVersion()
                 detectedVersion=RDS_XA51A;
                 break;
             }
+
+            if (buffer=="VA60A")
+            {
+                detectedVersion=RDS_XA60A;
+                break;
+            }
+
+            if (buffer=="VA61A")
+            {
+                detectedVersion=RDS_XA61A;
+                break;
+            }
         }
     }
 
