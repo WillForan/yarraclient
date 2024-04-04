@@ -156,10 +156,9 @@ void ortConfigurationDialog::readSettings()
     ui->autoLaunchRDSCheckbox->setChecked(settings.value("ORT/StartRDSOnShutdown", false).toBool());
     ui->cloudCheckbox->setChecked        (settings.value("ORT/CloudSupport",       false).toBool());
 
-    ui->serverTypeComboBox->setCurrentText(settings.value("ORT/ConnectionType",         "SMB").toString());
-    ui->serverURIEdit->setText           (settings.value("ORT/ServerURI",         "").toString());
-    ui->fallbackServerURIEdit->setText   (settings.value("ORT/FallbackServerURI",         "").toString());
-
+    ui->serverTypeComboBox->setCurrentText(settings.value("ORT/ConnectionType",    "SMB").toString());
+    ui->serverURIEdit->setText           (settings.value("ORT/ServerURI",          "").toString());
+    ui->fallbackServerURIEdit->setText   (settings.value("ORT/FallbackServerURI",  "").toString());
 
     ui->serialNumberEdit->setText(RTI->getConfigInstance()->infoSerialNumber);
 

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
-    <height>463</height>
+    <width>641</width>
+    <height>533</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,9 +29,18 @@
       <attribute name="title">
        <string>General</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout">
+      <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0" columnminimumwidth="0,0,0">
+       <property name="bottomMargin">
+        <number>11</number>
+       </property>
        <item row="6" column="0">
         <widget class="QLabel" name="label_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>Connection Type:</string>
          </property>
@@ -46,6 +55,18 @@
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="systemNameLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>120</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
           <string>System Name:</string>
          </property>
@@ -76,13 +97,25 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>0</height>
           </size>
          </property>
         </spacer>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="softwareVersionLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>120</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
           <string>Detected Version:</string>
          </property>
@@ -113,6 +146,18 @@
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="serialNumberLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>120</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
           <string>Serial Number:</string>
          </property>
@@ -133,6 +178,12 @@
        </item>
        <item row="6" column="2">
         <widget class="QComboBox" name="serverTypeComboBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <item>
           <property name="text">
            <string>SMB</string>
@@ -140,56 +191,57 @@
          </item>
          <item>
           <property name="text">
-           <string>New</string>
+           <string>SFTP / SCP / WebDAV</string>
           </property>
          </item>
         </widget>
        </item>
        <item row="7" column="0" colspan="3">
         <widget class="QStackedWidget" name="serverConnectionStack">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="currentIndex">
           <number>0</number>
          </property>
          <widget class="QWidget" name="SMBEditPage">
-          <layout class="QGridLayout" name="gridLayout_6">
-           <item row="1" column="0">
-            <widget class="QLabel" name="connectCmdLabel">
+          <layout class="QGridLayout" name="gridLayout_4">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>15</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="serverPathLabel">
+             <property name="minimumSize">
+              <size>
+               <width>126</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>126</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="text">
-              <string>Connect Cmd:</string>
+              <string>Server Path:</string>
              </property>
             </widget>
            </item>
            <item row="0" column="2">
             <widget class="QLineEdit" name="serverPathEdit"/>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="serverPathLabel">
-             <property name="text">
-              <string>Server Path:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="2">
-            <widget class="QLineEdit" name="fallbackConnectCmdEdit"/>
-           </item>
            <item row="1" column="2">
             <widget class="QLineEdit" name="connectCmdEdit"/>
-           </item>
-           <item row="2" column="2">
-            <widget class="QLineEdit" name="disconnectCmdEdit"/>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="fallbackConnectCmdLabel">
-             <property name="minimumSize">
-              <size>
-               <width>120</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Fallback Connect Cmd:</string>
-             </property>
-            </widget>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="disconnectCmdLabel">
@@ -198,10 +250,55 @@
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
+           <item row="2" column="2">
+            <widget class="QLineEdit" name="disconnectCmdEdit"/>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="fallbackConnectCmdLabel">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Fallback Connect Cmd:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="connectCmdLabel">
+             <property name="text">
+              <string>Connect Cmd:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLineEdit" name="fallbackConnectCmdEdit"/>
+           </item>
+           <item row="0" column="1">
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Minimum</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="4" column="0">
             <spacer name="verticalSpacer_11">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::MinimumExpanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -213,7 +310,6 @@
            </item>
           </layout>
           <zorder>serverPathLabel</zorder>
-          <zorder>serverPathLabel</zorder>
           <zorder>serverPathEdit</zorder>
           <zorder>connectCmdLabel</zorder>
           <zorder>connectCmdEdit</zorder>
@@ -221,14 +317,104 @@
           <zorder>fallbackConnectCmdLabel</zorder>
           <zorder>fallbackConnectCmdEdit</zorder>
           <zorder>disconnectCmdEdit</zorder>
+          <zorder>horizontalSpacer_5</zorder>
           <zorder>verticalSpacer_11</zorder>
          </widget>
          <widget class="QWidget" name="SftpURIEditPage">
           <layout class="QGridLayout" name="gridLayout_7">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>15</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="serverURILabel">
+             <property name="minimumSize">
+              <size>
+               <width>126</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>126</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Server URI:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLineEdit" name="serverURIEdit"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="fallbackServerURILabel">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Fallback URI:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QLineEdit" name="fallbackServerURIEdit"/>
+           </item>
+           <item row="2" column="3">
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="topMargin">
+              <number>4</number>
+             </property>
+             <property name="bottomMargin">
+              <number>7</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="serverURITestButton">
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>25</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>25</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Test Connection</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
            <item row="4" column="3">
             <widget class="QLabel" name="serverURITestLabel">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -236,7 +422,7 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>120</height>
+               <height>80</height>
               </size>
              </property>
              <property name="sizeIncrement">
@@ -259,53 +445,35 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="3">
-            <widget class="QLineEdit" name="fallbackServerURIEdit"/>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="fallbackServerURILabel">
-             <property name="text">
-              <string>Fallback URI</string>
+           <item row="5" column="3">
+            <spacer name="verticalSpacer_13">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="serverURILabel">
-             <property name="text">
-              <string>Server URI</string>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
              </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QLineEdit" name="serverURIEdit"/>
-           </item>
-           <item row="2" column="3">
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QPushButton" name="serverURITestButton">
-               <property name="text">
-                <string>Test Connection</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
+            </spacer>
            </item>
           </layout>
          </widget>
         </widget>
+       </item>
+       <item row="8" column="2">
+        <spacer name="verticalSpacer_12">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

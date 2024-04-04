@@ -35,7 +35,7 @@ bool ortConfiguration::isConfigurationValid()
     if (ortSystemName==ORT_INVALID) {
         return false;
     }
-    if (ortConnectionType != "New" && ortConnectionType != "SMB" ) {
+    if (ortConnectionType != "SFTP / SCP / WebDAV" && ortConnectionType != "SMB" ) {
         return false;
     }
     return true;

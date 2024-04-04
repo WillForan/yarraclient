@@ -71,7 +71,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         QTimer::singleShot(0, qApp, SLOT(quit()));        
         return;
     }
-    if (config.ortConnectionType == "New") {
+    if (config.ortConnectionType == "SFTP / SCP / WebDAV") {
         network = new ortNetworkSftp();
     } else if (config.ortConnectionType == "SMB") {
         network = new ortNetwork();
