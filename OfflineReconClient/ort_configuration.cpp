@@ -17,7 +17,7 @@ ortConfiguration::ortConfiguration()
 
         // TODO: Find way to identify system type under NumarisX
         // TODO: Call IDEA command to read system configuration on first run
-        infoScannerType ="VidaSola";
+        infoScannerType="VidaSola";
     }
 
     ortCloudSupportEnabled=false;
@@ -35,7 +35,7 @@ bool ortConfiguration::isConfigurationValid()
     if (ortSystemName==ORT_INVALID) {
         return false;
     }
-    if (ortConnectionType != "SFTP / SCP / WebDAV" && ortConnectionType != "SMB" ) {
+    if (ortConnectionType != ORT_CONNECTION_SFTP && ortConnectionType != ORT_CONNECTION_SMB ) {
         return false;
     }
     return true;
@@ -47,18 +47,17 @@ void ortConfiguration::loadConfiguration()
     QSettings settings(RTI->getAppPath()+"/"+ORT_INI_NAME, QSettings::IniFormat);
 
     // Used to test if the program has been configured once at all
-    ortSystemName         =settings.value("ORT/SystemName", QString(ORT_INVALID)).toString();
-    ortServerPath         =settings.value("ORT/ServerPath", "").toString();
-    ortConnectCmd         =settings.value("ORT/ConnectCmd", "").toString();
-    ortDisconnectCmd      =settings.value("ORT/DisconnectCmd", "").toString();
+    ortSystemName         =settings.value("ORT/SystemName",         QString(ORT_INVALID)).toString();
+    ortServerPath         =settings.value("ORT/ServerPath",         "").toString();
+    ortConnectCmd         =settings.value("ORT/ConnectCmd",         "").toString();
+    ortDisconnectCmd      =settings.value("ORT/DisconnectCmd",      "").toString();
     ortFallbackConnectCmd =settings.value("ORT/FallbackConnectCmd", "").toString();
-    ortConnectTimeout     =settings.value("ORT/ConnectTimeout", 0).toInt();
+    ortConnectTimeout     =settings.value("ORT/ConnectTimeout",     0).toInt();
     ortStartRDSOnShutdown =settings.value("ORT/StartRDSOnShutdown", false).toBool();
-    ortCloudSupportEnabled=settings.value("ORT/CloudSupport",false).toBool();
-    ortConnectionType     =settings.value("ORT/ConnectionType", "SMB").toString();
-
-    ortServerURI          =settings.value("ORT/ServerURI", "").toString();
-    ortFallbackServerURI  =settings.value("ORT/FallbackServerURI", "").toString();
+    ortCloudSupportEnabled=settings.value("ORT/CloudSupport",       false).toBool();
+    ortConnectionType     =settings.value("ORT/ConnectionType",     ORT_CONNECTION_SMB).toString();
+    ortServerURI          =settings.value("ORT/ServerURI",          "").toString();
+    ortFallbackServerURI  =settings.value("ORT/FallbackServerURI",  "").toString();
 
     // Read the mail presets for the ORT configuration dialog
     ortMailPresets.clear();

@@ -35,4 +35,10 @@
 
 #define ORT_DIR_QUEUE            "recoqueue"
 
+#define ORT_CONNECTION_SMB       "SMB"
+#define ORT_CONNECTION_SFTP      "SFTP / SCP"
+
+#define ORT_WINSCP_BINARY        "winscp/WinSCP.com"
+#define ORT_WINSCP_SUPPORTBINARY "winscp/WinSCP.exe"
+
 #endif // ORT_GLOBAL_H

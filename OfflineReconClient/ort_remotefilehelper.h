@@ -1,29 +1,32 @@
-#ifndef REMOTEFILEHELPER_H
-#define REMOTEFILEHELPER_H
+#ifndef ORT_REMOTEFILEHELPER_H
+#define ORT_REMOTEFILEHELPER_H
 
 #include <QObject>
 #include <QtCore>
 #include "../Client/rds_exechelper.h"
 
-enum connectionType
+
+enum ortConnectionType
 {
     UNKNOWN = 0,
-    FTP= 1,
-    SFTP=2,
-    SCP=3
+    FTP     = 1,
+    SFTP    = 2,
+    SCP     = 3
 };
 
-class remoteFileHelper : public QObject
+
+class ortRemoteFileHelper: public QObject
 {
     Q_OBJECT
     rdsExecHelper exec;
     QString serverURI;
     QString winSCPPath;
     QString hostkey;
+
 public:
-    connectionType connectionType;
+    ortConnectionType connectionType;
     QString remoteBasePath;
-    explicit remoteFileHelper(QObject *parent = nullptr);
+    explicit ortRemoteFileHelper(QObject *parent = nullptr);
     void init(QString server, QString hostKey="acceptnew");
     bool testConnection(QString& error);
     bool callWinSCP(QStringList str, QStringList &output);
@@ -42,4 +45,4 @@ signals:
 
 };
 
-#endif // REMOTEFILEHELPER_H
+#endif // ORT_REMOTEFILEHELPER_H

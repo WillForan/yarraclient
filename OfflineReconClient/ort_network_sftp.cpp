@@ -1,30 +1,43 @@
 #include <QtWidgets>
 
 #include "ort_network_sftp.h"
-#include "remotefilehelper.h"
+#include "ort_remotefilehelper.h"
 #include "ort_configuration.h"
 #include "ort_configurationdialog.h"
 #include "ort_global.h"
+
+
 ortNetworkSftp::ortNetworkSftp()
 {
 }
+
+
 bool ortNetworkSftp::prepare()
 {
     bool result = ortNetwork::prepare();
-    if (!result) return false;
+    if (!result) {
+        return false;
+    }
     return true;
 }
 
-QSettings* ortNetworkSftp::readModelist(QString &error) {
+
+QSettings* ortNetworkSftp::readModelist(QString &error)
+{
     helper.get(ORT_MODEFILE, QDir::temp());
     return new QSettings(QDir::temp().absoluteFilePath(ORT_MODEFILE),QSettings::Format::IniFormat);
 }
-bool ortNetworkSftp::copyFile() {
+
+
+bool ortNetworkSftp::copyFile()
+{
     QString sourceName=queueDir.absoluteFilePath(currentFilename);
     return helper.put(sourceName);
 }
 
-bool ortNetworkSftp::verifyTransfer() {
+
+bool ortNetworkSftp::verifyTransfer()
+{
     bool exists = helper.exists(currentFilename);
 
     if (!exists)
@@ -49,17 +62,24 @@ bool ortNetworkSftp::verifyTransfer() {
     return true;
 }
 
-bool ortNetworkSftp::doReconnectServerEntry(ortServerEntry *selectedEntry) {
-    if(serverPath.isEmpty()){
+
+bool ortNetworkSftp::doReconnectServerEntry(ortServerEntry *selectedEntry)
+{
+    if(serverPath.isEmpty())
+    {
         return false;
     }
+
     helper.init(serverPath, selectedEntry->hostKey);
     QString out;
     return helper.testConnection(out);
 }
 
-bool ortNetworkSftp::syncServerList() {
+
+bool ortNetworkSftp::syncServerList()
+{
     bool result = serverList.removeLocalServerList();
+
     // Check if server list exists in remote directory
     if (!helper.exists(ORT_SERVERLISTFILE))
     {
@@ -72,11 +92,13 @@ bool ortNetworkSftp::syncServerList() {
         }
         return true;
     }
+
     QString lockFilename=ORT_SERVERLISTFILE;
     lockFilename.truncate(lockFilename.indexOf("."));
     lockFilename+=ORT_LOCK_EXTENSION;
 
-    if (helper.exists(lockFilename)) {
+    if (helper.exists(lockFilename))
+    {
         {
             int retries=0;
             bool fileUnlocked=false;
@@ -100,7 +122,8 @@ bool ortNetworkSftp::syncServerList() {
                 return false;
             }
         }
-     }
+    }
+
     QDir localDir(appPath);
     if (!helper.get(ORT_SERVERLISTFILE,localDir))
     {
@@ -109,23 +132,36 @@ bool ortNetworkSftp::syncServerList() {
     }
     return true;
 }
-bool ortNetworkSftp::openConnection(bool fallback) {
-    if (!fallback) {
+
+
+bool ortNetworkSftp::openConnection(bool fallback)
+{
+    if (!fallback)
+    {
         helper.init(configInstance->ortServerURI);
-    } else {
+    }
+    else
+    {
         helper.init(configInstance->ortFallbackServerURI);
     }
+
     QString error;
     bool result = helper.testConnection(error);
-    if (!result) {
+
+    if (!result)
+    {
         goto on_error;
     }
-    if(!helper.exists(QStringList{ORT_MODEFILE, ORT_SERVERFILE})) {
+
+    if(!helper.exists(QStringList{ORT_MODEFILE, ORT_SERVERFILE}))
+    {
         error = "ERROR: ORT mode or server file not found.";
         goto on_error;
     }
+
     RTI->log("Mode and server files found.");
     RTI->log("Connection validated.");
+
     if (syncServerList())
     {
         // If copying the server list was successful, read the local
@@ -134,6 +170,7 @@ bool ortNetworkSftp::openConnection(bool fallback) {
     }
 
     return true;
+
 on_error:
     RTI->log(error);
     RTI->log("Unable to connect to server.");

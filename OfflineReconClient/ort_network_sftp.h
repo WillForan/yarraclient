@@ -3,12 +3,12 @@
 
 #include "ort_network.h"
 #include <QObject>
-#include "remotefilehelper.h"
+#include "ort_remotefilehelper.h"
 
 class ortNetworkSftp : public ortNetwork
 {
     Q_OBJECT
-    remoteFileHelper helper;
+    ortRemoteFileHelper helper;
 
 public:
     ortNetworkSftp();

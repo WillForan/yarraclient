@@ -11,6 +11,7 @@
 
 #include "ort_network.h"
 
+
 ortNetwork::ortNetwork()
 {
     connectCmd="";
@@ -271,7 +272,9 @@ bool ortNetwork::openConnection(bool fallback)
     return (!error);
 }
 
-QSettings* ortNetwork::readModelist(QString &error) {
+
+QSettings* ortNetwork::readModelist(QString &error)
+{
     // Check if the mode file exists and if it's readable
     QString modeFileName = serverPath+"/"+ORT_MODEFILE;
     QString serverFileName = serverPath+"/"+ORT_SERVERFILE;
@@ -298,17 +301,19 @@ QSettings* ortNetwork::readModelist(QString &error) {
 
     // First read the server file to learn what server this is
     QSettings serverFileIni(serverFileName, QSettings::IniFormat);
-
     QString serverName=serverFileIni.value("YarraServer/Name", ORT_INVALID).toString();
     if (serverName==ORT_INVALID)
     {
         error="Server file content is not valid.";
         return nullptr;
     }
+    currentServer=serverName;
 
     // Now we should be safe, so read the file
     return new QSettings(modeFileName, QSettings::IniFormat);
 }
+
+
 void ortNetwork::closeConnection()
 {
     if (disconnectCmd!="")
@@ -324,9 +329,9 @@ void ortNetwork::closeConnection()
     }
 }
 
-bool ortNetwork::doReconnectServerEntry(ortServerEntry *selectedEntry) {
 
-
+bool ortNetwork::doReconnectServerEntry(ortServerEntry *selectedEntry)
+{
     bool success=false;
     bool connectCmdSuccess=false;
     {
@@ -364,6 +369,7 @@ bool ortNetwork::doReconnectServerEntry(ortServerEntry *selectedEntry) {
     }
     return true;
 }
+
 
 bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
 {

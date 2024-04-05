@@ -43,7 +43,7 @@ SOURCES += main.cpp \
     ../CloudTools/yct_api.cpp \
     ../CloudTools/yct_prepare/yct_twix_anonymizer.cpp \
     ../CloudAgent/yca_threadlog.cpp \
-    remotefilehelper.cpp
+    ort_remotefilehelper.cpp
 
 
 HEADERS  += \
@@ -75,7 +75,7 @@ HEADERS  += \
     ../CloudTools/yct_aws/qtaws.h \
     ../CloudTools/yct_prepare/yct_twix_anonymizer.h \
     ../CloudTools/yct_api.h \
-    remotefilehelper.h
+    ort_remotefilehelper.h
 
     
 FORMS    += \

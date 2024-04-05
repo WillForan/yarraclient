@@ -46,6 +46,7 @@ ortModeList::ortModeList()
     network=0;
     modes.clear();
     count=0;
+    serverName="";
 }
 
 ortModeList::~ortModeList()
@@ -70,7 +71,8 @@ bool ortModeList::readModeList()
     }
 
     QSettings* modeFileIni = network->readModelist(errorText);
-    if (modeFileIni) {
+    if (modeFileIni)
+    {
         // Read the settings from the file
         int modeCount=0;
         QString modeName="";
@@ -149,7 +151,9 @@ bool ortModeList::readModeList()
             }
         }
         return true;
-    } else {
+    }
+    else
+    {
         RTI->log("Error during reading of mode file.");
         RTI->log("ERROR: "+errorText);
 

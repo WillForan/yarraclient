@@ -71,9 +71,9 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
         QTimer::singleShot(0, qApp, SLOT(quit()));        
         return;
     }
-    if (config.ortConnectionType == "SFTP / SCP / WebDAV") {
+    if (config.ortConnectionType == ORT_CONNECTION_SFTP) {
         network = new ortNetworkSftp();
-    } else if (config.ortConnectionType == "SMB") {
+    } else if (config.ortConnectionType == ORT_CONNECTION_SMB) {
         network = new ortNetwork();
     }
 
@@ -158,6 +158,7 @@ ortMainWindow::ortMainWindow(QWidget *parent) :
             QTimer::singleShot(0, qApp, SLOT(quit()));
             return;
         }
+        modeList.serverName=network->currentServer;
     }
 
     // Now read cloud modes if cloud support has been enabled
@@ -640,7 +641,7 @@ void ortMainWindow::on_sendButton_clicked()
     RTI->processEvents();
 
     // Tell the network module the name and type of the current server
-    network->currentServer       =modeList.serverName;
+    network->currentServer      =modeList.serverName;
     QString requiredServerType  =modeList.modes.at(selectedMode)->requiredServerType;
     reconTask.requiredServerType=requiredServerType;
 
@@ -792,7 +793,7 @@ void ortMainWindow::on_logoLabel_customContextMenuRequested(const QPoint &pos)
 
     if (modeList.serverName.isEmpty())
     {
-        QString serverString="Server:  yarracloud.com";
+        serverString="Server:  yarracloud.com";
     }
 
     QMenu infoMenu(this);

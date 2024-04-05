@@ -11,7 +11,8 @@
 #include <../NetLogger/netlogger.h>
 #include "../CloudTools/yct_common.h"
 #include "../CloudTools/yct_aws/qtaws.h"
-#include "remotefilehelper.h"
+#include "ort_remotefilehelper.h"
+
 
 ortConfigurationDialog::ortConfigurationDialog(QWidget *parent) :
     QDialog(parent),
@@ -116,7 +117,7 @@ void ortConfigurationDialog::on_okButton_clicked()
         return;
     }
 
-    if ((ui->serverPathEdit->text().isEmpty()) && (!ui->cloudCheckbox->isChecked()) && ui->serverTypeComboBox->currentData() =="SMB")
+    if ((ui->serverPathEdit->text().isEmpty()) && (!ui->cloudCheckbox->isChecked()) && ui->serverTypeComboBox->currentData() == ORT_CONNECTION_SMB)
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Server Path Needed");
@@ -156,7 +157,7 @@ void ortConfigurationDialog::readSettings()
     ui->autoLaunchRDSCheckbox->setChecked(settings.value("ORT/StartRDSOnShutdown", false).toBool());
     ui->cloudCheckbox->setChecked        (settings.value("ORT/CloudSupport",       false).toBool());
 
-    ui->serverTypeComboBox->setCurrentText(settings.value("ORT/ConnectionType",    "SMB").toString());
+    ui->serverTypeComboBox->setCurrentText(settings.value("ORT/ConnectionType",    ORT_CONNECTION_SMB).toString());
     ui->serverURIEdit->setText           (settings.value("ORT/ServerURI",          "").toString());
     ui->fallbackServerURIEdit->setText   (settings.value("ORT/FallbackServerURI",  "").toString());
 
@@ -601,24 +602,42 @@ void ortConfigurationDialog::on_serverTypeComboBox_currentIndexChanged(int index
 
 void ortConfigurationDialog::on_serverURITestButton_clicked()
 {
-    remoteFileHelper  helper;
+    if ((!QDir(qApp->applicationDirPath()).exists(ORT_WINSCP_BINARY)) ||
+        (!QDir(qApp->applicationDirPath()).exists(ORT_WINSCP_SUPPORTBINARY)))
+    {
+        ui->serverURITestLabel->setText("<span style=""color:#E5554F;""><strong>ERROR</strong></span>: WinSCP binaries missing in installation.");
+        return;
+    }
+
+    ortRemoteFileHelper  helper;
     QString err;
     ui->serverURITestLabel->setText("Testing connection...");
 
     QString output = "";
-    for (int i=0; i<2; i++) {
+    for (int i=0; i<2; i++)
+    {
         QString uri;
         QString name;
-        if (i==0) {uri = ui->serverURIEdit->text(); name="Primary server"; }
-        if (i==1) {uri = ui->fallbackServerURIEdit->text(); name="Fallback server";}
-        if (uri.isEmpty()) {
+        if (i==0)
+        {
+            uri = ui->serverURIEdit->text(); name="Primary server";
+        }
+        if (i==1)
+        {
+            uri = ui->fallbackServerURIEdit->text(); name="Fallback server";
+        }
+        if (uri.isEmpty())
+        {
             output += "\n" + name + " not configured.";
         }
         helper.init(uri);
         bool result = helper.testConnection(err);
-        if (result) {
+        if (result)
+        {
             output += "\n"+name+" <span style=""color:#40C1AC;""><strong>validated</strong></span>.";
-        } else {
+        }
+        else
+        {
             output += "\n"+name+" <span style=""color:#E5554F;""><strong>FAILED</strong></span>:\n"+err;
         }
         output = output.trimmed();
