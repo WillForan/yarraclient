@@ -73,7 +73,7 @@ private:
     rdsLog log;
     rdsNetwork network;
     rdsProcessControl control;
-    Mailbox mailbox;
+    rdsMailbox mailbox;
     QTimer controlTimer;
     QTimer heartbeatTimer;
 

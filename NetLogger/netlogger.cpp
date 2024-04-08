@@ -322,16 +322,21 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
     return networkManager->post(req,postData);
 }
 
-bool NetLogger::doRequest(QString endpoint, const std::function<void(QNetworkReply*)> fn, int timeout) {
+
+bool NetLogger::doRequest(QString endpoint, const std::function<void(QNetworkReply*)> fn, int timeout)
+{
     return doRequest(endpoint, QUrlQuery{}, fn, timeout);
 }
 
-bool NetLogger::doRequest(QString endpoint, QUrlQuery query, const std::function<void(QNetworkReply*)> fn, int timeout) {
+
+bool NetLogger::doRequest(QString endpoint, QUrlQuery query, const std::function<void(QNetworkReply*)> fn, int timeout)
+{
     query.addQueryItem("api_key",   RTI_CONFIG->logApiKey);
     query.addQueryItem("source_id", RTI_CONFIG->infoSerialNumber);
 
     QNetworkReply* reply = postDataAsync(query, endpoint);
-    if (!reply) {
+    if (!reply)
+    {
         return false;
     }
     QObject::connect(reply, &QNetworkReply::finished,
@@ -355,7 +360,8 @@ bool NetLogger::doRequest(QString endpoint, QUrlQuery query, const std::function
 }
 
 
-bool NetLogger::waitForReply(QNetworkReply* reply, int timeoutMsec) {
+bool NetLogger::waitForReply(QNetworkReply* reply, int timeoutMsec)
+{
     // Use eventloop to wait until post event has finished. Event loop will timeout after 20sec
     QEventLoop eventLoop;
     QObject::connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));

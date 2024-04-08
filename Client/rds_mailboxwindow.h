@@ -6,9 +6,11 @@
 #include <qevent.h>
 #include <QScreen>
 
+
 namespace Ui {
 class rdsMailboxWindow;
 }
+
 
 class rdsMailboxWindow : public QDialog
 {
@@ -31,5 +33,6 @@ private:
     QString buttonClicked;
     Ui::rdsMailboxWindow *ui;
 };
+
 
 #endif // RDS_MAILBOXWINDOW_H

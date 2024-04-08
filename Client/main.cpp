@@ -14,6 +14,7 @@ rdsApplication::rdsApplication(int &argc, char **argv, bool GUIenabled)
     connect(this, SIGNAL(messageReceived(const QString&)), this, SLOT(respond(const QString&)));
 }
 
+
 void rdsApplication::respond(const QString &message)
 {
     if (message=="")
@@ -31,6 +32,7 @@ void rdsApplication::respond(const QString &message)
         }
     }
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -127,7 +129,6 @@ int main(int argc, char *argv[])
     {
         return 0;
     }
-
 
 
     rdsConfigurationWindow* cw=0;

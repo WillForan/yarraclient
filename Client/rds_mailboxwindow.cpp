@@ -2,6 +2,7 @@
 #include "ui_rds_mailboxwindow.h"
 #include <QtCore>
 
+
 rdsMailboxWindow::rdsMailboxWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::rdsMailboxWindow)
@@ -15,7 +16,9 @@ rdsMailboxWindow::rdsMailboxWindow(QWidget *parent) :
     move(screenrect.right() - width(), screenrect.bottom() - height());
 }
 
-void rdsMailboxWindow::setMessage(QString message) {
+
+void rdsMailboxWindow::setMessage(QString message)
+{
     ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
     ui->titleIcon->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
     ui->buttonBox->clear();
@@ -24,7 +27,9 @@ void rdsMailboxWindow::setMessage(QString message) {
     ui->messageText->setText(message);
 }
 
-void rdsMailboxWindow::setError(QString message) {
+
+void rdsMailboxWindow::setError(QString message)
+{
     ui->titleLabel->setStyleSheet("QLabel { background-color : #FF0000; color : white; }");
     ui->titleIcon->setStyleSheet("QLabel { background-color : #FF0000; color : white; }");
     ui->buttonBox->clear();
@@ -32,20 +37,29 @@ void rdsMailboxWindow::setError(QString message) {
     ui->messageText->setText(message);
 }
 
+
 rdsMailboxWindow::~rdsMailboxWindow()
 {
     delete ui;
 }
+
+
 //void rdsMailboxWindow::closeEvent( QCloseEvent* event )
 //{
 //    emit closing(buttonClicked);
 //    event->accept();
 //    destroy();
 //}
-void rdsMailboxWindow::keyPressEvent(QKeyEvent *e) {
+
+
+void rdsMailboxWindow::keyPressEvent(QKeyEvent *e)
+{
     if(e->key() != Qt::Key_Escape)
+    {
         QDialog::keyPressEvent(e);
+    }
 }
+
 
 void rdsMailboxWindow::on_buttonBox_clicked(QAbstractButton *button)
 {

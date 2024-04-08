@@ -8,25 +8,28 @@
 #include "rds_mailboxwindow.h"
 #include <../NetLogger/netlogger.h>
 #include <functional>
-class MailboxMessage
+
+
+class rdsMailboxMessage
 {
 public:
     QString id;
     QString content;
-    MailboxMessage();
-    MailboxMessage(QString id, QString content);
-    MailboxMessage(QJsonObject obj);
+    rdsMailboxMessage();
+    rdsMailboxMessage(QString id, QString content);
+    rdsMailboxMessage(QJsonObject obj);
 };
 
-class Mailbox : public QObject
+
+class rdsMailbox : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Mailbox(QObject *parent = 0);
+    explicit rdsMailbox(QObject *parent = 0);
     void start();
     QTimer timer;
-    MailboxMessage currentMessage;
+    rdsMailboxMessage currentMessage;
     rdsMailboxWindow* mailboxWindow;
     void startChecking();
     void stopChecking();
@@ -34,8 +37,9 @@ public:
 public slots:
     void updateMailbox();
     void windowClosing(QString button);
-    void showMessage(MailboxMessage message);
+    void showMessage(rdsMailboxMessage message);
 
 };
+
 
 #endif // MAILBOX_H
