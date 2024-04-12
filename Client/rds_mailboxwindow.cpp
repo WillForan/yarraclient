@@ -8,7 +8,7 @@ rdsMailboxWindow::rdsMailboxWindow(QWidget *parent) :
     ui(new Ui::rdsMailboxWindow)
 {
     ui->setupUi(this);
-    ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
+    ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; margin-left: 0px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }");
     ui->titleIcon->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
 
     setWindowFlags(Qt::SplashScreen | Qt::WindowStaysOnTopHint);
@@ -19,7 +19,7 @@ rdsMailboxWindow::rdsMailboxWindow(QWidget *parent) :
 
 void rdsMailboxWindow::setMessage(QString message)
 {
-    ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
+    ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; margin-left: 0px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }");
     ui->titleIcon->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
     ui->buttonBox->clear();
     ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Ok);
@@ -30,7 +30,7 @@ void rdsMailboxWindow::setMessage(QString message)
 
 void rdsMailboxWindow::setError(QString message)
 {
-    ui->titleLabel->setStyleSheet("QLabel { background-color : #FF0000; color : white; }");
+    ui->titleLabel->setStyleSheet("QLabel { background-color : #FF0000; color : white; margin-left: 0px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }");
     ui->titleIcon->setStyleSheet("QLabel { background-color : #FF0000; color : white; }");
     ui->buttonBox->clear();
     ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Ok);

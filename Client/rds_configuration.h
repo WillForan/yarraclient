@@ -73,6 +73,8 @@ public:
     int     logUpdateFrequency;
     int     logUpdateFrequencyUnit;
 
+    bool    mailboxEnabled;
+
     QStringList startCmds;
 
     bool    cloudSupportEnabled;

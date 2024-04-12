@@ -492,10 +492,13 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Yarra Message</string>
+        <string>Yarra Notification</string>
        </property>
        <property name="margin">
-        <number>9</number>
+        <number>0</number>
+       </property>
+       <property name="indent">
+        <number>-1</number>
        </property>
       </widget>
      </item>
@@ -504,19 +507,22 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
      <property name="leftMargin">
-      <number>9</number>
+      <number>8</number>
      </property>
      <property name="topMargin">
-      <number>9</number>
+      <number>8</number>
      </property>
      <property name="rightMargin">
-      <number>9</number>
+      <number>8</number>
      </property>
      <property name="bottomMargin">
-      <number>9</number>
+      <number>8</number>
      </property>
      <item>
       <widget class="QScrollArea" name="scrollArea">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
@@ -525,18 +531,38 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>380</width>
+          <width>384</width>
           <height>211</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <property name="leftMargin">
+          <number>8</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>8</number>
+         </property>
+         <property name="bottomMargin">
+          <number>8</number>
+         </property>
          <item>
           <widget class="QLabel" name="messageText">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Text</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
            </property>
            <property name="margin">
             <number>0</number>
@@ -544,8 +570,6 @@
           </widget>
          </item>
         </layout>
-        <zorder>messageText</zorder>
-        <zorder>messageText</zorder>
        </widget>
       </widget>
      </item>

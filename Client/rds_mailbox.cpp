@@ -11,7 +11,7 @@ rdsMailboxMessage::rdsMailboxMessage()
 rdsMailboxMessage::rdsMailboxMessage(QString id, QString content)
 {
     this->id=id;
-    this->content;
+    this->content=content;
 }
 
 

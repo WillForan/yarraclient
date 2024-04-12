@@ -86,6 +86,8 @@ void rdsConfiguration::loadConfiguration()
     logUpdateFrequency     =settings.value("LogServer/UpdateFrequency",    4).toInt();
     logUpdateFrequencyUnit =settings.value("LogServer/UpdateFrequencyUnit",0).toInt();
 
+    mailboxEnabled         =settings.value("Mailbox/Enabled",              false).toBool();
+
     startCmds.clear();
     int startCmdsCount     =settings.value("StartCmds/Count",              0).toInt();
     for (int i=0; i<startCmdsCount; i++)
@@ -195,6 +197,8 @@ void rdsConfiguration::saveConfiguration()
     settings.setValue("LogServer/SendScanInfo",       logSendScanInfo);
     settings.setValue("LogServer/UpdateFrequency",    logUpdateFrequency);
     settings.setValue("LogServer/UpdateFrequencyUnit",logUpdateFrequencyUnit);
+
+    settings.setValue("Mailbox/Enabled",              mailboxEnabled);
 
     settings.setValue("StartCmds/Count",              startCmds.count());
     for (int i=0; i<startCmds.count(); i++)

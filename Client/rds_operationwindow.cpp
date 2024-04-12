@@ -80,7 +80,13 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
             scannerID=RTI_CONFIG->infoName;
         }
         RTI_NETLOG.configure(RTI_CONFIG->logServerPath, EventInfo::SourceType::RDS, scannerID, RTI_CONFIG->logApiKey);
-        mailbox.start();
+
+        // Start polling the Yarra mailbox server, if enabled
+        if (RTI_CONFIG->mailboxEnabled)
+        {
+            mailbox.start();
+        }
+
         // If the DNS lookup failed, set timer to retry at later time
         if ((RTI_NETLOG.isConfigurationError()) && (!RTI_CONFIG->logServerPath.isEmpty()))
         {
