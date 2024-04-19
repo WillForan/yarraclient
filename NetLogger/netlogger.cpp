@@ -307,8 +307,8 @@ QNetworkReply* NetLogger::postDataAsync(QUrlQuery query, QString endpt)
         return 0;
     }
 
-    QUrl serviceUrl = QUrl("http://" + serverPath + "/" + endpt);
-    serviceUrl.setScheme("http");
+    QUrl serviceUrl = QUrl("https://" + serverPath + "/" + endpt);
+    serviceUrl.setScheme("https");
     //RTI->log(serviceUrl.toString());
 
     QNetworkRequest req(serviceUrl);

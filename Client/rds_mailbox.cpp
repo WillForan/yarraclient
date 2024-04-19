@@ -58,7 +58,7 @@ void rdsMailbox::updateMailbox()
 {
     qDebug()<<"updateMailbox called";
 
-    RTI_NETLOG.doRequest("get_unread_messages", [this](QNetworkReply* reply)
+    RTI_NETLOG.doRequest("mailbox/get_unread_messages", [this](QNetworkReply* reply)
     {
         startChecking();
 
@@ -91,7 +91,7 @@ void rdsMailbox::windowClosing(QString button)
     qDebug()<< "Window closing" << button;
     QUrlQuery query;
     query.addQueryItem("response", button);
-    bool did = RTI_NETLOG.doRequest(QString("mark_message_as_read/") + currentMessage.id, query, [this](QNetworkReply* reply)
+    bool did = RTI_NETLOG.doRequest(QString("mailbox/mark_message_as_read/") + currentMessage.id, query, [this](QNetworkReply* reply)
         {
             if (reply->error() == QNetworkReply::NetworkError::NoError)
             {

@@ -1,7 +1,7 @@
 #include "rds_mailboxwindow.h"
 #include "ui_rds_mailboxwindow.h"
 #include <QtCore>
-
+#include <QtWidgets>
 
 rdsMailboxWindow::rdsMailboxWindow(QWidget *parent) :
     QDialog(parent),
@@ -22,8 +22,10 @@ void rdsMailboxWindow::setMessage(QString message)
     ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; margin-left: 0px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }");
     ui->titleIcon->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
     ui->buttonBox->clear();
-    ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Ok);
-    ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Cancel);
+    //ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Ok);
+    //ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Cancel);
+    QPushButton *addedButton = ui->buttonBox->addButton("Confirm", QDialogButtonBox::AcceptRole);
+    addedButton->setMinimumWidth(100);
     ui->messageText->setText(message);
 }
 

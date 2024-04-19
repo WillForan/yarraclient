@@ -84,6 +84,7 @@ rdsOperationWindow::rdsOperationWindow(QWidget *parent, bool isFirstRun) :
         // Start polling the Yarra mailbox server, if enabled
         if (RTI_CONFIG->mailboxEnabled)
         {
+            log.log("Mailbox notifications enabled");
             mailbox.start();
         }
 
