@@ -42,7 +42,6 @@ void rdsMailbox::start()
 
 void rdsMailbox::startChecking()
 {
-    qDebug() << "start checking";
     timer.start(1000);
 }
 
@@ -56,8 +55,6 @@ void rdsMailbox::stopChecking()
 
 void rdsMailbox::updateMailbox()
 {
-    qDebug()<<"updateMailbox called";
-
     RTI_NETLOG.doRequest("mailbox/get_unread_messages", [this](QNetworkReply* reply)
     {
         startChecking();

@@ -341,7 +341,7 @@ bool NetLogger::doRequest(QString endpoint, QUrlQuery query, const std::function
     }
     QObject::connect(reply, &QNetworkReply::finished,
             [this, reply, fn, endpoint]() {
-                qDebug() << "Reply from: " << endpoint;
+                //qDebug() << "Reply from: " << endpoint;
                 fn(reply);
                 reply->deleteLater();
             }
