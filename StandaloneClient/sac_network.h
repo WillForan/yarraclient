@@ -35,6 +35,8 @@ public:
     void closeConnection();
     bool checkConnection();
 
+    virtual QSettings* readModelist(QString& error);
+
     bool copyMeasurementFile(QString sourceFile, QString targetFile);
     bool fileExistsOnServer(QString filename);
 

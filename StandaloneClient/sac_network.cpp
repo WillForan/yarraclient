@@ -160,6 +160,47 @@ void sacNetwork::closeConnection()
 }
 
 
+QSettings* sacNetwork::readModelist(QString &error)
+{
+    // Check if the mode file exists and if it's readable
+    QString modeFileName = serverPath+"/"+ORT_MODEFILE;
+    QString serverFileName = serverPath+"/"+ORT_SERVERFILE;
+
+    QFile modeFile(modeFileName);
+    if (!modeFile.open(QIODevice::ReadOnly))
+    {
+        // Opening the file failed -- maybe the file is edited at this moment
+        // Wait for a moment, then try again
+
+        // TODO: Better check for lock file.
+
+        RTI->log("WARNING: Opening mode file failed. Retrying in 2 sec.");
+        Sleep(2000);
+
+        if (!modeFile.open(QIODevice::ReadOnly))
+        {
+            error="Could not read mode file (file locked).";
+            return nullptr;
+        }
+    }
+
+    modeFile.close();
+
+    // First read the server file to learn what server this is
+    QSettings serverFileIni(serverFileName, QSettings::IniFormat);
+    QString serverName=serverFileIni.value("YarraServer/Name", ORT_INVALID).toString();
+    if (serverName==ORT_INVALID)
+    {
+        error="Server file content is not valid.";
+        return nullptr;
+    }
+
+    // Now we should be safe, so read the file
+    return new QSettings(modeFileName, QSettings::IniFormat);
+}
+
+
+
 bool sacNetwork::fileExistsOnServer(QString filename)
 {
     serverDir.refresh();
