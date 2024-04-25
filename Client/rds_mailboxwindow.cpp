@@ -22,14 +22,14 @@ void rdsMailboxWindow::setMessage(rdsMailboxMessage message)
     QString color;
     if (message.color.length() == 0) {
         color = "#580F8B";
+    } else if (! (message.color.startsWith("#") && message.color.length() == 7 && !message.color.contains(";"))) {
+            color = "#580F8B";
     } else {
         color = message.color;
     }
     ui->titleLabel->setStyleSheet(QString() + "QLabel { background-color : "+ color + "; color : white; margin-left: 0px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }");
     ui->titleIcon->setStyleSheet(QString() + "QLabel { background-color : "+ color + "; color : white; }");
     ui->buttonBox->clear();
-    //ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Ok);
-    //ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Cancel);
     if (message.buttons.length() == 0) {
         QPushButton *addedButton = ui->buttonBox->addButton("Confirm", QDialogButtonBox::ActionRole);
         addedButton->setMinimumWidth(100);
