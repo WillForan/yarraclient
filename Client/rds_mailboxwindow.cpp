@@ -30,7 +30,7 @@ void rdsMailboxWindow::setMessage(rdsMailboxMessage message)
     ui->titleLabel->setStyleSheet(QString() + "QLabel { background-color : "+ color + "; color : white; margin-left: 0px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }");
     ui->titleIcon->setStyleSheet(QString() + "QLabel { background-color : "+ color + "; color : white; }");
     ui->buttonBox->clear();
-    if (message.buttons.length() == 0) {
+    if (message.buttons.length() == 0 || message.buttons.length() > 3) {
         QPushButton *addedButton = ui->buttonBox->addButton("Confirm", QDialogButtonBox::ActionRole);
         addedButton->setMinimumWidth(100);
     } else {
