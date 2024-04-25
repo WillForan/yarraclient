@@ -3,26 +3,6 @@
 #include "rds_network.h"
 
 
-rdsMailboxMessage::rdsMailboxMessage()
-{
-}
-
-
-rdsMailboxMessage::rdsMailboxMessage(QString id, QString content)
-{
-    this->id=id;
-    this->content=content;
-}
-
-
-rdsMailboxMessage::rdsMailboxMessage(QJsonObject obj)
-{
-    id=obj.value("message_id").toString();
-    content=obj.value("content").toString();
-}
-
-
-
 rdsMailbox::rdsMailbox(QObject *parent) : QObject(parent)
 {
 }
@@ -42,7 +22,7 @@ void rdsMailbox::start()
 
 void rdsMailbox::startChecking()
 {
-    timer.start(1000);
+    timer.start(checkInterval);
 }
 
 
@@ -95,12 +75,19 @@ void rdsMailbox::windowClosing(QString button)
                 startChecking();
                 qDebug() << "Marked message response" << reply->readAll();
                 mailboxWindow->close();
+                errorCount = 0;
                 return;
             }
-            mailboxWindow = new rdsMailboxWindow();
-            mailboxWindow->setError("Network error while responding to message");
-            connect(mailboxWindow, &rdsMailboxWindow::closing, this, [this](QString _){ this->startChecking(); });
-            mailboxWindow->show();
+            mailboxWindow->close();
+            rdsMailboxWindow* errorWindow = new rdsMailboxWindow();
+            errorCount++;
+            if (errorCount > 3) {
+                errorWindow->setError("Exceeded error threshold. Disabling mailbox until RDS is restarted.");
+            } else {
+                errorWindow->setError("Network error while responding to message.");
+                connect(errorWindow, &rdsMailboxWindow::closing, this, [this](QString _){ this->startChecking(); });
+            }
+            errorWindow->show();
         }
     );
 
@@ -116,7 +103,7 @@ void rdsMailbox::showMessage(rdsMailboxMessage message)
     qDebug()<< message.id;
     stopChecking();
     mailboxWindow = new rdsMailboxWindow();
-    mailboxWindow->setMessage(message.content);
+    mailboxWindow->setMessage(message);
     currentMessage = message;
     connect(mailboxWindow, &rdsMailboxWindow::closing, this, &rdsMailbox::windowClosing);
     mailboxWindow->show();

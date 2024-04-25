@@ -6,20 +6,9 @@
 #include <QMessageBox>
 #include "rds_global.h"
 #include "rds_mailboxwindow.h"
+#include "rds_mailboxmessage.h"
 #include <../NetLogger/netlogger.h>
 #include <functional>
-
-
-class rdsMailboxMessage
-{
-public:
-    QString id;
-    QString content;
-    rdsMailboxMessage();
-    rdsMailboxMessage(QString id, QString content);
-    rdsMailboxMessage(QJsonObject obj);
-};
-
 
 class rdsMailbox : public QObject
 {
@@ -33,7 +22,8 @@ public:
     rdsMailboxWindow* mailboxWindow;
     void startChecking();
     void stopChecking();
-
+    unsigned int errorCount = 0;
+    int checkInterval = 1000;
 public slots:
     void updateMailbox();
     void windowClosing(QString button);

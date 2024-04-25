@@ -36,7 +36,8 @@ SOURCES += main.cpp \
     rds_iconwindow.cpp \
     rds_exechelper.cpp \
     rds_mailbox.cpp \
-    rds_mailboxwindow.cpp
+    rds_mailboxwindow.cpp \
+    rds_mailboxmessage.cpp
 
 HEADERS  += rds_configurationwindow.h \
             rds_runtimeinformation.h \
@@ -58,7 +59,8 @@ HEADERS  += rds_configurationwindow.h \
     rds_iconwindow.h \
     rds_exechelper.h \
     rds_mailbox.h \
-    rds_mailboxwindow.h
+    rds_mailboxwindow.h \
+    rds_mailboxmessage.h
 
 FORMS    += rds_configurationwindow.ui \
             rds_operationwindow.ui \

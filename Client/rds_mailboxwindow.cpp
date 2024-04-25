@@ -17,16 +17,28 @@ rdsMailboxWindow::rdsMailboxWindow(QWidget *parent) :
 }
 
 
-void rdsMailboxWindow::setMessage(QString message)
+void rdsMailboxWindow::setMessage(rdsMailboxMessage message)
 {
-    ui->titleLabel->setStyleSheet("QLabel { background-color : #580F8B; color : white; margin-left: 0px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }");
-    ui->titleIcon->setStyleSheet("QLabel { background-color : #580F8B; color : white; }");
+    QString color;
+    if (message.color.length() == 0) {
+        color = "#580F8B";
+    } else {
+        color = message.color;
+    }
+    ui->titleLabel->setStyleSheet(QString() + "QLabel { background-color : "+ color + "; color : white; margin-left: 0px; padding-top: 9px; padding-bottom: 9px; font-size: 14px; }");
+    ui->titleIcon->setStyleSheet(QString() + "QLabel { background-color : "+ color + "; color : white; }");
     ui->buttonBox->clear();
     //ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Ok);
     //ui->buttonBox->addButton(QDialogButtonBox::StandardButton::Cancel);
-    QPushButton *addedButton = ui->buttonBox->addButton("Confirm", QDialogButtonBox::AcceptRole);
-    addedButton->setMinimumWidth(100);
-    ui->messageText->setText(message);
+    if (message.buttons.length() == 0) {
+        QPushButton *addedButton = ui->buttonBox->addButton("Confirm", QDialogButtonBox::ActionRole);
+        addedButton->setMinimumWidth(100);
+    } else {
+        for (QString& button: message.buttons) {
+            ui->buttonBox->addButton(button, QDialogButtonBox::ActionRole)->setMinimumWidth(100);
+        }
+    }
+    ui->messageText->setText(message.content);
 }
 
 

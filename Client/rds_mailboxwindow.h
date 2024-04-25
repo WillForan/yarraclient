@@ -5,7 +5,7 @@
 #include <QAbstractButton>
 #include <qevent.h>
 #include <QScreen>
-
+#include "rds_mailboxmessage.h"
 
 namespace Ui {
 class rdsMailboxWindow;
@@ -19,7 +19,7 @@ class rdsMailboxWindow : public QDialog
 public:
     explicit rdsMailboxWindow(QWidget *parent = 0);
     ~rdsMailboxWindow();
-    void setMessage(QString message);
+    void setMessage(rdsMailboxMessage message);
     void setError(QString message);
 
 signals:
