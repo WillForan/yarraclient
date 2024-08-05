@@ -27,6 +27,7 @@ void ortServerList::clearList()
     }
 }
 
+
 bool ortServerList::removeLocalServerList() {
     QDir localDir(appPath);
 
@@ -53,22 +54,17 @@ bool ortServerList::removeLocalServerList() {
     }
     return false;
 }
+
+
 bool ortServerList::syncServerList(QString remotePath)
 {
     QDir localDir(appPath);
     QDir remoteDir(remotePath);
 
-    bool removedServerList = removeLocalServerList();
     // Check if server list exists in remote directory
     if (!remoteDir.exists(ORT_SERVERLISTFILE))
     {
-        if (removedServerList)
-        {
-            // Note in log file is a local version of the server list file has been
-            // removed but a new file has not been found on the server. Might indicate
-            // a problem with the server.
-            RTI->log("Warning: Removed local server list but did not find one on server.");
-        }
+        RTI->log("WARNING: Failed to find remote server list. Using local copy.");
         return true;
     }
 
@@ -101,6 +97,9 @@ bool ortServerList::syncServerList(QString remotePath)
             return false;
         }
     }
+
+    // Remove local list and replace it with remote list.
+    bool removedServerList = removeLocalServerList();
 
     if (!QFile::copy(remoteDir.filePath(ORT_SERVERLISTFILE),localDir.filePath(ORT_SERVERLISTFILE)))
     {
