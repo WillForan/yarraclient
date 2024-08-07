@@ -470,7 +470,7 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
         // NOTE: serverPath has a different meaning for the SMB and Sftp modes. For SMB, it is the mounting location, for Sftp
         //       it is the server URI. To handle the inconsistency, serverPath is overwritten (reset) in the function
         //       doReconnectServerEntry of the base class (the Sftp class does not do this).
-        serverPath=selectedEntry->name;
+        serverPath=selectedEntry->serverPath;
         selectedServer=selectedEntry->name;
         connectCmd=selectedEntry->connectCmd;
         bool success = doReconnectServerEntry(selectedEntry);
