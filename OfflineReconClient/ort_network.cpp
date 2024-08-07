@@ -332,15 +332,17 @@ void ortNetwork::closeConnection()
 
 bool ortNetwork::doReconnectServerEntry(ortServerEntry *selectedEntry)
 {
+    RTI->log("Trying to connect to server: " + selectedEntry->name);
+
     bool success=false;
     bool connectCmdSuccess=false;
     {
-    rdsExecHelper execHelper;
-    execHelper.setMonitorNetUseOutput();
-    execHelper.setCommand(connectCmd);
-    connectCmdSuccess=execHelper.callNetUseTimout(connectTimeout);
-    success=connectCmdSuccess;
-    RTI->processEvents();
+        rdsExecHelper execHelper;
+        execHelper.setMonitorNetUseOutput();
+        execHelper.setCommand(connectCmd);
+        connectCmdSuccess=execHelper.callNetUseTimout(connectTimeout);
+        success=connectCmdSuccess;
+        RTI->processEvents();
     }
     if (!success)
     {
@@ -367,6 +369,7 @@ bool ortNetwork::doReconnectServerEntry(ortServerEntry *selectedEntry)
         RTI->log("ERROR: Mode or server file not found.");
         return false;
     }
+
     return true;
 }
 
@@ -460,12 +463,14 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
             RTI->log("Error: Invalid server entry received.");
             continue;
         }
-        serverPath=selectedEntry->serverPath;
+
+        // NOTE: For non-Sftp connections, serverPath is the mounting location of the network share
+        //       on the host! It is not the server path address (or URI). Thus, it always needs to
+        //       be pointing to the path selected in the configuration dialog.
+        serverPath=configInstance->ortServerPath;
         selectedServer=selectedEntry->name;
         connectCmd=selectedEntry->connectCmd;
-
         bool success = doReconnectServerEntry(selectedEntry);
-
 
         // OK, everything looks good. New server is connected.
         if (success)
@@ -484,6 +489,7 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
     if (!serverConnected)
     {
         errorReason="Unable to connect to requested server type.";
+        RTI->log("Error: Unable to connect to any server.");
     }
 
     return serverConnected;

@@ -4,7 +4,7 @@
 // Include global definitions from the RDS client
 #include "../Client/rds_global.h"
 
-#define ORT_VERSION     "0.38b2"
+#define ORT_VERSION     "0.38b3"
 
 #define ORT_ICON QIcon(":/images/orticon_256.png")
 
