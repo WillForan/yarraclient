@@ -334,6 +334,9 @@ bool ortNetwork::doReconnectServerEntry(ortServerEntry *selectedEntry)
 {
     RTI->log("Trying to connect to server: " + selectedEntry->name);
 
+    // NOTE: For SMB connections, serverPath always needs to point to the mount location on the host
+    serverPath=configInstance->ortServerPath;
+
     bool success=false;
     bool connectCmdSuccess=false;
     {
@@ -464,10 +467,10 @@ bool ortNetwork::reconnectToMatchingServer(QString requiredServerType)
             continue;
         }
 
-        // NOTE: For non-Sftp connections, serverPath is the mounting location of the network share
-        //       on the host! It is not the server path address (or URI). Thus, it always needs to
-        //       be pointing to the path selected in the configuration dialog.
-        serverPath=configInstance->ortServerPath;
+        // NOTE: serverPath has a different meaning for the SMB and Sftp modes. For SMB, it is the mounting location, for Sftp
+        //       it is the server URI. To handle the inconsistency, serverPath is overwritten (reset) in the function
+        //       doReconnectServerEntry of the base class (the Sftp class does not do this).
+        serverPath=selectedEntry->name;
         selectedServer=selectedEntry->name;
         connectCmd=selectedEntry->connectCmd;
         bool success = doReconnectServerEntry(selectedEntry);
