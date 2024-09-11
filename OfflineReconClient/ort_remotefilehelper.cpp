@@ -90,7 +90,7 @@ bool ortRemoteFileHelper::exists(QStringList paths)
 }
 
 
-long int ortRemoteFileHelper::size(QString path)
+qlonglong ortRemoteFileHelper::size(QString path)
 {
     QStringList output;
     exec.setTimeout(ORT_CONNECT_TIMEOUT);
@@ -102,10 +102,10 @@ long int ortRemoteFileHelper::size(QString path)
     QString stat_string = output.back();
     QString size_string = stat_string.split(" ",QString::SkipEmptyParts).at(2);
     bool ok;
-    int size_int = size_string.toLong(&ok);
+    qlonglong size = size_string.toLongLong(&ok);
     if (ok)
     {
-        return size_int;
+        return size;
     }
     return -1;
 }

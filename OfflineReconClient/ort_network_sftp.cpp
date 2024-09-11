@@ -49,7 +49,7 @@ bool ortNetworkSftp::verifyTransfer()
     }
 
 //  TODO: verify file size
-    long int remote_size = helper.size(currentFilename);
+    qlonglong remote_size = helper.size(currentFilename);
     if (remote_size != currentFilesize)
     {
         RTI->log("ERROR: File size of copied file does not match!");

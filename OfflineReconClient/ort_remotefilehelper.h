@@ -32,7 +32,7 @@ public:
     bool callWinSCP(QStringList str, QStringList &output);
     bool runServerOperation(QString operation, QStringList &output);
     bool runServerOperations(QStringList str, QStringList &output);
-    long int size(QString path);
+    qlonglong size(QString path);
     bool exists(QString path);
     bool exists(QStringList path);
 
