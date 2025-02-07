@@ -4,7 +4,7 @@
 
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_ANONYMIZER_VER "0.2b10"
+#define YCT_ANONYMIZER_VER "0.2b11"
 
 
 class phiEntry
@@ -42,7 +42,7 @@ public:
 };
 
 
-bool processFolder(QDir currentInput, QDir currentOutput, QString inputPathPrefix, QString outputPathPrefix, int recursionDepth, QString replaceName, QFile* tableFile)
+bool processFolder(QDir currentInput, QDir currentOutput, QString inputPathPrefix, QString outputPathPrefix, int recursionDepth, QString replaceName, QFile* tableFile, bool strictVersionCheck=true)
 {
     if (recursionDepth > 100)
     {
@@ -73,6 +73,7 @@ bool processFolder(QDir currentInput, QDir currentOutput, QString inputPathPrefi
         qInfo() << indent.toLatin1().data() << "*" << fileInfo.fileName() << "-->" << destFilename;
 
         yctTWIXAnonymizer anonymizer;
+        anonymizer.setStrictVersionChecking(strictVersionCheck);
         anonymizer.patientInformation.fillStr=uuidChars;
         if (!replaceName.isEmpty())
         {
@@ -185,6 +186,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+        bool useStrictVersionCheck=true;
         QString inPath =QString::fromLocal8Bit(argv[1]);
         QString outPath=QString::fromLocal8Bit(argv[2]);
 
@@ -205,9 +207,18 @@ int main(int argc, char *argv[])
         QString replaceName="";
         if (argc>=4)
         {
-            replaceName=QString::fromLocal8Bit(argv[3]);
-            qInfo() << "Using replacement name: " << replaceName;
-            qInfo() << "";
+            if (QString::fromLocal8Bit(argv[3]) != "-disable-version-check")
+            {
+                replaceName=QString::fromLocal8Bit(argv[3]);
+                qInfo() << "Using replacement name: " << replaceName;
+                qInfo() << "";
+            }
+        }
+
+        // Secret option to disable the version check
+        if ((argc>=4) && (QString::fromLocal8Bit(argv[argc-1]) == "-disable-version-check"))
+        {
+            useStrictVersionCheck=false;
         }
 
         // Open or create the CSV file and add the header to it
@@ -217,7 +228,7 @@ int main(int argc, char *argv[])
         tableFile.write(phiEntry::getCSVHeader().toLatin1());
 
         // Recursively process the input folder
-        bool success=processFolder(inDir, outDir, "", "", 0, replaceName, &tableFile);
+        bool success=processFolder(inDir, outDir, "", "", 0, replaceName, &tableFile, useStrictVersionCheck);
 
         // Close the CSV file in any case (error / no error)
         tableFile.close();
