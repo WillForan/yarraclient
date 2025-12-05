@@ -86,6 +86,7 @@ public:
     int clearLine(QByteArray* line);
     int analyzeFollowLine(QByteArray* line);
     bool clearPatientRegistrationEntry(QByteArray* line);
+    int anonymizePatientAge(QByteArray* line);
 
     FileVersionType fileVersion;
     int             expectedContent;

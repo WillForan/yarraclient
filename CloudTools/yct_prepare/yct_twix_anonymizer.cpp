@@ -509,6 +509,12 @@ int yctTWIXAnonymizer::analyzeLine(QByteArray* line)
         return PROCESSING_ERROR;
     }
 
+    // Anonymize patient age by replacing decimal digits with zeros
+    if (line->indexOf("<ParamDouble.\"flPatientAge\">", 0) >= 0)
+    {
+        return anonymizePatientAge(line);
+    }
+
     if (readAdditionalPatientInformation)
     {
         int startPos=line->indexOf("{", 0);
@@ -856,6 +862,44 @@ int yctTWIXAnonymizer::analyzeFollowLine(QByteArray* line)
 
     // Senstive information still not found in this line
     return SENSITIVE_INFORMATION_FOLLOWS;
+}
+
+
+int yctTWIXAnonymizer::anonymizePatientAge(QByteArray* line)
+{
+    // Anonymize patient age by replacing digits after the decimal point with zeros
+    // Example: 43.12321 becomes 43.00000
+
+    int startPos = line->indexOf("{", 0);
+    int endPos = line->indexOf("}", 0);
+
+    if ((startPos < 0) || (endPos < 0) || (endPos <= startPos))
+    {
+        // Empty or malformed entry
+        return NO_SENSITIVE_INFORMATION;
+    }
+
+    // Find the decimal point within the braces
+    int decimalPos = line->indexOf(".", startPos);
+    if ((decimalPos < 0) || (decimalPos >= endPos))
+    {
+        // No decimal point found, nothing to anonymize
+        return NO_SENSITIVE_INFORMATION;
+    }
+
+    DBG("Found patient age: " + line->toStdString());
+
+    // Replace all digits after the decimal point with '0'
+    for (int i = decimalPos + 1; i < endPos; i++)
+    {
+        char c = line->at(i);
+        if (c >= '0' && c <= '9')
+        {
+            line->replace(i, 1, "0");
+        }
+    }
+
+    return SENSITIVE_INFORMATION_CLEARED;
 }
 
 
