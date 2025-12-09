@@ -4,3 +4,7 @@ build-*
 *.autosave
 *.orig
 Client/RDS.pro.user.*
+*.stash
+*.idx
+/CloudTools/yct_anonymize/build
+**/build/**

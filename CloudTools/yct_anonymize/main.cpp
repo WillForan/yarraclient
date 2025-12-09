@@ -4,7 +4,7 @@
 
 #include "../yct_prepare/yct_twix_anonymizer.h"
 
-#define YCT_ANONYMIZER_VER "0.2b11"
+#define YCT_ANONYMIZER_VER "0.2b12"
 
 
 class phiEntry
@@ -40,6 +40,74 @@ public:
                "\n";
     }
 };
+
+
+bool processSingleFile(QString inputFilePath, QString outputFilePath, QString replaceName, QFile* tableFile, bool strictVersionCheck=true)
+{
+    QFileInfo inputFileInfo(inputFilePath);
+    QFileInfo outputFileInfo(outputFilePath);
+
+    // Check if input file exists
+    if (!inputFileInfo.exists() || !inputFileInfo.isFile())
+    {
+        qInfo() << "Error! Input file does not exist: " << inputFilePath;
+        return false;
+    }
+
+    // Check if we would overwrite the original file
+    if (inputFileInfo.absoluteFilePath() == outputFileInfo.absoluteFilePath())
+    {
+        qInfo() << "Error! Output path would overwrite the original file.";
+        return false;
+    }
+
+    QString uuid = QUuid::createUuid().toString();
+    // Remove the curly braces enclosing the id
+    uuid = uuid.mid(1, uuid.length() - 2);
+
+    QString uuidChars = uuid;
+    uuidChars.remove(QChar('-'), Qt::CaseSensitive);
+
+    qInfo() << "*" << inputFileInfo.fileName() << "-->" << outputFileInfo.fileName();
+
+    yctTWIXAnonymizer anonymizer;
+    anonymizer.setStrictVersionChecking(strictVersionCheck);
+    anonymizer.patientInformation.fillStr = uuidChars;
+    if (!replaceName.isEmpty())
+    {
+        anonymizer.patientInformation.fillStr = replaceName;
+    }
+
+    if (!QFile::copy(inputFilePath, outputFilePath))
+    {
+        qInfo() << "Error! Unable to copy file " << inputFilePath << " to " << outputFilePath;
+        return false;
+    }
+
+    if (!anonymizer.processFile(outputFilePath, "none.phi", "", "", "", "", false))
+    {
+        qInfo() << "Error! Unable to anonymize file " << outputFilePath;
+
+        if (!QFile::remove(outputFilePath))
+        {
+            qInfo() << "Error! Unable to remove file " << outputFilePath;
+        }
+
+        return false;
+    }
+
+    // Store the phi information in a text file in CSV format
+    phiEntry entry;
+    entry.originalFilename = inputFileInfo.fileName();
+    entry.anonymizedFilename = outputFileInfo.fileName();
+    entry.uuid = uuid;
+    entry.patientName = anonymizer.patientInformation.name;
+    entry.dob = anonymizer.patientInformation.dateOfBirth;
+    entry.mrn = anonymizer.patientInformation.mrn;
+    tableFile->write(entry.getCSVLine().toLatin1());
+
+    return true;
+}
 
 
 bool processFolder(QDir currentInput, QDir currentOutput, QString inputPathPrefix, QString outputPathPrefix, int recursionDepth, QString replaceName, QFile* tableFile, bool strictVersionCheck=true)
@@ -172,8 +240,12 @@ int main(int argc, char *argv[])
     {
         printf("Usage:    yct_anonymizer [input path] [output path] [optional: patient-name replacement]\n\n");
         printf("");
-        printf("Purpose:  Anonymizes all Twix files located in [input path]. The anonymized files will be \n");
-        printf("          written into [output path]. Each anonymized file will be named by a unique ID (UUID).\n");
+        printf("Purpose:  Anonymizes Twix files. Input can be a single file or a folder.\n");
+        printf("          - If input is a file: anonymizes that file.\n");
+        printf("            - If output is a folder: writes anonymized file to that folder.\n");
+        printf("            - If output is a file path: writes anonymized file to that path.\n");
+        printf("          - If input is a folder: anonymizes all .dat files recursively.\n");
+        printf("          Each anonymized file will be named by a unique ID (UUID) unless output is a file.\n");
         printf("          The patient name will be replaced by the UUID (while keeping the original length).\n");
         printf("          If a name is provided as 3rd parameter, this name will be used instead to replace\n");
         printf("          the patient name. A file in CSV format will be created (files.csv) that lists the\n");
@@ -184,60 +256,106 @@ int main(int argc, char *argv[])
 
         return 0;
     }
-    else
-    {
-        bool useStrictVersionCheck=true;
-        QString inPath =QString::fromLocal8Bit(argv[1]);
-        QString outPath=QString::fromLocal8Bit(argv[2]);
 
-        QDir inDir;
-        if (!inDir.cd(inPath))
+    bool useStrictVersionCheck=true;
+    QString inPath =QString::fromLocal8Bit(argv[1]);
+    QString outPath=QString::fromLocal8Bit(argv[2]);
+
+    QFileInfo inPathInfo(inPath);
+    QFileInfo outPathInfo(outPath);
+
+    if (!inPathInfo.exists())
+    {
+        printf("Input path doesn't exist.\n");
+        return 1;
+    }
+
+    QString replaceName="";
+    if (argc>=4)
+    {
+        if (QString::fromLocal8Bit(argv[3]) != "-disable-version-check")
         {
-            printf("Input path doesn't exist.\n");
-            return 1;
+            replaceName=QString::fromLocal8Bit(argv[3]);
+            qInfo() << "Using replacement name: " << replaceName;
+            qInfo() << "";
+        }
+    }
+
+    // Secret option to disable the version check
+    if ((argc>=4) && (QString::fromLocal8Bit(argv[argc-1]) == "-disable-version-check"))
+    {
+        useStrictVersionCheck=false;
+    }
+
+    QFile tableFile;
+    tableFile.setFileName("files.csv");
+    bool tableFileExists = tableFile.exists();
+    tableFile.open(QIODevice::Append | QIODevice::Text);
+    if (!tableFileExists)
+    {
+        tableFile.write(phiEntry::getCSVHeader().toLatin1());
+    }
+
+    bool success = false;
+
+    // Check if input is a file or a folder
+    if (inPathInfo.isFile())
+    {
+        // Input is a single file
+        QString outputFilePath;
+
+        if (outPathInfo.isDir())
+        {
+            // Output is a folder - generate UUID filename in that folder
+            QString uuid = QUuid::createUuid().toString();
+            uuid = uuid.mid(1, uuid.length() - 2);
+            outputFilePath = QDir(outPath).absoluteFilePath(uuid + ".dat");
+        }
+        else
+        {
+            // Output is a file path (may or may not exist yet)
+            // Check if parent directory exists
+            QDir outParentDir = outPathInfo.absoluteDir();
+            if (!outParentDir.exists())
+            {
+                printf("Output directory doesn't exist.\n");
+                tableFile.close();
+                return 1;
+            }
+            outputFilePath = outPathInfo.absoluteFilePath();
         }
 
+        success = processSingleFile(inPathInfo.absoluteFilePath(), outputFilePath, replaceName, &tableFile, useStrictVersionCheck);
+    }
+    else if (inPathInfo.isDir())
+    {
+        // Input is a folder
+        QDir inDir(inPath);
         QDir outDir(outPath);
+
         if (!outDir.exists())
         {
-            printf("Output path doesn't exist.\n");
+            printf("Output folder doesn't exist.\n");
+            tableFile.close();
             return 1;
         }
 
-        QString replaceName="";
-        if (argc>=4)
-        {
-            if (QString::fromLocal8Bit(argv[3]) != "-disable-version-check")
-            {
-                replaceName=QString::fromLocal8Bit(argv[3]);
-                qInfo() << "Using replacement name: " << replaceName;
-                qInfo() << "";
-            }
-        }
-
-        // Secret option to disable the version check
-        if ((argc>=4) && (QString::fromLocal8Bit(argv[argc-1]) == "-disable-version-check"))
-        {
-            useStrictVersionCheck=false;
-        }
-
-        // Open or create the CSV file and add the header to it
-        QFile tableFile;
-        tableFile.setFileName("files.csv");
-        tableFile.open(QIODevice::Append | QIODevice::Text);
-        tableFile.write(phiEntry::getCSVHeader().toLatin1());
-
-        // Recursively process the input folder
-        bool success=processFolder(inDir, outDir, "", "", 0, replaceName, &tableFile, useStrictVersionCheck);
-
-        // Close the CSV file in any case (error / no error)
+        success = processFolder(inDir, outDir, "", "", 0, replaceName, &tableFile, useStrictVersionCheck);
+    }
+    else
+    {
+        printf("Input path is neither a file nor a folder.\n");
         tableFile.close();
+        return 1;
+    }
 
-        // Indicate error in exit code
-        if (!success)
-        {
-            return 1;
-        }
+    // Close the CSV file in any case (error / no error)
+    tableFile.close();
+
+    // Indicate error in exit code
+    if (!success)
+    {
+        return 1;
     }
 
     printf("\n\n");
