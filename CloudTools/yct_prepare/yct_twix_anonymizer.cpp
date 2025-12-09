@@ -911,25 +911,40 @@ bool yctTWIXAnonymizer::checkVersionString(QString versionString)
     // Unfortunately, there is no consistent way to test for the subversion
     // as the baseline string is not included in the XA versions anymore.
 
-    if (versionString.contains("syngo MR XA60")) { return true; }
-    if (versionString.contains("syngo MR XA51")) { return true; }
-    if (versionString.contains("syngo MR XA50")) { return true; }
-    if (versionString.contains("syngo MR XA40")) { return true; }
-    if (versionString.contains("syngo MR XA31")) { return true; }
-    if (versionString.contains("syngo MR XA30")) { return true; }
-    if (versionString.contains("syngo MR XA20")) { return true; }
-    if (versionString.contains("syngo MR XA11")) { return true; }
-    if (versionString.contains("syngo MR XA10")) { return true; }
-    if (versionString.contains("syngo MR E11"))  { return true; }
-    if (versionString.contains("syngo MR D13"))  { return true; }
-    if (versionString.contains("syngo MR D11"))  { return true; }
-    if (versionString.contains("syngo MR B19"))  { return true; }
-    if (versionString.contains("syngo MR B17"))  { return true; }
+    static const QStringList supportedVersions = {
+        "syngo MR XA60",
+        "syngo MR XA51",
+        "syngo MR XA50",
+        "syngo MR XA40",
+        "syngo MR XA31",
+        "syngo MR XA30",
+        "syngo MR XA20",
+        "syngo MR XA11",
+        "syngo MR XA10",
+        "syngo MR E11",
+        "syngo MR D13",
+        "syngo MR D11",
+        "syngo MR B19",
+        "syngo MR B17"
+        // Special software versions of the Biograph mMR (for E11, the P has been dropped)
+        "syngo MR B20P",
+        "syngo MR B18P",
 
-    // Special software versions of the Biograph mMR (for E11, the P has been dropped)
-    if (versionString.contains("syngo MR B20P")) { return true; }
-    if (versionString.contains("syngo MR B18P")) { return true; }
+    };
+
+    for (const QString& version : supportedVersions)
+    {
+        if (versionString.contains(version))
+        {
+            return true;
+        }
+    }
 
     LOG("ERROR: Unknown software version '" << versionString.toStdString() << "'");
+    LOG("Supported versions:");
+    for (const QString& version : supportedVersions)
+    {
+        LOG("  - " << version.toStdString());
+    }
     return false;
 }
