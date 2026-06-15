@@ -304,7 +304,8 @@ void rdsRaid::saveLPFI()
 
 bool rdsRaid::saveRaidFile(int fileID, QString filename, bool saveAdjustments, bool anonymize)
 {
-    QString filePath=QDir::toNativeSeparators(queueDir.absolutePath()) + "\\" + filename;
+    // 20260615 - fix here for linux testing
+    QString filePath=QDir::toNativeSeparators(queueDir.absolutePath()) + QDir::separator() + filename;
     RTI->debug("File path for RAID export: " + filePath);
 
     // Check if the file already exists in the queue directory and remove because
@@ -542,6 +543,7 @@ bool rdsRaid::parseOutputDirectory()
         dirHead=RDS_RAID_DIRHEAD_VB13;
     }
 
+    printf("PARSING RAID. %d entires. lastProcessedFileID LPFID=%d\n", raidToolOutput.count(), lastProcessedFileID);
     for (int i=0; i<raidToolOutput.count(); i++)
     {
         lineProcessed=false;
@@ -611,6 +613,7 @@ bool rdsRaid::parseOutputDirectory()
 
             // Remove the CR+LF at the end
             raidLine.chop(2);
+            printf("new RAID input line %d: '%s'\n", i, raidLine.toStdString().c_str());
 
             QString origLine=raidLine;
 
@@ -670,6 +673,9 @@ bool rdsRaid::parseOutputDirectory()
                 if (raidEntry.fileID<=lastProcessedFileID)
                 {
                     // Scan has already been processed during previous run. We can stop here
+                    RTI->log("SKIP REST. @ " +QString::number(i) + "='"+raidLine+"' hit LPFID: " +
+                          QString::number(raidEntry.fileID) + " <= " + QString::number(lastProcessedFileID)+
+                          ". Update lpfi.ini to change.");
                     break;
                 }
             }
@@ -872,6 +878,11 @@ bool rdsRaid::createExportList()
 
     int raidCount=raidList.count();
     int raidIndex=0;  
+    int n_protos = RTI_CONFIG->getProtocolCount();
+
+    RTI->log("Evaluating " +
+          QString::number(raidCount)+" in RAID against each of "+
+          QString::number(n_protos)+" filters");
 
     // Evalute RaidList backwards and filter measurements that have to be saved
     // NOTE: Backward evaluation is needed to ensure that the LPFI mechanism works
@@ -881,8 +892,12 @@ bool rdsRaid::createExportList()
         raidIndex=raidCount-1-rc;
         rdsRaidEntry* currentEntry=raidList.at(raidIndex);
 
+        QString desc = "#" +QString::number(rc) +
+           "='" + currentEntry->protName + "'@ " +
+           (currentEntry->creationTime).toString("yyyy-MM-dd HH:mm:ss");
+
         // Loop over all protocols
-        for (int pc=0; pc<RTI_CONFIG->getProtocolCount(); pc++)
+        for (int pc=0; pc<n_protos; pc++)
         {
             QString name="";
             QString filter="";
@@ -894,8 +909,11 @@ bool rdsRaid::createExportList()
             RTI_CONFIG->readProtocol(pc, name, filter, saveAdjustData, anonymizeData, smallFiles, remotelyDefined);
 
             // Check if protocol name from raid contains filter tag
+            RTI->log(name + ": checking '"+ filter + "' in " + desc);
             if (currentEntry->protName.contains(filter))
             {
+
+               RTI->log("MATCHES: " + filter + " in " + desc);
                 // TODO: If in verbose mode, don't export files that have the error attribute
 
                 // Check the size. Only export measurements that are larger than 1Mb. Measurements
@@ -904,12 +922,18 @@ bool rdsRaid::createExportList()
                 if ((currentEntry->size > RDS_FILESIZE_FILTER) || (smallFiles))
                 {
                     addExportEntry(raidIndex, pc, name, anonymizeData, saveAdjustData);
+                } else {
+                   RTI->log("NO TRANSFER. File size (" + QString::number(currentEntry->size) + ") too small in " + desc);
                 }
+            } else {
+               // TODO: behind verbose guard
+               RTI->log("# no match. '" + filter + "' not in  " + desc);
             }
         }
     }
 
-    RTI->log(QString::number(exportList.count()) + " files to be processed.");
+    RTI->log(QString::number(exportList.count()) + "/" + QString::number(raidCount) +
+         " files in RAID to be processed for " + QString::number(n_protos) + " protocol Filters in configuration.");
 
     return true;
 }

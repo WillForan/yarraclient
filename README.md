@@ -14,3 +14,9 @@ More information can be found on the project website https://yarra-framework.org
 
 ## Building
 See [BUILD.md](BUILD.md)
+
+## Configuration
+
+Use <kbd>Ctrl+d</kbd> to open the debug window. For the configuration and debugging window, see hard-coded `PASSWORD`s in [`Client/rds_global.h`](Client/rds_global.h)
+
+RDS saves the last seen "last position" file id (lpfi) in `lpfi.ini`. Set to `-1` to reapply (newly edited) filters.

@@ -64,6 +64,8 @@ void rdsRuntimeInformation::prepare()
     simulatorExists=false;
     QString myPath=qApp->applicationDirPath();
     QDir myDir(myPath);
+
+    printf("# checking simulator on %s/%s\n", myDir.absolutePath().toStdString().c_str(), RDS_RAIDSIMULATOR_NAME);
     if (myDir.exists(RDS_RAIDSIMULATOR_NAME))
     {
         simulatorExists=true;

@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
               (uint64_t) filesize,
               cTimeString,
               fTimeString);
-            printf("\n");
+            printf("\r\n");
         }
     }
 

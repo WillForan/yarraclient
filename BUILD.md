@@ -8,15 +8,33 @@ apt install qtbase5-dev-tools qtbase5-dev libqt5svg5-dev qt5-qmake
 
 Use `qmake` and `make` to build
 
+> [!NOTE]
+> Tested 2026-06-15 on debian 13 "trixie" with QMake version 3.1 Using Qt version 5.15.15
+
+### Stand Alone Client
 ```
-qmake -o SAC-build/Makefile StandaloneClient/SAC.pro 
-make -C SAC-build
+qmake -o build/SAC/Makefile StandaloneClient/SAC.pro 
+make -C build/SAC
 
 # run 
-SAC-build/SAC
+build/SAC/SAC
 ```
 
 
-> [!NOTE]
-> Tested 2025-06-15 on debian 12 "bookworm" with QMake version 3.1 Using Qt version 5.15.8
+### Raw Data Storage
+
+For debugging, it's useful for the raid simulator binary to neighbor the RDS executable.
+
+```
+qmake -o build/RDS/Makefile Client/RDS.pro
+make -C build/RDS
+
+qmake -o build/Sim/Makefile Simulator/RaidSimulator.pro
+make -C build/Sim
+ln -s $PWD/build/Sim/RaidSimulator build/RDS/RaidSimulator.exe
+
+# run 
+build/RDS/RDS
+```
+
 
